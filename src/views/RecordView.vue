@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-
 type RecordViewProps = {
   model: string;
 };
@@ -36,73 +35,78 @@ onMounted(() => {
 
 function handleCreateDialog() {
   // 新建对话
+  records.value.push({
+    id: records.value.length,
+    title: `title${records.value.length}`,
+    dialogNum: 0,
+    createAt: '2023-01-01'
+  });
+}
+function handleRemoveRecord() {
+  // 删除对话
+}
+function handleClearRecords() {
+  records.value = [];
 }
 </script>
 <template>
-  <div class="record">
-    <div class="record-entries">
-      <div class="record-entries-entry">
-        新的聊天
-      </div>
-      <div class="record-entries-entry">
-        巴拉巴拉
-      </div>
-    </div>
-    <div class="record-list">
-      <div v-for="(record, i) in records" :key="record.id" class="record-list-item">
-        <div class="record-list-item-title">
-          {{ record.title }}
+  <div className="container m-10">
+    <div class="w-72 mx-auto box-border">
+      <div className="flex flex-row flex-wrap gap-4">
+        <div className="flex-1 h-auto rounded-lg cursor-pointer bg-indigo-600 px-3.5 py-2.5 text-center text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          @click="handleClearRecords"
+        >
+          清除记录
         </div>
-        <div class="record-list-item-bottom">
-          <div class="record-list-item-bottom-left">
-            {{ record.dialogNum }} 条对话
-          </div>
-          <div class="record-list-item-bottom-right">
-
-          </div>
+        <div className="flex-1 h-auto rounded-lg cursor-pointer bg-indigo-600 px-3.5 py-2.5 text-center text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          @click="handleCreateDialog"
+        >
+          新的聊天
         </div>
       </div>
-    </div>
-    <div class="record-toolbar">
+      <div className="h-4"></div>
+      <TransitionGroup name="bounce" tag="div" className="flex flex-col gap-4 overflow-none">
+        <div v-for="(record, i) in records" :key="record.id"
+             className="relative rounded-lg h-auto p-4 border-2 border-b-emerald-500 hover:border-emerald-500 transition-all group/record"
+        >
+          <div className="font-bold text-xl">
+            {{ record.title }}
+          </div>
+          <div @click="handleRemoveRecord" className="absolute cursor-pointer right-4 top-2 collapse group-hover/record:visible">
+            ×
+          </div>
+          <div className="flex flex-row justify-between">
+            <div className="text-left">
+              {{ record.dialogNum }} 条对话
+            </div>
+            <div className="text-right">
+              {{ record.createAt }}
+            </div>
+          </div>
+        </div>
+      </TransitionGroup>
+      <div class="record-toolbar">
 
+      </div>
     </div>
   </div>
 </template>
-<style scoped lang="scss">
-.record {
-
-  &-entries {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-
-    &-entry {
-      flex: 1;
-      border-radius: 16px;
-      padding: 16px;
-    }
+<style scoped>
+.bounce-enter-active {
+  animation: bounce-in 0.25s;
+}
+.bounce-leave-active {
+  animation: bounce-in 0.25s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
   }
-  &-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
-    &-item {
-      border-radius: 16px;
-      background-color: aqua;
-      height: fit-content;
-      padding: 12px;
-
-      &-title {
-        font-weight: 500;
-        font-size: 16px;
-      }
-
-      &-bottom {
-        display: flex;
-        flex-direction: row;
-      }
-    }
+  35% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 </style>
