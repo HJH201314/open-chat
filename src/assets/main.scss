@@ -1,0 +1,35 @@
+@import './base.css';
+/* IconPark图标 */
+@import '@icon-park/vue-next/styles/index.css';
+
+/* TailwindCSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#app {
+    position: relative;
+    max-width: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+@media screen and (max-width: 768px) {
+    #app {
+        position: relative;
+        max-width: 100%;
+        max-height: 100vh;
+        overflow: hidden;
+        padding: 24px;
+    }
+}
+
+ /*隐藏可能渲染的滚动条*/
+.hide-scrollbar {
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}

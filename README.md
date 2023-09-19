@@ -1,51 +1,50 @@
-# openai-front
+# OpenChat
 
-This template should help get you started developing with Vue 3 in Vite.
+基于OpenAI接口打造的一个网页聊天应用前端，[后端在这里](https://gitee.com/origamiwang/gptplat)
 
-## Recommended IDE Setup
+## 技术栈
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+- [TypeScript](https://www.typescriptlang.org/) - JavaScript 的超集
+- [Vue 3](https://v3.vuejs.org/) - 渐进式 JavaScript 框架
+- [Pinia](https://pinia.vuejs.org/) - 符合直觉的 Vue.js 状态管理库
+- [Vite](https://vitejs.dev/) - 极速的前端构建工具
+- [Tailwind CSS](https://tailwindcss.com/) - 无需编写 CSS 的 CSS 框架
+- [PNPM](https://pnpm.io/) - 快速、零安装的包管理工具
+- [Vitest](https://vitest.dev/) - 快速、简单的单元测试工具
 
-## Type Support for `.vue` Imports in TS
+## 其它依赖
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+- [IconPark](http://iconpark.oceanengine.com/) - 字节跳动旗下的开源图标包
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+## 如何运行？
 
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+本项目使用pnpm作为包管理工具
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
+### 安装依赖
 
 ```sh
 pnpm install
 ```
 
-### Compile and Hot-Reload for Development
+### 开启开发服务器
 
 ```sh
 pnpm dev
 ```
 
-### Type-Check, Compile and Minify for Production
+### 构建优化产物
 
 ```sh
 pnpm build
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+### 使用 [Vitest](https://vitest.dev/) 进行单元测试
 
 ```sh
 pnpm test:unit
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### 使用 [ESLint](https://eslint.org/) 进行代码风格检查
 
 ```sh
 pnpm lint
