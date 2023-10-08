@@ -26,7 +26,7 @@ const currentRecord = ref({
 </script>
 
 <template>
-  <div class="flex gap-4 flex-row box-border rounded-lg">
+  <div class="record-page">
     <RecordList v-if="showListView" class="flex-[3]" @choose="(v) => currentRecord.id = v" />
     <div v-if="showListView && showDialogView" class="w-0.5 bg-gray-100 h-auto"></div>
     <DialogDetail v-if="showDialogView" class="flex-[7]"
@@ -36,5 +36,13 @@ const currentRecord = ref({
 </template>
 
 <style scoped>
-
+.record-page {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+  border-radius: .5rem;
+  gap: 8px;
+  overflow: hidden;
+}
 </style>

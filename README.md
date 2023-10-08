@@ -8,13 +8,13 @@
 - [Vue 3](https://v3.vuejs.org/) - 渐进式 JavaScript 框架
 - [Pinia](https://pinia.vuejs.org/) - 符合直觉的 Vue.js 状态管理库
 - [Vite](https://vitejs.dev/) - 极速的前端构建工具
-- [Tailwind CSS](https://tailwindcss.com/) - 无需编写 CSS 的 CSS 框架
 - [PNPM](https://pnpm.io/) - 快速、零安装的包管理工具
 - [Vitest](https://vitest.dev/) - 快速、简单的单元测试工具
 
-## 其它依赖
+## 其它依赖/工具
 
 - [IconPark](http://iconpark.oceanengine.com/) - 字节跳动旗下的开源图标包
+- [CSS Filter色值转换工具](https://www.zhangxinxu.com/sp/filter.html) - 用filter滤镜来转换颜色
 
 ## 如何运行？
 

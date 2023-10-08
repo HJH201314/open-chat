@@ -6,6 +6,5 @@ import Panel from "@/components/Panel.vue";
   <Panel />
 </template>
 
-<style scoped>
-
+<style scoped lang="scss">
 </style>

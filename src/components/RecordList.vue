@@ -55,28 +55,28 @@ function handleClearRecords() {
 }
 </script>
 <template>
-  <div>
-    <div class="box-border flex flex-col">
-      <div class="flex flex-row flex-wrap gap-3">
-        <div class="flex-1 h-auto rounded-lg cursor-pointer bg-indigo-600 px-3.5 py-2.5 text-center text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+  <div class="record-list">
+    <div class="record-list-container">
+      <div class="record-list-actions">
+        <div class="flex-1 h-auto rounded-lg cursor-pointer border-2 border-b-blue-500 hover:border-blue-600 px-3.5 py-2.5 text-center transition-all"
           @click="handleClearRecords"
         >
           清除记录
         </div>
-        <div class="flex-1 h-auto rounded-lg cursor-pointer bg-indigo-600 px-3.5 py-2.5 text-center text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        <div class="flex-1 h-auto rounded-lg cursor-pointer border-2 border-b-blue-500 hover:border-blue-500 px-3.5 py-2.5 text-center transition-all"
           @click="handleCreateDialog"
         >
           新的聊天
         </div>
       </div>
-      <div class="h-4"></div>
-      <TransitionGroup name="bounce" tag="div" class="flex1 flex flex-col gap-3 overflow-y-scroll hide-scrollbar">
+      <div class="h-3"></div>
+      <TransitionGroup name="bounce" tag="div" class="record-list-list">
         <div v-for="(record, i) in records" :key="record.id"
              @click="$emit('choose', record.id)"
-             class="relative rounded-lg group/record border-2 hover:border-white"
+             class="relative rounded-lg group/record border-2 border-b-emerald-500 hover:border-white cursor-pointer"
         >
           <div class="absolute bg-emerald-500 bottom-0 left-0 w-full -z-10 h-0 group-hover/record:h-full transition-height ease-out-expo" />
-          <div class="p-4 m-0.5 bg-white rounded-[0.25rem] box-border">
+          <div class="p-4 m-0.5 bg-white box-border rounded-[0.25rem]">
             <div class="font-bold text-xl">
               {{ record.title }}
             </div>
@@ -101,6 +101,32 @@ function handleClearRecords() {
   </div>
 </template>
 <style scoped lang="scss">
+.record-list {
+  max-height: 100%;
+  &-container {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+
+  &-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+}
 .bounce-enter-active {
   animation: bounce-in 0.25s;
 }
