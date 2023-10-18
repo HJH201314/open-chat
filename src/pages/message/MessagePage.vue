@@ -4,6 +4,7 @@ import RecordList from "@/components/RecordList.vue";
 import DialogDetail from "@/components/DialogDetail.vue";
 import { computed, ref } from "vue";
 import { useMediaQuery } from "@vueuse/core";
+import SideBar from "@/components/sidebar/SideBar.vue";
 
 const isLargeScreen = useMediaQuery("(min-width: 768px)");
 

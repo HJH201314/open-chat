@@ -1,17 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import RecordPage from '@/pages/RecordPage.vue'
+import MessagePage from '@/pages/message/MessagePage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/record'
+      redirect: '/message'
     },
     {
-      path: '/record',
-      name: 'record',
-      component: RecordPage
+      path: '/message',
+      name: 'message',
+      component: MessagePage
     }
   ]
 })

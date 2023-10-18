@@ -13,6 +13,8 @@ $color-black: var(--black);
 $color-primary: var(--emerald-500);
 $color-primary-darker: var(--emerald-600);
 
+$ease-out-circ: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
 body {
     background-color: var(--white);
     color: var(--black);
@@ -77,18 +79,20 @@ body, html {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    padding: 24px;
+    //padding: 24px;
     box-sizing: border-box;
     position: relative;
 }
 
-@media screen and (max-width: 768px) {
+$screen-sm: 768px;
+
+@media screen and (max-width: $screen-sm) {
     #app {
         flex: 1;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        padding: 12px;
+        //padding: 12px;
         box-sizing: border-box;
         position: relative;
     }
