@@ -56,7 +56,6 @@ function handleClearRecords() {
 </script>
 <template>
   <div class="record-list">
-    <div class="record-list-container">
       <div class="record-list-actions">
         <div class="flex-1 h-auto rounded-lg cursor-pointer border-2 border-b-blue-500 hover:border-blue-600 px-3.5 py-2.5 text-center transition-all"
           @click="handleClearRecords"
@@ -97,18 +96,14 @@ function handleClearRecords() {
       <div class="record-toolbar">
 
       </div>
-    </div>
   </div>
 </template>
 <style scoped lang="scss">
 .record-list {
-  max-height: 100%;
-  &-container {
-    height: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 
   &-actions {
     display: flex;

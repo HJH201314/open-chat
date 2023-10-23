@@ -1,0 +1,126 @@
+<script setup lang="ts">
+import { Close } from "@icon-park/vue-next";
+import { ref, watch } from "vue";
+
+interface CommonModalProps {
+  showClose: boolean;
+  visible: boolean;
+}
+
+const props = withDefaults(defineProps<CommonModalProps>(),{
+  showClose: true,
+  visible: false,
+});
+
+const emit = defineEmits<{
+  (event: 'onOpen'): void;
+  (event: 'onClose'): void;
+}>();
+
+/**
+ * CommonModal - 通用模态框
+ * 作为Vue组件使用
+ * @author HJH201314
+ *
+ * */
+/* 暴露接口 */
+defineExpose({
+  open,
+  close,
+});
+
+const showModal = ref(false);
+
+/* 观测visibility，可以通过切换visibility切换展示状态 */
+watch(() => props.visible, (v) => {
+  showModal.value = v;
+});
+/* 展示模态框（暴露的方法，配合ref使用） */
+function open() {
+  showModal.value = true;
+}
+/* 关闭模态框（暴露的方法，配合ref使用） */
+function close() {
+  showModal.value = false;
+}
+
+function handleClose() {
+  close();
+  emit('onClose');
+}
+</script>
+
+<template>
+  <!-- TODO: 修复BUG，加了transition后在sidebar的展示慢一步 -->
+  <Teleport to="body">
+    <Transition name="show">
+      <div v-show="showModal" class="modal" :class="{'modal-hide': !showModal}">
+        <div class="modal-mask"></div>
+        <div class="modal-body">
+          <Close v-if="showClose" class="modal-body-close transition-all-circ enable-hover enable-active" size="20" @click="handleClose" />
+          <div class="modal-body-content">
+            <slot></slot>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
+
+<style scoped lang="scss">
+@import "@/assets/variables";
+.modal {
+  visibility: unset;
+  &-hide {
+    visibility: hidden;
+  }
+  &-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .5);
+  }
+
+  &-body {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 512px; // 加个最小宽度不然组件有没有生效都不知道
+    max-height: 100%;
+    z-index: 1001;
+    background-color: $color-white;
+    border-radius: .5rem;
+    box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, .1);
+
+    &-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: .25rem;
+      cursor: pointer;
+      border-radius: 0 .5rem 0 .5rem;
+    }
+
+    &-content {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+  }
+}
+
+.show-enter-active,
+.show-leave-active {
+  transition: opacity 0.2s $ease-out-circ;
+}
+
+.show-enter-from,
+.show-leave-to {
+  opacity: 0;
+}
+</style>

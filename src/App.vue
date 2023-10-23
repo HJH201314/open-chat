@@ -4,22 +4,22 @@ import SideBar from "@/components/sidebar/SideBar.vue";
 </script>
 
 <template>
-  <div class="base">
+  <div class="app-base">
     <SideBar />
-    <div class="panel">
-      <Panel class="panel" />
+    <div class="app-base-panel">
+      <Panel />
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.base {
+.app-base {
   height: 100%;
   position: relative;
   display: flex;
   flex-direction: row;
 }
-.panel {
+.app-base-panel {
   flex: 1;
   box-sizing: border-box;
   padding: 12px;

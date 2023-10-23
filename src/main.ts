@@ -1,4 +1,5 @@
-import './assets/main.scss'
+import '@/assets/main.scss'
+import '@/assets/variables.scss'
 import '@icon-park/vue-next/styles/index.css'
 
 import { createApp } from 'vue'
@@ -15,7 +16,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faBars, faComment as fasComment, faGear as fasGear } from '@fortawesome/free-solid-svg-icons'
 import { faComment as farComment } from '@fortawesome/free-regular-svg-icons'
-import { Message, SettingTwo } from "@icon-park/vue-next";
+import { MenuFold, MenuUnfold, Message, SettingTwo, Star } from "@icon-park/vue-next";
+import shake from "@/commands/shake";
 
 library.add(
     faGithub,
@@ -29,8 +31,16 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 
+// 自定义指令v-shake
+app.directive('shake', {
+  updated: shake
+});
+
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.component('setting-two', SettingTwo)
 app.component('message', Message)
+app.component('menu-unfold', MenuUnfold)
+app.component('menu-fold', MenuFold)
+app.component('star', Star)
 
 app.mount('#app')

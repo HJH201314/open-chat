@@ -1,4 +1,5 @@
 @import './base.css';
+@import "variables";
 /* IconPark图标 */
 @import '@icon-park/vue-next/styles/index.css';
 
@@ -6,14 +7,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-$color-white: var(--white);
-$color-gray: var(--gray);
-$color-black: var(--black);
-$color-primary: var(--emerald-500);
-$color-primary-darker: var(--emerald-600);
-
-$ease-out-circ: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 body {
     background-color: var(--white);
@@ -31,7 +24,7 @@ body {
             color 0.5s,
             background-color 0.5s;
     line-height: 1.6;
-    font-family:
+    font-family: system-ui, "MiSans", "Microsoft YaHei UI",
             Inter,
             -apple-system,
             BlinkMacSystemFont,
@@ -51,7 +44,8 @@ body {
 }
 
 body, html {
-    height: 100%;
+  height: 100%;
+  // background: linear-gradient(90deg, #e1eec307, #f0505307);
 }
 
 /* 滚动条 */
@@ -74,6 +68,12 @@ body, html {
     background-color: transparent;
 }
 
+/* 划词样式 */
+::selection {
+    background-color: $color-primary-lighter;
+    color: $color-black;
+}
+
 #app {
     flex: 1;
     width: 100%;
@@ -83,8 +83,6 @@ body, html {
     box-sizing: border-box;
     position: relative;
 }
-
-$screen-sm: 768px;
 
 @media screen and (max-width: $screen-sm) {
     #app {
@@ -96,4 +94,57 @@ $screen-sm: 768px;
         box-sizing: border-box;
         position: relative;
     }
+}
+
+/* v-shake 的动画 */
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+.enable-hover {
+  &:hover {
+    background: $color-hover;
+  }
+}
+
+.enable-active {
+  &:active {
+    background: $color-active;
+  }
+}
+
+/* 改变hover和active时的颜色、鼠标指针 */
+.enable-click {
+  cursor: pointer;
+  &:hover {
+    background: $color-hover;
+  }
+  &:active {
+    background: $color-active;
+  }
+}
+
+.transition-all-circ {
+    transition: all 0.2s $ease-out-circ;
 }
