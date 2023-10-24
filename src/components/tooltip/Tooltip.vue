@@ -23,6 +23,7 @@ function show() {
   nextTick(() => {
     const trigger = refTrigger.value;
     const popover = refPopover.value;
+    if (!trigger || !popover) return;
     console.debug(refTrigger.value?.offsetLeft, refTrigger.value?.offsetWidth);
     let positionLeft = 0;
     let positionTop = 0;

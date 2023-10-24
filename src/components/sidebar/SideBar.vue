@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { defineComponent, reactive, ref, VueElement } from "vue";
+import { createApp, defineComponent, h, onMounted, reactive, ref, VueElement } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { MenuUnfold, MenuFold, Github, Login, Logout, Right } from "@icon-park/vue-next";
 import { useUserStore } from "@/store/useUserStore";
@@ -9,10 +9,10 @@ import CommonModal from "@/components/modal/CommonModal.vue";
 import type { CommonModalFunc } from "@/components/modal/CommonModal";
 import { useEventBus, useMediaQuery, useShare } from "@vueuse/core";
 import { toggleSidebarKey } from "@/constants/eventBusKeys";
+import LoginForm from "@/components/login-form/LoginForm.vue";
+import showToast from "@/components/toast/toast";
 
 const userStore = useUserStore();
-
-const isLargeScreen = useMediaQuery('(min-width: 768px)')
 
 const showSideBar = ref(true);
 const expandBar = ref(false);
@@ -61,36 +61,20 @@ function handleEntryClick(e: Event, entry: Entry) {
   } else if (entry.onClick) {
     entry.onClick();
   }
+  showToast({text: entry.name});
   expandBar.value = false;
 }
 
-const refLoginModal = ref<CommonModalFunc>();
+const refLoginForm = ref();
+
 function handleLogin() {
   if (userStore.isLogin) {
     userStore.logout();
   } else {
-    refLoginModal.value?.open();
+    refLoginForm.value?.open();
   }
 }
 
-/* Login模态框中的代码 */
-const loginForm = reactive({
-  username: ref(''),
-  password: ref(''),
-  shake: ref(0),
-});
-const loginText = ref('即刻出发');
-function handleLoginSubmit() {
-  if (!loginForm.username) {
-    loginForm.shake += 1;
-    return;
-  } else if (!loginForm.password) {
-    loginForm.shake += 1;
-    return;
-  } else {
-    loginText.value = '即刻出发';
-  }
-}
 </script>
 
 <template>
@@ -130,28 +114,7 @@ function handleLoginSubmit() {
         </div>
       </div>
     </div>
-    <!-- TODO: 抽取为单独的登录组件 -->
-    <CommonModal ref="refLoginModal" class="modal-login" :show-close="false">
-      <template #default>
-        <div class="login">
-          <div class="sidebar-logo sidebar-logo-animation" style="font-size: 32px;">
-            OpenChat
-          </div>
-          <div class="login-top"><span class="login-top-emoji">🚀</span><div style="height: .01rem;" v-if="!isLargeScreen" /><span class="login-top-text">{{ loginText }}</span></div>
-          <div class="login-bottom">
-            <div class="login-form">
-              <input class="login-form-input" type="text" placeholder="请输入用户名" v-model="loginForm.username" />
-              <input class="login-form-input" type="password" placeholder="请输入密码" v-model="loginForm.password" />
-            </div>
-            <div class="login-form-submit" v-shake="loginForm.shake">
-              <button @click="handleLoginSubmit">
-                <Right size="32" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </template>
-    </CommonModal>
+    <LoginForm ref="refLoginForm" />
   </div>
 </template>
 
@@ -293,89 +256,6 @@ function handleLoginSubmit() {
     margin-top: auto;
     width: 100%;
     font-size: 1.5rem;
-  }
-}
-.login {
-  padding: .25rem 1rem 1rem 1rem;
-
-  &-top {
-    width: 100%;
-    font-size: 100px;
-    line-height: 1;
-    text-align: center;
-    margin: 1rem 0;
-    &-emoji {
-      &:focus {
-        transform: scale(0.9);
-      }
-    }
-    &-text {
-      font-size: 56px;
-      font-weight: bold;
-      color: $color-primary;
-      background-image: $linear-gradient-primary;
-      -webkit-text-fill-color: rgba(0,0,0,0);
-      background-clip: text;
-    }
-  }
-
-  &-title {
-    font-size: 20px;
-    font-weight: bold;
-    letter-spacing: 4px;
-
-    &:before {
-      display: inline-block;
-      content: '';
-      height: 1rem;
-      width: 4px;
-      background-color: $color-primary;
-    }
-  }
-
-  &-bottom {
-    display: flex;
-    flex-direction: row;
-    gap: .5rem;
-  }
-
-  &-form {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-    &-input {
-      width: 100%;
-      font-size: large;
-      border-radius: .5rem;
-      padding: .25rem .5rem;
-      border: 2px solid #FFFFFF00;
-      background-color: $color-gray-100;
-      outline: none;
-      transition: all .2s $ease-out-circ;
-      &:focus {
-        border: 2px solid $color-primary;
-      }
-    }
-    &-submit {
-      position: relative;
-      font-size: 20px;
-      background-image: $linear-gradient-primary-2;
-      color: white;
-      text-align: center;
-      border-radius: .5rem;
-      display: flex;
-      padding: .75rem;
-      box-sizing: border-box;
-      cursor: pointer;
-      transition: all .2s $ease-out-circ;
-      &:hover {
-        opacity: 0.85;
-      }
-      &:active {
-        background-image: $linear-gradient-primary-3;
-      }
-    }
   }
 }
 </style>

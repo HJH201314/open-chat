@@ -25,5 +25,5 @@ export const logout = createRequest<
     API.StatusResult
 >("logout", () => ({
   url: `/auth/logout/`,
-  method: "POST",
+  method: "GET",
 }));

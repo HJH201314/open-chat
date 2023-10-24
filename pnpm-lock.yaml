@@ -29,6 +29,9 @@ dependencies:
   axios:
     specifier: ^1.5.1
     version: 1.5.1
+  easy-typer-js:
+    specifier: ^2.1.0
+    version: 2.1.0
   pinia:
     specifier: ^2.1.6
     version: 2.1.6(typescript@5.1.6)(vue@3.3.4)
@@ -1476,6 +1479,10 @@ packages:
     dependencies:
       webidl-conversions: 7.0.0
     dev: true
+
+  /easy-typer-js@2.1.0:
+    resolution: {integrity: sha512-P1G1oPO26lPfuPdaS3KyywFc36HRVKBJvzxJiOMbn5+Z3n9JLzhTT4cJK121mnjujyOWQiRla4ikHZQHPcoa/g==}
+    dev: false
 
   /editorconfig@1.0.4:
     resolution: {integrity: sha512-L9Qe08KWTlqYMVvMcTIvMAdl1cDUubzRNYL+WfA4bLDMHe4nemKkpmYzkznE1FwLKu0EEmy6obgQKzMJrg4x9Q==}

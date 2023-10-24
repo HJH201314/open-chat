@@ -14,16 +14,21 @@ export const useUserStore  = defineStore('user', () => {
     return user_id.value >= 0;
   });
 
-  function login(username: string, password: string) {
+  const login = async (username: string, password: string) => new Promise((resolve, reject) => {
     api.user.login({
       username,
       password,
-    }).then((res) => {
-      if (res.status === 200) {
+    }).then(res => {
+      if (res.data.status === 200) {
         user_id.value = res.data.data.userId ?? -1;
+        resolve(res.data);
+      } else {
+        reject(res);
       }
+    }).catch(err => {
+      reject(err);
     });
-  }
+  });
 
   function logout() {
     user_id.value = -1;
