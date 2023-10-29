@@ -61,7 +61,7 @@ function handleEntryClick(e: Event, entry: Entry) {
   } else if (entry.onClick) {
     entry.onClick();
   }
-  showToast({text: entry.name});
+  showToast({text: entry.name, position: 'top'});
   expandBar.value = false;
 }
 
@@ -92,7 +92,7 @@ function handleLogin() {
         </div>
       </div>
       <div class="sidebar-avatar">
-        <img class="sidebar-avatar-img" src="@/assets/image/default_avatar.png" alt="avatar"/>
+        <img class="sidebar-avatar-img" src="@/assets/image/default_avatar.jpg" alt="avatar"/>
       </div>
       <div class="sidebar-entries">
         <div v-for="entry in entries" :key="entry.key" class="sidebar-entry" :class="{'sidebar-entry-focus': entry.href == route.path}" @click="(e) => handleEntryClick(e, entry)">
@@ -220,7 +220,7 @@ function handleLogin() {
     flex-direction: row;
     justify-content: center;
     gap: 1rem;
-    &:hover {
+    &:not(&-focus):hover {
       background: $color-hover;
     }
     &:active {

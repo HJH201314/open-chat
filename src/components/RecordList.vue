@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { Plus, Search } from '@icon-park/vue-next';
+import { useDataStore } from "@/store/useDataStore";
+import type { DialogInfo, DialogData } from "@/types/data";
 
 type RecordViewProps = {
   model: string;
@@ -12,104 +15,200 @@ const props  = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'choose', value: number): void;
+  (e: 'change', value: string): void;
 }>();
 
-type Record = {
+type RecordListItem = {
   id: number;
   title: string;
+  digest: string;
   dialogNum: number;
   createAt: string;
+  avatarPath: string;
 };
-const records = ref<Record[]>([]);
+const dataStore = useDataStore();
+const currentDialogId = ref<string>('1');
 
 onMounted(() => {
-  // 从本地加载缓存的数据列表
-  // 生成数据列表records
-  for (let i = 0; i < 10; i++) {
-    records.value.push({
-      id: i,
-      title: `title${i}`,
-      dialogNum: 10,
-      createAt: '2023-01-01'
-    });
-  }
-  records.value = [...records.value];
 });
 
-function handleCreateDialog() {
-  // 新建对话
-  records.value.push({
-    id: records.value.length,
-    title: `title${records.value.length}`,
-    dialogNum: 0,
-    createAt: '2023-01-01'
-  });
+function handleRecordAddClick() {
+  dataStore.addDialog(dataStore.roles?.[0][0] ?? 1);
+  // showToast({ text: '添加对话成功' });
 }
-function handleRemoveRecord(index: number) {
-  // 删除对话
-  records.value.splice(index, 1);
-}
-function handleClearRecords() {
-  records.value = [];
+function handleListItemClick(record: DialogInfo) {
+  // 点击对话列表项
+  currentDialogId.value = record.id;
+  emit('change', currentDialogId.value);
 }
 </script>
 <template>
-  <div class="record-list">
-      <div class="record-list-actions">
-        <div class="flex-1 h-auto rounded-lg cursor-pointer border-2 border-b-blue-500 hover:border-blue-600 px-3.5 py-2.5 text-center transition-all"
-          @click="handleClearRecords"
-        >
-          清除记录
+  <div class="message-left">
+    <!-- 角色列表 -->
+    <div class="role-list">
+      <div class="role-list-bar">
+        <div class="role-list-bar-search">
+          <span class="role-list-bar-search-icon"><Search /></span>
+          <input type="text" placeholder="搜索对话" />
         </div>
-        <div class="flex-1 h-auto rounded-lg cursor-pointer border-2 border-b-blue-500 hover:border-blue-500 px-3.5 py-2.5 text-center transition-all"
-          @click="handleCreateDialog"
-        >
-          新的聊天
+        <div class="role-list-add" @click="handleRecordAddClick">
+          <Plus theme="outline" size="24" />
         </div>
       </div>
-      <div class="h-3"></div>
-      <TransitionGroup name="bounce" tag="div" class="record-list-list">
-        <div v-for="(record, i) in records" :key="record.id"
-             @click="$emit('choose', record.id)"
-             class="relative rounded-lg group/record border-2 border-b-emerald-500 hover:border-white cursor-pointer"
-        >
-          <div class="absolute bg-emerald-500 bottom-0 left-0 w-full -z-10 h-0 group-hover/record:h-full transition-height ease-out-expo" />
-          <div class="p-4 m-0.5 bg-white box-border rounded-[0.25rem]">
-            <div class="font-bold text-xl">
-              {{ record.title }}
+      <div class="role-list-container">
+        <div v-for="item in dataStore.dialogList" @click="handleListItemClick(item)" class="role-list-item" :class="{'role-list-item-selected': item.id === currentDialogId}">
+          <img :src="item.avatarPath ? item.avatarPath : 'https://avatars.githubusercontent.com/u/24362351?v=4'" alt="avatar">
+          <div class="role-list-item-center">
+            <div class="title">
+              {{ item.title }}
             </div>
-            <div @click="handleRemoveRecord(i)" class="absolute cursor-pointer right-4 top-2 collapse group-hover/record:visible">
-              ×
+            <div class="digest">
+              {{ item.botRole }}
             </div>
-            <div class="flex flex-row justify-between">
-              <div class="text-left">
-                {{ record.dialogNum }} 条对话
-              </div>
-              <div class="text-right">
-                {{ record.createAt }}
-              </div>
+          </div>
+          <div class="role-list-item-right">
+            <div class="datetime">
+              {{ item.createAt ?? '' }}
             </div>
           </div>
         </div>
-      </TransitionGroup>
-      <div class="record-toolbar">
-
       </div>
+    </div>
   </div>
 </template>
 <style scoped lang="scss">
-.record-list {
+@import "@/assets/variables";
+.message-left {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: .5rem;
+}
+.role-list {
+  width: 100%;
   height: 100%;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
 
-  &-actions {
+  &-container {
+    flex: 1;
+    margin-top: .5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &-bar {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    height: min-content;
+    gap: .25rem;
+
+    &-search {
+      flex: 1;
+      border-radius: .5rem;
+      padding: .25rem .5rem;
+      background-color: $color-gray-200;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+
+      &-icon {
+        color: $color-gray-500;
+      }
+
+      input {
+        width: 100%;
+        background: transparent;
+        outline: none;
+      }
+    }
+  }
+
+  &-add {
+    height: 2rem;
+    aspect-ratio: 1;
+    background-color: $color-gray-200;
+    border-radius: .5rem;
+    color: $color-gray-400;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  &-item {
+    padding: .5rem;
+    border-radius: .5rem;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    transition: background-color .2s $ease-out-circ;
+    display: flex;
+    flex-direction: row;
     gap: .5rem;
+    &:not(&-selected):hover  {
+      // border-radius: 0;
+      background-color: $color-gray-100;
+    }
+    &-selected {
+      background-color: $color-teal-50;
+    }
+    & img {
+      height: 3rem;
+      width: 3rem;
+      border-radius: 20%;
+    }
+
+    &-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      .title {
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+      .digest {
+        color: $color-gray-500;
+        font-size: .8rem;
+        // 超过长度显示省略号
+        text-overflow: ellipsis;
+      }
+    }
+
+    &-right {
+      width: 4rem;
+      .datetime {
+        font-size: .7rem;
+        text-align: right;
+      }
+    }
+  }
+}
+.record-list {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+
+  &-action {
+    &-container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+    &-item {
+      flex: 1;
+      border-radius: .5rem;
+      cursor: pointer;
+      text-align: center;
+      background-color: $color-teal-50;
+    }
   }
 
   &-list {

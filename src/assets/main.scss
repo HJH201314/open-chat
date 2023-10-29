@@ -24,7 +24,9 @@ body {
             color 0.5s,
             background-color 0.5s;
     line-height: 1.6;
-    font-family: system-ui, "MiSans", "Microsoft YaHei UI",
+    font-family: system-ui,
+            "MiSans Normal",
+            "Microsoft YaHei UI",
             Inter,
             -apple-system,
             BlinkMacSystemFont,
@@ -147,4 +149,23 @@ body, html {
 
 .transition-all-circ {
     transition: all 0.2s $ease-out-circ;
+}
+
+/* 闪烁光标，一般配合typer使用 */
+.typed-cursor {
+  margin-left: 10px;
+  opacity: 1;
+  animation: blink 0.9s infinite;
+  @keyframes blink {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+    100% {
+
+      opacity: 1;
+    }
+  }
 }

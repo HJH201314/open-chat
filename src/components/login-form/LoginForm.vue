@@ -8,6 +8,7 @@ import type { CommonModalFunc } from "@/components/modal/CommonModal";
 import { useMediaQuery } from "@vueuse/core";
 import { useUserStore } from "@/store/useUserStore";
 import api from "@/api";
+import showToast from "@/components/toast/toast";
 
 const userStore = useUserStore();
 const refLoginModal = ref<CommonModalFunc>();
@@ -17,7 +18,7 @@ const typerObj = reactive({
   isEnd: false,
   speed: 150,
   singleBack: false,
-  sleep: 0,
+  sleep: 1000,
   type: 'normal',
   backSpeed: 40,
   sentencePause: false,
@@ -47,7 +48,8 @@ const submitDisabled = ref(false);
 
 function init() {
   emoji.value = '🚀';
-  typer.value = new EasyTyper(typerObj, `即刻出发`);
+  // @ts-ignore
+  typer.value = new EasyTyper(typerObj, ['即刻出发']);
 }
 async function handleLoginSubmit() {
   if (!loginForm.username) {
@@ -75,7 +77,9 @@ async function handleLoginSubmit() {
 watch(() => userStore.isLogin, (v) => {
   if (v) {
     emoji.value = '🎉';
+    // @ts-ignore
     typer.value = new EasyTyper(typerObj, '欢迎回来');
+    showToast({ text: `登录成功，欢迎回来，UID:${userStore.user_id}`, position: 'top' });
     setTimeout(() => {
       refLoginModal.value?.close();
     }, 1500);
@@ -214,23 +218,6 @@ watch(() => userStore.isLogin, (v) => {
     }
     100% {
       background-position: -100% 0;
-    }
-  }
-}
-.typed-cursor {
-  margin-left: 10px;
-  opacity: 1;
-  animation: blink 0.9s infinite;
-  @keyframes blink {
-    0% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0;
-    }
-    100% {
-
-      opacity: 1;
     }
   }
 }

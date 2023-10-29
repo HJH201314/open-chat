@@ -14,7 +14,10 @@ export const createRequest = <TReq, TResp = any>(
     _: string,
     requestConfigCreator: (args: TReq) => AxiosRequestConfig,
 ) => {
-  return (args: TReq) => {
+  return (args?: TReq) => {
+    if (!args) {
+      return axiosInstance.request<TResp>(requestConfigCreator({} as TReq));
+    }
     return axiosInstance.request<TResp>(requestConfigCreator(args));
   };
 };

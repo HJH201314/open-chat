@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import type { AppSettings } from "@/types/setting";
 
 /* 设置相关 */
 export const useSettingStore = defineStore('setting', () => {
-  const data: AppSettings = ref({});
+  const data = ref({});
 
   function loadSetting() {
 

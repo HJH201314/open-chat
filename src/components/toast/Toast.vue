@@ -24,7 +24,7 @@ const durationTimeMs = computed(() => {
 
 onMounted(() => {
   setTimeout(() => {
-    console.log(myself.value?.remove());
+    myself.value?.remove();
   }, durationTimeMs.value);
 })
 
@@ -51,10 +51,10 @@ const toastClass = computed(() => {
 @import "@/assets/variables";
 .toast {
   position: absolute;
+  z-index: 10000;
 
   &-wrapper {
     border-radius: .5rem;
-    box-shadow: $box-shadow;
     padding: .25rem .5rem;
     display: flex;
     flex-direction: row;
@@ -62,6 +62,7 @@ const toastClass = computed(() => {
     gap: .5rem;
     color: $color-white;
     background-color: $color-primary;
+    box-shadow: 0 0 4px $color-primary;
     opacity: 0.9;
   }
 
@@ -70,36 +71,103 @@ const toastClass = computed(() => {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
+    -webkit-animation: top-center-in .25s $ease-out-circ;
+    -o-animation: top-center-in .25s $ease-out-circ;
+    animation: top-center-in .25s $ease-out-circ;
+
+    @keyframes top-center-in {
+      0% {
+        transform: translate(-50%, -100%);
+      }
+      100% {
+        transform: translate(-50%, 0);
+      }
+    }
   }
   &-top-left {
     margin-top: .75rem;
     margin-left: .75rem;
     top: 0;
     left: 0;
+    -webkit-animation: top-left-in .25s $ease-out-circ;;
+    -o-animation: top-left-in .25s $ease-out-circ;;
+    animation: top-left-in .25s $ease-out-circ;;
+    @keyframes top-left-in {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
   }
   &-top-right {
     margin-top: .75rem;
     margin-right: .75rem;
     top: 0;
     right: 0;
+    -webkit-animation: top-right-in .25s $ease-out-circ;
+    -o-animation: top-right-in .25s $ease-out-circ;
+    animation: top-right-in .25s $ease-out-circ;
+    @keyframes top-right-in {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
   }
   &-bottom-center {
     margin-bottom: .75rem;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
+    -webkit-animation: bottom-center-in .25s $ease-out-circ;
+    -o-animation: bottom-center-in .25s $ease-out-circ;
+    animation: bottom-center-in .25s $ease-out-circ;
+    @keyframes bottom-center-in {
+      0% {
+        transform: translate(-50%, 100%);
+      }
+      100% {
+        transform: translate(-50%, 0);
+      }
+    }
   }
   &-bottom-left {
     margin-bottom: .75rem;
     margin-left: .75rem;
     bottom: 0;
     left: 0;
+    -webkit-animation: bottom-left-in .25s $ease-out-circ;
+    -o-animation: bottom-left-in .25s $ease-out-circ;
+    animation: bottom-left-in .25s $ease-out-circ;
+    @keyframes bottom-left-in {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
   }
   &-bottom-right {
     margin-bottom: .75rem;
     margin-right: .75rem;
     bottom: 0;
     right: 0;
+    -webkit-animation: bottom-right-in .25s $ease-out-circ;
+    -o-animation: bottom-right-in .25s $ease-out-circ;
+    animation: bottom-right-in .25s $ease-out-circ;
+    @keyframes bottom-right-in {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
   }
 }
 </style>

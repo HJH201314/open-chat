@@ -12,4 +12,11 @@ declare namespace API {
   type LoginResult = {
     userId?: number;
   }
+
+  /**
+   * number 为 role id
+   * string 为 role name
+   * */
+  type RoleResult = [number, string]
+  type RoleListResult = RoleResult[]
 }

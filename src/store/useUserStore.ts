@@ -6,7 +6,7 @@ import api from '@/api';
 // https://pinia.vuejs.org/core-concepts/#Setup-Stores
 /* 用户相关 */
 export const useUserStore  = defineStore('user', () => {
-  const avatar = ref('');
+  const avatar = ref('src/assets/image/default_avatar.jpg');
   const username = ref('');
   const user_id = ref(-1);
 
@@ -36,6 +36,7 @@ export const useUserStore  = defineStore('user', () => {
   }
 
   return {
+    avatar,
     isLogin,
     user_id,
     login,

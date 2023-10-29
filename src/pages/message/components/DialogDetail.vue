@@ -5,27 +5,64 @@ import IconButton from "@/components/IconButton.vue";
 import cusCss from "@/constants/cusCss";
 import { Voice, NewPicture } from "@icon-park/vue-next";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
-import { ref } from "vue";
+import { reactive, ref, watch } from "vue";
+import { useDataStore } from "@/store/useDataStore";
+import type { DialogData, DialogInfo, MsgInfo } from "@/types/data";
+
+const dataStore = useDataStore();
 
 interface DialogDetailProps {
-  id: number;
-  title: string;
+  dialogId: string;
 }
 
 const props = withDefaults(
   defineProps<DialogDetailProps>(),
   {
-    id: 0,
-    title: '神秘对话',
+    dialogId: '',
   }
 );
+
+const dialogInfo = ref<DialogInfo>({} as DialogInfo);
+const messageList = ref([] as MsgInfo[]);
+
+watch(() => props.dialogId, (v) => {
+  dialogInfo.value = dataStore.getDialogInfo(v);
+  form.sessionId = v;
+  // TODO
+  messageList.value = dataStore.getMessageList(v);
+});
 
 const emit = defineEmits<{
   (e: 'back'): void;
 }>();
 
-const form = ref({
+const form = reactive({
+  sessionId: ref(''),
   inputValue: ref(''),
+  outputValue: ref(''),
+});
+
+function handleInputKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && e.ctrlKey) {
+    handleSendMessage();
+  }
+}
+function handleSendMessage() {
+  if (!form.inputValue) return;
+  dataStore.sendMessageText(form.sessionId, form.inputValue, {
+    onMessage: (msg) => {
+      form.outputValue += msg;
+    },
+    onFinish: (fullMessage) => {
+      form.outputValue = '';
+      messageList.value = dataStore.getMessageList(form.sessionId);
+    }
+  });
+  form.inputValue = '';
+}
+
+watch(() => dataStore.messageStorage, (v) => {
+  console.log(v);
 });
 </script>
 
@@ -36,7 +73,7 @@ const form = ref({
         <Back size="16" />
       </IconButton>
       <span class="dialog-detail-actions-title">
-        {{ props.title }}
+        {{ dialogInfo.title }}
       </span>
       <IconButton>
         <Share size="16" />
@@ -46,12 +83,14 @@ const form = ref({
       </IconButton>
     </div>
     <div class="dialog-detail-dialogs">
-      <DialogMessage message="test" />
-      <DialogMessage message="Hello, how can I assist you today?" role="bot" />
-      <DialogMessage v-if="form.inputValue" :message="form.inputValue" role="user" />
+      <DialogMessage message="Hello! How can I assist you today?" role="bot" />
+<!--   消息列表   -->
+      <DialogMessage v-for="item in messageList" :message="item.content" :role="item.sender" :time="item.time" />
+      <DialogMessage id="user-typing-box" v-if="form.inputValue" :message="form.inputValue" role="user" />
+      <DialogMessage id="bot-typing-box" v-if="form.outputValue" :message="form.outputValue" role="bot" />
     </div>
     <div class="dialog-detail-inputs">
-      <textarea class="dialog-detail-inputs-textarea" v-model="form.inputValue" />
+      <textarea class="dialog-detail-inputs-textarea" @keydown="(e) => handleInputKeydown(e)" v-model="form.inputValue" />
       <div class="dialog-detail-inputs-bar">
         <span class="dialog-detail-inputs-bar-icon transition-all-circ">
           <NewPicture size="24" />
@@ -59,7 +98,7 @@ const form = ref({
         <span class="dialog-detail-inputs-bar-icon transition-all-circ">
           <Voice size="24" />
         </span>
-        <div class="dialog-detail-inputs-bar-send">
+        <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
           <Send fill="white" size="16" />
           <span>发送</span>
         </div>
