@@ -33,8 +33,7 @@ const avatarPath = computed(() => {
       <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
         <span class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
         <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
-          <div class="dialog-message-content-body">
-            {{ props.message }}
+          <div class="dialog-message-content-body" v-html="props.message">
           </div>
         </div>
       </div>

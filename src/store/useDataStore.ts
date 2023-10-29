@@ -69,7 +69,7 @@ export const useDataStore  = defineStore('data', () => {
         };
       }
     } catch (e) {
-      showToast({ text: '请求失败，请检查网络~' });
+      showToast({ text: '请求失败，请先登录~' });
     } finally {
 
     }
@@ -91,7 +91,6 @@ export const useDataStore  = defineStore('data', () => {
 
   function loadMessagesFromStorage(sessionId: string) {
     const storageKey = `dialog-${sessionId}`;
-    console.log(storageKey)
     messageStorage.value[storageKey] = useLocalStorage<MsgData>(storageKey, {
       messages: [],
       version: 1,
@@ -115,8 +114,8 @@ export const useDataStore  = defineStore('data', () => {
     source.onmessage = function (event) {
       if (event.data === "[DONE]") {
         source.close();
-        receiver.onFinish(fullMessage);
         saveMessage(sessionId, fullMessage, 'bot', 'text');
+        receiver.onFinish(fullMessage);
       } else {
         console.log('[data]', event.data)
         fullMessage += event.data;

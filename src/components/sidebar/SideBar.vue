@@ -75,6 +75,10 @@ function handleLogin() {
   }
 }
 
+function handleGithubClick() {
+  window.open('https://github.com/HJH201314/openai-front');
+}
+
 </script>
 
 <template>
@@ -110,7 +114,7 @@ function handleLogin() {
       </div>
       <div class="sidebar-footer">
         <div class="sidebar-entry">
-          <Github class="sidebar-entry-icon" size="24"></Github>
+          <Github class="sidebar-entry-icon" size="24" @click="handleGithubClick"></Github>
         </div>
       </div>
     </div>

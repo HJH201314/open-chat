@@ -5,7 +5,7 @@ import IconButton from "@/components/IconButton.vue";
 import cusCss from "@/constants/cusCss";
 import { Voice, NewPicture } from "@icon-park/vue-next";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
-import { reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { useDataStore } from "@/store/useDataStore";
 import type { DialogData, DialogInfo, MsgInfo } from "@/types/data";
 
@@ -25,22 +25,27 @@ const props = withDefaults(
 const dialogInfo = ref<DialogInfo>({} as DialogInfo);
 const messageList = ref([] as MsgInfo[]);
 
-watch(() => props.dialogId, (v) => {
-  dialogInfo.value = dataStore.getDialogInfo(v);
-  form.sessionId = v;
-  // TODO
-  messageList.value = dataStore.getMessageList(v);
-});
-
-const emit = defineEmits<{
-  (e: 'back'): void;
-}>();
-
 const form = reactive({
   sessionId: ref(''),
   inputValue: ref(''),
   outputValue: ref(''),
 });
+
+onMounted(() => {
+  document.querySelector(`#bottom-line`)?.scrollIntoView(false);
+});
+
+watch(() => props.dialogId, (v) => {
+  if (props.dialogId != '') {
+    dialogInfo.value = dataStore.getDialogInfo(v);
+    form.sessionId = v;
+    messageList.value = dataStore.getMessageList(v);
+  }
+}, { immediate: true });
+
+const emit = defineEmits<{
+  (e: 'back'): void;
+}>();
 
 function handleInputKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' && e.ctrlKey) {
@@ -60,10 +65,6 @@ function handleSendMessage() {
   });
   form.inputValue = '';
 }
-
-watch(() => dataStore.messageStorage, (v) => {
-  console.log(v);
-});
 </script>
 
 <template>
@@ -84,10 +85,11 @@ watch(() => dataStore.messageStorage, (v) => {
     </div>
     <div class="dialog-detail-dialogs">
       <DialogMessage message="Hello! How can I assist you today?" role="bot" />
-<!--   消息列表   -->
-      <DialogMessage v-for="item in messageList" :message="item.content" :role="item.sender" :time="item.time" />
+      <!--   消息列表   -->
+      <DialogMessage v-for="item in messageList" :id="item.time" :message="item.content" :role="item.sender" :time="item.time" />
       <DialogMessage id="user-typing-box" v-if="form.inputValue" :message="form.inputValue" role="user" />
       <DialogMessage id="bot-typing-box" v-if="form.outputValue" :message="form.outputValue" role="bot" />
+      <div id="bottom-line"></div><!--定位-->
     </div>
     <div class="dialog-detail-inputs">
       <textarea class="dialog-detail-inputs-textarea" @keydown="(e) => handleInputKeydown(e)" v-model="form.inputValue" />
@@ -125,7 +127,7 @@ watch(() => dataStore.messageStorage, (v) => {
       text-align: center;
       margin-right: auto;
       font-weight: bold;
-      font-size: 24px;
+      font-size: 20px;
     }
   }
 

@@ -33,7 +33,7 @@ onMounted(() => {
 });
 
 function handleRecordAddClick() {
-  dataStore.addDialog(dataStore.roles?.[0][0] ?? 1);
+  dataStore.addDialog(dataStore.roles?.[0][0] ?? 0);
   // showToast({ text: '添加对话成功' });
 }
 function handleListItemClick(record: DialogInfo) {
@@ -57,7 +57,7 @@ function handleListItemClick(record: DialogInfo) {
       </div>
       <div class="role-list-container">
         <div v-for="item in dataStore.dialogList" @click="handleListItemClick(item)" class="role-list-item" :class="{'role-list-item-selected': item.id === currentDialogId}">
-          <img :src="item.avatarPath ? item.avatarPath : 'https://avatars.githubusercontent.com/u/24362351?v=4'" alt="avatar">
+          <img :src="item.avatarPath ? item.avatarPath : 'src/assets/image/chatgpt3.svg'" alt="avatar">
           <div class="role-list-item-center">
             <div class="title">
               {{ item.title }}
@@ -117,6 +117,10 @@ function handleListItemClick(record: DialogInfo) {
       display: flex;
       align-items: center;
       gap: .5rem;
+      transition: all .2s $ease-out-circ;
+      &:focus-within {
+        background-color: $color-gray-300;
+      }
 
       &-icon {
         color: $color-gray-500;
@@ -139,6 +143,10 @@ function handleListItemClick(record: DialogInfo) {
     display: grid;
     place-items: center;
     cursor: pointer;
+    transition: all .2s $ease-out-circ;
+    &:hover {
+      background-color: $color-gray-300;
+    }
   }
 
   &-item {

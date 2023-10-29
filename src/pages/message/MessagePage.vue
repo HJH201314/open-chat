@@ -43,9 +43,10 @@ function handleDialogChange(sessionId: string) {
   <div class="message-page">
     <RecordList v-show="showListView" class="message-page-record-list" @change="handleDialogChange" />
     <div v-if="showListView && showDialogView" class="split"></div>
-    <DialogDetail v-show="showDialogView" class="message-page-dialog-detail" :dialog-id="currentRecord.id"
+    <DialogDetail v-if="showDialogView && currentRecord.id" class="message-page-dialog-detail" :dialog-id="currentRecord.id"
                   @back="() => currentRecord.id = ''"
     />
+    <div v-if="showDialogView && !currentRecord.id" class="message-page-dialog-detail message-page-empty-tip">这里空空如也<br /></div>
   </div>
 </template>
 
@@ -74,6 +75,15 @@ function handleDialogChange(sessionId: string) {
 
   &-dialog-detail {
     flex: 7;
+  }
+
+  &-empty-tip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $color-primary;
+    font-size: 24px;
+    font-weight: bold;
   }
 }
 </style>
