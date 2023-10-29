@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import { Plus, Search } from '@icon-park/vue-next';
 import { useDataStore } from "@/store/useDataStore";
 import type { DialogInfo, DialogData } from "@/types/data";
@@ -32,14 +32,16 @@ const currentDialogId = ref<string>('1');
 onMounted(() => {
 });
 
-function handleRecordAddClick() {
-  dataStore.addDialog(dataStore.roles?.[0][0] ?? 0);
-  // showToast({ text: '添加对话成功' });
+async function handleRecordAddClick() {
+  const sessionId = await dataStore.addDialog(dataStore.roles?.[0][0] ?? 0);
+  handleListItemClick(sessionId);
 }
-function handleListItemClick(record: DialogInfo) {
+function handleListItemClick(id: string) {
   // 点击对话列表项
-  currentDialogId.value = record.id;
-  emit('change', currentDialogId.value);
+  currentDialogId.value = id;
+  // nextTick(() => {
+    emit('change', currentDialogId.value);
+  // });
 }
 </script>
 <template>
@@ -56,7 +58,7 @@ function handleListItemClick(record: DialogInfo) {
         </div>
       </div>
       <div class="role-list-container">
-        <div v-for="item in dataStore.dialogList" @click="handleListItemClick(item)" class="role-list-item" :class="{'role-list-item-selected': item.id === currentDialogId}">
+        <div v-for="item in dataStore.dialogList" @click="handleListItemClick(item.id)" class="role-list-item" :class="{'role-list-item-selected': item.id === currentDialogId}">
           <img :src="item.avatarPath ? item.avatarPath : 'src/assets/image/chatgpt3.svg'" alt="avatar">
           <div class="role-list-item-center">
             <div class="title">

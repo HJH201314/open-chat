@@ -68,23 +68,29 @@ export const useDataStore  = defineStore('data', () => {
           createAt: new Date().toLocaleString(),
         };
       }
+      return res.headers['session_id'];
     } catch (e) {
       showToast({ text: '请求失败，请先登录~' });
     } finally {
-
     }
+    return '';
   }
 
-  function delDialog(id: number) {
-    // 本地删除
-    const storageKey = dialogData.value.dialogs![id]?.storageKey;
-    if (storageKey) {
-      delete dialogData.value.dialogs![id];
-      localStorage.removeItem(storageKey);
-    } else {
-      showToast({ text: '删除失败' });
-    }
-    // TODO: 远程删除
+  async function delDialog(sessionId: string) {
+    return new Promise((resolve, reject) => {
+      // 本地删除
+      const storageKey = dialogData.value.dialogs![sessionId]?.storageKey;
+      if (storageKey) {
+        delete dialogData.value.dialogs![sessionId];
+        localStorage.removeItem(storageKey);
+        showToast({ text: '删除成功√' });
+        resolve('删除成功');
+      } else {
+        showToast({ text: '删除失败' });
+        reject('删除失败');
+      }
+      // TODO: 远程删除
+    });
   }
 
   const messageStorage = ref<Record<string, RemovableRef<MsgData>>>({});
@@ -133,7 +139,7 @@ export const useDataStore  = defineStore('data', () => {
         type,
         content: message,
       });
-      // localStorage.setItem(dialogData.value.dialogs![sessionId]?.storageKey!, JSON.stringify(messageData));
+      localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
     } catch (ignore) {
 
     }

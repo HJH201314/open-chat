@@ -88,7 +88,7 @@ watch(() => userStore.isLogin, (v) => {
 </script>
 
 <template>
-  <CommonModal ref="refLoginModal" :show-close="false">
+  <CommonModal ref="refLoginModal" :show-close="false" style="padding-bottom: 100px;">
     <template #default>
       <div class="login">
         <div class="sidebar-logo sidebar-logo-animation" style="font-size: 32px;">

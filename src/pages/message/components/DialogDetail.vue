@@ -65,6 +65,11 @@ function handleSendMessage() {
   });
   form.inputValue = '';
 }
+
+function handleDeleteDialog() {
+  dataStore.delDialog(form.sessionId);
+  emit('back');
+}
 </script>
 
 <template>
@@ -79,7 +84,7 @@ function handleSendMessage() {
       <IconButton>
         <Share size="16" />
       </IconButton>
-      <IconButton>
+      <IconButton @click="handleDeleteDialog">
         <Delete size="16" />
       </IconButton>
     </div>
