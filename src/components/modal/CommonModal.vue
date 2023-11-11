@@ -68,7 +68,7 @@ function handleClose() {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .modal {
   visibility: unset;
   &-hide {

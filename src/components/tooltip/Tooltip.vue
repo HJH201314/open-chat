@@ -73,7 +73,7 @@ function hide(e: MouseEvent) {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .tooltip {
   position: relative;
   &-info {

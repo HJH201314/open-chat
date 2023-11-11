@@ -1,5 +1,5 @@
 import '@/assets/main.scss'
-import '@/assets/variables.scss'
+import '@/assets/variables.module.scss'
 import '@icon-park/vue-next/styles/index.css'
 
 import { createApp } from 'vue'

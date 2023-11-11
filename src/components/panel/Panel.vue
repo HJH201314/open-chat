@@ -9,7 +9,7 @@
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .panel {
   position: relative;
   box-sizing: border-box;

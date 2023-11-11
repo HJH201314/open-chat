@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import type { ToastProps } from './index';
+import cusCss from "@/constants/cusCss";
 
 const props = withDefaults(defineProps<ToastProps>(), {
   text: '',
   position: 'top-center',
   duration: 'normal',
+  type: 'normal',
 });
 
 const myself = ref<HTMLElement>();
@@ -34,6 +36,21 @@ const toastClass = computed(() => {
   if (className === 'bottom') className = 'bottom-center';
   return ['toast', `toast-${className}`];
 });
+
+const wrapperColor = computed(() => {
+  switch (props.type) {
+    case 'success':
+      return cusCss.colorSuccess;
+    case 'warning':
+      return cusCss.colorWarning;
+    case 'danger':
+      return cusCss.colorDanger;
+    case 'info':
+      return cusCss.colorInfo;
+    default:
+      return cusCss.colorPrimary;
+  }
+});
 </script>
 
 <template>
@@ -48,7 +65,7 @@ const toastClass = computed(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .toast {
   position: absolute;
   z-index: 10000;
@@ -61,8 +78,8 @@ const toastClass = computed(() => {
     align-items: center;
     gap: .5rem;
     color: $color-white;
-    background-color: $color-primary;
-    box-shadow: 0 0 4px $color-primary;
+    background-color: v-bind(wrapperColor);
+    box-shadow: 0 0 4px v-bind(wrapperColor);
     opacity: 0.9;
   }
 

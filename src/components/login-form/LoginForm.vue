@@ -54,9 +54,11 @@ function init() {
 async function handleLoginSubmit() {
   if (!loginForm.username) {
     loginForm.shake += 1;
+    showToast({ text: '请输入账号！', position: 'top', type: 'danger' });
     return;
   } else if (!loginForm.password) {
     loginForm.shake += 1;
+    showToast({ text: '请输入密码！', position: 'top', type: 'warning' });
     return;
   } else {
     try {
@@ -66,6 +68,7 @@ async function handleLoginSubmit() {
     catch (e) {
       console.error(e);
       loginForm.shake += 1;
+      showToast({ text: '登录失败', position: 'top' });
       return;
     }
     finally {
@@ -117,7 +120,7 @@ watch(() => userStore.isLogin, (v) => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .login {
   padding: .25rem 1rem 1rem 1rem;
 

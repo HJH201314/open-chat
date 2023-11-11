@@ -79,7 +79,7 @@ function handleListItemClick(id: string) {
   </div>
 </template>
 <style scoped lang="scss">
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .message-left {
   display: flex;
   flex-direction: row;

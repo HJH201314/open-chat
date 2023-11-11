@@ -45,7 +45,7 @@ const avatarPath = computed(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .dialog-message {
   display: flex;
   &__user {

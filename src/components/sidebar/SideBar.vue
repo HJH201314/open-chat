@@ -123,7 +123,7 @@ function handleGithubClick() {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .sidebar {
   &-placeholder {
     width: 3.5rem;

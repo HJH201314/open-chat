@@ -46,12 +46,12 @@ function handleDialogChange(sessionId: string) {
     <DialogDetail v-if="showDialogView && currentRecord.id" class="message-page-dialog-detail" :dialog-id="currentRecord.id"
                   @back="() => currentRecord.id = ''"
     />
-    <div v-if="showDialogView && !currentRecord.id" class="message-page-dialog-detail message-page-empty-tip">这里空空如也<br /></div>
+    <div v-if="showDialogView && !currentRecord.id" class="message-page-dialog-detail message-page-empty-tip">╮(￣▽￣)╭<br />这里空空如也<br /></div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-@import "@/assets/variables";
+@import "@/assets/variables.module";
 .message-page {
   height: 100%;
   display: flex;
@@ -81,6 +81,7 @@ function handleDialogChange(sessionId: string) {
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
     color: $color-primary;
     font-size: 24px;
     font-weight: bold;
