@@ -13,6 +13,7 @@ import SideBar from "@/components/sidebar/SideBar.vue";
 </template>
 
 <style scoped lang="scss">
+@import "@/assets/variables.module";
 .app-base {
   height: 100%;
   position: relative;
@@ -22,6 +23,9 @@ import SideBar from "@/components/sidebar/SideBar.vue";
 .app-base-panel {
   flex: 1;
   box-sizing: border-box;
-  padding: 12px;
+  padding: 12px 12px 12px 0;
+  @media screen and (max-width: $screen-sm) {
+    padding: 8px 8px 8px 0;
+  }
 }
 </style>

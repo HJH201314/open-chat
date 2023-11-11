@@ -21,3 +21,15 @@
   opacity: 0;
   transform: translateX(-50px)
 }
+
+/* 定义 页面滑动切换 动画 反向 */
+// 离开
+.slide-fade-rev-leave-to {
+  opacity: 0;
+  transform: translateX(-50px)
+}
+// 进入
+.slide-fade-rev-enter-from {
+  opacity: 0;
+  transform: translateX(50px)
+}

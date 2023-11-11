@@ -41,12 +41,12 @@ function handleDialogChange(sessionId: string) {
 
 <template>
   <div class="message-page">
-    <Transition name="slide-fade">
+    <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
       <RecordList v-show="showListView" class="message-page-record-list transition-all-circ" :class="{'message-page-record-list-absolute': !showDialogView}" @change="handleDialogChange" />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <Transition name="slide-fade">
-      <DialogDetail v-if="showDialogView && currentRecord.id" class="message-page-dialog-detail transition-all-circ" :class="{'message-page-dialog-detail-absolute': !showListView}" :dialog-id="currentRecord.id"
+    <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
+      <DialogDetail v-show="showDialogView && currentRecord.id" class="message-page-dialog-detail transition-all-circ" :class="{'message-page-dialog-detail-absolute': !showListView}" :dialog-id="currentRecord.id"
                     @back="() => currentRecord.id = ''"
       />
     </Transition>

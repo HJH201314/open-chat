@@ -8,6 +8,8 @@ import DialogMessage from "@/pages/message/components/DialogMessage.vue";
 import { onMounted, reactive, ref, watch } from "vue";
 import { useDataStore } from "@/store/useDataStore";
 import type { DialogData, DialogInfo, MsgInfo } from "@/types/data";
+import { useUserStore } from "@/store/useUserStore";
+import showToast from "@/components/toast/toast";
 
 const dataStore = useDataStore();
 
@@ -21,6 +23,8 @@ const props = withDefaults(
     dialogId: '',
   }
 );
+
+const userStore = useUserStore();
 
 const dialogInfo = ref<DialogInfo>({} as DialogInfo);
 const messageList = ref([] as MsgInfo[]);
@@ -53,7 +57,11 @@ function handleInputKeydown(e: KeyboardEvent) {
   }
 }
 function handleSendMessage() {
-  if (!form.inputValue) return;
+  if (!userStore.isLogin) {
+    showToast({ text: '请先登录！', type: 'warning' });
+    return;
+  }
+  if (!form.sessionId || !form.inputValue) return;
   dataStore.sendMessageText(form.sessionId, form.inputValue, {
     onMessage: (msg) => {
       form.outputValue += msg;

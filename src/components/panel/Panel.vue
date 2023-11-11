@@ -22,7 +22,7 @@
   height: 100%;
   overflow: hidden;
   // border: 2px solid $color-grey;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.01);
   border-radius: .5rem;
   // padding: .5rem;
   max-width: 1240px;

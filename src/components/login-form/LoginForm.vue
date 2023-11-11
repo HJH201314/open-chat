@@ -106,8 +106,8 @@ watch(() => userStore.isLogin, (v) => {
         </div>
         <div class="login-bottom">
           <div class="login-form">
-            <input class="login-form-input" type="text" name="username" placeholder="请输入用户名" v-model="loginForm.username" />
-            <input class="login-form-input" type="password" name="password" placeholder="请输入密码" v-model="loginForm.password" />
+            <input class="login-form-input" type="text" name="username" placeholder="请输入用户名（guest）" v-model="loginForm.username" />
+            <input class="login-form-input" type="password" name="password" placeholder="请输入密码（123456）" v-model="loginForm.password" />
           </div>
           <div class="login-form-submit" v-shake="loginForm.shake">
             <button style="outline: none;" :disabled="submitDisabled" @click="handleLoginSubmit">

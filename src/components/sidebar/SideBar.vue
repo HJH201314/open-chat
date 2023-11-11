@@ -117,7 +117,7 @@ function handleGithubClick() {
       <hr style="background: #4db6ac; height: 1px; width: 80%;" />
       <div class="sidebar-avatar sidebar-entry">
         <img class="sidebar-avatar-img" src="@/assets/image/default_avatar.jpg" alt="avatar"/>
-        <span v-if="userStore.isLogin">{{ userStore.username }}</span>
+        <span v-if="userStore.isLogin && expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
       </div>
     </div>
     <LoginForm ref="refLoginForm" />
@@ -126,6 +126,7 @@ function handleGithubClick() {
 
 <style scoped lang="scss">
 @import "@/assets/variables.module";
+@import "@/assets/functions";
 .sidebar {
   &-placeholder {
     width: 3.5rem;
@@ -136,13 +137,13 @@ function handleGithubClick() {
     position: fixed; // 统一fixed解决还原时占位异常
     left: 0;
     top: 0;
-    background-color: $color-teal-10;
+    background-color: $color-teal-20;
     height: 100%;
     width: 3.5rem;
-    padding: .5rem;
+    padding: .5rem .5rem 1rem .5rem;
     text-align: center;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
-    border-right: 1px solid $color-grey-200;
+    // box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
+    // border-right: 1px solid $color-grey-200;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -152,6 +153,7 @@ function handleGithubClick() {
 
     &-expand {
       width: 12rem;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -187,17 +189,17 @@ function handleGithubClick() {
     border-radius: .5rem;
     transition: background-color .2s $ease-out-circ;
     cursor: pointer;
-    &:hover {
-      background: $color-hover;
+    &:not(&-focus):hover {
+      background: shade-color($color-teal-20, 5%);
     }
-    &:active {
-      background: $color-active;
+    &:not(&-focus):active {
+      background: shade-color($color-teal-20, 10%);
     }
   }
 
   &-avatar {
     cursor: pointer;
-    padding: 0 !important; // 取消sidebar-entry的padding
+    padding: .5rem 0 !important; // 取消sidebar-entry的padding
 
     &-img {
       width: 2.25rem;
@@ -207,6 +209,11 @@ function handleGithubClick() {
       &:hover {
         transform: rotate(-360deg);
       }
+    }
+    &-name {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: $color-primary;
     }
   }
 
@@ -229,10 +236,10 @@ function handleGithubClick() {
     justify-content: center;
     gap: 1rem;
     &:not(&-focus):hover {
-      background: $color-hover;
+      background: shade-color($color-teal-20, 5%);
     }
-    &:active {
-      background: $color-active;
+    &:not(&-focus):active {
+      background: shade-color($color-teal-20, 10%);
     }
     &-focus {
       background: $color-teal-50;

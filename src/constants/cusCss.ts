@@ -5,7 +5,7 @@ console.log(variables);
 export default {
   // Colors
   colorPrimary: variables.colorPrimary,
-  colorgrey: variables.colorgrey,
+  colorGrey: variables.colorgrey,
   colorSuccess: variables.colorSuccess,
   colorInfo: variables.colorInfo,
   colorWarning: variables.colorWarning,
