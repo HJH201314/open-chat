@@ -22,7 +22,7 @@
   text-align: center;
   transition: all .1s ease-in-out;
   color: $color-black;
-  background: $color-gray-50;
+  background: $color-grey-50;
 
   &-slot {
     position: absolute;
@@ -32,7 +32,7 @@
     transform: translate(-50%, -50%);
   }
   &:hover {
-    background: $color-gray-200;
+    background: $color-grey-200;
   }
 }
 </style>

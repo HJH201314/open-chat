@@ -51,7 +51,7 @@ function handleListItemClick(id: string) {
       <div class="role-list-bar">
         <div class="role-list-bar-search">
           <span class="role-list-bar-search-icon"><Search /></span>
-          <input type="text" placeholder="搜索对话" />
+          <input type="text" name="search" placeholder="搜索对话" />
         </div>
         <div class="role-list-add" @click="handleRecordAddClick">
           <Plus theme="outline" size="24" />
@@ -115,17 +115,17 @@ function handleListItemClick(id: string) {
       flex: 1;
       border-radius: .5rem;
       padding: .25rem .5rem;
-      background-color: $color-gray-200;
+      background-color: $color-grey-200;
       display: flex;
       align-items: center;
       gap: .5rem;
       transition: all .2s $ease-out-circ;
       &:focus-within {
-        background-color: $color-gray-300;
+        background-color: $color-grey-300;
       }
 
       &-icon {
-        color: $color-gray-500;
+        color: $color-grey-500;
       }
 
       input {
@@ -139,15 +139,15 @@ function handleListItemClick(id: string) {
   &-add {
     height: 2rem;
     aspect-ratio: 1;
-    background-color: $color-gray-200;
+    background-color: $color-grey-200;
     border-radius: .5rem;
-    color: $color-gray-400;
+    color: $color-grey-400;
     display: grid;
     place-items: center;
     cursor: pointer;
     transition: all .2s $ease-out-circ;
     &:hover {
-      background-color: $color-gray-300;
+      background-color: $color-grey-300;
     }
   }
 
@@ -162,7 +162,7 @@ function handleListItemClick(id: string) {
     gap: .5rem;
     &:not(&-selected):hover  {
       // border-radius: 0;
-      background-color: $color-gray-100;
+      background-color: $color-grey-100;
     }
     &-selected {
       background-color: $color-teal-50;
@@ -183,7 +183,7 @@ function handleListItemClick(id: string) {
         font-size: 1.1rem;
       }
       .digest {
-        color: $color-gray-500;
+        color: $color-grey-500;
         font-size: .8rem;
         // 超过长度显示省略号
         text-overflow: ellipsis;

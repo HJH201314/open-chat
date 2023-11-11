@@ -47,7 +47,17 @@ body {
 
 body, html {
   height: 100%;
+  background-color: $color-teal-10;
   // background: linear-gradient(90deg, #e1eec307, #f0505307);
+}
+
+/* 定义链接样式 */
+a {
+  text-decoration: underline $color-primary-lighter solid 1px;
+  transition: all 0.2s $ease-out-circ;
+  &:hover {
+
+  }
 }
 
 /* 滚动条 */

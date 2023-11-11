@@ -2,7 +2,7 @@
 /* Login模态框中的代码 */
 import EasyTyper from 'easy-typer-js';
 import { reactive, ref, watch } from "vue";
-import { Right } from "@icon-park/vue-next";
+import { Close, Right } from "@icon-park/vue-next";
 import CommonModal from "@/components/modal/CommonModal.vue";
 import type { CommonModalFunc } from "@/components/modal/CommonModal";
 import { useMediaQuery } from "@vueuse/core";
@@ -49,16 +49,16 @@ const submitDisabled = ref(false);
 function init() {
   emoji.value = '🚀';
   // @ts-ignore
-  typer.value = new EasyTyper(typerObj, ['即刻出发']);
+  typer.value = new EasyTyper(typerObj, ['即刻启航']);
 }
 async function handleLoginSubmit() {
   if (!loginForm.username) {
     loginForm.shake += 1;
-    showToast({ text: '请输入账号！', position: 'top', type: 'danger' });
+    showToast({ text: '请输入用户名！', position: 'bottom', type: 'warning' });
     return;
   } else if (!loginForm.password) {
     loginForm.shake += 1;
-    showToast({ text: '请输入密码！', position: 'top', type: 'warning' });
+    showToast({ text: '请输入密码！', position: 'bottom', type: 'warning' });
     return;
   } else {
     try {
@@ -68,7 +68,7 @@ async function handleLoginSubmit() {
     catch (e) {
       console.error(e);
       loginForm.shake += 1;
-      showToast({ text: '登录失败', position: 'top' });
+      showToast({ text: '点火失败', position: 'bottom', type: 'danger' });
       return;
     }
     finally {
@@ -94,6 +94,7 @@ watch(() => userStore.isLogin, (v) => {
   <CommonModal ref="refLoginModal" :show-close="false" style="padding-bottom: 100px;">
     <template #default>
       <div class="login">
+        <Close class="login-close transition-all-circ enable-hover enable-active" size="20" @click="() => refLoginModal?.close()" />
         <div class="sidebar-logo sidebar-logo-animation" style="font-size: 32px;">
           OpenChat
         </div>
@@ -105,14 +106,17 @@ watch(() => userStore.isLogin, (v) => {
         </div>
         <div class="login-bottom">
           <div class="login-form">
-            <input class="login-form-input" type="text" placeholder="请输入用户名" v-model="loginForm.username" />
-            <input class="login-form-input" type="password" placeholder="请输入密码" v-model="loginForm.password" />
+            <input class="login-form-input" type="text" name="username" placeholder="请输入用户名" v-model="loginForm.username" />
+            <input class="login-form-input" type="password" name="password" placeholder="请输入密码" v-model="loginForm.password" />
           </div>
           <div class="login-form-submit" v-shake="loginForm.shake">
             <button style="outline: none;" :disabled="submitDisabled" @click="handleLoginSubmit">
               <Right size="32" />
             </button>
           </div>
+        </div>
+        <div class="login-footer">
+          我已阅读并同意<a href="http://localhost">《OpenChat用户协议》</a>
         </div>
       </div>
     </template>
@@ -122,7 +126,18 @@ watch(() => userStore.isLogin, (v) => {
 <style scoped lang="scss">
 @import "@/assets/variables.module";
 .login {
-  padding: .25rem 1rem 1rem 1rem;
+  margin: .25rem 1rem 1rem 1rem;
+  position: relative;
+
+  &-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: .5rem;
+    padding: .5rem;
+    cursor: pointer;
+    border-radius: .5rem;
+  }
 
   &-top {
     width: 100%;
@@ -165,6 +180,12 @@ watch(() => userStore.isLogin, (v) => {
     gap: .5rem;
   }
 
+  &-footer {
+    margin-top: .5rem;
+    color: $color-grey-500;
+    text-align: center;
+  }
+
   &-form {
     flex: 1;
     display: flex;
@@ -176,7 +197,7 @@ watch(() => userStore.isLogin, (v) => {
       border-radius: .5rem;
       padding: .25rem .5rem;
       border: 2px solid #FFFFFF00;
-      background-color: $color-gray-100;
+      background-color: $color-grey-100;
       outline: none;
       transition: all .2s $ease-out-circ;
       &:focus {

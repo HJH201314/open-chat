@@ -95,9 +95,6 @@ function handleGithubClick() {
           <MenuFold v-else size="24"></MenuFold>
         </div>
       </div>
-      <div class="sidebar-avatar">
-        <img class="sidebar-avatar-img" src="@/assets/image/default_avatar.jpg" alt="avatar"/>
-      </div>
       <div class="sidebar-entries">
         <div v-for="entry in entries" :key="entry.key" class="sidebar-entry" :class="{'sidebar-entry-focus': entry.href == route.path}" @click="(e) => handleEntryClick(e, entry)">
           <component :is="entry.icon" v-if="!entry.href || entry.href != route.path" class="sidebar-entry-icon" theme="outline" size="24"></component>
@@ -117,6 +114,11 @@ function handleGithubClick() {
           <Github class="sidebar-entry-icon" size="24" @click="handleGithubClick"></Github>
         </div>
       </div>
+      <hr style="background: #4db6ac; height: 1px; width: 80%;" />
+      <div class="sidebar-avatar sidebar-entry">
+        <img class="sidebar-avatar-img" src="@/assets/image/default_avatar.jpg" alt="avatar"/>
+        <span v-if="userStore.isLogin">{{ userStore.username }}</span>
+      </div>
     </div>
     <LoginForm ref="refLoginForm" />
   </div>
@@ -134,12 +136,13 @@ function handleGithubClick() {
     position: fixed; // 统一fixed解决还原时占位异常
     left: 0;
     top: 0;
-    background-color: $color-white;
+    background-color: $color-teal-10;
     height: 100%;
     width: 3.5rem;
     padding: .5rem;
     text-align: center;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid $color-grey-200;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -194,10 +197,11 @@ function handleGithubClick() {
 
   &-avatar {
     cursor: pointer;
+    padding: 0 !important; // 取消sidebar-entry的padding
 
     &-img {
-      width: 2.5rem;
-      height: 2.5rem;
+      width: 2.25rem;
+      height: 2.25rem;
       border-radius: 50%;
       transition: transform .2s $ease-out-circ;
       &:hover {
@@ -232,6 +236,7 @@ function handleGithubClick() {
     }
     &-focus {
       background: $color-teal-50;
+      color: $color-primary;
     }
 
     &-icon {
@@ -248,6 +253,9 @@ function handleGithubClick() {
         display: inline;
         visibility: visible;
         font-weight: bold;
+      }
+      &-active {
+        color: $color-primary;
       }
     }
 

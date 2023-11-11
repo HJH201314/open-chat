@@ -97,7 +97,7 @@ function handleDeleteDialog() {
       <div id="bottom-line"></div><!--定位-->
     </div>
     <div class="dialog-detail-inputs">
-      <textarea class="dialog-detail-inputs-textarea" @keydown="(e) => handleInputKeydown(e)" v-model="form.inputValue" />
+      <textarea class="dialog-detail-inputs-textarea" @keydown="(e) => handleInputKeydown(e)" v-model="form.inputValue" placeholder="随便问点啥(●'◡'●)" />
       <div class="dialog-detail-inputs-bar">
         <span class="dialog-detail-inputs-bar-icon transition-all-circ">
           <NewPicture size="24" />
@@ -151,9 +151,8 @@ function handleDeleteDialog() {
     gap: .5rem;
     &-textarea {
       flex: 1;
-      background-color: $color-white;
+      background-color: $color-grey-100;
       width: 100%;
-      border: 2px solid $color-gray;
       border-radius: .5rem;
       padding: .25rem;
       box-sizing: border-box;
@@ -162,8 +161,12 @@ function handleDeleteDialog() {
       outline: none;
       font-size: 16px;
       resize: none;
-      &:focus {
-        border-color: $color-primary;
+      &::placeholder {
+        text-align: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
     }
     &-bar {
@@ -178,7 +181,7 @@ function handleDeleteDialog() {
         cursor: pointer;
         border-radius: .5rem;
         &:hover {
-          background-color: $color-gray-200;
+          background-color: $color-grey-200;
         }
       }
       &-send {

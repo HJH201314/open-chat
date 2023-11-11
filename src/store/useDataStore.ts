@@ -70,7 +70,7 @@ export const useDataStore  = defineStore('data', () => {
       }
       return res.headers['session_id'];
     } catch (e) {
-      showToast({ text: '请求失败，请先登录~' });
+      showToast({ text: '请求失败，请先登录~', type: 'danger', position: 'top-left' });
     } finally {
     }
     return '';

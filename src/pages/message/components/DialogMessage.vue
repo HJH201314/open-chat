@@ -101,7 +101,7 @@ const avatarPath = computed(() => {
       border-radius: .5rem .5rem 0 .5rem;
     }
     &__bot {
-      background-color: $color-gray-200;
+      background-color: $color-grey-200;
       color: $color-black;
       border-radius: .5rem .5rem .5rem 0;
     }
@@ -114,7 +114,7 @@ const avatarPath = computed(() => {
     }
   }
   &-time {
-    color: $color-gray;
+    color: $color-grey;
     font-size: 12px;
     margin-left: .5rem;
   }

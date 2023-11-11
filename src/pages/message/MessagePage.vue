@@ -41,17 +41,22 @@ function handleDialogChange(sessionId: string) {
 
 <template>
   <div class="message-page">
-    <RecordList v-show="showListView" class="message-page-record-list" @change="handleDialogChange" />
+    <Transition name="slide-fade">
+      <RecordList v-show="showListView" class="message-page-record-list transition-all-circ" :class="{'message-page-record-list-absolute': !showDialogView}" @change="handleDialogChange" />
+    </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <DialogDetail v-if="showDialogView && currentRecord.id" class="message-page-dialog-detail" :dialog-id="currentRecord.id"
-                  @back="() => currentRecord.id = ''"
-    />
+    <Transition name="slide-fade">
+      <DialogDetail v-if="showDialogView && currentRecord.id" class="message-page-dialog-detail transition-all-circ" :class="{'message-page-dialog-detail-absolute': !showListView}" :dialog-id="currentRecord.id"
+                    @back="() => currentRecord.id = ''"
+      />
+    </Transition>
     <div v-if="showDialogView && !currentRecord.id" class="message-page-dialog-detail message-page-empty-tip">╮(￣▽￣)╭<br />这里空空如也<br /></div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 @import "@/assets/variables.module";
+@import "@/assets/animations";
 .message-page {
   height: 100%;
   display: flex;
@@ -65,16 +70,26 @@ function handleDialogChange(sessionId: string) {
   .split {
     width: 2px;
     height: auto;
-    background-color: $color-gray;
+    background-color: $color-grey;
     opacity: 0.666;
   }
 
   &-record-list {
     flex: 3;
+    // 在移动端使用absolute便于展示切换动画，否则会被挤压
+    &-absolute {
+      position: absolute;
+      inset: .5rem;
+    }
   }
 
   &-dialog-detail {
     flex: 7;
+    // 在移动端使用absolute便于展示切换动画，否则会被挤压
+    &-absolute {
+      position: absolute;
+      inset: .5rem;
+    }
   }
 
   &-empty-tip {

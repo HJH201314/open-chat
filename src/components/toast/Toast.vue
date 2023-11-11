@@ -111,7 +111,7 @@ const wrapperColor = computed(() => {
     animation: top-left-in .25s $ease-out-circ;;
     @keyframes top-left-in {
       0% {
-        transform: translateX(100%);
+        transform: translateX(-100%);
       }
       100% {
         transform: translateX(0);
@@ -128,7 +128,7 @@ const wrapperColor = computed(() => {
     animation: top-right-in .25s $ease-out-circ;
     @keyframes top-right-in {
       0% {
-        transform: translateX(-100%);
+        transform: translateX(100%);
       }
       100% {
         transform: translateX(0);
@@ -162,7 +162,7 @@ const wrapperColor = computed(() => {
     animation: bottom-left-in .25s $ease-out-circ;
     @keyframes bottom-left-in {
       0% {
-        transform: translateX(-100%);
+        transform: translateX(100%);
       }
       100% {
         transform: translateX(0);
@@ -179,7 +179,7 @@ const wrapperColor = computed(() => {
     animation: bottom-right-in .25s $ease-out-circ;
     @keyframes bottom-right-in {
       0% {
-        transform: translateX(100%);
+        transform: translateX(-100%);
       }
       100% {
         transform: translateX(0);
