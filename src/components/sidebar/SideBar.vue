@@ -1,16 +1,17 @@
 <script setup lang="ts">
 
-import { createApp, defineComponent, h, onMounted, reactive, ref, VueElement } from "vue";
+import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { MenuUnfold, MenuFold, Github, Login, Logout, Right } from "@icon-park/vue-next";
+import { Github, Login, Logout, MenuFold, MenuUnfold } from "@icon-park/vue-next";
 import { useUserStore } from "@/store/useUserStore";
-import Tooltip from "@/components/tooltip/Tooltip.vue";
+import Tooltip from "@/components/tooltip/CusTooltip.vue";
 import CommonModal from "@/components/modal/CommonModal.vue";
 import type { CommonModalFunc } from "@/components/modal/CommonModal";
-import { useEventBus, useMediaQuery, useShare } from "@vueuse/core";
+import { useEventBus, useMediaQuery } from "@vueuse/core";
 import { toggleSidebarKey } from "@/constants/eventBusKeys";
 import LoginForm from "@/components/login-form/LoginForm.vue";
 import showToast from "@/components/toast/toast";
+import SettingPage from "@/pages/setting/SettingPage.vue";
 
 const userStore = useUserStore();
 
@@ -24,6 +25,7 @@ toggleSideBarBus.on((e) => {
 });
 
 const route = useRoute();
+const isLargeScreen = useMediaQuery('(min-width: 768px)');
 
 type Entry = {
   key: string;
@@ -50,22 +52,33 @@ const entries = ref<Entry[]>([
     name: "设置",
     icon: 'setting-two',
     href: "/setting",
+    onClick() {
+      if (isLargeScreen.value) {
+        // 如果是大屏幕，打开模态框
+        refSettingModal.value?.open();
+      } else {
+        // 小屏幕跳转页面
+        if ('/setting' == route.path) return;
+        router.push('/setting');
+      }
+    }
   },
 ]);
 
 const router = useRouter();
 function handleEntryClick(e: Event, entry: Entry) {
-  if (entry.href) {
+  if (entry.onClick) {
+    entry.onClick();
+  } else if (entry.href) {
     if (entry.href == route.path) return;
     router.push(entry.href);
-  } else if (entry.onClick) {
-    entry.onClick();
   }
   showToast({text: entry.name, position: 'top'});
   expandBar.value = false;
 }
 
 const refLoginForm = ref();
+const refSettingModal = ref<CommonModalFunc>();
 
 function handleLogin() {
   if (userStore.isLogin) {
@@ -121,6 +134,9 @@ function handleGithubClick() {
       </div>
     </div>
     <LoginForm ref="refLoginForm" />
+    <CommonModal ref="refSettingModal">
+      <SettingPage />
+    </CommonModal>
   </div>
 </template>
 

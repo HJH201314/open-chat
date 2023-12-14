@@ -26,6 +26,7 @@
     "idb-keyval": "^6.2.1",
     "pinia": "^2.1.6",
     "sass": "^1.67.0",
+    "voice-input-button2": "^1.1.9",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"
   },

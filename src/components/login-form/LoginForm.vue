@@ -1,5 +1,4 @@
 <script setup lang="ts">
-/* Login模态框中的代码 */
 import EasyTyper from 'easy-typer-js';
 import { reactive, ref, watch } from "vue";
 import { Close, Right } from "@icon-park/vue-next";
@@ -7,7 +6,6 @@ import CommonModal from "@/components/modal/CommonModal.vue";
 import type { CommonModalFunc } from "@/components/modal/CommonModal";
 import { useMediaQuery } from "@vueuse/core";
 import { useUserStore } from "@/store/useUserStore";
-import api from "@/api";
 import showToast from "@/components/toast/toast";
 
 const userStore = useUserStore();
@@ -109,11 +107,9 @@ watch(() => userStore.isLogin, (v) => {
             <input class="login-form-input" type="text" name="username" placeholder="请输入用户名（guest）" v-model="loginForm.username" />
             <input class="login-form-input" type="password" name="password" placeholder="请输入密码（123456）" v-model="loginForm.password" />
           </div>
-          <div class="login-form-submit" v-shake="loginForm.shake">
-            <button style="outline: none;" :disabled="submitDisabled" @click="handleLoginSubmit">
-              <Right size="32" />
-            </button>
-          </div>
+          <button class="login-form-submit" style="outline: none;" :disabled="submitDisabled" @click="handleLoginSubmit" v-shake="loginForm.shake">
+            <Right size="32" />
+          </button>
         </div>
         <div class="login-footer">
           我已阅读并同意<a href="http://localhost">《OpenChat用户协议》</a>
@@ -221,6 +217,9 @@ watch(() => userStore.isLogin, (v) => {
       }
       &:active {
         background-image: $linear-gradient-primary-3;
+      }
+      span {
+        margin: auto;
       }
     }
   }

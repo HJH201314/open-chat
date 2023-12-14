@@ -33,7 +33,7 @@ export const useUserStore  = defineStore('user', () => {
 
   function logout() {
     user_id.value = -1;
-    api.user.logout({});
+    api.user.logout();
   }
 
   return {

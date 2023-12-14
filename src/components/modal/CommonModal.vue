@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Close } from "@icon-park/vue-next";
-import { ref, watch } from "vue";
+import type { CSSProperties } from "vue";
+import { nextTick, ref, watch } from "vue";
 
 interface CommonModalProps {
-  showClose: boolean;
-  visible: boolean;
+  showClose?: boolean;
+  visible?: boolean;
+  modalStyle?: CSSProperties;
 }
 
 const props = withDefaults(defineProps<CommonModalProps>(),{
@@ -33,8 +35,11 @@ const showModal = ref(false);
 
 /* 观测visibility，可以通过切换visibility切换展示状态 */
 watch(() => props.visible, (v) => {
-  showModal.value = v;
-});
+  // nextTick才真正改变可视，能够让props.visible从一开始就为true时也展示动画
+  nextTick(() => {
+    showModal.value = v;
+  });
+}, { immediate: true });
 /* 展示模态框（暴露的方法，配合ref使用） */
 function open() {
   showModal.value = true;
@@ -51,15 +56,14 @@ function handleClose() {
 </script>
 
 <template>
-  <!-- TODO: 修复BUG，加了transition后在sidebar的展示慢一步 -->
   <Teleport to="body">
     <Transition name="show">
       <div v-show="showModal" class="modal" :class="{'modal-hide': !showModal}">
         <div class="modal-mask"></div>
-        <div class="modal-body">
-          <Close v-if="showClose" class="modal-body-close transition-all-circ enable-hover enable-active" size="20" @click="handleClose" />
+        <div class="modal-body" :style="props.modalStyle">
+          <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
           <div class="modal-body-content">
-            <slot></slot>
+            <slot :isShown="showModal"></slot>
           </div>
         </div>
       </div>
@@ -91,13 +95,17 @@ function handleClose() {
     transform: translate(-50%, -50%);
     width: 90%;
     max-width: 512px; // 加个最小宽度不然组件有没有生效都不知道
-    max-height: 100%;
+    max-height: calc(100% - 2rem);
     z-index: 1001;
     background-color: $color-white;
     border-radius: .5rem;
     box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, .1);
+    display: flex; // 由于&-content是由内容撑起来的，这里设置为flex，能够让子元素撑起并占满&-body
+    flex-direction: column;
 
     &-close {
+      @extend %click-able;
+      @extend %transition-all-circ;
       position: absolute;
       top: 0;
       right: 0;
@@ -107,8 +115,7 @@ function handleClose() {
     }
 
     &-content {
-      width: 100%;
-      height: 100%;
+      flex: 1;
       overflow: auto;
     }
   }
@@ -116,6 +123,7 @@ function handleClose() {
 
 .show-enter-active,
 .show-leave-active {
+  z-index: 999;
   transition: opacity 0.2s $ease-out-circ;
 }
 

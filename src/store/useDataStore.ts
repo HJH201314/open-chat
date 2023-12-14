@@ -1,13 +1,13 @@
 import { defineStore } from "pinia";
-import { computed, onMounted, reactive, ref } from "vue";
+import type { UnwrapNestedRefs } from "vue";
+import { computed, reactive, ref } from "vue";
 import api from '@/api';
 import { useLocalStorage, useStorage } from "@vueuse/core";
-import type { DialogData, DialogInfo, MsgData } from "@/types/data";
+import type { DialogData, MsgData } from "@/types/data";
 import showToast from "@/components/toast/toast";
 import { recordToMap } from "@/utils/typeUtils";
 import { SERVER_API_URL } from "@/constants";
-import type { RemovableRef } from "@vueuse/core";
-import type { Ref } from "vue";
+import useRoleStore from "@/store/useRoleStore";
 
 interface MessageReceiver {
   onMessage: (message: string) => void;
@@ -29,22 +29,7 @@ export const useDataStore  = defineStore('data', () => {
     return Array.from(recordToMap(dialogData.value.dialogs!).values()).reverse();
   });
 
-  const roles = ref<API.RoleListResult>();
-
-  onMounted(() => {
-    getAllRoles();
-  });
-
-  async function getAllRoles() {
-    try {
-      const res = await api.gpt.getAllRoles();
-      if (res.status === 200) {
-          roles.value = res.data;
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
+  const roleStore = useRoleStore();
 
   function getDialogInfo(sessionId: string) {
     return dialogData.value.dialogs![sessionId] ?? {};
@@ -63,7 +48,7 @@ export const useDataStore  = defineStore('data', () => {
           title: '新会话',
           avatarPath: '',
           digest: '',
-          botRole: roles.value?.find((r) => r[0] === role)?.[1] || '未知',
+          botRole: roleStore.roles?.find((r) => r[0] === role)?.[1] || '未知',
           storageKey: `dialog-${sessionId}`,
           createAt: new Date().toLocaleString(),
         };
@@ -93,14 +78,14 @@ export const useDataStore  = defineStore('data', () => {
     });
   }
 
-  const messageStorage = ref<Record<string, RemovableRef<MsgData>>>({});
+  const messageStorage = ref<Record<string, UnwrapNestedRefs<MsgData>>>({});
 
   function loadMessagesFromStorage(sessionId: string) {
     const storageKey = `dialog-${sessionId}`;
-    messageStorage.value[storageKey] = useLocalStorage<MsgData>(storageKey, {
+    messageStorage.value[storageKey] = reactive(useLocalStorage<MsgData>(storageKey, {
       messages: [],
       version: 1,
-    });
+    })) as UnwrapNestedRefs<MsgData>;
   }
 
   function getMessageList(sessionId: string) {
@@ -117,15 +102,16 @@ export const useDataStore  = defineStore('data', () => {
     let url = `${SERVER_API_URL}/gpt/${sessionId}?question=${message}`
     let source = new EventSource(url);
     let fullMessage = '';
+    // EventSource接收消息
     source.onmessage = function (event) {
-      if (event.data === "[DONE]") {
-        source.close();
-        saveMessage(sessionId, fullMessage, 'bot', 'text');
-        receiver.onFinish(fullMessage);
+      if (event.data === "[DONE]") { // 当接收到服务器端的结束标记时
+        source.close(); // 关闭EventSource
+        saveMessage(sessionId, fullMessage, 'bot', 'text'); // 保存消息
+        receiver.onFinish(fullMessage); // 消息接收完毕回调
       } else {
-        console.log('[data]', event.data)
-        fullMessage += event.data;
-        receiver.onMessage(event.data);
+        console.log('[data]', event.data);
+        fullMessage += event.data; // 记录已接收的消息
+        receiver.onMessage(event.data); // 消息接收回调
       }
     }
   }
@@ -133,6 +119,7 @@ export const useDataStore  = defineStore('data', () => {
   function saveMessage(sessionId: string, message: string, sender: 'user' | 'bot', type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other') {
     try {
       const storageKey = `dialog-${sessionId}`;
+      console.log(messageStorage.value[storageKey])
       messageStorage.value[storageKey].messages?.push({
         time: new Date().toLocaleString(),
         sender,
@@ -148,7 +135,6 @@ export const useDataStore  = defineStore('data', () => {
   return {
     dialogList,
     messageStorage,
-    roles,
     getDialogInfo,
     addDialog,
     delDialog,

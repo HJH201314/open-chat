@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import type { ToastProps } from './index';
-import cusCss from "@/constants/cusCss";
+import variables from "@/assets/variables.module.scss";
 
 const props = withDefaults(defineProps<ToastProps>(), {
   text: '',
@@ -40,15 +40,15 @@ const toastClass = computed(() => {
 const wrapperColor = computed(() => {
   switch (props.type) {
     case 'success':
-      return cusCss.colorSuccess;
+      return variables.colorSuccess;
     case 'warning':
-      return cusCss.colorWarning;
+      return variables.colorWarning;
     case 'danger':
-      return cusCss.colorDanger;
+      return variables.colorDanger;
     case 'info':
-      return cusCss.colorInfo;
+      return variables.colorInfo;
     default:
-      return cusCss.colorPrimary;
+      return variables.colorPrimary;
   }
 });
 </script>

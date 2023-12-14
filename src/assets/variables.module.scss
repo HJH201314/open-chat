@@ -8,6 +8,7 @@ $color-grey-400: #bdbdbd;
 $color-grey-500: #9e9e9e;
 $color-black-lighter: #3d3d3d;
 $color-black: #303030;
+$color-black-lighter: #424242;
 $color-emerald-50: rgb(236, 253, 245);
 $color-emerald-100: rgb(209, 250, 229);
 $color-emerald-200: rgb(167, 243, 208);
@@ -23,63 +24,102 @@ $color-teal-300: #4db6ac;
 $color-teal-400: #26a69a;
 $color-teal-500: #009688;
 
-$color-hover: $color-grey-200;
-$color-active: $color-grey-300;
-$color-primary-lighter: $color-teal-200;
-$color-primary: $color-teal-400;
-$color-primary-darker: $color-teal-500;
+$color-pink-100: #fff0f6;
+$color-pink-200: #ffd6e7;
+$color-pink-300: #ffadd2;
+$color-pink-400: #ff85c0;
+$color-pink-500: #f759ab;
 
 $color-success: #1dd1a1;
 $color-info: #48dbfb;
 $color-warning: #feca57;
 $color-danger: #ff6b6b;
 
+$color-hover: $color-grey-300;
+$color-active: $color-grey-400;
+$color-primary-lighter: $color-teal-200;
+$color-primary: $color-teal-400;
+$color-primary-darker: $color-teal-500;
+$color-secondary-lighter: $color-pink-200;
+$color-secondary: $color-pink-400;
+$color-secondary-darker: $color-pink-500;
+
 $linear-gradient-primary: linear-gradient(180deg, $color-teal-300, $color-primary-darker);
 $linear-gradient-primary-2: linear-gradient(150deg, $color-teal-300, $color-primary-darker);
 $linear-gradient-primary-3: linear-gradient(330deg, $color-teal-300, $color-primary-darker);
 
 $ease-out-circ: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+$ease-in-out-back: cubic-bezier(.68,-0.55,.27,1.55);
 
 $screen-sm: 768px;
 
 $box-shadow: 0px 0px 5px 0 rgba(0, 0, 0, 0.1);
 
+%hover-able {
+    &:hover {
+        background: transparentize($color-hover, 0.5);
+    }
+}
+%active-able {
+    &:active {
+        background: transparentize($color-active, 0.5);
+    }
+}
+%transition-all-circ {
+    transition: all 0.2s $ease-out-circ;
+}
+%click-able {
+    cursor: pointer;
+    @extend %hover-able;
+    @extend %active-able;
+    @extend %transition-all-circ;
+}
+%button-like {
+    border-radius: .5rem;
+    padding: .5rem;
+}
+
+%page-title {
+    font-weight: bold;
+    font-size: large;
+}
+
 :export {
-    colorWhite: $color-white;
-    colorgrey: $color-grey;
-    colorgrey50: $color-grey-50;
-    colorgrey100: $color-grey-100;
-    colorgrey200: $color-grey-200;
-    colorgrey300: $color-grey-300;
-    colorgrey400: $color-grey-400;
-    colorgrey500: $color-grey-500;
-    colorBlack: $color-black;
-    colorEmerald50: $color-emerald-50;
-    colorEmerald100: $color-emerald-100;
-    colorEmerald200: $color-emerald-200;
-    colorEmerald300: $color-emerald-300;
-    colorEmerald400: $color-emerald-400;
-    colorEmerald500: $color-emerald-500;
-    colorTeal10: $color-teal-10;
-    colorTeal50: $color-teal-50;
-    colorTeal100: $color-teal-100;
-    colorTeal200: $color-teal-200;
-    colorTeal300: $color-teal-300;
-    colorTeal400: $color-teal-400;
-    colorTeal500: $color-teal-500;
-    colorHover: $color-hover;
-    colorActive: $color-active;
-    colorPrimaryLighter: $color-primary-lighter;
-    colorPrimary: $color-primary;
-    colorPrimaryDarker: $color-primary-darker;
-    colorSuccess: $color-success;
-    colorInfo: $color-info;
-    colorWarning: $color-warning;
-    colorDanger: $color-danger;
-    linearGradientPrimary: $linear-gradient-primary;
-    linearGradientPrimary2: $linear-gradient-primary-2;
-    linearGradientPrimary3: $linear-gradient-primary-3;
-    easeOutCirc: $ease-out-circ;
-    screenSm: $screen-sm;
-    boxShadow: $box-shadow;
+    color-white: $color-white;
+    color-grey: $color-grey;
+    color-grey-50: $color-grey-50;
+    color-grey-100: $color-grey-100;
+    color-grey-200: $color-grey-200;
+    color-grey-300: $color-grey-300;
+    color-grey-400: $color-grey-400;
+    color-grey-500: $color-grey-500;
+    color-black: $color-black;
+    color-emerald-50: $color-emerald-50;
+    color-emerald-100: $color-emerald-100;
+    color-emerald-200: $color-emerald-200;
+    color-emerald-300: $color-emerald-300;
+    color-emerald-400: $color-emerald-400;
+    color-emerald-500: $color-emerald-500;
+    color-teal-10: $color-teal-10;
+    color-teal-50: $color-teal-50;
+    color-teal-100: $color-teal-100;
+    color-teal-200: $color-teal-200;
+    color-teal-300: $color-teal-300;
+    color-teal-400: $color-teal-400;
+    color-teal-500: $color-teal-500;
+    color-hover: $color-hover;
+    color-active: $color-active;
+    color-primary-lighter: $color-primary-lighter;
+    color-primary: $color-primary;
+    color-primary-darker: $color-primary-darker;
+    color-success: $color-success;
+    color-info: $color-info;
+    color-warning: $color-warning;
+    color-danger: $color-danger;
+    linear-gradient-primary: $linear-gradient-primary;
+    linear-gradient-primary-2: $linear-gradient-primary-2;
+    linear-gradient-primary-3: $linear-gradient-primary-3;
+    ease-out-circ: $ease-out-circ;
+    screen-sm: $screen-sm;
+    box-shadow: $box-shadow;
 }

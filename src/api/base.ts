@@ -1,6 +1,8 @@
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
-import type { AxiosRequestConfig } from 'axios';
 import { SERVER_API_URL } from "@/constants";
+import { useSettingStore } from "@/store/useSettingStore";
+import { getActivePinia } from "pinia";
 
 /* 创建axios实例 */
 const axiosInstance = axios.create({
@@ -10,14 +12,17 @@ const axiosInstance = axios.create({
 });
 
 /* 创建请求 */
-export const createRequest = <TReq, TResp = any>(
-    _: string,
-    requestConfigCreator: (args: TReq) => AxiosRequestConfig,
-) => {
-  return (args?: TReq) => {
-    if (!args) {
-      return axiosInstance.request<TResp>(requestConfigCreator({} as TReq));
-    }
-    return axiosInstance.request<TResp>(requestConfigCreator(args));
+export const createRequest = <TRes>(path: string, args: AxiosRequestConfig) => {
+  console.log(localStorage.getItem("token") ?? "")
+  let config: AxiosRequestConfig<any> = {
+    url: path,
+    ...args,
   };
-};
+  if (getActivePinia()) {
+    if (useSettingStore().settings.host) config.baseURL = useSettingStore().settings.host;
+  }
+  if (!config.headers) config.headers = {};
+  config.headers['token'] = localStorage.getItem("token") ?? '';
+  config.headers['Authorization'] = localStorage.getItem("token") ?? '';
+  return axiosInstance.request<any, AxiosResponse<TRes>>(config);
+}

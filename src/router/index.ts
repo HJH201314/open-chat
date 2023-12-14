@@ -12,8 +12,18 @@ const router = createRouter({
       path: '/message',
       name: 'message',
       component: MessagePage
-    }
+    },
+    {
+      path: '/star',
+      name: 'star',
+      component: () => import('@/pages/star/StarPage.vue'),
+    },
+    {
+      path: '/setting',
+      name: 'setting',
+      component: () => import('@/pages/setting/SettingPage.vue'),
+    },
   ]
 })
 
-export default router
+export default router;

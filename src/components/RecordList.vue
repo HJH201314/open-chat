@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { Plus, Search } from '@icon-park/vue-next';
 import { useDataStore } from "@/store/useDataStore";
-import type { DialogInfo, DialogData } from "@/types/data";
+import CommonModal from "@/components/modal/CommonModal.vue";
+import Toggle from "@/components/toggle/CusToggle.vue";
+import useRoleStore from "@/store/useRoleStore";
+import { useSettingStore } from "@/store/useSettingStore";
 
 type RecordViewProps = {
   model: string;
@@ -27,14 +30,28 @@ type RecordListItem = {
   avatarPath: string;
 };
 const dataStore = useDataStore();
+const roleStore = useRoleStore();
+const settingStore = useSettingStore();
 const currentDialogId = ref<string>('1');
 
 onMounted(() => {
 });
 
-async function handleRecordAddClick() {
-  const sessionId = await dataStore.addDialog(dataStore.roles?.[0][0] ?? 0);
+async function handleAddRecord(roleId?: number) {
+  const sessionId = await dataStore.addDialog(roleId ?? 1);
   handleListItemClick(sessionId);
+  roleForm.modalVisible = false;
+  if (roleForm.remember) {
+    settingStore.saveSetting('roleRemember', true);
+    settingStore.saveSetting('roleDefaultId', roleId);
+  }
+}
+function handleListAddClick() {
+  console.log(roleForm.remember)
+  if (roleForm.remember)
+    handleAddRecord(settingStore.settings.roleDefaultId);
+  else
+    roleForm.modalVisible = true;
 }
 function handleListItemClick(id: string) {
   // 点击对话列表项
@@ -43,24 +60,42 @@ function handleListItemClick(id: string) {
     emit('change', currentDialogId.value);
   // });
 }
+
+const roleForm = reactive({
+  modalVisible: false,
+  remember: ref(settingStore.settings.roleRemember),
+});
 </script>
 <template>
   <div class="message-left">
     <!-- 角色列表 -->
-    <div class="role-list">
-      <div class="role-list-bar">
-        <div class="role-list-bar-search">
-          <span class="role-list-bar-search-icon"><Search /></span>
+    <div class="dialog-list">
+      <div class="dialog-list-bar">
+        <div class="dialog-list-bar-search">
+          <span class="dialog-list-bar-search-icon"><Search /></span>
           <input type="text" name="search" placeholder="搜索对话" />
         </div>
-        <div class="role-list-add" @click="handleRecordAddClick">
-          <Plus theme="outline" size="24" />
+        <div>
+          <div class="dialog-list-add" @click="handleListAddClick">
+            <Plus theme="outline" size="24" />
+          </div>
+          <CommonModal v-model:visible="roleForm.modalVisible" title="选择角色" subtitle="单击角色以创建对话">
+            <div class="select-role">
+              <div class="select-role-list">
+                <div class="select-role-item" v-for="item in roleStore.roles" @click="handleAddRecord(item[0])">
+                  {{ item[1] }}
+                </div>
+              </div>
+              <!-- TODO: 支持记住本次选择 -->
+              <Toggle style="margin-top: 1rem;" label="记住本次选择" v-model="roleForm.remember" />
+            </div>
+          </CommonModal>
         </div>
       </div>
-      <div class="role-list-container">
-        <div v-for="item in dataStore.dialogList" @click="handleListItemClick(item.id)" class="role-list-item" :class="{'role-list-item-selected': item.id === currentDialogId}">
+      <div class="dialog-list-container">
+        <div v-for="item in dataStore.dialogList" @click="handleListItemClick(item.id)" class="dialog-list-item" :class="{'dialog-list-item-selected': item.id === currentDialogId}">
           <img :src="item.avatarPath ? item.avatarPath : 'src/assets/image/chatgpt3.svg'" alt="avatar">
-          <div class="role-list-item-center">
+          <div class="dialog-list-item-center">
             <div class="title">
               {{ item.title }}
             </div>
@@ -68,7 +103,7 @@ function handleListItemClick(id: string) {
               {{ item.botRole }}
             </div>
           </div>
-          <div class="role-list-item-right">
+          <div class="dialog-list-item-right">
             <div class="datetime">
               {{ item.createAt ?? '' }}
             </div>
@@ -86,7 +121,7 @@ function handleListItemClick(id: string) {
   flex-wrap: nowrap;
   gap: .5rem;
 }
-.role-list {
+.dialog-list {
   width: 100%;
   height: 100%;
   display: flex;
@@ -230,6 +265,28 @@ function handleListItemClick(id: string) {
     gap: .5rem;
   }
 
+}
+.select-role {
+  padding: 1rem;
+  &-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  &-item {
+    border-radius: .5rem;
+    padding: .25rem .5rem;
+    cursor: pointer;
+    line-height: 1.5rem;
+    transition: all .2s $ease-out-circ;
+    background-color: $color-grey-100;
+    &:hover {
+      font-size: 1.1rem;
+      line-height: 1.5rem;
+      background-color: $color-primary;
+      color: $color-white;
+    }
+  }
 }
 .bounce-enter-active {
   animation: bounce-in 0.25s;

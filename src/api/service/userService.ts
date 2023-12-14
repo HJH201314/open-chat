@@ -1,29 +1,22 @@
 import { createRequest } from "@/api/base";
 
-export const login = createRequest<
-    {
-      username: string;
-      password: string;
+export const login = (p: { username: string, password: string }) => {
+  return createRequest<API.DataResult<API.LoginResult>>("/auth/login/", {
+    method: "POST",
+    params: {
+      username: p.username,
+      password: p.password,
     },
-    API.DataResult<API.LoginResult>
->("login", ({ username, password }) => ({
-  url: `/auth/login/`,
-  method: "POST",
-  params: {
-    username,
-    password,
-  },
-  data: {
-    username,
-    password,
-  },
-  headers: { "Content-Type": "application/json" },
-}));
+    data: {
+      username: p.username,
+      password: p.password,
+    },
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
-export const logout = createRequest<
-    {},
+export const logout = () => createRequest<
     API.StatusResult
->("logout", () => ({
-  url: `/auth/logout/`,
+>("/auth/logout/", {
   method: "GET",
-}));
+});

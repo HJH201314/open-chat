@@ -1,13 +1,11 @@
 <script setup lang="ts">
 
-import { Share, Back, Delete, Send } from '@icon-park/vue-next';
+import { Back, Delete, Send, Share, Voice } from '@icon-park/vue-next';
 import IconButton from "@/components/IconButton.vue";
-import cusCss from "@/constants/cusCss";
-import { Voice, NewPicture } from "@icon-park/vue-next";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
 import { onMounted, reactive, ref, watch } from "vue";
 import { useDataStore } from "@/store/useDataStore";
-import type { DialogData, DialogInfo, MsgInfo } from "@/types/data";
+import type { DialogInfo, MsgInfo } from "@/types/data";
 import { useUserStore } from "@/store/useUserStore";
 import showToast from "@/components/toast/toast";
 
@@ -107,9 +105,10 @@ function handleDeleteDialog() {
     <div class="dialog-detail-inputs">
       <textarea class="dialog-detail-inputs-textarea" @keydown="(e) => handleInputKeydown(e)" v-model="form.inputValue" placeholder="随便问点啥(●'◡'●)" />
       <div class="dialog-detail-inputs-bar">
-        <span class="dialog-detail-inputs-bar-icon transition-all-circ">
-          <NewPicture size="24" />
-        </span>
+<!--        <span class="dialog-detail-inputs-bar-icon transition-all-circ">-->
+<!--          <NewPicture size="24" />-->
+<!--        </span>-->
+
         <span class="dialog-detail-inputs-bar-icon transition-all-circ">
           <Voice size="24" />
         </span>
