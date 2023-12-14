@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Github, Login, Logout, MenuFold, MenuUnfold } from "@icon-park/vue-next";
 import { useUserStore } from "@/store/useUserStore";
@@ -79,6 +79,9 @@ function handleEntryClick(e: Event, entry: Entry) {
 
 const refLoginForm = ref();
 const refSettingModal = ref<CommonModalFunc>();
+const settingModalVisible = computed(() => {
+  return refSettingModal?.value?.isVisible;
+});
 
 function handleLogin() {
   if (userStore.isLogin) {
@@ -134,8 +137,8 @@ function handleGithubClick() {
       </div>
     </div>
     <LoginForm ref="refLoginForm" />
-    <CommonModal ref="refSettingModal">
-      <SettingPage />
+    <CommonModal ref="refSettingModal" v-slot:default="{ close: closeSetting }">
+      <SettingPage v-if="settingModalVisible" @cancel="closeSetting" />
     </CommonModal>
   </div>
 </template>
@@ -164,7 +167,7 @@ function handleGithubClick() {
     flex-direction: column;
     align-items: center;
     gap: .5rem;
-    transition: width .2s $ease-out-circ;
+    transition: width .25s $ease-out-circ;
     z-index: 999;
 
     &-expand {

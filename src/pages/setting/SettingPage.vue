@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import CusInput from "@/components/input/CusInput.vue";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import DiliButton from "@/components/button/DiliButton.vue";
 import variables from "@/assets/variables.module.scss";
 import { useSettingStore } from "@/store/useSettingStore";
@@ -16,10 +16,25 @@ defineEmits<{
   (event: 'cancel'): void;
 }>();
 
+// 观测设置信息变化
+watch(() => settingStore.settings, (newVal) => {
+  editingValue.value = newVal;
+});
+
 function handleSave() {
   const result = settingStore.saveSettings(editingValue.value);
   showToast({ text: `保存${result}个设置成功` });
 }
+
+function handleReset() {
+  settingStore.resetSetting();
+  showToast({ text: `重置成功` });
+}
+
+const globe = useGlobal();
+watch(() => globe.isLargeScreen, (val) => {
+  console.log('isLargeScreen:', val)
+})
 </script>
 
 <template>
@@ -28,31 +43,33 @@ function handleSave() {
     <div class="setting-list">
       <div class="setting-list-container">
         <div class="setting-list-item">
-          <span class="setting-list-item__title">Cloud接口地址</span>
+          <span class="setting-list-item__title">API地址</span>
           <span class="setting-list-item__value">
             <CusInput v-model="editingValue.host" placeholder="Cloud API" />
           </span>
         </div>
+        <hr />
         <div class="setting-list-item">
-          <span class="setting-list-item__title">本地对话缓存</span>
+          <span class="setting-list-item__title">对话缓存</span>
           <span class="setting-list-item__value">
             <CusToggle v-model="editingValue.localCache" />
           </span>
         </div>
+        <hr />
         <div class="setting-list-item">
           <span class="setting-list-item__title">默认角色</span>
           <span class="setting-list-item__value">
             <CusToggle v-model="editingValue.roleRemember">
               <template #before>{{ editingValue.roleRemember ? '开启' : '关闭' }}</template>
             </CusToggle>
-            <CusInput v-model="editingValue.roleDefaultId" />
+            <CusInput v-model="editingValue.roleDefaultId" placeholder="角色ID" />
           </span>
         </div>
         <div class="setting-actions-placeholder"></div>
         <div class="setting-list-item setting-actions">
-          <DiliButton type="primary" text="保存" :background-color="variables.colorPrimary" @click="handleSave" />
-          <DiliButton type="normal" text="取消" v-if="useGlobal().isLargeScreen" @click="$emit('cancel')" />
-          <DiliButton style="margin-left: auto;" type="normal" text="重置" @click="settingStore.resetSetting()" />
+          <DiliButton style="flex: 1;" :button-style="{'width': '100%'}" type="primary" text="保存" :background-color="variables.colorPrimary" @click="handleSave" />
+          <DiliButton type="normal" text="取消" v-if="globe.isLargeScreen" @click="$emit('cancel')" />
+          <DiliButton style="margin-left: auto;" type="normal" text="重置" @click="handleReset" />
         </div>
       </div>
     </div>
@@ -96,7 +113,8 @@ function handleSave() {
       &__value {
         display: flex;
         gap: .5rem;
-        align-items: center;
+        align-items: flex-end;
+        flex-direction: column;
       }
     }
   }

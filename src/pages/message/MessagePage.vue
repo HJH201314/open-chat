@@ -4,9 +4,7 @@ import RecordList from "@/components/RecordList.vue";
 import DialogDetail from "@/pages/message/components/DialogDetail.vue";
 import { computed, reactive, ref, watch } from "vue";
 import { useEventBus, useMediaQuery } from "@vueuse/core";
-import SideBar from "@/components/sidebar/SideBar.vue";
 import { toggleSidebarKey } from "@/constants/eventBusKeys";
-import CommonModal from "@/components/modal/CommonModal.vue";
 
 const isLargeScreen = useMediaQuery("(min-width: 768px)");
 
@@ -37,6 +35,9 @@ watch(() => currentRecord.id, (v) => {
 function handleDialogChange(sessionId: string) {
   currentRecord.id = sessionId;
 }
+
+/* 通过Transition的事件控制showEmptyTip，避免应用动画时刷新空空如也和消息列表挤压 */
+const showEmptyTip = ref(true);
 </script>
 
 <template>
@@ -45,12 +46,19 @@ function handleDialogChange(sessionId: string) {
       <RecordList v-show="showListView" class="message-page-record-list transition-all-circ" :class="{'message-page-record-list-absolute': !showDialogView}" @change="handleDialogChange" />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
-      <DialogDetail v-show="showDialogView && currentRecord.id" class="message-page-dialog-detail transition-all-circ" :class="{'message-page-dialog-detail-absolute': !showListView}" :dialog-id="currentRecord.id"
+    <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'"
+                @before-enter="showEmptyTip = false"
+                @after-leave="showEmptyTip = true">
+      <DialogDetail id="dialog-detail-view" v-if="showDialogView && currentRecord.id"
+                    class="message-page-dialog-detail transition-all-circ"
+                    :class="{'message-page-dialog-detail-absolute': !showListView}" :dialog-id="currentRecord.id"
                     @back="() => currentRecord.id = ''"
       />
     </Transition>
-    <div v-if="showDialogView && !currentRecord.id" class="message-page-dialog-detail message-page-empty-tip">╮(￣▽￣)╭<br />这里空空如也<br /></div>
+    <Transition name="ease-in">
+      <div id="dialog-detail-empty-tip" v-if="showDialogView && !currentRecord.id && showEmptyTip"
+           class="message-page-dialog-detail message-page-empty-tip">╮(￣▽￣)╭<br />这里空空如也<br /></div>
+    </Transition>
   </div>
 </template>
 
@@ -76,6 +84,7 @@ function handleDialogChange(sessionId: string) {
 
   &-record-list {
     flex: 3;
+    min-width: calc(30% - 5px); // 防止右侧消息列表关闭时被挤压
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
     &-absolute {
       position: absolute;

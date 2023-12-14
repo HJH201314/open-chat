@@ -12,6 +12,7 @@ export type ChatSetting = {
 const defaultSetting: ChatSetting = {
   host: '/api',
   localCache: true,
+  roleRemember: false,
   roleDefaultId: 0,
 }
 
@@ -30,7 +31,7 @@ export const useSettingStore = defineStore('setting', () => {
   }
 
   function saveSettings(newSettings: ChatSetting) {
-    settingStorage.value = { ...settingStorage.value, ...newSettings };
+    settingStorage.value = { ...defaultSetting, ...settingStorage.value, ...newSettings }; // 第一个放defaultSetting是便于程序更新设置也能更新默认值
     console.log(newSettings)
     return Object.keys(newSettings).length;
   }
@@ -43,7 +44,8 @@ export const useSettingStore = defineStore('setting', () => {
     if (key) {
       settingStorage.value[key] = defaultSetting[key];
     } else {
-      settingStorage.value = defaultSetting;
+      settingStorage.value = { ...defaultSetting }; // 直接赋值会导致defaultSetting被引用从而被修改，因此需要解构
+      console.log('reset', settingStorage.value, defaultSetting)
     }
   }
 

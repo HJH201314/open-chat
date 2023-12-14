@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Close } from "@icon-park/vue-next";
-import type { CSSProperties } from "vue";
-import { nextTick, ref, watch } from "vue";
+import { type CSSProperties, nextTick, ref, toRef, watch } from "vue";
+import type { CommonModalFunc } from "@/components/modal/CommonModal";
 
 interface CommonModalProps {
   showClose?: boolean;
@@ -18,18 +18,6 @@ const emit = defineEmits<{
   (event: 'onOpen'): void;
   (event: 'onClose'): void;
 }>();
-
-/**
- * CommonModal - 通用模态框
- * 作为Vue组件使用
- * @author HJH201314
- *
- * */
-/* 暴露接口 */
-defineExpose({
-  open,
-  close,
-});
 
 const showModal = ref(false);
 
@@ -53,6 +41,19 @@ function handleClose() {
   close();
   emit('onClose');
 }
+
+/**
+ * CommonModal - 通用模态框
+ * 作为Vue组件使用
+ * @author HJH201314
+ *
+ * */
+/* 暴露接口 */
+defineExpose<CommonModalFunc>({
+  open,
+  close,
+  isVisible: toRef(showModal),
+});
 </script>
 
 <template>
@@ -63,7 +64,8 @@ function handleClose() {
         <div class="modal-body" :style="props.modalStyle">
           <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
           <div class="modal-body-content">
-            <slot :isShown="showModal"></slot>
+            <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
+            <slot :isShown="showModal" :close="close"></slot>
           </div>
         </div>
       </div>
@@ -102,6 +104,7 @@ function handleClose() {
     box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, .1);
     display: flex; // 由于&-content是由内容撑起来的，这里设置为flex，能够让子元素撑起并占满&-body
     flex-direction: column;
+    overflow: hidden;
 
     &-close {
       @extend %click-able;

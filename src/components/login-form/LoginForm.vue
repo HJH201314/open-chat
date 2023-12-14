@@ -89,7 +89,7 @@ watch(() => userStore.isLogin, (v) => {
 </script>
 
 <template>
-  <CommonModal ref="refLoginModal" :show-close="false" style="padding-bottom: 100px;">
+  <CommonModal ref="refLoginModal" :show-close="false">
     <template #default>
       <div class="login">
         <Close class="login-close transition-all-circ enable-hover enable-active" size="20" @click="() => refLoginModal?.close()" />
