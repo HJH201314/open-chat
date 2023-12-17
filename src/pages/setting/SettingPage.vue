@@ -67,7 +67,7 @@ watch(() => globe.isLargeScreen, (val) => {
         </div>
         <div class="setting-actions-placeholder"></div>
         <div class="setting-list-item setting-actions">
-          <DiliButton style="flex: 1;" :button-style="{'width': '100%'}" type="primary" text="保存" :background-color="variables.colorPrimary" @click="handleSave" />
+          <DiliButton style="flex: 1;" :button-style="{'width': '100%', 'text-align': 'center'}" type="primary" text="保存" :background-color="variables.colorPrimary" @click="handleSave" />
           <DiliButton type="normal" text="取消" v-if="globe.isLargeScreen" @click="$emit('cancel')" />
           <DiliButton style="margin-left: auto;" type="normal" text="重置" @click="handleReset" />
         </div>

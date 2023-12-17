@@ -5,7 +5,7 @@ import type { CommonModalFunc } from "@/components/modal/CommonModal";
 
 interface CommonModalProps {
   showClose?: boolean;
-  visible?: boolean;
+  visible?: boolean; // 默认不展示
   modalStyle?: CSSProperties;
 }
 
@@ -95,8 +95,8 @@ defineExpose<CommonModalFunc>({
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 512px; // 加个最小宽度不然组件有没有生效都不知道
+    width: 512px; // 加个默认宽度不然组件有没有生效都不知道
+    max-width: calc(100% - 2rem);
     max-height: calc(100% - 2rem);
     z-index: 1001;
     background-color: $color-white;

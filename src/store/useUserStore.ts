@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import { acceptHMRUpdate, defineStore } from "pinia";
 import { computed, ref } from "vue";
 import api from '@/api';
 
@@ -9,6 +9,8 @@ export const useUserStore  = defineStore('user', () => {
   const avatar = ref('src/assets/image/default_avatar.jpg');
   const username = ref('未登录');
   const user_id = ref(-1);
+  const permission = ref(0);
+  const currentUser = ref<API.LoginResult>({});
 
   const isLogin = computed(() => {
     return user_id.value >= 0;
@@ -20,8 +22,10 @@ export const useUserStore  = defineStore('user', () => {
       password: _password,
     }).then(res => {
       if (res.data.status === 200) {
-        user_id.value = res.data.data.userId ?? -1;
+        user_id.value = res.data.data.id ?? -1;
         username.value = _username ?? '匿名用户';
+        permission.value = res.data.data.permission ?? 0;
+        currentUser.value = res.data.data;
         resolve(res.data);
       } else {
         reject(res);
@@ -41,7 +45,13 @@ export const useUserStore  = defineStore('user', () => {
     isLogin,
     user_id,
     username,
+    permission,
+    currentUser,
     login,
     logout,
   }
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useUserStore, import.meta.hot));
+}

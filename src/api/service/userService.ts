@@ -15,6 +15,13 @@ export const login = (p: { username: string, password: string }) => {
   });
 }
 
+export const current = () => {
+  return createRequest<API.DataResult<any>>("/auth/current", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 export const logout = () => createRequest<
     API.StatusResult
 >("/auth/logout/", {

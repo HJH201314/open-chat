@@ -17,6 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: .5rem;
+  padding: .5rem;
 
   &-title {
     @extend %page-title;

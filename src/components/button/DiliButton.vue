@@ -8,7 +8,7 @@ import { getDarkerColor } from "@/utils/color";
 const props = withDefaults(defineProps<DiliButtonProps>(), {
   text: "",
   type: "normal",
-  shadow: true,
+  shadow: false,
 });
 
 const emit = defineEmits<DiliButtonEmits>();
@@ -16,10 +16,12 @@ const emit = defineEmits<DiliButtonEmits>();
 const buttonRef = ref<HTMLButtonElement>();
 
 const buttonStyle = computed(() => {
-  return {
+  const calcStyle: CSSProperties = {
     'box-shadow': props.shadow ? variables.boxShadow : 'none',
+    'padding': props.text ? '.25rem 1rem' : '.25rem',
     ...props.buttonStyle
-  } as CSSProperties;
+  };
+  return calcStyle;
 });
 
 const backgroundColor = computed(() => {
@@ -60,9 +62,10 @@ function handleClick() {
 <template>
   <div class="dili-button" @click="handleClick">
     <button ref="buttonRef" :style="buttonStyle" :class="{'disabled': props.disabled}">
-      {{ props.text }}
+      <slot></slot>
+      <span class="button-text" v-if="props.text">{{ props.text }}</span>
     </button>
-    <div class="mask">
+    <div class="mask" :class="{'disabled': props.disabled}">
 
     </div>
   </div>
@@ -79,16 +82,20 @@ function handleClick() {
   > button {
     outline: none;
     border-radius: .5rem;
-    padding: .25rem 1rem;
     transition: background-color .2s $ease-out-circ, color .2s $ease-out-circ;
     background-color: v-bind(backgroundColor);
     color: v-bind(fontColor);
     overflow: hidden;
     white-space: pre;
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    justify-content: center;
 
     &.disabled {
-      background-color: $color-grey-200;
-      color: $color-grey-500;
+      //background-color: $color-grey-200;
+      //color: $color-grey-500;
+      filter: grayscale(0.5) opacity(0.5);
       cursor: not-allowed;
     }
 

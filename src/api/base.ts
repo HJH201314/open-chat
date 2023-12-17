@@ -13,7 +13,6 @@ const axiosInstance = axios.create({
 
 /* 创建请求 */
 export const createRequest = <TRes>(path: string, args: AxiosRequestConfig) => {
-  console.log(localStorage.getItem("token") ?? "")
   let config: AxiosRequestConfig<any> = {
     url: path,
     ...args,

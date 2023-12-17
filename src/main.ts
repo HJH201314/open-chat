@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faBars, faComment as fasComment, faGear as fasGear } from '@fortawesome/free-solid-svg-icons'
 import { faComment as farComment } from '@fortawesome/free-regular-svg-icons'
-import { MenuFold, MenuUnfold, Message, SettingTwo, Star } from "@icon-park/vue-next";
+import { MenuFold, MenuUnfold, Message, SettingTwo, Star, User } from "@icon-park/vue-next";
 import shake from "@/commands/shake";
 
 library.add(
@@ -42,5 +42,6 @@ app.component('message', Message)
 app.component('menu-unfold', MenuUnfold)
 app.component('menu-fold', MenuFold)
 app.component('star', Star)
+app.component('user', User)
 
 app.mount('#app')

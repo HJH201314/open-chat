@@ -81,12 +81,12 @@ const roleForm = reactive({
           </div>
           <CommonModal v-model:visible="roleForm.modalVisible" title="选择角色" subtitle="单击角色以创建对话">
             <div class="select-role">
+              <div class="select-role-title">选择角色</div>
               <div class="select-role-list">
                 <div class="select-role-item" v-for="item in roleStore.roles" @click="handleAddRecord(item[0])">
                   {{ item[1] }}
                 </div>
               </div>
-              <!-- TODO: 支持记住本次选择 -->
               <Toggle style="margin-top: 1rem;" label="记住本次选择" v-model="roleForm.remember" />
             </div>
           </CommonModal>
@@ -268,6 +268,10 @@ const roleForm = reactive({
 }
 .select-role {
   padding: 1rem;
+  &-title {
+    @extend %page-title;
+    margin-bottom: 1rem;
+  }
   &-list {
     display: flex;
     flex-wrap: wrap;

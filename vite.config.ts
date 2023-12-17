@@ -2,6 +2,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import vueJsx from '@vitejs/plugin-vue-jsx'
 import sassDts from 'vite-plugin-sass-dts'
 import path from 'path'
 
@@ -9,6 +10,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [
     vue(),
+    vueJsx(),
     sassDts({
       enabledMode: ['development', 'production'],
       global: {
@@ -35,6 +37,7 @@ export default defineConfig({
     }
   },
   server: {
+    port: 80,
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:5000/',

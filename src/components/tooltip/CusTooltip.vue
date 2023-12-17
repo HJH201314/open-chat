@@ -87,8 +87,10 @@ function hide(e: MouseEvent) {
     z-index: 999;
     opacity: 0.9;
     box-sizing: border-box;
+    display: flex;
 
     &-text {
+      font-size: 1rem;
       white-space: nowrap;
       color: $color-white;
     }

@@ -2,7 +2,7 @@
 
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Github, Login, Logout, MenuFold, MenuUnfold } from "@icon-park/vue-next";
+import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from "@icon-park/vue-next";
 import { useUserStore } from "@/store/useUserStore";
 import Tooltip from "@/components/tooltip/CusTooltip.vue";
 import CommonModal from "@/components/modal/CommonModal.vue";
@@ -12,6 +12,8 @@ import { toggleSidebarKey } from "@/constants/eventBusKeys";
 import LoginForm from "@/components/login-form/LoginForm.vue";
 import showToast from "@/components/toast/toast";
 import SettingPage from "@/pages/setting/SettingPage.vue";
+import { useSettingStore } from "@/store/useSettingStore";
+import ToastManager from "@/components/toast/ToastManager";
 
 const userStore = useUserStore();
 
@@ -34,46 +36,69 @@ type Entry = {
   href?: string;
   onClick?: () => void;
 };
-const entries = ref<Entry[]>([
-  {
-    key: "dialog",
-    name: "对话",
-    icon: 'message',
-    href: "/message",
-  },
-  {
-    key: "start",
-    name: "收藏",
-    icon: 'star',
-    href: "/star",
-  },
-  {
-    key: 'setting',
-    name: "设置",
-    icon: 'setting-two',
-    href: "/setting",
-    onClick() {
-      if (isLargeScreen.value) {
-        // 如果是大屏幕，打开模态框
-        refSettingModal.value?.open();
-      } else {
-        // 小屏幕跳转页面
-        if ('/setting' == route.path) return;
-        router.push('/setting');
+// entry中的icon因为使用动态组件，需要在main.ts中注册
+const entries = computed<Entry[]>(() => {
+  let data = [
+    {
+      key: "dialog",
+      name: "对话",
+      icon: 'message',
+      href: "/message",
+    },
+    {
+      key: "start",
+      name: "收藏",
+      icon: 'star',
+      href: "/star",
+    },
+    {
+      key: "user",
+      name: "用户管理",
+      icon: 'user',
+      href: "/manage/user",
+      onClick() {
+        if (userStore.permission == 2) {
+          if ('/manage/user' == route.path) return;
+          router.push('/manage/user');
+        } else {
+          ToastManager.danger('权限不足');
+        }
       }
-    }
-  },
-]);
+    },
+    {
+      key: 'setting',
+      name: "设置",
+      icon: 'setting-two',
+      href: "/setting",
+      onClick() {
+        if (isLargeScreen.value) {
+          // 如果是大屏幕，打开模态框
+          refSettingModal.value?.open();
+        } else {
+          // 小屏幕跳转页面
+          if ('/setting' == route.path) return;
+          router.push('/setting');
+        }
+      }
+    },
+  ];
+  if (userStore.permission != 2) {
+    data = data.filter((v) => {
+      return v.key != 'user';
+    });
+  }
+  return data;
+});
 
 const router = useRouter();
 function handleEntryClick(e: Event, entry: Entry) {
+  showToast({text: entry.name, position: 'top'});
   if (entry.onClick) {
     entry.onClick();
   } else if (entry.href) {
     if (entry.href == route.path) return;
     router.push(entry.href);
   }
-  showToast({text: entry.name, position: 'top'});
   expandBar.value = false;
 }
 
@@ -93,6 +118,11 @@ function handleLogin() {
 
 function handleGithubClick() {
   window.open('https://github.com/HJH201314/openai-front');
+}
+
+const settingStore = useSettingStore();
+function handleApiClick() {
+  window.open(settingStore.settings.host + '/docs/api/');
 }
 
 </script>
@@ -126,9 +156,16 @@ function handleGithubClick() {
         </Tooltip>
       </div>
       <div class="sidebar-footer">
-        <div class="sidebar-entry">
-          <Github class="sidebar-entry-icon" size="24" @click="handleGithubClick"></Github>
-        </div>
+        <Tooltip text="开源地址" position="bottom" :enabled="expandBar">
+          <div class="sidebar-entry sidebar-footer-item">
+            <Github class="sidebar-entry-icon" size="1.5rem" @click="handleGithubClick"></Github>
+          </div>
+        </Tooltip>
+        <Tooltip text="查看接口" position="bottom" :enabled="expandBar">
+          <div class="sidebar-entry sidebar-footer-item">
+            <Api class="sidebar-entry-icon" size="1.5rem" @click="handleApiClick"></Api>
+          </div>
+        </Tooltip>
       </div>
       <hr style="background: #4db6ac; height: 1px; width: 80%;" />
       <div class="sidebar-avatar sidebar-entry">
@@ -294,6 +331,15 @@ function handleGithubClick() {
     margin-top: auto;
     width: 100%;
     font-size: 1.5rem;
+    display: flex;
+    flex-direction: row;
+    gap: .25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    &-item {
+      width: max-content;
+    }
   }
 }
 </style>

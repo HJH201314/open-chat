@@ -3,11 +3,15 @@
 import { Back, Delete, Send, Share, Voice } from '@icon-park/vue-next';
 import IconButton from "@/components/IconButton.vue";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
-import { onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useDataStore } from "@/store/useDataStore";
 import type { DialogInfo, MsgInfo } from "@/types/data";
 import { useUserStore } from "@/store/useUserStore";
 import showToast from "@/components/toast/toast";
+import DiliButton from "@/components/button/DiliButton.vue";
+/* 音频录制相关 */
+// 似乎需要https或localhost才能测试
+import { useDevicesList, useUserMedia } from '@vueuse/core';
 
 const dataStore = useDataStore();
 
@@ -76,6 +80,30 @@ function handleDeleteDialog() {
   dataStore.delDialog(form.sessionId);
   emit('back');
 }
+
+const {
+  audioInputs: microphones,
+} = useDevicesList({
+  requestPermissions: true,
+})
+const currentMicrophone = computed(() => microphones.value[0]?.deviceId);
+
+const { stream, start: startRecording, stop: stopRecording, restart: restartRecording } = useUserMedia({
+  constraints: {
+    video: false,
+    audio: { deviceId: currentMicrophone.value }
+  }
+})
+
+function handleVoiceMouseDown() {
+  restartRecording();
+}
+
+function handleVoiceMouseUp() {
+  stopRecording();
+  console.log(microphones.value)
+  console.log(stream)
+}
 </script>
 
 <template>
@@ -109,9 +137,9 @@ function handleDeleteDialog() {
 <!--          <NewPicture size="24" />-->
 <!--        </span>-->
 
-        <span class="dialog-detail-inputs-bar-icon transition-all-circ">
+        <DiliButton @mousedown="handleVoiceMouseDown" @mouseup="handleVoiceMouseUp">
           <Voice size="24" />
-        </span>
+        </DiliButton>
         <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
           <Send fill="white" size="16" />
           <span>发送</span>

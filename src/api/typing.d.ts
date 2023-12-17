@@ -10,7 +10,36 @@ declare namespace API {
   }
 
   type LoginResult = {
-    userId?: number;
+    id?: number;
+    name?: string;
+    permission?: number;
+  }
+
+  interface UserResult {
+    user?: UserQueryResult;
+  }
+
+  interface UsersResult {
+    users?: UserQueryResult[];
+  }
+
+  type UserCreateParam = {
+    username?: string;
+    password?: string;
+    permission?: number;
+  }
+
+  type UserId = number;
+  type UserName = string;
+  type UserPassword = string;
+  type UserPermission = number;
+  type UserQueryResult = [UserId, UserName, UserPassword, UserPermission]
+
+  type UserVO = {
+    id?: number;
+    username?: string;
+    password?: string;
+    permission?: number;
   }
 
   /**

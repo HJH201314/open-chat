@@ -19,6 +19,11 @@ const router = createRouter({
       component: () => import('@/pages/star/StarPage.vue'),
     },
     {
+      path: '/manage/user',
+      name: 'manage-user',
+      component: () => import('@/pages/manage/user/ManageUserPage.vue'),
+    },
+    {
       path: '/setting',
       name: 'setting',
       component: () => import('@/pages/setting/SettingPage.vue'),
