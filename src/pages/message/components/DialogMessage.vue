@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useUserStore } from "@/store/useUserStore";
-import { computed, ref } from "vue";
+import { computed } from "vue";
+import useMarkdownIt from "@/commands/useMarkdownIt";
 
 type DialogMessageProps = {
   message: string;
@@ -25,6 +26,9 @@ const avatarPath = computed(() => {
   return '';
 });
 
+const markdownIt = useMarkdownIt(() => props.message);
+const renderMessage = computed(() => markdownIt.result.value);
+
 </script>
 
 <template>
@@ -33,8 +37,7 @@ const avatarPath = computed(() => {
       <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
         <span class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
         <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
-          <div class="dialog-message-content-body" v-html="props.message">
-          </div>
+          <div class="dialog-message-content-body" v-html="renderMessage" />
         </div>
       </div>
       <div class="dialog-message-time">
@@ -107,7 +110,7 @@ const avatarPath = computed(() => {
     }
     &-body {
       // width: min-content;
-      word-wrap: break-word;
+      white-space: unset;
       line-height: 1.5;
       -ms-text-size-adjust: 100%;
       -webkit-text-size-adjust: 100%;

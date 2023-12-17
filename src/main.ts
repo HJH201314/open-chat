@@ -18,6 +18,8 @@ import { faBars, faComment as fasComment, faGear as fasGear } from '@fortawesome
 import { faComment as farComment } from '@fortawesome/free-regular-svg-icons'
 import { MenuFold, MenuUnfold, Message, SettingTwo, Star, User } from "@icon-park/vue-next";
 import shake from "@/commands/shake";
+import "highlight.js/styles/atom-one-dark.css";
+import "@/assets/code.scss";
 
 library.add(
     faGithub,

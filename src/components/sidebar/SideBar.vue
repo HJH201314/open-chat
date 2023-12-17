@@ -45,12 +45,12 @@ const entries = computed<Entry[]>(() => {
       icon: 'message',
       href: "/message",
     },
-    {
-      key: "start",
-      name: "收藏",
-      icon: 'star',
-      href: "/star",
-    },
+    // {
+    //   key: "start",
+    //   name: "收藏",
+    //   icon: 'star',
+    //   href: "/star",
+    // },
     {
       key: "user",
       name: "用户管理",
@@ -147,14 +147,14 @@ function handleApiClick() {
           <component :is="entry.icon" v-else class="sidebar-entry-icon sidebar-entry-icon-focus" theme="outline" size="24"></component>
           <span class="sidebar-entry-name" :class="{'sidebar-entry-name-ext': expandBar}">{{ entry.name }}</span>
         </div>
-        <Tooltip position="right" class="sidebar-entry-login" :text="userStore.isLogin ? '退出登录' : '登录'">
-          <div @click="handleLogin" class="sidebar-entry">
-            <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
-            <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
-            <span class="sidebar-entry-name" :class="{'sidebar-entry-name-ext': expandBar}">{{ userStore.isLogin ? '退出登录' : '登录' }}</span>
-          </div>
-        </Tooltip>
       </div>
+      <Tooltip position="right" class="sidebar-entry-login" :text="userStore.isLogin ? '退出登录' : '登录'">
+        <div @click="handleLogin" class="sidebar-entry">
+          <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
+          <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
+          <span class="sidebar-entry-name" :class="{'sidebar-entry-name-ext': expandBar}">{{ userStore.isLogin ? '退出登录' : '登录' }}</span>
+        </div>
+      </Tooltip>
       <div class="sidebar-footer">
         <Tooltip text="开源地址" position="bottom" :enabled="expandBar">
           <div class="sidebar-entry sidebar-footer-item">
@@ -280,6 +280,7 @@ function handleApiClick() {
     display: flex;
     flex-direction: column;
     gap: .5rem;
+    overflow: auto;
   }
   &-entry {
     padding: .5rem;
@@ -323,6 +324,7 @@ function handleApiClick() {
     }
 
     &-login {
+      width: 100%;
       margin-top: auto;
     }
   }

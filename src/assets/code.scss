@@ -1,0 +1,8 @@
+code.hljs {
+  border-radius: .5rem;
+  line-height: normal;
+}
+
+:not(pre) > code.hljs {
+  margin-inline: .5rem;
+}

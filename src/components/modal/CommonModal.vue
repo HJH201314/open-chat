@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * CommonModal - 通用模态框
+ * 作为Vue使用
+ * @author HJH201314
+ *
+ * */
 import { Close } from "@icon-park/vue-next";
 import { type CSSProperties, nextTick, ref, toRef, watch } from "vue";
 import type { CommonModalFunc } from "@/components/modal/CommonModal";
@@ -17,6 +23,7 @@ const props = withDefaults(defineProps<CommonModalProps>(),{
 const emit = defineEmits<{
   (event: 'onOpen'): void;
   (event: 'onClose'): void;
+  (event: 'update:visible', v: boolean): void;
 }>();
 
 const showModal = ref(false);
@@ -37,17 +44,17 @@ function close() {
   showModal.value = false;
 }
 
+watch(() => showModal.value, (newVal, oldVal) => {
+  if (newVal != oldVal) {
+    emit('update:visible', newVal);
+  }
+})
+
 function handleClose() {
   close();
   emit('onClose');
 }
 
-/**
- * CommonModal - 通用模态框
- * 作为Vue组件使用
- * @author HJH201314
- *
- * */
 /* 暴露接口 */
 defineExpose<CommonModalFunc>({
   open,
