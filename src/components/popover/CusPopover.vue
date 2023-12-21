@@ -49,7 +49,6 @@ function show() {
         positionTop = trigger.offsetTop + trigger.offsetHeight + 2;
         break;
     }
-    console.log(positionTop, positionLeft)
     refPopover.value.style.top = positionTop + 'px';
     refPopover.value.style.left = positionLeft + 'px';
   })

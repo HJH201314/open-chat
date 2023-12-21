@@ -14,7 +14,7 @@ const props = withDefaults(
   {
     role: 'user',
     message: '',
-    time: '2023/10/23 04:04:04',
+    time: new Date().toLocaleString(),
   }
 );
 
@@ -32,17 +32,15 @@ const renderMessage = computed(() => markdownIt.result.value);
 </script>
 
 <template>
-  <div :class="['dialog-message', `dialog-message__${props.role}`]">
-    <div :class="['dialog-message-container', `dialog-message-container__${props.role}`]">
-      <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
-        <span class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
-        <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
-          <div class="dialog-message-content-body" v-html="renderMessage" />
-        </div>
+  <div :class="['dialog-message-container', `dialog-message-container__${props.role}`]">
+    <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
+      <span class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
+      <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
+        <div class="dialog-message-content-body" v-html="renderMessage" />
       </div>
-      <div class="dialog-message-time">
-        {{ props.time }}
-      </div>
+    </div>
+    <div class="dialog-message-time">
+      {{ props.time }}
     </div>
   </div>
 </template>
@@ -50,13 +48,6 @@ const renderMessage = computed(() => markdownIt.result.value);
 <style scoped lang="scss">
 @import "@/assets/variables.module";
 .dialog-message {
-  display: flex;
-  &__user {
-    flex-direction: row-reverse;
-  }
-  &__bot {
-    flex-direction: row;
-  }
 
   &-container {
     display: flex;
@@ -71,6 +62,7 @@ const renderMessage = computed(() => markdownIt.result.value);
     }
   }
   &-body {
+    max-width: 100%;  // 此处是消息盒子宽度的关键限制
     display: flex;
     gap: .5rem;
     &__user {
@@ -98,6 +90,7 @@ const renderMessage = computed(() => markdownIt.result.value);
     user-select: text;
     white-space: pre-wrap;
     word-break: break-word;
+    overflow-x: auto; // 此处让代码内容超出时可以滚动查看
     &__user {
       background-color: $color-teal-500;
       color: $color-white;
@@ -109,8 +102,10 @@ const renderMessage = computed(() => markdownIt.result.value);
       border-radius: .5rem .5rem .5rem 0;
     }
     &-body {
-      // width: min-content;
-      white-space: unset;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      white-space: pre-line; // 去除额外的换行
       line-height: 1.5;
       -ms-text-size-adjust: 100%;
       -webkit-text-size-adjust: 100%;
@@ -120,6 +115,17 @@ const renderMessage = computed(() => markdownIt.result.value);
     color: $color-grey;
     font-size: 12px;
     margin-left: .5rem;
+  }
+}
+</style>
+<style lang="scss">
+// 解决v-html中的展示问题
+.dialog-message-content-body {
+  :is(ol, li) {
+    white-space: nowrap;
+  }
+  p {
+    white-space: pre-line;
   }
 }
 </style>

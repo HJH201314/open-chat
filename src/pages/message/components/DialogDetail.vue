@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-import { Back, Delete, Send, Share, Voice } from '@icon-park/vue-next';
+import { Acoustic, Back, Delete, Edit, Send, Share, Voice } from '@icon-park/vue-next';
 import IconButton from "@/components/IconButton.vue";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useDataStore } from "@/store/useDataStore";
 import type { DialogInfo, MsgInfo } from "@/types/data";
 import { useUserStore } from "@/store/useUserStore";
@@ -71,6 +71,7 @@ function handleSendMessage() {
     onFinish: (fullMessage) => {
       form.outputValue = '';
       messageList.value = dataStore.getMessageList(form.sessionId);
+      document.querySelector(`#bottom-line`)?.scrollIntoView(false);
     }
   });
   form.inputValue = '';
@@ -91,18 +92,56 @@ const currentMicrophone = computed(() => microphones.value[0]?.deviceId);
 const { stream, start: startRecording, stop: stopRecording, restart: restartRecording } = useUserMedia({
   constraints: {
     video: false,
-    audio: { deviceId: currentMicrophone.value }
+    audio: {
+      deviceId: currentMicrophone.value
+    }
   }
-})
+});
+
+let mediaRecorder: MediaRecorder;
+let chunks: BlobPart[] = [];
+watch(() => stream.value, (s) => {
+  if (s) {
+    mediaRecorder = new MediaRecorder(s);
+    chunks = [];
+
+    // 开始录制
+    mediaRecorder.start();
+
+    // 当有音频数据可用时触发该事件
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    }
+
+    // 录制结束时触发该事件
+    mediaRecorder.onstop = function() {
+      // 将音频数据合并成一个Blob对象
+      let blob = new Blob(chunks, { type: 'audio/wav' });
+
+      // 创建一个音频元素并播放录制的音频
+      const audioElement = new Audio();
+      audioElement.src = URL.createObjectURL(blob);
+      audioElement.controls = true;
+      // document.body.appendChild(audioElement);
+    };
+  } else {
+    mediaRecorder.stop();
+  }
+});
 
 function handleVoiceMouseDown() {
-  restartRecording();
+  startRecording();
+  nextTick(() => {
+    console.log(stream.value)
+  })
 }
 
 function handleVoiceMouseUp() {
+  console.log(stream.value)
   stopRecording();
   console.log(microphones.value)
-  console.log(stream)
 }
 </script>
 
@@ -115,6 +154,9 @@ function handleVoiceMouseUp() {
       <span class="dialog-detail-actions-title">
         {{ dialogInfo.title }}
       </span>
+      <IconButton>
+        <Edit size="16" />
+      </IconButton>
       <IconButton>
         <Share size="16" />
       </IconButton>
@@ -137,8 +179,11 @@ function handleVoiceMouseUp() {
 <!--          <NewPicture size="24" />-->
 <!--        </span>-->
 
-        <DiliButton @mousedown="handleVoiceMouseDown" @mouseup="handleVoiceMouseUp">
-          <Voice size="24" />
+        <DiliButton style="flex: 1;" :button-style="{'width': '100%', 'border': '1px solid grey'}"
+                    @touchstart="handleVoiceMouseDown" @touchend="handleVoiceMouseUp"
+                    @mousedown="handleVoiceMouseDown" @mouseup="handleVoiceMouseUp">
+          <div style="display: contents" v-if="!stream"><Voice size="24" />按住说话</div>
+          <div style="display: contents" v-else><Acoustic size="24" />录制中...</div>
         </DiliButton>
         <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
           <Send fill="white" size="16" />
@@ -173,7 +218,7 @@ function handleVoiceMouseUp() {
 
   &-dialogs {
     flex: 1;
-    overflow: scroll;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: .5rem;

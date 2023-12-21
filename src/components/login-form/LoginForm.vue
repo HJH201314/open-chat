@@ -7,6 +7,7 @@ import type { CommonModalFunc } from "@/components/modal/CommonModal";
 import { useMediaQuery } from "@vueuse/core";
 import { useUserStore } from "@/store/useUserStore";
 import showToast from "@/components/toast/toast";
+import CusToggle from "@/components/toggle/CusToggle.vue";
 
 const userStore = useUserStore();
 const refLoginModal = ref<CommonModalFunc>();
@@ -40,6 +41,7 @@ const loginForm = reactive({
   username: ref(''),
   password: ref(''),
   shake: ref(0),
+  remember: ref(false),
 });
 const emoji = ref('🚀');
 const submitDisabled = ref(false);
@@ -61,7 +63,7 @@ async function handleLoginSubmit() {
   } else {
     try {
       submitDisabled.value = true;
-      const result = await userStore.login(loginForm.username, loginForm.password);
+      const result = await userStore.login(loginForm.username, loginForm.password, loginForm.remember);
     }
     catch (e) {
       console.error(e);
@@ -111,6 +113,7 @@ watch(() => userStore.isLogin, (v) => {
             <Right size="32" />
           </button>
         </div>
+        <CusToggle style="margin-top: .5rem" label="记住我" v-model="loginForm.remember" />
         <div class="login-footer">
           我已阅读并同意<a href="http://localhost">《OpenChat用户协议》</a>
         </div>

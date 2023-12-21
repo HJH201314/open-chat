@@ -53,7 +53,7 @@ const entries = computed<Entry[]>(() => {
     // },
     {
       key: "user",
-      name: "用户管理",
+      name: "用户",
       icon: 'user',
       href: "/manage/user",
       onClick() {
@@ -169,7 +169,7 @@ function handleApiClick() {
       </div>
       <hr style="background: #4db6ac; height: 1px; width: 80%;" />
       <div class="sidebar-avatar sidebar-entry">
-        <img class="sidebar-avatar-img" src="@/assets/image/default_avatar.jpg" alt="avatar"/>
+        <img class="sidebar-avatar-img" src="https://avatars.githubusercontent.com/u/24362351?v=4" alt="avatar"/>
         <span v-if="userStore.isLogin && expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
       </div>
     </div>

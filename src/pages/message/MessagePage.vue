@@ -83,7 +83,6 @@ const showEmptyTip = ref(true);
   }
 
   &-record-list {
-    flex: 3;
     min-width: calc(30% - 5px); // 防止右侧消息列表关闭时被挤压
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
     &-absolute {
@@ -93,7 +92,11 @@ const showEmptyTip = ref(true);
   }
 
   &-dialog-detail {
-    flex: 7;
+    flex: 1;
+    &:not(&-absolute) {
+      max-width: calc(70% - 5px);
+      width: calc(70% - 5px);
+    }
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
     &-absolute {
       position: absolute;
