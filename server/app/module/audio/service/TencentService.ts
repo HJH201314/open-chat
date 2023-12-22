@@ -13,23 +13,22 @@ export class TencentService {
   @Inject()
   logger: EggLogger;
 
-  clientConfig = {
-    credential: {
-      secretId: "AKIDKf2GNODnATo8Rh8jMsZwCKZsGXfo0IUU",
-      secretKey: "50nS0X30d6Qjssiar266yncLsaJ0WuJg",
-    },
-    region: "",
-    profile: {
-      httpProfile: {
-        endpoint: "asr.tencentcloudapi.com",
-      },
-    },
-  };
-
   asrClient: Client;
 
   constructor() {
-    this.asrClient = new tencentCloudSdk.asr.v20190614.Client(this.clientConfig);
+    const clientConfig = {
+      credential: {
+        secretId: "",
+        secretKey: "",
+      },
+      region: "",
+      profile: {
+        httpProfile: {
+          endpoint: "asr.tencentcloudapi.com",
+        },
+      },
+    };
+    this.asrClient = new tencentCloudSdk.asr.v20190614.Client(clientConfig);
   }
 
   async uploadAudioFile(audioData: string): Promise<number|undefined> {
