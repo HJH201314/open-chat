@@ -2,8 +2,10 @@
   "name": "openai-front",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@8.0.0+",
   "scripts": {
     "dev": "vite --host",
+    "serve": "cd server && pnpm run dev",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",

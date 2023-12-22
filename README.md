@@ -1,6 +1,10 @@
 # OpenChat
 
-基于OpenAI接口打造的一个网页聊天应用前端，[后端在这里](https://gitee.com/origamiwang/gptplat)
+基于OpenAI接口打造的一个网页聊天应用前端
+
+[后端在这里](https://gitee.com/origamiwang/gptplat)
+
+目前此项目的正常运行需要依赖上述Python后端
 
 ## 技术栈
 
@@ -13,6 +17,7 @@
 
 ## 其它依赖/工具
 
+- [PageSpy](https://www.pagespy.org/docs) - 便捷的远程调试工具
 - [IconPark](http://iconpark.oceanengine.com/) - 字节跳动旗下的开源图标包
 - [CSS Filter色值转换工具](https://www.zhangxinxu.com/sp/filter.html) - 用filter滤镜来转换颜色
 

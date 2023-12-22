@@ -3,7 +3,7 @@ import type { CSSProperties } from "vue";
 export type DiliButtonProps = {
   text?: string;
   icon?: string;
-  type?: 'normal' | 'primary';
+  type?: 'normal' | 'primary' | 'text';
   backgroundColor?: string;
   fontColor?: string;
   shadow?: boolean;

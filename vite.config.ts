@@ -39,10 +39,15 @@ export default defineConfig({
   server: {
     port: 80,
     proxy: {
-      '/api': {
+      '/api/cloud': {
+        target: 'http://127.0.0.1:7002/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/cloud/, '')
+      },
+      '/api/origin': {
         target: 'http://127.0.0.1:5000/',
-        changeOrigin: false,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/origin/, '')
       }
     }
   }

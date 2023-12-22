@@ -7,6 +7,13 @@ export type ChatSetting = {
   localCache?: boolean; // 本地对话数据缓存
   roleRemember?: boolean; // 是否使用默认角色
   roleDefaultId?: number; // 默认角色
+
+  /* 语音输入相关 */
+  enableVoiceToText?: boolean; // 是否启用语音输入
+  enableTextToVoice?: boolean; // 是否启用结果转语音
+  voiceCloudAppId?: string; // 云服务AppID
+  voiceCloudSecretId?: string; // 云服务SecretId
+  voiceCloudSecretKey?: string; // 云服务SecretKey
 }
 
 const defaultSetting: ChatSetting = {
@@ -14,6 +21,12 @@ const defaultSetting: ChatSetting = {
   localCache: true,
   roleRemember: false,
   roleDefaultId: 0,
+  enableVoiceToText: true,
+  enableTextToVoice: false,
+
+  voiceCloudAppId: import.meta.env.VITE_CLOUD_VOICE_APPID,
+  voiceCloudSecretId: import.meta.env.VITE_CLOUD_VOICE_SECRET_ID,
+  voiceCloudSecretKey: import.meta.env.VITE_CLOUD_VOICE_SECRET_KEY,
 }
 
 /* 设置相关 */

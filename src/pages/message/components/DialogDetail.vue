@@ -12,6 +12,9 @@ import DiliButton from "@/components/button/DiliButton.vue";
 /* 音频录制相关 */
 // 似乎需要https或localhost才能测试
 import { useDevicesList, useUserMedia } from '@vueuse/core';
+import { useSettingStore } from "@/store/useSettingStore";
+import ToastManager from "@/components/toast/ToastManager";
+import api from "@/api";
 
 const dataStore = useDataStore();
 
@@ -27,6 +30,7 @@ const props = withDefaults(
 );
 
 const userStore = useUserStore();
+const settingStore = useSettingStore();
 
 const dialogInfo = ref<DialogInfo>({} as DialogInfo);
 const messageList = ref([] as MsgInfo[]);
@@ -93,7 +97,8 @@ const { stream, start: startRecording, stop: stopRecording, restart: restartReco
   constraints: {
     video: false,
     audio: {
-      deviceId: currentMicrophone.value
+      deviceId: currentMicrophone.value,
+      channelCount: 1,
     }
   }
 });
@@ -102,7 +107,9 @@ let mediaRecorder: MediaRecorder;
 let chunks: BlobPart[] = [];
 watch(() => stream.value, (s) => {
   if (s) {
-    mediaRecorder = new MediaRecorder(s);
+    mediaRecorder = new MediaRecorder(s, {
+      audioBitsPerSecond: 16000,
+    });
     chunks = [];
 
     // 开始录制
@@ -120,10 +127,46 @@ watch(() => stream.value, (s) => {
       // 将音频数据合并成一个Blob对象
       let blob = new Blob(chunks, { type: 'audio/wav' });
 
+      // 将音频转换为base64
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onload = e => {
+        console.log(e.target?.result);
+        let base64 = e.target?.result as string;
+        if (base64) {
+          // 去除文件头
+          base64 = base64.replace(/^data:audio\/\w+;base64,/, '');
+          try {
+            api.cloud.voice.uploadAudioFileUsingPost(base64).then(res => {
+              if (res.data.status == 200) {
+                // 上传成功，开始定时轮询
+                const interval = setInterval(() => {
+                  api.cloud.voice.checkAudioResultUsingGet(res.data.data.taskId).then(res => {
+                    if (res.data.data.status == 2) {
+                      // 已经处理完成
+                      clearInterval(interval);
+                      const textResultSplit = res.data.data.result.split(' ');
+                      form.inputValue = textResultSplit[textResultSplit.length - 1];
+                      handleSendMessage();
+                    } else if (res.data.data.status != 1) {
+                      // 处理失败
+                      clearInterval(interval);
+                      ToastManager.danger('语音模块异常，请联系管理员！');
+                    } else {
+                      // status = 1，处理中
+                    }
+                  });
+                }, 1000);
+              }
+            });
+          } catch (ignore) {}
+        }
+      };
+
       // 创建一个音频元素并播放录制的音频
-      const audioElement = new Audio();
-      audioElement.src = URL.createObjectURL(blob);
-      audioElement.controls = true;
+      // const audioElement = new Audio();
+      // audioElement.src = URL.createObjectURL(blob);
+      // audioElement.controls = true;
       // document.body.appendChild(audioElement);
     };
   } else {
@@ -132,6 +175,10 @@ watch(() => stream.value, (s) => {
 });
 
 function handleVoiceMouseDown() {
+  if (microphones.value.length <= 0) {
+    ToastManager.warning('无语音输入设备失败！');
+    return;
+  }
   startRecording();
   nextTick(() => {
     console.log(stream.value)
@@ -140,8 +187,8 @@ function handleVoiceMouseDown() {
 
 function handleVoiceMouseUp() {
   console.log(stream.value)
+  mediaRecorder.stop();
   stopRecording();
-  console.log(microphones.value)
 }
 </script>
 
@@ -179,7 +226,8 @@ function handleVoiceMouseUp() {
 <!--          <NewPicture size="24" />-->
 <!--        </span>-->
 
-        <DiliButton style="flex: 1;" :button-style="{'width': '100%', 'border': '1px solid grey'}"
+        <DiliButton v-if="settingStore.settings.enableVoiceToText"
+                    style="flex: 1;" :button-style="{'width': '100%', 'border': '1px solid grey'}"
                     @touchstart="handleVoiceMouseDown" @touchend="handleVoiceMouseUp"
                     @mousedown="handleVoiceMouseDown" @mouseup="handleVoiceMouseUp">
           <div style="display: contents" v-if="!stream"><Voice size="24" />按住说话</div>

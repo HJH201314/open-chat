@@ -1,14 +1,10 @@
 <script setup lang="ts">
 
 import { ref, watch } from "vue";
+import type { CusInputProps } from "@/components/input/CusInput";
 
-type CusInputProps = {
-  value?: string;
-  modelValue?: string;
-  placeholder?: string;
-  disabled?: boolean;
-}
 const props = withDefaults(defineProps<CusInputProps>(), {
+  inputAttrs: () => {return {}}
 });
 
 const emit = defineEmits<{
@@ -22,10 +18,14 @@ watch(() => props.modelValue, (newValue, oldValue) => {
     v.value = newValue;
   }
 });
+
+function handleInput(e: any) {
+  emit('update:modelValue', e.target.value as string);
+}
 </script>
 
 <template>
-  <input class="cus-input" v-model="v" :placeholder="props.placeholder" :disabled="props.disabled" @change="$emit('update:modelValue', v!)" />
+  <input class="cus-input" :value="v" :placeholder="props.placeholder" :disabled="props.disabled" @input="handleInput" v-bind="props.inputAttrs" />
 </template>
 
 <style scoped lang="scss">

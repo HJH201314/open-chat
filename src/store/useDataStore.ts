@@ -6,7 +6,7 @@ import { useLocalStorage, useStorage } from "@vueuse/core";
 import type { DialogData, MsgData } from "@/types/data";
 import showToast from "@/components/toast/toast";
 import { recordToMap } from "@/utils/typeUtils";
-import { SERVER_API_URL } from "@/constants";
+import { SERVER_ORIGIN_API_URL } from "@/constants";
 import useRoleStore from "@/store/useRoleStore";
 
 interface MessageReceiver {
@@ -99,7 +99,7 @@ export const useDataStore  = defineStore('data', () => {
 
   function sendMessageText(sessionId: string, message: string, receiver: MessageReceiver) {
     saveMessage(sessionId, message, 'user', 'text');
-    let url = `${SERVER_API_URL}/gpt/${sessionId}?question=${message}`
+    let url = `${SERVER_ORIGIN_API_URL}/gpt/${sessionId}?question=${message}`
     let source = new EventSource(url);
     let fullMessage = '';
     // EventSource接收消息

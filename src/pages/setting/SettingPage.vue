@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import CusInput from "@/components/input/CusInput.vue";
-import { ref, watch } from "vue";
+import { ref, toValue, watch } from "vue";
 import DiliButton from "@/components/button/DiliButton.vue";
 import variables from "@/assets/variables.module.scss";
 import { useSettingStore } from "@/store/useSettingStore";
@@ -10,7 +10,8 @@ import showToast from "@/components/toast/toast";
 import CusToggle from "@/components/toggle/CusToggle.vue";
 
 const settingStore = useSettingStore();
-const editingValue = ref(settingStore.settings);
+// 解构赋值editingValue避免使用proxy，此处并不希望未点击保存前生效
+const editingValue = ref({...toValue(settingStore.settings)});
 
 defineEmits<{
   (event: 'cancel'): void;
@@ -18,10 +19,11 @@ defineEmits<{
 
 // 观测设置信息变化
 watch(() => settingStore.settings, (newVal) => {
-  editingValue.value = newVal;
+  editingValue.value = {...toValue(settingStore.settings)};
 });
 
 function handleSave() {
+  console.log(editingValue)
   const result = settingStore.saveSettings(editingValue.value);
   showToast({ text: `保存${result}个设置成功` });
 }
@@ -33,12 +35,12 @@ function handleReset() {
 
 const globe = useGlobal();
 watch(() => globe.isLargeScreen, (val) => {
-  console.log('isLargeScreen:', val)
-})
+
+}, { immediate: true });
 </script>
 
 <template>
-  <div class="setting-page">
+  <div class="setting-page" :class="{'setting-page--large': globe.isLargeScreen}">
     <div class="setting-page-title">设置 | Setting</div>
     <div class="setting-list">
       <div class="setting-list-container">
@@ -62,13 +64,45 @@ watch(() => globe.isLargeScreen, (val) => {
             <CusToggle v-model="editingValue.roleRemember">
               <template #before>{{ editingValue.roleRemember ? '开启' : '关闭' }}</template>
             </CusToggle>
+            <!-- TODO: Need investigation -->
             <CusInput v-model="editingValue.roleDefaultId" placeholder="角色ID" />
           </span>
         </div>
+        <hr />
+        <div class="setting-list-item">
+          <span class="setting-list-item__title">语音输入</span>
+          <span class="setting-list-item__value">
+            <CusToggle v-model="editingValue.enableVoiceToText" />
+          </span>
+        </div>
+        <div class="setting-list-item">
+          <span class="setting-list-item__title">语音输出</span>
+          <span class="setting-list-item__value">
+            <CusToggle v-model="editingValue.enableTextToVoice" />
+          </span>
+        </div>
+        <div class="setting-list-item">
+          <span class="setting-list-item__title">语音服务APPID</span>
+          <span class="setting-list-item__value">
+            <CusInput v-model="editingValue.voiceCloudAppId" placeholder="APPID" />
+          </span>
+        </div>
+        <div class="setting-list-item">
+          <span class="setting-list-item__title">语音服务SECRET_ID</span>
+          <span class="setting-list-item__value">
+            <CusInput v-model="editingValue.voiceCloudSecretId" placeholder="SECRET_ID" />
+          </span>
+        </div>
+        <div class="setting-list-item">
+          <span class="setting-list-item__title">语音服务SECRET_KEY</span>
+          <span class="setting-list-item__value">
+            <CusInput v-model="editingValue.voiceCloudSecretKey" placeholder="SECRET_KEY" :input-attrs="{'type': 'password'}" />
+          </span>
+        </div>
         <div class="setting-actions-placeholder"></div>
-        <div class="setting-list-item setting-actions">
+        <div class="setting-list-item setting-actions" :class="{'setting-actions--large': globe.isLargeScreen}">
           <DiliButton style="flex: 1;" :button-style="{'width': '100%', 'text-align': 'center'}" type="primary" text="保存" :background-color="variables.colorPrimary" @click="handleSave" />
-          <DiliButton type="normal" text="取消" v-if="globe.isLargeScreen" @click="$emit('cancel')" />
+          <DiliButton shadow type="normal" text="关闭" v-if="globe.isLargeScreen" @click="$emit('cancel')" />
           <DiliButton style="margin-left: auto;" type="normal" text="重置" @click="handleReset" />
         </div>
       </div>
@@ -86,6 +120,10 @@ watch(() => globe.isLargeScreen, (val) => {
   padding: .5rem;
   display: flex;
   flex-direction: column;
+
+  &--large {
+    padding: 1rem;
+  }
 
   &-title {
     @extend %page-title;
@@ -127,8 +165,17 @@ watch(() => globe.isLargeScreen, (val) => {
     padding: .5rem;
     opacity: 0.95;
     background-color: white;
+
+    &--large {
+      padding: .5rem 1rem 1rem 1rem;
+    }
+
     &-placeholder {
       height: 2rem;
+      // 使用 :not 来排除 .setting-actions--large 的上下文
+      &:not(.setting-actions--large) {
+        height: 2.5rem;
+      }
     }
   }
 }

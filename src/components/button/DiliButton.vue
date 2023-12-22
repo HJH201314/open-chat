@@ -85,6 +85,7 @@ function handleClick() {
     border-radius: .5rem;
     transition: background-color .2s $ease-out-circ, color .2s $ease-out-circ;
     background-color: v-bind(backgroundColor);
+    border: 1px solid v-bind(backgroundColor);
     color: v-bind(fontColor);
     overflow: hidden;
     white-space: pre;
@@ -103,11 +104,13 @@ function handleClick() {
     &:not(&.disabled):hover {
       background-color: v-bind(hoverBackgroundColor);
       color: v-bind(hoverFontColor);
+      border: 1px solid v-bind(hoverBackgroundColor);
     }
 
     &:not(&.disabled):active {
       background-color: v-bind(activeBackgroundColor);
       color: v-bind(activeFontColor);
+      border: 1px solid v-bind(activeBackgroundColor);
     }
   }
 
