@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
 
 /* 创建请求 */
 export const createRequest = <TRes>(path: string, args: AxiosRequestConfig) => {
-  let config: AxiosRequestConfig<any> = {
+  const config: AxiosRequestConfig<any> = {
     url: path,
     ...args,
   };

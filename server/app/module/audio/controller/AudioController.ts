@@ -1,7 +1,7 @@
 import { EggLogger } from 'egg';
 import { HTTPBody, HTTPController, HTTPMethod, HTTPMethodEnum, HTTPQuery, Inject } from '@eggjs/tegg';
-import { TencentService } from "@/module/audio/service/TencentService";
-import { CommonResult } from "../../../model/CommonResult";
+import { TencentService } from '@/module/audio/service/TencentService';
+import { CommonResult } from '../../../model/CommonResult';
 
 @HTTPController({
   path: '/audio',
@@ -22,18 +22,18 @@ export class AudioController {
     const res = await this.tencentService.uploadAudioFile(audioData.data);
     if (res) {
       return CommonResult.success({
-        taskId: res
-      })
-    } else {
-      return CommonResult.fail();
+        taskId: res,
+      });
     }
+    return CommonResult.fail();
+
   }
 
   @HTTPMethod({
     method: HTTPMethodEnum.GET,
     path: '/tencent/check',
   })
-  async tencentCheck(@HTTPQuery({name: 'taskId'}) taskId: string) {
+  async tencentCheck(@HTTPQuery({ name: 'taskId' }) taskId: string) {
     const res = await this.tencentService.checkAudioStatus(parseInt(taskId));
     if (res) {
       return CommonResult.success({
@@ -42,9 +42,9 @@ export class AudioController {
         audioDuration: res.AudioDuration,
         result: res.Result,
         resultDetail: res.ResultDetail,
-      })
-    } else {
-      return CommonResult.fail();
+      });
     }
+    return CommonResult.fail();
+
   }
 }

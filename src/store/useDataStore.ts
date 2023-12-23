@@ -103,8 +103,8 @@ export const useDataStore  = defineStore('data', () => {
   function sendMessageText(sessionId: string, message: string, receiver?: MessageReceiver) {
     if (message == '') return;
     saveMessage(sessionId, message, 'user', 'text');
-    let url = `${SERVER_ORIGIN_API_URL}/gpt/${sessionId}?question=${message}`;
-    let source = new EventSource(url);
+    const url = `${SERVER_ORIGIN_API_URL}/gpt/${sessionId}?question=${message}`;
+    const source = new EventSource(url);
     let fullMessage = '';
     // EventSource接收消息
     source.onmessage = function (event) {
@@ -146,7 +146,7 @@ export const useDataStore  = defineStore('data', () => {
   function searchDialog(text: string) {
     return dialogList.value.filter((d) => {
       const info = localStorage.getItem(d.storageKey);
-      return (d.storageKey.indexOf(text) != -1 || info && info.indexOf(text) != -1);
+      return info && (d.storageKey.indexOf(text) != -1 || d.botRole.indexOf(text) != -1 || info.indexOf(text) != -1);
     });
   }
 

@@ -16,6 +16,8 @@ export const useUserStore  = defineStore('user', () => {
     return user_id.value >= 0;
   });
 
+  const heartbeatInterval = ref<number>();
+
   onMounted(() => {
     // 自动登录逻辑
     const up = localStorage.getItem('up');
@@ -41,18 +43,40 @@ export const useUserStore  = defineStore('user', () => {
           // 记忆自动登录信息
           localStorage.setItem('up', btoa(`${_username},${_password},${new Date().getTime()+3*24*60*60*1000}`));
         }
+        // 登录成功后，定时查询状态
+        clearInterval(heartbeatInterval.value);
+        heartbeatInterval.value = setInterval(async () => {
+          const res = await api.user.current();
+          if (!res.data.status || res.data.status != 200) {
+            logout(true);
+          }
+        }, 60000);
         resolve(res.data);
       } else {
+        clearInterval(heartbeatInterval.value);
         reject(res);
       }
     }).catch(err => {
+      clearInterval(heartbeatInterval.value);
+      logout(true);
       reject(err);
     });
   });
 
-  function logout() {
+  /**
+   * 登出
+   * @param force 是否强制登出
+   */
+  function logout(force?: boolean) {
     user_id.value = -1;
-    api.user.logout();
+    username.value = '未登录';
+    permission.value = 0;
+    currentUser.value = {};
+    clearInterval(heartbeatInterval.value);
+    if (!force) {
+      // 非强制登出才请求后端
+      api.user.logout();
+    }
   }
 
   return {

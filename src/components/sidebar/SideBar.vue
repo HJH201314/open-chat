@@ -195,9 +195,12 @@ function handleApiClick() {
         </Tooltip>
       </div>
       <hr style="background: #4db6ac; height: 1px; width: 80%;" />
-      <div class="sidebar-avatar sidebar-entry">
-        <img class="sidebar-avatar-img" src="https://avatars.githubusercontent.com/u/24362351?v=4" alt="avatar"/>
-        <span v-if="userStore.isLogin && expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
+      <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin(): void 0">
+        <div class="sidebar-avatar-img">
+          <img src="https://avatars.githubusercontent.com/u/24362351?v=4" alt="avatar"/>
+          <div class="sidebar-avatar-status" :class="{'sidebar-avatar-status--logout': !userStore.isLogin}"></div>
+        </div>
+        <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
       </div>
     </div>
     <LoginForm ref="refLoginForm" />
@@ -285,12 +288,29 @@ function handleApiClick() {
     padding: .5rem 0 !important; // 取消sidebar-entry的padding
 
     &-img {
-      width: 2.25rem;
-      height: 2.25rem;
+      position: relative;
+      > img {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        transition: transform .2s $ease-out-circ;
+        &:hover {
+          transform: rotate(-360deg);
+        }
+      }
+    }
+    &-status {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: .5rem;
+      height: .5rem;
       border-radius: 50%;
-      transition: transform .2s $ease-out-circ;
-      &:hover {
-        transform: rotate(-360deg);
+      box-sizing: content-box;
+      border: 2px solid $color-teal-20;
+      background-color: $color-success;
+      &--logout {
+        background-color: $color-danger;
       }
     }
     &-name {
@@ -317,6 +337,7 @@ function handleApiClick() {
     cursor: pointer;
     display: flex;
     flex-direction: row;
+    align-items: center;
     justify-content: center;
     gap: 1rem;
     &:not(&-focus):hover {
