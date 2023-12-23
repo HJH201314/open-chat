@@ -19,6 +19,7 @@ const userStore = useUserStore();
 
 const showSideBar = ref(true);
 const expandBar = ref(false);
+const isAutoExpand = ref(false);
 
 const toggleSideBarBus = useEventBus(toggleSidebarKey);
 toggleSideBarBus.on((e) => {
@@ -90,6 +91,31 @@ const entries = computed<Entry[]>(() => {
   return data;
 });
 
+const mouseEnterTimeout = ref<number>();
+const mouseLeaveTimeout = ref<number>();
+function handleMouseEnter(e: MouseEvent) {
+  clearTimeout(mouseLeaveTimeout.value);
+  clearTimeout(mouseEnterTimeout.value);
+  if (!expandBar.value) { // 如果已经打开，不能重复触发
+    mouseEnterTimeout.value = setTimeout(() => {
+      isAutoExpand.value = true;
+      expandBar.value = true;
+    }, 200);
+  }
+}
+
+function handleMouseLeave(e: MouseEvent) {
+  clearTimeout(mouseEnterTimeout.value);
+  clearTimeout(mouseLeaveTimeout.value);
+  if (expandBar.value && isAutoExpand.value) {
+    // 只有在打开并且是自动打开的情况下才能触发关闭
+    mouseLeaveTimeout.value = setTimeout(() => {
+      isAutoExpand.value = false
+      expandBar.value = false;
+    }, 100);
+  }
+}
+
 const router = useRouter();
 function handleEntryClick(e: Event, entry: Entry) {
   showToast({text: entry.name, position: 'top'});
@@ -131,7 +157,8 @@ function handleApiClick() {
   <div v-show="showSideBar" class="sidebar">
     <!-- 占位，避免sidebar-body变化（展开）时布局变化 -->
     <div v-show="showSideBar" class="sidebar-placeholder"></div>
-    <div v-show="showSideBar" class="sidebar-body" :class="{'sidebar-body-expand': expandBar}">
+    <div v-show="showSideBar" class="sidebar-body" :class="{'sidebar-body-expand': expandBar}"
+         @mouseleave="handleMouseLeave">
       <div class="sidebar-top">
         <div v-if="expandBar" class="sidebar-logo sidebar-logo-animation">
           OpenChat
@@ -141,7 +168,7 @@ function handleApiClick() {
           <MenuFold v-else size="24"></MenuFold>
         </div>
       </div>
-      <div class="sidebar-entries">
+      <div class="sidebar-entries" @mouseenter="handleMouseEnter">
         <div v-for="entry in entries" :key="entry.key" class="sidebar-entry" :class="{'sidebar-entry-focus': entry.href == route.path}" @click="(e) => handleEntryClick(e, entry)">
           <component :is="entry.icon" v-if="!entry.href || entry.href != route.path" class="sidebar-entry-icon" theme="outline" size="24"></component>
           <component :is="entry.icon" v-else class="sidebar-entry-icon sidebar-entry-icon-focus" theme="outline" size="24"></component>

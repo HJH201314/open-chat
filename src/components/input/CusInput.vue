@@ -4,7 +4,11 @@ import { ref, watch } from "vue";
 import type { CusInputProps } from "@/components/input/CusInput";
 
 const props = withDefaults(defineProps<CusInputProps>(), {
-  inputAttrs: () => {return {}}
+  inputAttrs: () => {
+    return {
+      autocomplete: 'off',
+    }
+  },
 });
 
 const emit = defineEmits<{

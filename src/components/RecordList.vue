@@ -73,7 +73,7 @@ const roleForm = reactive({
       <div class="dialog-list-bar">
         <div class="dialog-list-bar-search">
           <span class="dialog-list-bar-search-icon"><Search /></span>
-          <input placeholder="搜索对话" />
+          <input placeholder="搜索对话" autocomplete="off" />
         </div>
         <div>
           <div class="dialog-list-add" @click="handleListAddClick">

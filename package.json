@@ -4,6 +4,7 @@
   "private": true,
   "packageManager": "pnpm@8.0.0+",
   "scripts": {
+    "start": "concurrently \"pnpm run dev\" \"pnpm run serve\"",
     "dev": "vite --host",
     "serve": "cd server && pnpm run dev",
     "build": "run-p type-check \"build-only {@}\" --",
@@ -48,6 +49,7 @@
     "@vue/test-utils": "^2.4.1",
     "@vue/tsconfig": "^0.4.0",
     "autoprefixer": "^10.4.15",
+    "concurrently": "^8.2.2",
     "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
     "jsdom": "^22.1.0",
