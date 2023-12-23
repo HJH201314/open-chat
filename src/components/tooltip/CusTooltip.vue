@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /* Tooltip 悬浮提示组件 */
 import { nextTick, ref } from "vue";
+import { useMouseInElement } from "@vueuse/core";
 
 type TooltipProps = {
   text: string;
@@ -21,13 +22,13 @@ const showTip = ref(false);
 
 function show() {
   if (!props.enabled) return;
-  // 先切换show再设置位置，否则由于tooltip元素不存在，导致位置计算错误
+  // 先切换show再设置位置，否则由于tooltip元素大小不存在，导致位置计算错误
   showTip.value = true;
   nextTick(() => {
     const trigger = refTrigger.value;
     const popover = refPopover.value;
     if (!trigger || !popover) return;
-    console.debug(refTrigger.value?.offsetLeft, refTrigger.value?.offsetWidth);
+    // console.debug(refTrigger.value?.offsetLeft, refTrigger.value?.offsetWidth);
     let positionLeft = 0;
     let positionTop = 0;
     switch (props.position) {
@@ -50,24 +51,45 @@ function show() {
     }
     refPopover.value!.style.top = positionTop + 'px';
     refPopover.value!.style.left = positionLeft + 'px';
-  })
+  });
+  // 设置定时，如果超出时间，则尝试关闭tooltip
+  clearInterval(closeInterval.value);
+  closeInterval.value = setInterval(hide, 500);
 }
 
-function hide(e: MouseEvent) {
-  console.debug('mouse offset:', e.offsetX, e.offsetY);
-  if (e.offsetX < 0 || e.offsetX > refTooltip.value?.offsetWidth! || e.offsetY < 0 || e.offsetY > refTooltip.value?.offsetHeight!) {
+const closeInterval = ref<number>();
+const mouseInBase = useMouseInElement(refTooltip);
+const mouseInPopover = useMouseInElement(refPopover);
+
+function hide(e?: MouseEvent) {
+  // console.debug({
+  //   mouseX: mouseInBase.elementX.value,
+  //   mouseY: mouseInBase.elementY.value,
+  //   eventMouseX: e?.offsetX,
+  //   eventMouseY: e?.offsetY,
+  //   elementX: mouseInBase.elementWidth.value,
+  //   elementY: mouseInBase.elementHeight.value,
+  // });
+  // useMouseInElement的结果有延迟，一个nextTick似乎避免不了
+  // 因此如果有事件传进来，以事件中offsetX/offsetY的为准
+  // 下方判断加等号是因为，事件传递过来的offset有可能等于宽度或高度
+  const isOutsideByEvent = !e ? false :
+    (e.offsetX <= 0 || e.offsetX >= mouseInBase.elementWidth.value || e.offsetY <= 0 || e.offsetY >= mouseInBase.elementHeight.value)
+    && (e.offsetX <= 0 || e.offsetX >= mouseInPopover.elementWidth.value || e.offsetY <= 0 || e.offsetY >= mouseInPopover.elementHeight.value);
+  if (isOutsideByEvent || mouseInBase.isOutside.value && mouseInPopover.isOutside.value) {
     showTip.value = false;
+    clearInterval(closeInterval.value);
   }
 }
 </script>
 
 <template>
-  <div class="tooltip" @mouseenter="show" @mouseleave="(e) => hide(e)" ref="refTooltip">
+  <div class="tooltip" @mouseenter="show" @mouseleave="hide" ref="refTooltip">
     <span class="tooltip-wrapper" ref="refTrigger">
       <slot />
     </span>
     <Transition>
-      <div v-show="showTip" :class="{'tooltip-info': text, 'tooltip-slot': !text}" ref="refPopover" role="tooltip">
+      <div v-if="showTip" :class="{'tooltip-info': text, 'tooltip-slot': !text}" @mouseleave="hide" ref="refPopover" role="tooltip">
         <span v-if="text" class="tooltip-info-text">{{ props.text }}</span>
         <div v-else><slot name="tip" /></div>
       </div>
