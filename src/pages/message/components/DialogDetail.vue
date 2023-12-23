@@ -3,7 +3,7 @@
 import { Acoustic, Back, Delete, Edit, Send, Voice } from '@icon-park/vue-next';
 import IconButton from "@/components/IconButton.vue";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
-import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDataStore } from "@/store/useDataStore";
 import type { DialogInfo, MsgInfo } from "@/types/data";
 import { useUserStore } from "@/store/useUserStore";
@@ -51,15 +51,14 @@ function scrollToBottom() {
   });
 }
 
-onMounted(() => {
-  scrollToBottom();
-});
-
 watch(() => props.dialogId, (v) => {
   if (props.dialogId != '') {
     dialogInfo.value = dataStore.getDialogInfo(v);
     form.sessionId = v;
     messageList.value = dataStore.getMessageList(v);
+    nextTick(() => {
+      scrollToBottom();
+    });
   }
 }, { immediate: true });
 
