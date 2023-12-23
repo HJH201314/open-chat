@@ -32,8 +32,18 @@ function handleSave() {
 }
 
 function handleReset() {
-  settingStore.resetSetting();
-  showToast({ text: `重置成功` });
+  DialogManager.commonDialog({
+    title: '重置设置',
+    content: '此操作不可逆，确定要重置设置吗？',
+    confirmButtonProps: {
+      backgroundColor: variables.colorDanger,
+    },
+  }).then(res => {
+    if (res) {
+      settingStore.resetSetting();
+      showToast({ text: `重置成功` });
+    }
+  })
 }
 
 const globe = useGlobal();

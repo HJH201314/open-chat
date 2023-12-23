@@ -39,7 +39,7 @@ function getPermissionName(permissionId: number) {
 <template>
   <div class="user-item-card">
     <section class="avatar">
-      <img :src="avatar ?? `/avatar/${Math.ceil(Math.random() * 30)}.png`" />
+      <img :src="avatar ?? `/avatar/${Math.floor(Math.random() * 540) + 1}.gif`" />
     </section>
     <section class="info">
       <div class="username">

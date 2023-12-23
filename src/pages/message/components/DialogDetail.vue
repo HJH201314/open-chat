@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { Acoustic, Back, Delete, Edit, Send, Share, Voice } from '@icon-park/vue-next';
+import { Acoustic, Back, Delete, Edit, Send, Voice } from '@icon-park/vue-next';
 import IconButton from "@/components/IconButton.vue";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
@@ -302,7 +302,7 @@ function handleVoicePanelToggle() {
 <template>
   <div class="dialog-detail">
     <div class="dialog-detail-actions">
-      <IconButton @click="$emit('back')" >
+      <IconButton style="flex-shrink: 0;" @click="$emit('back')" >
         <Back size="16" />
       </IconButton>
       <span class="dialog-detail-actions-title">
@@ -311,13 +311,13 @@ function handleVoicePanelToggle() {
       <span class="dialog-detail-actions-subtitle">
         {{ messageList.length }} 条消息
       </span>
-      <IconButton @click="handleEditDialog">
+      <IconButton style="flex-shrink: 0;" @click="handleEditDialog">
         <Edit size="16" />
       </IconButton>
-      <IconButton>
-        <Share size="16" />
-      </IconButton>
-      <IconButton @click="handleDeleteDialog">
+<!--      <IconButton>-->
+<!--        <Share size="16" />-->
+<!--      </IconButton>-->
+      <IconButton style="flex-shrink: 0;" @click="handleDeleteDialog">
         <Delete size="16" />
       </IconButton>
     </div>
@@ -393,11 +393,20 @@ function handleVoicePanelToggle() {
       text-align: center;
       font-weight: bold;
       font-size: 20px;
+
+      display: -webkit-box;
+      word-break: break-all;
+      text-overflow: ellipsis;
+      -webkit-box-orient: vertical;
+      line-clamp: 1;
+      -webkit-line-clamp: 1;
+      overflow: hidden;
     }
 
     &-subtitle {
       margin-right: auto;
       font-size: .75rem;
+      flex-shrink: 0;
     }
   }
 
@@ -515,7 +524,7 @@ function handleVoicePanelToggle() {
       left: .5rem;
       top: .5rem;
       border-radius: .25rem;
-      padding: .125rem .25rem;
+      padding: .125rem .35rem;
       display: flex;
       align-items: center;
       gap: .25rem;

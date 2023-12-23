@@ -146,7 +146,11 @@ export const useDataStore  = defineStore('data', () => {
   function searchDialog(text: string) {
     return dialogList.value.filter((d) => {
       const info = localStorage.getItem(d.storageKey);
-      return info && (d.storageKey.indexOf(text) != -1 || d.botRole.indexOf(text) != -1 || info.indexOf(text) != -1);
+      return info &&
+          (d.storageKey.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
+              d.botRole.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
+              info.toLowerCase().indexOf(text.toLowerCase()) != -1
+          );
     });
   }
 

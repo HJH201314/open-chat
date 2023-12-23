@@ -42,7 +42,7 @@ async function handleAddRecord(roleId?: number) {
   const sessionId = await dataStore.addDialog(roleId ?? 1);
   if (roleId) {
     dataStore.sendMessageText(sessionId, await roleStore.getRoleSentence(roleId) +
-      `Current Time: ${new Date().toLocaleString()}. 请将我后续发送的第一句话总结为一个标题，添加到你回复的开头，输出格式为\`\`\`总结出的标题\`\`\`。If you are ready, please only output：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！` ?? '');
+      `Current Time: ${new Date().toLocaleString()}. 请将我后续发送的第一句话总结为一个标题（十个字左右），添加到你回复的开头，输出格式为\`\`\`总结出的标题\`\`\`。If you are ready, please only output：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！` ?? '');
   }
   handleListItemClick(sessionId);
   roleForm.modalVisible = false;
@@ -94,6 +94,7 @@ const displayList = computed(() => {
 </script>
 <template>
   <div class="message-left">
+    <span style="text-align: center; font-weight: bold; margin-bottom: .25rem;">对话 | Dialog</span>
     <!-- 角色列表 -->
     <div class="dialog-list">
       <div class="dialog-list-bar">
@@ -146,9 +147,7 @@ const displayList = computed(() => {
 @import "@/assets/variables.module";
 .message-left {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: .5rem;
+  flex-direction: column;
 }
 .dialog-list {
   width: 100%;
