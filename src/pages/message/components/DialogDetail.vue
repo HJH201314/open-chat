@@ -3,18 +3,20 @@
 import { Acoustic, Back, Delete, Edit, Send, Share, Voice } from '@icon-park/vue-next';
 import IconButton from "@/components/IconButton.vue";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
-import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useDataStore } from "@/store/useDataStore";
 import type { DialogInfo, MsgInfo } from "@/types/data";
 import { useUserStore } from "@/store/useUserStore";
 import showToast from "@/components/toast/toast";
 import DiliButton from "@/components/button/DiliButton.vue";
-/* 音频录制相关 */
-// 似乎需要https或localhost才能测试
-import { useDevicesList, useUserMedia } from '@vueuse/core';
+import { useDevicesList, useMousePressed, useUserMedia } from '@vueuse/core';
 import { useSettingStore } from "@/store/useSettingStore";
 import ToastManager from "@/components/toast/ToastManager";
 import api from "@/api";
+import { DialogManager } from "@/components/dialog";
+import variables from "@/assets/variables.module.scss";
+import CusCircularProgress from "@/components/progress/CusCircularProgress.vue";
+import Spinning from "@/components/spinning/Spinning.vue";
 
 const dataStore = useDataStore();
 
@@ -81,11 +83,38 @@ function handleSendMessage() {
   form.inputValue = '';
 }
 
-function handleDeleteDialog() {
-  dataStore.delDialog(form.sessionId);
-  emit('back');
+function handleEditDialog() {
+  DialogManager.inputDialog({
+    title: '编辑会话',
+    content: '修改会话名称为',
+  }, {
+    placeholder: '新对话名称',
+    value: dialogInfo.value.title,
+  }).then((res) => {
+    if (res.status && res.value) {
+      // 确认修改
+      dataStore.editDialogTitle(dialogInfo.value.id, res.value);
+    }
+  });
 }
 
+function handleDeleteDialog() {
+  DialogManager.commonDialog({
+    title: '删除对话',
+    content: `你将永久丢失与 ${dialogInfo.value.botRole} 的 对话 <${dialogInfo.value.title}> <br />这是不可逆的！`,
+    confirmButtonProps: {
+      backgroundColor: variables.colorDanger
+    }
+  }).then(res => {
+    if (res) {
+      dataStore.delDialog(form.sessionId);
+      emit('back');
+    }
+  });
+}
+
+/* 音频录制相关 */
+// 需要https或localhost才能测试
 const {
   audioInputs: microphones,
 } = useDevicesList({
@@ -93,7 +122,7 @@ const {
 })
 const currentMicrophone = computed(() => microphones.value[0]?.deviceId);
 
-const { stream, start: startRecording, stop: stopRecording, restart: restartRecording } = useUserMedia({
+const { stream: mediaStream, start: startStream, stop: stopStream } = useUserMedia({
   constraints: {
     video: false,
     audio: {
@@ -105,90 +134,146 @@ const { stream, start: startRecording, stop: stopRecording, restart: restartReco
 
 let mediaRecorder: MediaRecorder;
 let chunks: BlobPart[] = [];
-watch(() => stream.value, (s) => {
-  if (s) {
-    mediaRecorder = new MediaRecorder(s, {
-      audioBitsPerSecond: 16000,
-    });
-    chunks = [];
+const audioTimeout = ref(60);
+const audioInterval = ref();
+const audioHandling = ref(false);
 
-    // 开始录制
-    mediaRecorder.start();
+const audioButtonRef = ref<HTMLDivElement>();
+const audioButtonPress = useMousePressed({
+  target: audioButtonRef,
+  capture: true,
+  initialValue: false,
+});
 
-    // 当有音频数据可用时触发该事件
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        chunks.push(event.data);
-      }
-    }
-
-    // 录制结束时触发该事件
-    mediaRecorder.onstop = function() {
-      // 将音频数据合并成一个Blob对象
-      let blob = new Blob(chunks, { type: 'audio/wav' });
-
-      // 将音频转换为base64
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onload = e => {
-        console.log(e.target?.result);
-        let base64 = e.target?.result as string;
-        if (base64) {
-          // 去除文件头
-          base64 = base64.replace(/^data:audio\/\w+;base64,/, '');
-          try {
-            api.cloud.voice.uploadAudioFileUsingPost(base64).then(res => {
-              if (res.data.status == 200) {
-                // 上传成功，开始定时轮询
-                const interval = setInterval(() => {
-                  api.cloud.voice.checkAudioResultUsingGet(res.data.data.taskId).then(res => {
-                    if (res.data.data.status == 2) {
-                      // 已经处理完成
-                      clearInterval(interval);
-                      const textResultSplit = res.data.data.result.split(' ');
-                      form.inputValue = textResultSplit[textResultSplit.length - 1];
-                      handleSendMessage();
-                    } else if (res.data.data.status != 1) {
-                      // 处理失败
-                      clearInterval(interval);
-                      ToastManager.danger('语音模块异常，请联系管理员！');
-                    } else {
-                      // status = 1，处理中
-                    }
-                  });
-                }, 1000);
-              }
-            });
-          } catch (ignore) {}
-        }
-      };
-
-      // 创建一个音频元素并播放录制的音频
-      // const audioElement = new Audio();
-      // audioElement.src = URL.createObjectURL(blob);
-      // audioElement.controls = true;
-      // document.body.appendChild(audioElement);
-    };
+watch(() => audioButtonPress.pressed.value, (p) => {
+  console.log(audioButtonPress, p)
+  if (p) {
+    startVoiceRecording();
   } else {
-    mediaRecorder.stop();
+    audioTimeout.value = 60;
+    stopVoiceRecording();
   }
 });
 
-function handleVoiceMouseDown() {
+function startVoiceRecording() {
   if (microphones.value.length <= 0) {
-    ToastManager.warning('无语音输入设备失败！');
+    ToastManager.warning('无语音输入设备！');
     return;
   }
-  startRecording();
-  nextTick(() => {
-    console.log(stream.value)
-  })
+  if (!userStore.isLogin) {
+    ToastManager.warning('请先登录！');
+    return;
+  }
+  startStream().then(s => {
+    if (s) {
+      mediaRecorder = new MediaRecorder(s, {
+        audioBitsPerSecond: 16000,
+      });
+      chunks = [];
+
+      // 开始录制
+      mediaRecorder.start();
+
+      // 倒计时60秒，超时自动停止
+      audioTimeout.value = 60;
+      clearInterval(audioInterval.value);
+      audioInterval.value = setInterval(() => {
+        // 如果已经关闭就清除倒计时
+        if (!mediaRecorder.stream.active) {
+          clearInterval(audioInterval.value);
+          return;
+        }
+        if (audioTimeout.value <= 0) {
+          clearInterval(audioInterval.value);
+          mediaRecorder.stop();
+        } else {
+          audioTimeout.value = audioTimeout.value - 1;
+        }
+      }, 1000);
+
+      // 当有音频数据可用时触发该事件
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      }
+
+      // 录制结束时触发该事件
+      mediaRecorder.onstop = function() {
+        // 将音频数据合并成一个Blob对象
+        let blob = new Blob(chunks, { type: 'audio/wav' });
+
+        // 将音频转换为base64
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = e => {
+          console.log(e.target?.result);
+          let base64 = e.target?.result as string;
+          if (base64) {
+            // 去除文件头
+            base64 = base64.replace(/^data:audio\/\w+;base64,/, '');
+            try {
+              // return;
+              if (base64 == '') {
+                ToastManager.warning('说话时间太短啦');
+                return;
+              }
+              audioHandling.value = true;
+              api.cloud.voice.uploadAudioFileUsingPost(base64).then(res => {
+                if (res.data.status == 200) {
+                  // 上传成功，开始定时轮询
+                  const interval = setInterval(() => {
+                    api.cloud.voice.checkAudioResultUsingGet(res.data.data.taskId).then(res => {
+                      if (res.data.data.status == 2) {
+                        // 已经处理完成
+                        audioHandling.value = false;
+                        clearInterval(interval);
+                        const textResultSplit = res.data.data.result.split(' ');
+                        form.inputValue = textResultSplit[textResultSplit.length - 1];
+                        handleSendMessage();
+                      } else if (res.data.data.status != 1) {
+                        // 处理失败
+                        audioHandling.value = false;
+                        clearInterval(interval);
+                        ToastManager.danger('语音模块异常，请联系管理员！');
+                      } else {
+                        // status = 1，处理中
+                      }
+                    });
+                  }, 1000);
+                }
+              });
+            } catch (ignore) {}
+          }
+        };
+
+        // 创建一个音频元素并播放录制的音频
+        // const audioElement = new Audio();
+        // audioElement.src = URL.createObjectURL(blob);
+        // audioElement.controls = true;
+        // document.body.appendChild(audioElement);
+      };
+    } else {
+      ToastManager.danger('无权访问麦克风，请给予权限');
+      mediaRecorder?.stop();
+    }
+  }).catch(() => {
+    ToastManager.danger('无权访问麦克风，请给予权限');
+  });
 }
 
-function handleVoiceMouseUp() {
-  console.log(stream.value)
-  mediaRecorder.stop();
-  stopRecording();
+function stopVoiceRecording() {
+  stopStream();
+  mediaRecorder?.stop();
+}
+
+const voicePanel = ref(false);
+function handleVoicePanelToggle() {
+  voicePanel.value = !voicePanel.value;
+  if (!voicePanel.value) {
+    stopStream();
+    mediaRecorder?.stop();
+  }
 }
 </script>
 
@@ -201,7 +286,7 @@ function handleVoiceMouseUp() {
       <span class="dialog-detail-actions-title">
         {{ dialogInfo.title }}
       </span>
-      <IconButton>
+      <IconButton @click="handleEditDialog">
         <Edit size="16" />
       </IconButton>
       <IconButton>
@@ -228,10 +313,9 @@ function handleVoiceMouseUp() {
 
         <DiliButton v-if="settingStore.settings.enableVoiceToText"
                     style="flex: 1;" :button-style="{'width': '100%', 'border': '1px solid grey'}"
-                    @touchstart="handleVoiceMouseDown" @touchend="handleVoiceMouseUp"
-                    @mousedown="handleVoiceMouseDown" @mouseup="handleVoiceMouseUp">
-          <div style="display: contents" v-if="!stream"><Voice size="24" />按住说话</div>
-          <div style="display: contents" v-else><Acoustic size="24" />录制中...</div>
+                    @click="handleVoicePanelToggle">
+          <div style="display: contents" v-if="!voicePanel"><Voice size="20" />语音面板</div>
+          <div style="display: contents" v-else><Acoustic size="20" />收起面板</div>
         </DiliButton>
         <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
           <Send fill="white" size="16" />
@@ -239,12 +323,30 @@ function handleVoiceMouseUp() {
         </div>
       </div>
     </div>
+    <!-- 语音面板 -->
+    <transition name="flow-in">
+      <section class="audio-input" v-show="voicePanel">
+        <div class="audio-input-status audio-input-status--ready"
+            :class="{'audio-input-status--handling': audioHandling}">
+          <Spinning v-if="audioHandling" :color="variables.colorPrimary" />
+          <div v-else class="signal" />
+          {{ mediaStream ? `录制中 ${audioTimeout}s` : audioHandling ? '处理中' : '就绪' }}
+        </div>
+        <div class="audio-input-speak" ref="audioButtonRef">
+          <CusCircularProgress :value="(audioTimeout) * 100 / 60" :bar-style="{'opacity': '0.25'}">
+            <Voice fill="white" size="2rem" v-if="!mediaStream" />
+            <Acoustic fill="white" size="2rem" v-else />
+          </CusCircularProgress>
+        </div>
+      </section>
+    </transition>
   </div>
 </template>
 
 <style scoped lang="scss">
 @import "@/assets/variables.module";
 .dialog-detail {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: .5rem;
@@ -329,6 +431,114 @@ function handleVoiceMouseUp() {
         }
       }
     }
+  }
+
+  .audio-input {
+    border-radius: .5rem;
+    box-shadow: $box-shadow;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 2.5rem;
+    height: 150px;
+    background-color: white;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &-speak {
+      background-color: $color-primary;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+
+      &:before {
+        content: "";
+        border-radius: 50%;
+        position: absolute;
+        inset: 0;
+        background-color: transparentize($color-primary, 0.5);
+        animation: recording 5s infinite;
+      }
+    }
+
+    @keyframes recording {
+      0% {
+        scale: 1.1;
+      }
+      30% {
+        scale: 1.2;
+      }
+      100% {
+        scale: 1.1;
+      }
+    }
+
+    &-status {
+      position: absolute;
+      left: .5rem;
+      top: .5rem;
+      border-radius: .25rem;
+      padding: .125rem .25rem;
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+      transition: all .25s $ease-out-circ;
+      > .signal {
+        border-radius: 50%;
+        width: 1rem;
+        height: 1rem;
+      }
+
+      &--error {
+        color: $color-danger;
+        background-color: transparentize($color-danger, 0.75);
+        > .signal {
+          background-color: $color-danger;
+        }
+      }
+
+      &--handling {
+        color: $color-warning;
+        background-color: transparentize($color-warning, 0.75);
+        > .signal {
+          background-color: $color-warning;
+        }
+      }
+
+      &--ready {
+        color: $color-primary;
+        background-color: transparentize($color-primary, 0.75);
+        > .signal {
+          background-color: $color-primary;
+        }
+      }
+    }
+  }
+}
+</style>
+<style lang="scss">
+@import "@/assets/variables.module";
+.flow-in-enter-from,
+.flow-in-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}
+.flow-in-enter-active,
+.flow-in-leave-active {
+  transition: all .3s $ease-in-out-back;
+}
+
+@keyframes recording {
+  0% {
+    background-size: 100%;
+  }
+  30% {
+    background-size: 110%;
+  }
+  100% {
+    background-size: 100%;
   }
 }
 </style>

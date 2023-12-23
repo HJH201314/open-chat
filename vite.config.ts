@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import sassDts from 'vite-plugin-sass-dts'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 import path from 'path'
 
 // https://vitejs.dev/config/
@@ -20,6 +21,7 @@ export default defineConfig({
       sourceDir: path.resolve(__dirname, './src'),
       outputDir: path.resolve(__dirname, './dist'),
     }),
+    basicSsl(),
   ],
   css: {
     // 对css的行为进行配置
@@ -37,7 +39,8 @@ export default defineConfig({
     }
   },
   server: {
-    port: 80,
+    port: 9035,
+    https: true,
     proxy: {
       '/api/cloud': {
         target: 'http://127.0.0.1:7002/',

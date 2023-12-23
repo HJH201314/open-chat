@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import type { DiliButtonEmits, DiliButtonProps } from "@/components/button/DiliButton";
+import type { CusButtonEmits, CusButtonProps } from "@/components/button/DiliButton";
 import variables from "@/assets/variables.module.scss";
 import type { CSSProperties } from "vue";
 import { computed, ref } from "vue";
 import { getDarkerColor } from "@/utils/color";
 
-const props = withDefaults(defineProps<DiliButtonProps>(), {
+const props = withDefaults(defineProps<CusButtonProps>(), {
   text: "",
   type: "normal",
   shadow: false,
 });
 
-const emit = defineEmits<DiliButtonEmits>();
+const emit = defineEmits<CusButtonEmits>();
 
 const buttonRef = ref<HTMLButtonElement>();
 

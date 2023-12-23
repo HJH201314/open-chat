@@ -60,15 +60,13 @@ defineExpose<CommonDialogExpose>({
       </header>
       <hr />
       <main>
-        <div>
-          {{ props.content }}
-        </div>
+        <div v-html="props.content"></div>
         <slot></slot>
       </main>
       <hr />
       <footer>
-        <DiliButton text="取消" type="normal" @click="handleCancel" />
-        <DiliButton text="确认" type="primary" @click="handleConfirm" />
+        <DiliButton text="取消" type="normal" @click="handleCancel" v-bind="props.cancelButtonProps" />
+        <DiliButton text="确认" type="primary" @click="handleConfirm" v-bind="props.confirmButtonProps" />
       </footer>
     </div>
   </CommonModal>

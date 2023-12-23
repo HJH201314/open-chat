@@ -1,4 +1,5 @@
 import type { CSSProperties } from "vue";
+import type { CusButtonProps } from "@/components/button/DiliButton";
 
 export type CommonDialogProps = {
   _id?: string; // DialogManager提供的唯一ID
@@ -9,6 +10,8 @@ export type CommonDialogProps = {
 
   // 样式调整
   modalStyle?: CSSProperties;
+  confirmButtonProps?: CusButtonProps;
+  cancelButtonProps?: CusButtonProps;
 
   // 提供回调props，方便函数调用时使用
   onCancel?: (close: () => void) => void;

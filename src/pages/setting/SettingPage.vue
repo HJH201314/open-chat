@@ -149,6 +149,7 @@ watch(() => globe.isLargeScreen, (val) => {
         // font-weight: bold;
       }
       &__value {
+        flex-shrink: 0; // 阻止压缩，尤其是在小屏幕上
         display: flex;
         gap: .5rem;
         align-items: flex-end;

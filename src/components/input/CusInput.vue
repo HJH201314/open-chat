@@ -38,6 +38,7 @@ function handleInput(e: any) {
   outline: none;
   resize: none;
   border: none;
+  width: 100%;
   box-sizing: border-box;
   border-radius: .5rem;
   padding: .25rem .5rem;

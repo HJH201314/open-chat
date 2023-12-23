@@ -1,6 +1,6 @@
 import type { CSSProperties } from "vue";
 
-export type DiliButtonProps = {
+export type CusButtonProps = {
   text?: string;
   icon?: string;
   type?: 'normal' | 'primary' | 'text';
@@ -13,6 +13,6 @@ export type DiliButtonProps = {
   buttonStyle?: CSSProperties;
 }
 
-export type DiliButtonEmits = {
+export type CusButtonEmits = {
   (event: 'click'): void;
 }

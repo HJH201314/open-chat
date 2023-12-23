@@ -1,6 +1,5 @@
-import { defineStore } from "pinia";
-import type { UnwrapNestedRefs } from "vue";
-import { computed, reactive, ref } from "vue";
+import { acceptHMRUpdate, defineStore } from "pinia";
+import { computed, reactive, ref, type UnwrapNestedRefs } from "vue";
 import api from '@/api';
 import { useLocalStorage, useStorage } from "@vueuse/core";
 import type { DialogData, MsgData } from "@/types/data";
@@ -59,6 +58,10 @@ export const useDataStore  = defineStore('data', () => {
     } finally {
     }
     return '';
+  }
+
+  function editDialogTitle(dialogId: string, newTitle: string) {
+    dialogData.value.dialogs![dialogId].title = newTitle;
   }
 
   async function delDialog(sessionId: string) {
@@ -137,8 +140,13 @@ export const useDataStore  = defineStore('data', () => {
     messageStorage,
     getDialogInfo,
     addDialog,
+    editDialogTitle,
     delDialog,
     getMessageList,
     sendMessageText,
   }
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useDataStore, import.meta.hot));
+}

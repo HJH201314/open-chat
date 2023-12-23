@@ -96,7 +96,7 @@ const mouseLeaveTimeout = ref<number>();
 function handleMouseEnter(e: MouseEvent) {
   clearTimeout(mouseLeaveTimeout.value);
   clearTimeout(mouseEnterTimeout.value);
-  if (!expandBar.value) { // 如果已经打开，不能重复触发
+  if (!expandBar.value && isLargeScreen.value) { // 如果已经打开，不能重复触发
     mouseEnterTimeout.value = setTimeout(() => {
       isAutoExpand.value = true;
       expandBar.value = true;
@@ -104,7 +104,7 @@ function handleMouseEnter(e: MouseEvent) {
   }
 }
 
-function handleMouseLeave(e: MouseEvent) {
+function handleMouseLeave(e: MouseEvent | TouchEvent) {
   clearTimeout(mouseEnterTimeout.value);
   clearTimeout(mouseLeaveTimeout.value);
   if (expandBar.value && isAutoExpand.value) {
