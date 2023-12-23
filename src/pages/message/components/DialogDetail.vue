@@ -3,7 +3,7 @@
 import { Acoustic, Back, Delete, Edit, Send, Share, Voice } from '@icon-park/vue-next';
 import IconButton from "@/components/IconButton.vue";
 import DialogMessage from "@/pages/message/components/DialogMessage.vue";
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useDataStore } from "@/store/useDataStore";
 import type { DialogInfo, MsgInfo } from "@/types/data";
 import { useUserStore } from "@/store/useUserStore";
@@ -43,8 +43,16 @@ const form = reactive({
   outputValue: ref(''),
 });
 
+function scrollToBottom() {
+  document.querySelector(`#bottom-line`)?.scrollIntoView({
+    behavior: "smooth",
+    block: "end",
+    inline: "nearest",
+  });
+}
+
 onMounted(() => {
-  document.querySelector(`#bottom-line`)?.scrollIntoView(false);
+  scrollToBottom();
 });
 
 watch(() => props.dialogId, (v) => {
@@ -73,14 +81,20 @@ function handleSendMessage() {
   dataStore.sendMessageText(form.sessionId, form.inputValue, {
     onMessage: (msg) => {
       form.outputValue += msg;
+      if (form.outputValue.match(/^```(.+?)```/)) {
+        form.outputValue = form.outputValue.replace(/^```(.+?)```/, '');
+      }
     },
     onFinish: (fullMessage) => {
       form.outputValue = '';
       messageList.value = dataStore.getMessageList(form.sessionId);
-      document.querySelector(`#bottom-line`)?.scrollIntoView(false);
+      scrollToBottom();
     }
   });
   form.inputValue = '';
+  nextTick(() => {
+    scrollToBottom();
+  });
 }
 
 function handleEditDialog() {
@@ -157,7 +171,7 @@ watch(() => audioButtonPress.pressed.value, (p) => {
 
 function startVoiceRecording() {
   if (microphones.value.length <= 0) {
-    ToastManager.warning('无语音输入设备！');
+    ToastManager.warning('无音频输入设备！');
     return;
   }
   if (!userStore.isLogin) {
@@ -230,7 +244,11 @@ function startVoiceRecording() {
                         clearInterval(interval);
                         const textResultSplit = res.data.data.result.split(' ');
                         form.inputValue = textResultSplit[textResultSplit.length - 1];
-                        handleSendMessage();
+                        if (!form.inputValue) {
+                          ToastManager.info('未识别到语音~');
+                        } else {
+                          handleSendMessage();
+                        }
                       } else if (res.data.data.status != 1) {
                         // 处理失败
                         audioHandling.value = false;
@@ -273,6 +291,10 @@ function handleVoicePanelToggle() {
   if (!voicePanel.value) {
     stopStream();
     mediaRecorder?.stop();
+  } else {
+    nextTick(() => {
+      scrollToBottom();
+    });
   }
 }
 </script>
@@ -286,6 +308,9 @@ function handleVoicePanelToggle() {
       <span class="dialog-detail-actions-title">
         {{ dialogInfo.title }}
       </span>
+      <span class="dialog-detail-actions-subtitle">
+        {{ messageList.length }} 条消息
+      </span>
       <IconButton @click="handleEditDialog">
         <Edit size="16" />
       </IconButton>
@@ -297,11 +322,12 @@ function handleVoicePanelToggle() {
       </IconButton>
     </div>
     <div class="dialog-detail-dialogs">
-      <DialogMessage message="Hello! How can I assist you today?" role="bot" />
+      <DialogMessage message="Hello! How can I assist you today?" role="bot" v-if="!messageList.length" />
       <!--   消息列表   -->
       <DialogMessage v-for="item in messageList" :id="item.time" :message="item.content" :role="item.sender" :time="item.time" />
       <DialogMessage id="user-typing-box" v-if="form.inputValue" :message="form.inputValue" role="user" />
       <DialogMessage id="bot-typing-box" v-if="form.outputValue" :message="form.outputValue" role="bot" />
+      <div v-if="voicePanel" style="min-height: 3rem;"></div>
       <div id="bottom-line"></div><!--定位-->
     </div>
     <div class="dialog-detail-inputs">
@@ -326,13 +352,17 @@ function handleVoicePanelToggle() {
     <!-- 语音面板 -->
     <transition name="flow-in">
       <section class="audio-input" v-show="voicePanel">
-        <div class="audio-input-status audio-input-status--ready"
-            :class="{'audio-input-status--handling': audioHandling}">
-          <Spinning v-if="audioHandling" :color="variables.colorPrimary" />
+        <div class="audio-input-status"
+            :class="{
+              'audio-input-status--ready': !audioHandling && currentMicrophone,
+              'audio-input-status--handling': audioHandling,
+              'audio-input-status--error': !currentMicrophone,
+            }">
+          <Spinning v-if="audioHandling" :color="variables.colorWarning" />
           <div v-else class="signal" />
-          {{ mediaStream ? `录制中 ${audioTimeout}s` : audioHandling ? '处理中' : '就绪' }}
+          {{ mediaStream ? `录制中 ${audioTimeout}s` : audioHandling ? '处理中' : !currentMicrophone ? '无麦克风' : '就绪' }}
         </div>
-        <div class="audio-input-speak" ref="audioButtonRef">
+        <div class="audio-input-speak" ref="audioButtonRef" @touchend="stopVoiceRecording">
           <CusCircularProgress :value="(audioTimeout) * 100 / 60" :bar-style="{'opacity': '0.25'}">
             <Voice fill="white" size="2rem" v-if="!mediaStream" />
             <Acoustic fill="white" size="2rem" v-else />
@@ -355,14 +385,19 @@ function handleVoicePanelToggle() {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    align-items: center;
     gap: .5rem;
     margin: .25rem .25rem 0 .25rem;
 
     &-title {
       text-align: center;
-      margin-right: auto;
       font-weight: bold;
       font-size: 20px;
+    }
+
+    &-subtitle {
+      margin-right: auto;
+      font-size: .75rem;
     }
   }
 
@@ -440,7 +475,7 @@ function handleVoicePanelToggle() {
     left: 0;
     right: 0;
     bottom: 2.5rem;
-    height: 150px;
+    height: 10rem;
     background-color: white;
     z-index: 2;
     display: flex;

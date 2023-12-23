@@ -48,4 +48,8 @@ declare namespace API {
    * */
   type RoleResult = [number, string]
   type RoleListResult = RoleResult[]
+
+  type RoleSentenceResult = {
+    roleSentence?: string;
+  }
 }

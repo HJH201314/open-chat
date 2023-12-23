@@ -76,6 +76,7 @@ const showEmptyTip = ref(true);
   padding: .5rem;
 
   .split {
+    flex-shrink: 0;
     width: 2px;
     height: auto;
     background-color: $color-grey;
@@ -83,7 +84,10 @@ const showEmptyTip = ref(true);
   }
 
   &-record-list {
-    min-width: calc(30% - 5px); // 防止右侧消息列表关闭时被挤压
+    &:not(&-absolute) {
+      min-width: calc(30% - 8px); // 防止右侧消息列表关闭时被挤压
+      max-width: calc(30% - 8px); // 防止右侧消息列表关闭时被挤压
+    }
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
     &-absolute {
       position: absolute;
@@ -92,10 +96,10 @@ const showEmptyTip = ref(true);
   }
 
   &-dialog-detail {
-    flex: 1;
+    flex-shrink: 0;
     &:not(&-absolute) {
-      max-width: calc(70% - 5px);
-      width: calc(70% - 5px);
+      max-width: calc(70% - 8px);
+      min-width: calc(70% - 8px);
     }
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
     &-absolute {

@@ -6,24 +6,34 @@ import api from "@/api";
 const useRoleStore = defineStore('bot-roles', () => {
   const roleStorage = useLocalStorage('bot-roles', [] as API.RoleListResult);
   const roles = computed(() => roleStorage.value);
+  const roleSentenceStorage = useLocalStorage<Record<number, string>>('role-sentence', {})
+
   // roleId -> roleName 映射表
   const roleIdMap = computed(() => {
     const map = new Map<number, string>();
     roles.value.forEach((value) => {
       map.set(value[0], value[1]);
-    })
+    });
+    return map;
   });
   // roleName -> roleId 映射表
   const roleNameMap = computed(() => {
     const map = new Map<string, number>();
     roles.value.forEach((value) => {
       map.set(value[1], value[0]);
-    })
+    });
+    return map;
   });
 
   onMounted(() => {
     refreshRoles();
   })
+
+  async function reset() {
+    roleSentenceStorage.value = {};
+    roleStorage.value = [];
+    refreshRoles();
+  }
 
   async function refreshRoles() {
     const res = await api.gpt.getAllRoles();
@@ -32,9 +42,29 @@ const useRoleStore = defineStore('bot-roles', () => {
     }
   }
 
+  async function getRoleSentence(roleId?: number) {
+    if (!roleId) return '';
+    if (roleSentenceStorage.value[roleId]) {
+      return roleSentenceStorage.value[roleId];
+    } else {
+      try {
+        const res = await api.gpt.getSentenceByRoleId(roleId);
+        if (res.data.roleSentence) {
+          roleSentenceStorage.value[roleId] = res.data.roleSentence;
+          console.log(roleId, res.data.roleSentence);
+          return res.data.roleSentence;
+        }
+      } catch (ignore) {}
+    }
+  }
+
   return {
     refreshRoles,
     roles,
+    roleIdMap,
+    roleNameMap,
+    getRoleSentence,
+    reset,
   }
 });
 

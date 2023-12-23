@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
-import { Plus, Search } from '@icon-park/vue-next';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { CloseOne, Plus, Search } from '@icon-park/vue-next';
 import { useDataStore } from "@/store/useDataStore";
 import CommonModal from "@/components/modal/CommonModal.vue";
 import Toggle from "@/components/toggle/CusToggle.vue";
 import useRoleStore from "@/store/useRoleStore";
 import { useSettingStore } from "@/store/useSettingStore";
+import type { DialogInfo } from "@/types/data";
 
 type RecordViewProps = {
   model: string;
@@ -39,17 +40,21 @@ onMounted(() => {
 
 async function handleAddRecord(roleId?: number) {
   const sessionId = await dataStore.addDialog(roleId ?? 1);
+  if (roleId) {
+    dataStore.sendMessageText(sessionId, await roleStore.getRoleSentence(roleId) +
+      `Current Time: ${new Date().toLocaleString()}. 请将我后续发送的第一句话总结为一个标题，添加到你回复的开头，输出格式为\`\`\`总结出的标题\`\`\`。If you are ready, please only output：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！` ?? '');
+  }
   handleListItemClick(sessionId);
   roleForm.modalVisible = false;
   if (roleForm.remember) {
     settingStore.saveSetting('roleRemember', true);
-    settingStore.saveSetting('roleDefaultId', roleId);
+    settingStore.saveSetting('roleDefaultId', roleId?.toString());
   }
 }
 function handleListAddClick() {
   console.log(roleForm.remember)
   if (roleForm.remember)
-    handleAddRecord(settingStore.settings.roleDefaultId);
+    handleAddRecord(parseInt(settingStore.settings.roleDefaultId ?? '1'));
   else
     roleForm.modalVisible = true;
 }
@@ -65,6 +70,27 @@ const roleForm = reactive({
   modalVisible: false,
   remember: ref(settingStore.settings.roleRemember),
 });
+
+const searchForm = reactive({
+  searchVal: '',
+});
+
+const searchList = ref<DialogInfo[]>([]);
+watch(() => searchForm.searchVal, (newVal) => {
+  if (newVal != '') {
+    searchList.value = dataStore.searchDialog(newVal);
+  } else {
+    searchList.value = [];
+  }
+})
+
+const displayList = computed(() => {
+  if (searchForm.searchVal) {
+    return searchList.value;
+  } else {
+    return dataStore.dialogList;
+  }
+});
 </script>
 <template>
   <div class="message-left">
@@ -73,7 +99,10 @@ const roleForm = reactive({
       <div class="dialog-list-bar">
         <div class="dialog-list-bar-search">
           <span class="dialog-list-bar-search-icon"><Search /></span>
-          <input placeholder="搜索对话" autocomplete="new-password" />
+          <input placeholder="搜索对话" autocomplete="new-password" v-model="searchForm.searchVal" />
+          <span v-if="searchForm.searchVal" @click="searchForm.searchVal = ''" class="dialog-list-bar-search-reset">
+            <CloseOne theme="filled" />
+          </span>
         </div>
         <div>
           <div class="dialog-list-add" @click="handleListAddClick">
@@ -93,7 +122,7 @@ const roleForm = reactive({
         </div>
       </div>
       <div class="dialog-list-container">
-        <div v-for="item in dataStore.dialogList" @click="handleListItemClick(item.id)" class="dialog-list-item" :class="{'dialog-list-item-selected': item.id === currentDialogId}">
+        <div v-for="item in displayList" @click="handleListItemClick(item.id)" class="dialog-list-item" :class="{'dialog-list-item-selected': item.id === currentDialogId}">
           <img :src="item.avatarPath ? item.avatarPath : 'src/assets/image/chatgpt3.svg'" alt="avatar">
           <div class="dialog-list-item-center">
             <div class="title">
@@ -162,6 +191,14 @@ const roleForm = reactive({
       &-icon {
         color: $color-grey-500;
       }
+      &-reset {
+        cursor: pointer;
+        color: $color-grey-500;
+        transition: color .2s $ease-out-circ;
+        &:hover {
+          color: darken($color-grey-500, 10);
+        }
+      }
 
       input {
         width: 100%;
@@ -213,9 +250,18 @@ const roleForm = reactive({
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      overflow: hidden;
       .title {
         font-weight: bold;
         font-size: 1.1rem;
+
+        display: -webkit-box;
+        word-break: break-all;
+        text-overflow: ellipsis;
+        -webkit-box-orient: vertical;
+        line-clamp: 1;
+        -webkit-line-clamp: 1;
+        overflow: hidden;
       }
       .digest {
         color: $color-grey-500;

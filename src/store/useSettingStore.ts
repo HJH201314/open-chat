@@ -6,7 +6,7 @@ export type ChatSetting = {
   host?: string;
   localCache?: boolean; // 本地对话数据缓存
   roleRemember?: boolean; // 是否使用默认角色
-  roleDefaultId?: number; // 默认角色
+  roleDefaultId?: string; // 默认角色
 
   /* 语音输入相关 */
   enableVoiceToText?: boolean; // 是否启用语音输入
@@ -20,7 +20,7 @@ const defaultSetting: ChatSetting = {
   host: '/api',
   localCache: true,
   roleRemember: false,
-  roleDefaultId: 0,
+  roleDefaultId: '1',
   enableVoiceToText: true,
   enableTextToVoice: false,
 

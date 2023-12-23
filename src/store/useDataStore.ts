@@ -100,21 +100,29 @@ export const useDataStore  = defineStore('data', () => {
     return messageStorage.value[storageKey].messages || [];
   }
 
-  function sendMessageText(sessionId: string, message: string, receiver: MessageReceiver) {
+  function sendMessageText(sessionId: string, message: string, receiver?: MessageReceiver) {
+    if (message == '') return;
     saveMessage(sessionId, message, 'user', 'text');
-    let url = `${SERVER_ORIGIN_API_URL}/gpt/${sessionId}?question=${message}`
+    let url = `${SERVER_ORIGIN_API_URL}/gpt/${sessionId}?question=${message}`;
     let source = new EventSource(url);
     let fullMessage = '';
     // EventSource接收消息
     source.onmessage = function (event) {
       if (event.data === "[DONE]") { // 当接收到服务器端的结束标记时
         source.close(); // 关闭EventSource
-        saveMessage(sessionId, fullMessage, 'bot', 'text'); // 保存消息
-        receiver.onFinish(fullMessage); // 消息接收完毕回调
+        saveMessage(sessionId, fullMessage.replace(/^```(.+?)```/, ''), 'bot', 'text'); // 保存消息
+        // 修改标题
+        const regex = /^```(.+?)```/; // 匹配以```开头和结尾的内容
+        const matches = fullMessage.match(regex);
+        if (matches){
+          const title = matches[1];
+          editDialogTitle(sessionId, title);
+        }
+        receiver?.onFinish(fullMessage); // 消息接收完毕回调
       } else {
         console.log('[data]', event.data);
         fullMessage += event.data; // 记录已接收的消息
-        receiver.onMessage(event.data); // 消息接收回调
+        receiver?.onMessage(event.data); // 消息接收回调
       }
     }
   }
@@ -135,6 +143,13 @@ export const useDataStore  = defineStore('data', () => {
     }
   }
 
+  function searchDialog(text: string) {
+    return dialogList.value.filter((d) => {
+      const info = localStorage.getItem(d.storageKey);
+      return (d.storageKey.indexOf(text) != -1 || info && info.indexOf(text) != -1);
+    });
+  }
+
   return {
     dialogList,
     messageStorage,
@@ -144,6 +159,7 @@ export const useDataStore  = defineStore('data', () => {
     delDialog,
     getMessageList,
     sendMessageText,
+    searchDialog,
   }
 });
 

@@ -8,8 +8,11 @@ import { useSettingStore } from "@/store/useSettingStore";
 import useGlobal from "@/commands/useGlobal";
 import showToast from "@/components/toast/toast";
 import CusToggle from "@/components/toggle/CusToggle.vue";
+import useRoleStore from "@/store/useRoleStore";
+import { DialogManager } from "@/components/dialog";
 
 const settingStore = useSettingStore();
+const roleStore = useRoleStore();
 // 解构赋值editingValue避免使用proxy，此处并不希望未点击保存前生效
 const editingValue = ref({...toValue(settingStore.settings)});
 
@@ -37,6 +40,20 @@ const globe = useGlobal();
 watch(() => globe.isLargeScreen, (val) => {
 
 }, { immediate: true });
+
+function handleClearRoleCache() {
+  DialogManager.commonDialog({
+    title: '清除缓存',
+    content: '此操作不可逆，清除后需要重新获取数据，是否继续？',
+    confirmButtonProps: {
+      backgroundColor: variables.colorDanger,
+    },
+  }).then((res) => {
+    if (res) {
+      roleStore.reset();
+    }
+  });
+}
 </script>
 
 <template>
@@ -59,7 +76,7 @@ watch(() => globe.isLargeScreen, (val) => {
         </div>
         <hr />
         <div class="setting-list-item">
-          <span class="setting-list-item__title">默认角色</span>
+          <span class="setting-list-item__title">默认角色 | {{ roleStore.roleIdMap.get(parseInt(editingValue.roleDefaultId ?? '1')) ?? '' }}</span>
           <span class="setting-list-item__value">
             <CusToggle v-model="editingValue.roleRemember">
               <template #before>{{ editingValue.roleRemember ? '开启' : '关闭' }}</template>
@@ -97,6 +114,13 @@ watch(() => globe.isLargeScreen, (val) => {
           <span class="setting-list-item__title">语音服务SECRET_KEY</span>
           <span class="setting-list-item__value">
             <CusInput v-model="editingValue.voiceCloudSecretKey" placeholder="SECRET_KEY" :input-attrs="{'type': 'password'}" />
+          </span>
+        </div>
+        <hr />
+        <div class="setting-list-item">
+          <span class="setting-list-item__title">清除缓存</span>
+          <span class="setting-list-item__value">
+            <DiliButton type="primary" :background-color="variables.colorDanger" text="清除角色缓存" @click="handleClearRoleCache" />
           </span>
         </div>
         <div class="setting-actions-placeholder"></div>
