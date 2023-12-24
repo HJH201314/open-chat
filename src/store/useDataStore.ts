@@ -1,12 +1,12 @@
-import { acceptHMRUpdate, defineStore } from "pinia";
-import { computed, reactive, ref, type UnwrapNestedRefs } from "vue";
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { computed, reactive, ref, type UnwrapNestedRefs } from 'vue';
 import api from '@/api';
-import { useLocalStorage, useStorage } from "@vueuse/core";
-import type { DialogData, MsgData } from "@/types/data";
-import showToast from "@/components/toast/toast";
-import { recordToMap } from "@/utils/typeUtils";
-import { SERVER_ORIGIN_API_URL } from "@/constants";
-import useRoleStore from "@/store/useRoleStore";
+import { useLocalStorage, useStorage } from '@vueuse/core';
+import type { DialogData, MsgData } from '@/types/data';
+import showToast from '@/components/toast/toast';
+import { recordToMap } from '@/utils/typeUtils';
+import { SERVER_ORIGIN_API_URL } from '@/constants';
+import useRoleStore from '@/store/useRoleStore';
 
 interface MessageReceiver {
   onMessage: (message: string) => void;
@@ -110,9 +110,9 @@ export const useDataStore  = defineStore('data', () => {
     source.onmessage = function (event) {
       if (event.data === "[DONE]") { // 当接收到服务器端的结束标记时
         source.close(); // 关闭EventSource
-        saveMessage(sessionId, fullMessage.replace(/^```(.+?)```/, ''), 'bot', 'text'); // 保存消息
+        saveMessage(sessionId, fullMessage.replace(/^【【【(.+?)】】】/, ''), 'bot', 'text'); // 保存消息
         // 修改标题
-        const regex = /^```(.+?)```/; // 匹配以```开头和结尾的内容
+        const regex = /^【【【(.+?)】】】/; // 匹配以```开头和结尾的内容
         const matches = fullMessage.match(regex);
         if (matches){
           const title = matches[1];

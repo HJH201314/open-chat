@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
-import RecordList from "@/components/RecordList.vue";
-import DialogDetail from "@/pages/message/components/DialogDetail.vue";
-import { computed, reactive, ref, watch } from "vue";
-import { useEventBus, useMediaQuery } from "@vueuse/core";
-import { toggleSidebarKey } from "@/constants/eventBusKeys";
+import RecordList from '@/components/RecordList.vue';
+import DialogDetail from '@/pages/message/components/DialogDetail.vue';
+import { computed, reactive, ref, watch } from 'vue';
+import { useEventBus, useMediaQuery } from '@vueuse/core';
+import { toggleSidebarKey } from '@/constants/eventBusKeys';
 
 const isLargeScreen = useMediaQuery("(min-width: 768px)");
 
@@ -43,7 +43,9 @@ const showEmptyTip = ref(true);
 <template>
   <div class="message-page">
     <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
-      <RecordList v-show="showListView" class="message-page-record-list transition-all-circ" :class="{'message-page-record-list-absolute': !showDialogView}" @change="handleDialogChange" />
+      <RecordList v-show="showListView" class="message-page-record-list transition-all-circ"
+                  :class="{'message-page-record-list-absolute': !showDialogView}"
+                  @change="handleDialogChange" />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
     <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'"

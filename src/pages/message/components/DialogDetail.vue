@@ -1,22 +1,22 @@
 <script setup lang="ts">
 
 import { Acoustic, Back, Delete, Edit, Send, Voice } from '@icon-park/vue-next';
-import IconButton from "@/components/IconButton.vue";
-import DialogMessage from "@/pages/message/components/DialogMessage.vue";
-import { computed, nextTick, reactive, ref, watch } from "vue";
-import { useDataStore } from "@/store/useDataStore";
-import type { DialogInfo, MsgInfo } from "@/types/data";
-import { useUserStore } from "@/store/useUserStore";
-import showToast from "@/components/toast/toast";
-import DiliButton from "@/components/button/DiliButton.vue";
+import IconButton from '@/components/IconButton.vue';
+import DialogMessage from '@/pages/message/components/DialogMessage.vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { useDataStore } from '@/store/useDataStore';
+import type { DialogInfo, MsgInfo } from '@/types/data';
+import { useUserStore } from '@/store/useUserStore';
+import showToast from '@/components/toast/toast';
+import DiliButton from '@/components/button/DiliButton.vue';
 import { useDevicesList, useMousePressed, useUserMedia } from '@vueuse/core';
-import { useSettingStore } from "@/store/useSettingStore";
-import ToastManager from "@/components/toast/ToastManager";
-import api from "@/api";
-import { DialogManager } from "@/components/dialog";
-import variables from "@/assets/variables.module.scss";
-import CusCircularProgress from "@/components/progress/CusCircularProgress.vue";
-import Spinning from "@/components/spinning/Spinning.vue";
+import { useSettingStore } from '@/store/useSettingStore';
+import ToastManager from '@/components/toast/ToastManager';
+import api from '@/api';
+import { DialogManager } from '@/components/dialog';
+import variables from '@/assets/variables.module.scss';
+import CusCircularProgress from '@/components/progress/CusCircularProgress.vue';
+import Spinning from '@/components/spinning/Spinning.vue';
 
 const dataStore = useDataStore();
 
@@ -80,8 +80,8 @@ function handleSendMessage() {
   dataStore.sendMessageText(form.sessionId, form.inputValue, {
     onMessage: (msg) => {
       form.outputValue += msg;
-      if (form.outputValue.match(/^```(.+?)```/)) {
-        form.outputValue = form.outputValue.replace(/^```(.+?)```/, '');
+      if (form.outputValue.match(/^【【【(.+?)】】】/)) {
+        form.outputValue = form.outputValue.replace(/^【【【(.+?)】】】/, '');
       }
     },
     onFinish: (fullMessage) => {
@@ -129,18 +129,18 @@ function handleDeleteDialog() {
 /* 音频录制相关 */
 // 需要https或localhost才能测试
 const {
-  audioInputs: microphones,
+  audioInputs: microphones, // 麦克风设备列表
 } = useDevicesList({
   requestPermissions: true,
 })
-const currentMicrophone = computed(() => microphones.value[0]?.deviceId);
+const currentMicrophone = computed(() => microphones.value[0]?.deviceId); // 取首个设备为当前设备
 
 const { stream: mediaStream, start: startStream, stop: stopStream } = useUserMedia({
   constraints: {
-    video: false,
+    video: false, // 不获取视频流
     audio: {
-      deviceId: currentMicrophone.value,
-      channelCount: 1,
+      deviceId: currentMicrophone.value, // 传入麦克风设备ID
+      channelCount: 1, // 单声道
     }
   }
 });

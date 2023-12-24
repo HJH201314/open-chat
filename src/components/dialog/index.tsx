@@ -1,10 +1,10 @@
-import { getRandomString } from "@/utils/string";
-import type { App, VNode } from "vue";
-import { createApp, h, nextTick, ref } from "vue";
-import CommonDialog from "@/components/dialog/CommonDialog.vue";
-import type { CommonDialogExpose, CommonDialogProps } from "@/components/dialog/CommonDialog";
-import CusInput from "@/components/input/CusInput.vue";
-import type { CusInputProps } from "@/components/input/CusInput";
+import { getRandomString } from '@/utils/string';
+import type { App, VNode } from 'vue';
+import { createApp, h, nextTick, ref } from 'vue';
+import CommonDialog from '@/components/dialog/CommonDialog.vue';
+import type { CommonDialogExpose, CommonDialogProps } from '@/components/dialog/CommonDialog';
+import CusInput from '@/components/input/CusInput.vue';
+import type { CusInputProps } from '@/components/input/CusInput';
 
 type CommonDialogInstance = {
   dom: HTMLDivElement;
@@ -25,10 +25,12 @@ export class DialogManager {
         return h(CommonDialog, {
             ...props,
             onConfirm: (close) => {
+              if (props.onConfirm) props.onConfirm(() => {});
               close();
               resolve(true);
             },
             onCancel: (close) => {
+              if (props.onConfirm) props.onConfirm(() => {});
               close();
               resolve(false);
             },

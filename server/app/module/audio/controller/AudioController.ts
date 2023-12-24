@@ -26,7 +26,6 @@ export class AudioController {
       });
     }
     return CommonResult.fail();
-
   }
 
   @HTTPMethod({

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { CloseOne, Plus, Search } from '@icon-park/vue-next';
-import { useDataStore } from "@/store/useDataStore";
-import CommonModal from "@/components/modal/CommonModal.vue";
-import Toggle from "@/components/toggle/CusToggle.vue";
-import useRoleStore from "@/store/useRoleStore";
-import { useSettingStore } from "@/store/useSettingStore";
-import type { DialogInfo } from "@/types/data";
+import { useDataStore } from '@/store/useDataStore';
+import CommonModal from '@/components/modal/CommonModal.vue';
+import Toggle from '@/components/toggle/CusToggle.vue';
+import useRoleStore from '@/store/useRoleStore';
+import { useSettingStore } from '@/store/useSettingStore';
+import type { DialogInfo } from '@/types/data';
 
 type RecordViewProps = {
   model: string;
@@ -41,8 +41,11 @@ onMounted(() => {
 async function handleAddRecord(roleId?: number) {
   const sessionId = await dataStore.addDialog(roleId ?? 1);
   if (roleId) {
-    dataStore.sendMessageText(sessionId, await roleStore.getRoleSentence(roleId) +
-      `Current Time: ${new Date().toLocaleString()}. 请将我后续发送的第一句话总结为一个标题（十个字左右），添加到你回复的开头，输出格式为\`\`\`总结出的标题\`\`\`。If you are ready, please only output：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！` ?? '');
+    dataStore.sendMessageText(sessionId, (await roleStore.getRoleSentence(roleId) +
+      `Current Time: ${new Date().toLocaleString()}. ` +
+      '请将我后续发送的第一句话总结为一个标题（十个字左右），添加到你回复的开头，输出格式为【【【总结出的标题】】】。' +
+      // '当你认为聊天主题发生变化时，将聊天内容总结为一个标题（十个字左右），添加到你回复的开头，输出格式为【【【总结出的标题】】】。' +
+      `If you are ready, please only output：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`) ?? '');
   }
   handleListItemClick(sessionId);
   roleForm.modalVisible = false;
@@ -53,7 +56,7 @@ async function handleAddRecord(roleId?: number) {
 }
 function handleListAddClick() {
   console.log(roleForm.remember)
-  if (roleForm.remember)
+  if (settingStore.settings.roleRemember && settingStore.settings.roleDefaultId)
     handleAddRecord(parseInt(settingStore.settings.roleDefaultId ?? '1'));
   else
     roleForm.modalVisible = true;
@@ -124,7 +127,7 @@ const displayList = computed(() => {
       </div>
       <div class="dialog-list-container">
         <div v-for="item in displayList" @click="handleListItemClick(item.id)" class="dialog-list-item" :class="{'dialog-list-item-selected': item.id === currentDialogId}">
-          <img :src="item.avatarPath ? item.avatarPath : 'src/assets/image/chatgpt3.svg'" alt="avatar">
+          <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar">
           <div class="dialog-list-item-center">
             <div class="title">
               {{ item.title }}

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 
-import CusInput from "@/components/input/CusInput.vue";
-import { ref, toValue, watch } from "vue";
-import DiliButton from "@/components/button/DiliButton.vue";
-import variables from "@/assets/variables.module.scss";
-import { useSettingStore } from "@/store/useSettingStore";
-import useGlobal from "@/commands/useGlobal";
-import showToast from "@/components/toast/toast";
-import CusToggle from "@/components/toggle/CusToggle.vue";
-import useRoleStore from "@/store/useRoleStore";
-import { DialogManager } from "@/components/dialog";
+import CusInput from '@/components/input/CusInput.vue';
+import { ref, toValue, watch } from 'vue';
+import DiliButton from '@/components/button/DiliButton.vue';
+import variables from '@/assets/variables.module.scss';
+import { useSettingStore } from '@/store/useSettingStore';
+import useGlobal from '@/commands/useGlobal';
+import showToast from '@/components/toast/toast';
+import CusToggle from '@/components/toggle/CusToggle.vue';
+import useRoleStore from '@/store/useRoleStore';
+import { DialogManager } from '@/components/dialog';
 
 const settingStore = useSettingStore();
 const roleStore = useRoleStore();
@@ -91,7 +91,6 @@ function handleClearRoleCache() {
             <CusToggle v-model="editingValue.roleRemember">
               <template #before>{{ editingValue.roleRemember ? '开启' : '关闭' }}</template>
             </CusToggle>
-            <!-- TODO: Need investigation -->
             <CusInput v-model="editingValue.roleDefaultId" placeholder="角色ID" />
           </span>
         </div>
@@ -102,12 +101,12 @@ function handleClearRoleCache() {
             <CusToggle v-model="editingValue.enableVoiceToText" />
           </span>
         </div>
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">语音输出</span>
-          <span class="setting-list-item__value">
-            <CusToggle v-model="editingValue.enableTextToVoice" />
-          </span>
-        </div>
+<!--        <div class="setting-list-item">-->
+<!--          <span class="setting-list-item__title">语音输出</span>-->
+<!--          <span class="setting-list-item__value">-->
+<!--            <CusToggle v-model="editingValue.enableTextToVoice" />-->
+<!--          </span>-->
+<!--        </div>-->
         <div class="setting-list-item">
           <span class="setting-list-item__title">语音服务APPID</span>
           <span class="setting-list-item__value">
