@@ -4,6 +4,7 @@ code.hljs {
   backdrop-filter: opacity(50%);
   -webkit-backdrop-filter: opacity(50%);
   overflow: auto;
+  margin: 2px 0;
 }
 
 :not(pre) > code.hljs {

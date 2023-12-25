@@ -3,15 +3,16 @@
 <h2 align='center'>OpenChat</h2>
 
 <p align='center'>
-An AI chat bot interface based on <a href='https://openai.com/'>OpenAI</a>
+A chatbot interface based on <a href='https://openai.com/'>OpenAI</a>
 
 <!--lint ignore-->
 
 <p align='center'>
 
-<img src="https://img.shields.io/badge/Based%20on-Vue.js-teal?style=flat-square&logo=vue.js" alt="Based On Vue.js">
-<img src="https://img.shields.io/github/license/HJH201314/openai-front?style=flat-square" alt="Github License">
-<img src="https://img.shields.io/github/stars/HJH201314/openai-front?style=flat-square" alt="Github Repo Stars">
+<img src="https://img.shields.io/badge/Based%20on-Vue.js-teal?logo=vue.js&style=flat-square&color=26a69a" alt="Based On Vue.js">
+<img src="https://img.shields.io/github/license/HJH201314/openai-front?logo=dependabot&style=flat-square&color=8bc34a" alt="Github License">
+<img src="https://img.shields.io/badge/Runs on-Web-orange?logo=microsoftedge&style=flat-square&color=ffc107" alt="Runs On Web">
+<img src="https://img.shields.io/github/stars/HJH201314/openai-front?logo=github&style=flat-square&color=ff5722" alt="Github Repo Stars">
 
 </p>
 
@@ -25,7 +26,14 @@ Currently, this project requires the following Python backend:
 - [x] Chat with AI
 - [x] Chat in voice
 - [x] Multiple roles
+- [x] User management
 - [x] Flexible configuration
+
+## Todo
+
+- [ ] Voice output
+- [ ] Customize roles
+- [ ] Multiple API support
 
 ## Stack
 

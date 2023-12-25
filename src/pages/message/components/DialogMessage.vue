@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useUserStore } from "@/store/useUserStore";
-import { computed } from "vue";
-import useMarkdownIt from "@/commands/useMarkdownIt";
+import { useUserStore } from '@/store/useUserStore';
+import { computed } from 'vue';
+import useMarkdownIt from '@/commands/useMarkdownIt';
 
 type DialogMessageProps = {
   message: string;
@@ -22,7 +22,7 @@ const userStore = useUserStore();
 
 const avatarPath = computed(() => {
   if (props.role == 'user') return userStore.avatar ?? '';
-  if (props.role == 'bot') return 'src/assets/image/chatgpt3.svg';
+  if (props.role == 'bot') return '/chatgpt3.svg';
   return '';
 });
 

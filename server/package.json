@@ -7,7 +7,7 @@
     "typescript": true
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=egg-server-open-chat-server",
+    "start": "egg-scripts start --port 7002 --daemon --title=egg-server-open-chat-server",
     "stop": "egg-scripts stop --title=egg-server-open-chat-server",
     "dev": "egg-bin dev --port 7002",
     "test:local": "egg-bin test -p",
