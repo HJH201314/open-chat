@@ -67,8 +67,13 @@ const emit = defineEmits<{
 }>();
 
 function handleInputKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter' && e.ctrlKey) {
-    handleSendMessage();
+  if (e.key === 'Enter') {
+    if (e.shiftKey || e.ctrlKey) {
+      form.inputValue += '\n';
+    } else {
+      handleSendMessage();
+    }
+    e.preventDefault();
   }
 }
 function handleSendMessage() {
