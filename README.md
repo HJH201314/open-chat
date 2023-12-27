@@ -57,6 +57,7 @@ This project use pnpm as package manager:
 ```sh
 pnpm install  # Install dependencies
 pnpm dev      # Start dev server
+pnpm start    # Start dev server (with voice service)
 pnpm build    # Build for production
 ```
 
