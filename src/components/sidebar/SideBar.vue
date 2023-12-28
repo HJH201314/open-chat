@@ -1,19 +1,19 @@
 <script setup lang="ts">
 
-import { computed, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from "@icon-park/vue-next";
-import { useUserStore } from "@/store/useUserStore";
-import Tooltip from "@/components/tooltip/CusTooltip.vue";
-import CommonModal from "@/components/modal/CommonModal.vue";
-import type { CommonModalFunc } from "@/components/modal/CommonModal";
-import { useEventBus, useMediaQuery } from "@vueuse/core";
-import { toggleSidebarKey } from "@/constants/eventBusKeys";
-import LoginForm from "@/components/login-form/LoginForm.vue";
-import showToast from "@/components/toast/toast";
-import SettingPage from "@/pages/setting/SettingPage.vue";
-import { useSettingStore } from "@/store/useSettingStore";
-import ToastManager from "@/components/toast/ToastManager";
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from '@icon-park/vue-next';
+import { useUserStore } from '@/store/useUserStore';
+import Tooltip from '@/components/tooltip/CusTooltip.vue';
+import CommonModal from '@/components/modal/CommonModal.vue';
+import type { CommonModalFunc } from '@/components/modal/CommonModal';
+import { useEventBus, useMediaQuery } from '@vueuse/core';
+import { toggleSidebarKey } from '@/constants/eventBusKeys';
+import LoginForm from '@/components/login-form/LoginForm.vue';
+import showToast from '@/components/toast/toast';
+import SettingPage from '@/pages/setting/SettingPage.vue';
+import { useSettingStore } from '@/store/useSettingStore';
+import ToastManager from '@/components/toast/ToastManager';
 
 const userStore = useUserStore();
 
@@ -97,7 +97,7 @@ function handleMouseEnter(e: MouseEvent) {
   clearTimeout(mouseLeaveTimeout.value);
   clearTimeout(mouseEnterTimeout.value);
   if (!expandBar.value && isLargeScreen.value) { // 如果已经打开，不能重复触发
-    mouseEnterTimeout.value = setTimeout(() => {
+    mouseEnterTimeout.value = window.setTimeout(() => {
       isAutoExpand.value = true;
       expandBar.value = true;
     }, 200);
@@ -109,7 +109,7 @@ function handleMouseLeave(e: MouseEvent | TouchEvent) {
   clearTimeout(mouseLeaveTimeout.value);
   if (expandBar.value && isAutoExpand.value) {
     // 只有在打开并且是自动打开的情况下才能触发关闭
-    mouseLeaveTimeout.value = setTimeout(() => {
+    mouseLeaveTimeout.value = window.setTimeout(() => {
       isAutoExpand.value = false
       expandBar.value = false;
     }, 100);

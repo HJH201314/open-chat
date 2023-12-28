@@ -1,5 +1,5 @@
-import { acceptHMRUpdate, defineStore } from "pinia";
-import { computed, onMounted, ref } from "vue";
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { computed, onMounted, ref } from 'vue';
 import api from '@/api';
 
 // setup 风格的 store
@@ -45,7 +45,7 @@ export const useUserStore  = defineStore('user', () => {
         }
         // 登录成功后，定时查询状态
         clearInterval(heartbeatInterval.value);
-        heartbeatInterval.value = setInterval(async () => {
+        heartbeatInterval.value = window.setInterval(async () => {
           const res = await api.user.current();
           if (!res.data.status || res.data.status != 200) {
             logout(true);

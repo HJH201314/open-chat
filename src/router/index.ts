@@ -1,5 +1,7 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import MessagePage from '@/pages/message/MessagePage.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import MessagePage from '@/pages/message/MessagePage.vue';
+import ManageUserPage from '@/pages/manage/user/ManageUserPage.vue';
+import SettingPage from '@/pages/setting/SettingPage.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,19 +16,14 @@ const router = createRouter({
       component: MessagePage
     },
     {
-      path: '/star',
-      name: 'star',
-      component: () => import('@/pages/star/StarPage.vue'),
-    },
-    {
       path: '/manage/user',
       name: 'manage-user',
-      component: () => import('@/pages/manage/user/ManageUserPage.vue'),
+      component: ManageUserPage,
     },
     {
       path: '/setting',
       name: 'setting',
-      component: () => import('@/pages/setting/SettingPage.vue'),
+      component: SettingPage,
     },
   ]
 })

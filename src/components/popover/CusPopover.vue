@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /* Popover 悬浮显示组件 */
-import { nextTick, ref } from "vue";
-import { useMouseInElement } from "@vueuse/core";
+import { nextTick, ref } from 'vue';
+import { useMouseInElement } from '@vueuse/core';
 
 type PopoverProps = {
   alwaysShow?: boolean; // 调试时使用，让popover一直显示
@@ -55,7 +55,7 @@ function show() {
   });
   // 设置定时，如果超出时间，则尝试关闭popover
   clearInterval(closeInterval.value);
-  closeInterval.value = setInterval(hide, 500);
+  closeInterval.value = window.setInterval(hide, 500);
 }
 
 const closeInterval = ref<number>();
