@@ -5,7 +5,7 @@ export function HexToRgb(str: string) {
   //replace替换查找的到的字符串
   str = str.replace("#", "");
   //match得到查询数组
-  const hxs: any = str.match(/../g);
+  const hxs: (string|number)[] | null = str.match(/../g);
   if (hxs == null) return [0, 0, 0];
   for (let i = 0; i < 3; i++) hxs[i] = parseInt(hxs[i] as string, 16);
   return hxs as number[];
