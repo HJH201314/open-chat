@@ -53,10 +53,12 @@ export const useUserStore  = defineStore('user', () => {
         }, 60000);
         resolve(res.data);
       } else {
+        localStorage.removeItem('up');
         clearInterval(heartbeatInterval.value);
         reject(res);
       }
     }).catch(err => {
+      localStorage.removeItem('up');
       clearInterval(heartbeatInterval.value);
       logout(true);
       reject(err);
@@ -72,6 +74,7 @@ export const useUserStore  = defineStore('user', () => {
     username.value = '未登录';
     permission.value = 0;
     currentUser.value = {};
+    localStorage.removeItem('up'); // 清除自动登录信息
     clearInterval(heartbeatInterval.value);
     if (!force) {
       // 非强制登出才请求后端
