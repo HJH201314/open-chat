@@ -45,9 +45,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
   "author": "HJH201314"
 }
