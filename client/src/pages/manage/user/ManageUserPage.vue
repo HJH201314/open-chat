@@ -173,7 +173,7 @@ function getPermissionName(permissionId: number) {
       </div>
     </section>
     <section class="user-list">
-      <UserItemCard class="user-list-item" v-for="user in users"
+      <UserItemCard class="user-list-item" v-for="user in users" :key="user[0]"
                     :id="user[0]" :username="user[1]" :password="user[2]" :permission="user[3]"
                     @edit="(u) => handleEdit(u)" @delete="(u) => handleDelete(u)" />
     </section>

@@ -265,7 +265,9 @@ function startVoiceRecording() {
                   }, 1000);
                 }
               });
-            } catch (ignore) {}
+            } catch (e) {
+              // ignore
+            }
           }
         };
 
@@ -328,7 +330,7 @@ function handleVoicePanelToggle() {
     <div class="dialog-detail-dialogs">
       <DialogMessage message="Hello! How can I assist you today?" role="bot" v-if="!messageList.length" />
       <!--   消息列表   -->
-      <DialogMessage v-for="item in messageList" :id="item.time" :message="item.content" :role="item.sender" :time="item.time" />
+      <DialogMessage v-for="item, i in messageList" :key="i" :id="item.time" :message="item.content" :role="item.sender" :time="item.time" />
       <DialogMessage id="user-typing-box" v-if="form.inputValue" :message="form.inputValue" role="user" />
       <DialogMessage id="bot-typing-box" v-if="form.outputValue" :message="form.outputValue" role="bot" />
       <div v-if="voicePanel" style="min-height: 3rem;"></div>

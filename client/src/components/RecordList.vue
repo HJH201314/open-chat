@@ -116,7 +116,7 @@ const displayList = computed(() => {
             <div class="select-role">
               <div class="select-role-title">选择角色</div>
               <div class="select-role-list">
-                <div class="select-role-item" v-for="item in roleStore.roles" @click="handleAddRecord(item[0])">
+                <div class="select-role-item" v-for="item, i in roleStore.roles" :key="i" @click="handleAddRecord(item[0])">
                   {{ item[1] }}
                 </div>
               </div>
@@ -126,7 +126,7 @@ const displayList = computed(() => {
         </div>
       </div>
       <div class="dialog-list-container">
-        <div v-for="item in displayList" @click="handleListItemClick(item.id)" class="dialog-list-item" :class="{'dialog-list-item-selected': item.id === currentDialogId}">
+        <div v-for="item in displayList" :key="item.id" @click="handleListItemClick(item.id)" class="dialog-list-item" :class="{'dialog-list-item-selected': item.id === currentDialogId}">
           <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar">
           <div class="dialog-list-item-center">
             <div class="title">
