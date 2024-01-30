@@ -231,6 +231,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tencentcloud-sdk-nodejs-asr:
+        specifier: ^4.0.788
+        version: 4.0.788
     devDependencies:
       '@nestjs/cli':
         specifier: ^10.0.0
@@ -274,6 +277,9 @@ importers:
       prettier:
         specifier: ^3.0.0
         version: 3.0.3
+      run-script-webpack-plugin:
+        specifier: ^0.2.0
+        version: 0.2.0
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -295,6 +301,12 @@ importers:
       typescript:
         specifier: ^5.1.3
         version: 5.1.6
+      webpack:
+        specifier: ^5.90.0
+        version: 5.90.0
+      webpack-node-externals:
+        specifier: ^3.0.0
+        version: 3.0.0
 
 packages:
 
@@ -9112,6 +9124,11 @@ packages:
     dependencies:
       queue-microtask: 1.2.3
 
+  /run-script-webpack-plugin@0.2.0:
+    resolution: {integrity: sha512-SVNNq4jxzjfnaW+HkdTlyH1CWwCuSb/weYfic0D7Y/KnhY27YRYkzgybdzTDEPJlpQ73FDCRDbyBFwNsJMmwWQ==}
+    engines: {node: '>=14'}
+    dev: true
+
   /runscript@1.6.0:
     resolution: {integrity: sha512-lI0ybcwtdC5Wz3aiVtMAK6U5jcTDeLseEBSXcz6ABtQeMmQGpj35dmzpmpy2C9Bn0k2wTjTRLZoya0NFt8Mxsg==}
     engines: {node: '>=4.2.3'}
@@ -9825,6 +9842,16 @@ packages:
 
   /tencentcloud-sdk-nodejs-asr@4.0.764:
     resolution: {integrity: sha512-3SZXo5za1IKfLPf+8M0y9YNIU1g4ISN+nhXI76U00MdpC8F1+l+YvS9v38PI787NeSD2yKELLaID+ST7SaFsXg==}
+    engines: {node: '>=10'}
+    dependencies:
+      tencentcloud-sdk-nodejs-common: 4.0.788
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: false
+
+  /tencentcloud-sdk-nodejs-asr@4.0.788:
+    resolution: {integrity: sha512-KbMdijkHzzyeQc0Z66RwjPOkeNtCAhvmdz3ua8hpj3Qc0r5VC0S/2+RexeA7H9JmEy7p4KLN8TFepvXUlw8xVw==}
     engines: {node: '>=10'}
     dependencies:
       tencentcloud-sdk-nodejs-common: 4.0.788

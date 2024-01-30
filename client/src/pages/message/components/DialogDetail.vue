@@ -241,7 +241,7 @@ function startVoiceRecording() {
                 if (res.data.status == 200) {
                   // 上传成功，开始定时轮询
                   const interval = setInterval(() => {
-                    api.cloud.voice.checkAudioResultUsingGet(res.data.data.taskId).then(res => {
+                    api.cloud.voice.checkAudioResultUsingGet(res.data.data).then(res => {
                       if (res.data.data.status == 2) {
                         // 已经处理完成
                         audioHandling.value = false;
@@ -249,7 +249,7 @@ function startVoiceRecording() {
                         const textResultSplit = res.data.data.result.split(' ');
                         form.inputValue = textResultSplit[textResultSplit.length - 1];
                         if (!form.inputValue) {
-                          ToastManager.info('未识别到语音~');
+                          ToastManager.info('哎呀没听清，再说一次吧~');
                         } else {
                           handleSendMessage();
                         }

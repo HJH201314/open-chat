@@ -1,4 +1,3 @@
 packages:
   - ./client
   - ./server
-  - ./server-nest

@@ -5,7 +5,7 @@ import { createRequest } from "@/api/cloud/base";
  * @param file 录音文件base64字符串
  */
 export const uploadAudioFileUsingPost = (file: string) => {
-  return createRequest<API.AudioTencentUploadResult>('/audio/tencent/upload', {
+  return createRequest<API.AudioTencentUploadResult>('/voice/upload', {
     method: 'POST',
     data: {
       data: file,
@@ -17,8 +17,8 @@ export const uploadAudioFileUsingPost = (file: string) => {
  * 轮询录音识别结果
  * @param taskId 任务ID
  */
-export const checkAudioResultUsingGet = (taskId: number) => {
-  return createRequest<API.AudioTencentCheckResult>('/audio/tencent/check', {
+export const checkAudioResultUsingGet = (taskId: API.TaskId) => {
+  return createRequest<API.AudioTencentCheckResult>('/voice/check', {
     method: 'GET',
     params: {
       taskId: taskId,

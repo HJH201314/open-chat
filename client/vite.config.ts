@@ -43,12 +43,12 @@ export default defineConfig({
     https: true,
     proxy: {
       '/api/cloud': {
-        target: 'http://127.0.0.1:7002/',
+        target: 'http://127.0.0.1:3000/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/cloud/, '')
       },
       '/api/origin': {
-        target: 'http://127.0.0.1:5000/',
+        target: 'http://192.168.17.18:5000/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/origin/, '')
       }
