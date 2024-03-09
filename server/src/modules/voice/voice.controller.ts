@@ -1,8 +1,10 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { VoiceService } from './voice.service';
 import { TaskStatus } from './entity/TaskStatus';
-import { CommonResult } from '../entity/Result';
+import { CommonResult } from '../../entity/Result';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Voice')
 @Controller('voice')
 export class VoiceController {
   constructor(private readonly voiceService: VoiceService) {}

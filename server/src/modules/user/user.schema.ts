@@ -1,0 +1,61 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
+
+/**
+ * UserCredential 用户凭证实体类
+ * 用户身份信息
+ */
+@Schema()
+export class UserCredential {
+  constructor(credential: string, type: string) {
+    this.credential = credential;
+    this.type = type;
+  }
+  /**
+   * 用户凭证
+   */
+  @Prop()
+  credential: string;
+  /**
+   * 用户身份类型（密码、openid等）
+   */
+  @Prop()
+  type: string;
+}
+
+/**
+ * User 用户实体类
+ * 用户基本信息
+ */
+@Schema()
+export class User {
+  /**
+   * 用户名
+   */
+  @Prop()
+  username: string;
+  /**
+   * 手机号
+   */
+  @Prop()
+  phone?: string;
+  /**
+   * 邮箱
+   */
+  @Prop()
+  email?: string;
+  /**
+   * 用户头像
+   */
+  @Prop()
+  avatar?: string;
+  /**
+   * 用户凭据
+   */
+  @Prop({
+    type: [UserCredential],
+  })
+  credential?: UserCredential[];
+}
+export type UserDocument = HydratedDocument<User>;
+export const UserSchema = SchemaFactory.createForClass(User);
