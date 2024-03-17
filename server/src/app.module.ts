@@ -3,11 +3,13 @@ import { VoiceController } from './modules/voice/voice.controller';
 import { VoiceService } from './modules/voice/voice.service';
 import { TencentVoiceRecognitionAdapter } from './modules/voice/adapter/TencentVoiceRecognitionAdapter';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
 import { MONGO_CONFIG } from '@/config/database';
 
 @Module({
   imports: [
+    AuthModule,
     UserModule,
     MongooseModule.forRoot(MONGO_CONFIG.uri, MONGO_CONFIG.config),
   ],

@@ -2,17 +2,17 @@ import { IsIn } from 'class-validator';
 
 export class UserAuthDto {
   /**
-   * the user's name
+   * 用户名
    * @example admin
    */
   username: string;
   /**
-   * the user's password or other credentials
+   * 用户凭据
    * @example 123456
    */
   credential: string;
   /**
-   * user's credentials type (password, openid, etc.)
+   * 用户凭据类型 (password, openid, etc.)
    * @example password
    */
   @IsIn(['password'], {

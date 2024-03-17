@@ -4,16 +4,17 @@ import { AllExceptionFilter } from './common/all-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { CommonResultInterceptor } from '@/common/common-result.interceptor';
 import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // Custom Exception Filter
+  // 自定义异常过滤器
   app.useGlobalFilters(new AllExceptionFilter());
-  // Pack CommonResult
+  // 包装CommonResult
   app.useGlobalInterceptors(new CommonResultInterceptor());
-  // Use class-validator
+  // class-validator验证失败处理
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors) => {
@@ -24,8 +25,10 @@ async function bootstrap() {
       },
     }),
   );
+  // 解析请求头中的cookie
+  app.use(cookieParser());
 
-  // Swagger Config
+  // Swagger 设置
   // Swagger UI: http://localhost:3000/api-docs
   // JSON Doc: http://localhost:3000/api-docs-json
   const swaggerConfig = new DocumentBuilder()

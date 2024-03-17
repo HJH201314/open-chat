@@ -1,11 +1,11 @@
 import { MongooseModuleOptions } from '@nestjs/mongoose/dist/interfaces/mongoose-options.interface';
 
-export type MONGO_CONFIG_TYPE = {
+export type AppMongoConfig = {
   uri: string;
   config: MongooseModuleOptions;
 };
 
-export const MONGO_CONFIG = {
+export const MONGO_CONFIG: AppMongoConfig = {
   uri: 'mongodb://example.com/',
   config: {
     user: 'root',

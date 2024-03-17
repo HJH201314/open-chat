@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { Role } from '@/constants/role.constants';
 
 /**
  * UserCredential 用户凭证实体类
@@ -17,7 +18,7 @@ export class UserCredential {
   @Prop()
   credential: string;
   /**
-   * 用户身份类型（密码、openid等）
+   * 用户身份类型 (password, openid, etc.)
    */
   @Prop()
   type: string;
@@ -56,6 +57,15 @@ export class User {
     type: [UserCredential],
   })
   credential?: UserCredential[];
+  /**
+   * 用户角色
+   */
+  @Prop({
+    type: [Number],
+    get: (roleNum: number[]) => roleNum.map((r) => Role.fromId(r)),
+    set: (roleClass: Role[]) => roleClass.map((r) => r.getRoleId()),
+  })
+  role?: Role[];
 }
 export type UserDocument = HydratedDocument<User>;
 export const UserSchema = SchemaFactory.createForClass(User);
