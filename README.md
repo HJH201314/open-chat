@@ -9,7 +9,9 @@ A chatbot interface based on <a href='https://openai.com/'>OpenAI</a>
 
 <p align='center'>
 
-<img src="https://img.shields.io/badge/Based%20on-Vue.js-teal?logo=vue.js&style=flat-square&color=26a69a" alt="Based On Vue.js">
+<img src="https://img.shields.io/badge/TypeScript-teal?style=flat-square&color=3178c6" alt="Language TS">
+<img src="https://img.shields.io/badge/Client-Vue.js-teal?style=flat-square&color=26a69a" alt="Client On Vue.js">
+<img src="https://img.shields.io/badge/Server-Nest.js-teal?style=flat-square&color=e0234e" alt="Server On Nest.js">
 <img src="https://img.shields.io/github/license/HJH201314/openai-front?logo=dependabot&style=flat-square&color=8bc34a" alt="Github License">
 <img src="https://img.shields.io/badge/Runs on-Web-orange?logo=microsoftedge&style=flat-square&color=ffc107" alt="Runs On Web">
 <img src="https://img.shields.io/github/stars/HJH201314/openai-front?logo=github&style=flat-square&color=ff5722" alt="Github Repo Stars">
