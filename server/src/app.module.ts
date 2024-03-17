@@ -5,13 +5,27 @@ import { TencentVoiceRecognitionAdapter } from './modules/voice/adapter/TencentV
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
-import { MONGO_CONFIG } from '@/config/database';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
-    MongooseModule.forRoot(MONGO_CONFIG.uri, MONGO_CONFIG.config),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env.development.local', '.env.development', '.env'],
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          uri: configService.get<string>('MONGO_URI'),
+          user: configService.get<string>('MONGO_USER'),
+          pass: configService.get<string>('MONGO_PASS'),
+        };
+      },
+    }),
   ],
   controllers: [VoiceController],
   providers: [VoiceService, TencentVoiceRecognitionAdapter],
