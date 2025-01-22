@@ -71,6 +71,7 @@ function handleInputKeydown(e: KeyboardEvent) {
     if (e.shiftKey || e.ctrlKey) {
       form.inputValue += '\n';
     } else {
+      if (e.isComposing) return;
       handleSendMessage();
     }
     e.preventDefault();
