@@ -1,20 +1,23 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 import api from '@/api';
+import { ping } from '@/api/service/userService';
 
 // setup 风格的 store
 // https://pinia.vuejs.org/core-concepts/#Setup-Stores
 /* 用户相关 */
 export const useUserStore  = defineStore('user', () => {
+  const token = ref(localStorage.getItem('token'));
   const avatar = ref('https://avatars.githubusercontent.com/u/24362351?v=4');
   const username = ref('未登录');
   const user_id = ref(-1);
   const permission = ref(0);
   const currentUser = ref<API.LoginResult>({});
 
-  const isLogin = computed(() => {
-    return user_id.value >= 0;
-  });
+  // const isLogin = computed(() => {
+  //   return user_id.value >= 0;
+  // });
+  const isLogin = ref(true);
 
   const heartbeatInterval = ref<number>();
 
@@ -27,7 +30,21 @@ export const useUserStore  = defineStore('user', () => {
         login(ups[0], ups[1]);
       }
     }
+    autoLogin();
   });
+
+  /**
+   * 自动登录逻辑
+   */
+  const autoLogin = () => {
+    ping().catch((err) => {
+      console.log(err);
+      if (err?.response?.headers?.['temp-auth-token']) {
+        localStorage.setItem('token', err.response.headers['temp-auth-token']);
+      }
+    });
+    token.value = localStorage.getItem('token');
+  }
 
   const login = async (_username: string, _password: string, _remember: boolean = false) => new Promise((resolve, reject) => {
     api.user.login({
@@ -83,6 +100,7 @@ export const useUserStore  = defineStore('user', () => {
   }
 
   return {
+    token,
     avatar,
     isLogin,
     user_id,

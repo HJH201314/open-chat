@@ -22,6 +22,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/vue-fontawesome": "^3.0.3",
     "@icon-park/vue-next": "^1.4.2",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@vitejs/plugin-basic-ssl": "^1.0.2",
     "@vueuse/core": "^10.7.0",
     "@vueuse/integrations": "^10.5.0",

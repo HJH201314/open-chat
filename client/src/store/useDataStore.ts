@@ -5,8 +5,8 @@ import { useLocalStorage, useStorage } from '@vueuse/core';
 import type { DialogData, MsgData } from '@/types/data';
 import showToast from '@/components/toast/toast';
 import { recordToMap } from '@/utils/typeUtils';
-import { SERVER_ORIGIN_API_URL } from '@/constants';
 import useRoleStore from '@/store/useRoleStore';
+import { useUserStore } from '@/store/useUserStore';
 
 interface MessageReceiver {
   onMessage: (message: string) => void;
@@ -29,6 +29,7 @@ export const useDataStore  = defineStore('data', () => {
   });
 
   const roleStore = useRoleStore();
+  const userStore = useUserStore();
 
   function getDialogInfo(sessionId: string) {
     return dialogData.value.dialogs![sessionId] ?? {};
@@ -37,11 +38,10 @@ export const useDataStore  = defineStore('data', () => {
   async function addDialog(role: number) {
     try {
       // 获取session_id
-      const res = await api.gpt.getSessionId();
-      console.log(res.headers)
-      if (res.headers['session_id']) {
-        const sessionId = res.headers['session_id'];
-        console.log(sessionId);
+      const { status, data } = await api.chat.getNewSession();
+      const sessionId = data.data;
+      console.log(data);
+      if (status === 200 && data.data) {
         dialogData.value.dialogs![sessionId] = {
           id: sessionId,
           title: '新会话',
@@ -52,10 +52,9 @@ export const useDataStore  = defineStore('data', () => {
           createAt: new Date().toLocaleString(),
         };
       }
-      return res.headers['session_id'];
+      return sessionId;
     } catch (e) {
       showToast({ text: '请求失败，请先登录~', type: 'danger', position: 'top-left' });
-    } finally {
     }
     return '';
   }
@@ -100,16 +99,14 @@ export const useDataStore  = defineStore('data', () => {
     return messageStorage.value[storageKey].messages || [];
   }
 
-  function sendMessageText(sessionId: string, message: string, receiver?: MessageReceiver) {
+  async function sendMessageText(sessionId: string, message: string, receiver?: MessageReceiver) {
     if (message == '') return;
     saveMessage(sessionId, message, 'user', 'text');
-    const url = `${SERVER_ORIGIN_API_URL}/gpt/${sessionId}?question=${message}`;
-    const source = new EventSource(url);
+    const ctrl = new AbortController();
     let fullMessage = '';
-    // EventSource接收消息
-    source.onmessage = function (event) {
+    await api.chat.completionStream(sessionId, message, ctrl.signal, (event) => {
+      console.log('[data]', event.data);
       if (event.data === "[DONE]") { // 当接收到服务器端的结束标记时
-        source.close(); // 关闭EventSource
         saveMessage(sessionId, fullMessage.replace(/^【【【(.+?)】】】/, ''), 'bot', 'text'); // 保存消息
         // 修改标题
         const regex = /^【【【(.+?)】】】/; // 匹配以```开头和结尾的内容
@@ -120,11 +117,12 @@ export const useDataStore  = defineStore('data', () => {
         }
         receiver?.onFinish(fullMessage); // 消息接收完毕回调
       } else {
-        console.log('[data]', event.data);
-        fullMessage += event.data; // 记录已接收的消息
+        let data = event.data;
+        data = data.replaceAll('\\n', '\n');
+        fullMessage += data; // 记录已接收的消息
         receiver?.onMessage(event.data); // 消息接收回调
       }
-    }
+    });
   }
 
   function saveMessage(sessionId: string, message: string, sender: 'user' | 'bot', type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other') {

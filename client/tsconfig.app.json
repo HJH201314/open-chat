@@ -9,6 +9,7 @@
       "@/*": ["./src/*"]
     },
     "jsx": "preserve",
-    "jsxImportSource": "vue"
+    "jsxImportSource": "vue",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
   }
 }

@@ -52,4 +52,16 @@ declare namespace API {
   type RoleSentenceResult = {
     roleSentence?: string;
   }
+
+  /// 以上为旧类型
+
+  interface CommonResponse<T> {
+    code: number;
+    msg: string;
+    data: T;
+  }
+
+  type CommonBooleanResponse = CommonResponse<boolean>;
+  type CommonStringResponse = CommonResponse<string>;
+  type CommonNumberResponse = CommonResponse<number>;
 }

@@ -18,10 +18,10 @@ export const createRequest = <TRes>(path: string, args: AxiosRequestConfig) => {
     ...args,
   };
   if (getActivePinia()) {
-    if (useSettingStore().settings.host) config.baseURL = useSettingStore().settings.host + '/origin';
+    if (useSettingStore().settings.host) config.baseURL = useSettingStore().settings.host + '/next';
   }
   if (!config.headers) config.headers = {};
   config.headers['token'] = localStorage.getItem("token") ?? '';
-  config.headers['Authorization'] = localStorage.getItem("token") ?? '';
+  config.headers['Authorization'] = 'Bearer ' + (localStorage.getItem("token") ?? '');
   return axiosInstance.request<any, AxiosResponse<TRes>>(config);
 }

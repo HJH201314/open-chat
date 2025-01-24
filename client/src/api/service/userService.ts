@@ -1,5 +1,11 @@
 import { createRequest } from "@/api/base";
 
+export const ping = () => {
+  return createRequest('/user/ping', {
+    method: "POST",
+  })
+}
+
 export const login = (p: { username: string, password: string }) => {
   return createRequest<API.DataResult<API.LoginResult>>("/auth/login/", {
     method: "POST",

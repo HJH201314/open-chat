@@ -53,7 +53,7 @@ const renderMessage = computed(() => markdownIt.result.value);
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    margin-left: 5px;
+    margin-inline: 2px;
     &__user {
       align-items: flex-end;
     }

@@ -14,9 +14,9 @@ function useMarkdownIt(text: MaybeRefOrGetter<string>) {
 
   const result = computed(() => {
     let value = <string>toValue(text);
-    console.log(value)
+    // console.log(value)
     value = value.replace(/<br>/g, "\n");
-    console.log(value)
+    // console.log(value)
     let res = markdownIt.render(value);
     res = res.substring(0, res.length - 1); // 删除最后一个莫名其妙的字符
     return res;
