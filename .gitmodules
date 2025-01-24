@@ -1,0 +1,3 @@
+[submodule "server"]
+	path = server
+	url = git@github.com:HJH201314/open-chat-backend.git
