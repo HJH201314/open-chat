@@ -64,4 +64,13 @@ declare namespace API {
   type CommonBooleanResponse = CommonResponse<boolean>;
   type CommonStringResponse = CommonResponse<string>;
   type CommonNumberResponse = CommonResponse<number>;
+
+  type UserLoginResult = {
+    id?: number;
+    username?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }
+
+  type UserLoginResponse = CommonResponse<UserLoginResult>
 }

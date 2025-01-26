@@ -126,7 +126,8 @@ function handleDeleteDialog() {
     }
   }).then(res => {
     if (res) {
-      dataStore.delDialog(form.sessionId);
+      dataStore.delDialog(form.sessionId);    // 本地删除
+      api.chat.deleteSession(form.sessionId); // 远程删除
       emit('back');
     }
   });

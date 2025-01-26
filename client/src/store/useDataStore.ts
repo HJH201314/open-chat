@@ -38,7 +38,7 @@ export const useDataStore  = defineStore('data', () => {
   async function addDialog(role: number) {
     try {
       // 获取session_id
-      const { status, data } = await api.chat.getNewSession();
+      const { status, data } = await api.chat.createSession();
       const sessionId = data.data;
       console.log(data);
       if (status === 200 && data.data) {

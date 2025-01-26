@@ -1,7 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 import api from '@/api';
-import { ping } from '@/api/service/userService';
 
 // setup 风格的 store
 // https://pinia.vuejs.org/core-concepts/#Setup-Stores
@@ -12,12 +11,11 @@ export const useUserStore  = defineStore('user', () => {
   const username = ref('未登录');
   const user_id = ref(-1);
   const permission = ref(0);
-  const currentUser = ref<API.LoginResult>({});
+  const currentUser = ref<API.UserLoginResult>({});
 
-  // const isLogin = computed(() => {
-  //   return user_id.value >= 0;
-  // });
-  const isLogin = ref(true);
+  const isLogin = computed(() => {
+    return user_id.value >= 0;
+  });
 
   const heartbeatInterval = ref<number>();
 
@@ -30,32 +28,19 @@ export const useUserStore  = defineStore('user', () => {
         login(ups[0], ups[1]);
       }
     }
-    autoLogin();
   });
-
-  /**
-   * 自动登录逻辑
-   */
-  const autoLogin = () => {
-    ping().catch((err) => {
-      console.log(err);
-      if (err?.response?.headers?.['temp-auth-token']) {
-        localStorage.setItem('token', err.response.headers['temp-auth-token']);
-      }
-    });
-    token.value = localStorage.getItem('token');
-  }
 
   const login = async (_username: string, _password: string, _remember: boolean = false) => new Promise((resolve, reject) => {
     api.user.login({
       username: _username,
       password: _password,
     }).then(res => {
-      if (res.data.status === 200) {
+      if (res.data.code === 200) {
         user_id.value = res.data.data.id ?? -1;
         username.value = _username ?? '匿名用户';
-        permission.value = res.data.data.permission ?? 0;
+        permission.value = 0; // TODO
         currentUser.value = res.data.data;
+        localStorage.setItem('token', res.headers['oc-auth-token'] || '');
         if (_remember) {
           // 记忆自动登录信息
           localStorage.setItem('up', btoa(`${_username},${_password},${new Date().getTime()+3*24*60*60*1000}`));
@@ -63,8 +48,8 @@ export const useUserStore  = defineStore('user', () => {
         // 登录成功后，定时查询状态
         clearInterval(heartbeatInterval.value);
         heartbeatInterval.value = window.setInterval(async () => {
-          const res = await api.user.current();
-          if (!res.data.status || res.data.status != 200) {
+          const res = await api.user.ping();
+          if (!res) {
             logout(true);
           }
         }, 60000);

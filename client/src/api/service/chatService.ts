@@ -1,12 +1,19 @@
-/* 获取session_id作为一个对话的唯一标识 */
 import { createRequest } from '@/api/base';
 import { type EventSourceMessage, EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source';
 import { SERVER_NEXT_API_URL } from '@/constants';
 
-export const getNewSession = () => createRequest<
+/* 创建对话，返回一个 session_id 作为对话的唯一标识 */
+export const createSession = () => createRequest<
   API.CommonStringResponse
 >("/chat/session/new", {
   method: "GET",
+});
+
+/* 删除对话，成功返回 true */
+export const deleteSession = (sessionId: string) => createRequest<
+  API.CommonBooleanResponse
+>(`/chat/session/del/${sessionId}`, {
+  method: "POST",
 });
 
 export const completionStream = async (
