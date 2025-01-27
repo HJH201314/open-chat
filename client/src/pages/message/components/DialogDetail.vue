@@ -17,6 +17,7 @@ import { DialogManager } from '@/components/dialog';
 import variables from '@/assets/variables.module.scss';
 import CusCircularProgress from '@/components/progress/CusCircularProgress.vue';
 import Spinning from '@/components/spinning/Spinning.vue';
+import CusToggle from '@/components/toggle/CusToggle.vue';
 
 const dataStore = useDataStore();
 
@@ -39,6 +40,7 @@ const messageList = ref([] as MsgInfo[]);
 
 const form = reactive({
   sessionId: ref(''),
+  withContext: ref(false),
   inputValue: ref(''),
   outputValue: ref(''),
 });
@@ -46,7 +48,7 @@ const form = reactive({
 function scrollToBottom() {
   document.querySelector(`#bottom-line`)?.scrollIntoView({
     behavior: "smooth",
-    block: "end",
+    block: "start",
     inline: "nearest",
   });
 }
@@ -55,12 +57,19 @@ watch(() => props.dialogId, (v) => {
   if (props.dialogId != '') {
     dialogInfo.value = dataStore.getDialogInfo(v);
     form.sessionId = v;
+    form.withContext = dialogInfo.value.withContext ?? false;
     messageList.value = dataStore.getMessageList(v);
     nextTick(() => {
       scrollToBottom();
     });
   }
 }, { immediate: true });
+
+watch(() => form.withContext, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    dataStore.toggleDialogContext(form.sessionId, newVal);
+  }
+});
 
 const emit = defineEmits<{
   (e: 'back'): void;
@@ -84,13 +93,16 @@ function handleSendMessage() {
   }
   if (!form.sessionId || !form.inputValue) return;
   dataStore.sendMessageText(form.sessionId, form.inputValue, {
-    onMessage: (msg) => {
+    onSaveUserMsg() {
+      messageList.value = dataStore.getMessageList(form.sessionId);
+    },
+    onMessage(msg: string) {
       form.outputValue += msg;
-      if (form.outputValue.match(/^【【【(.+?)】】】/)) {
-        form.outputValue = form.outputValue.replace(/^【【【(.+?)】】】/, '');
+      if (form.outputValue.match(/^\[title:(.+?)]/)) {
+        form.outputValue = form.outputValue.replace(/^\[title:(.+?)]/, '');
       }
     },
-    onFinish: (fullMessage) => {
+    onFinish(fullMessage: string) {
       form.outputValue = '';
       messageList.value = dataStore.getMessageList(form.sessionId);
       scrollToBottom();
@@ -310,15 +322,18 @@ function handleVoicePanelToggle() {
 <template>
   <div class="dialog-detail">
     <div class="dialog-detail-actions">
-      <IconButton style="flex-shrink: 0;" @click="$emit('back')" >
-        <Back size="16" />
-      </IconButton>
-      <span class="dialog-detail-actions-title">
-        {{ dialogInfo.title }}
-      </span>
-      <span class="dialog-detail-actions-subtitle">
-        {{ messageList.length }} 条消息
-      </span>
+      <div class="dialog-detail-actions-area-left">
+        <IconButton style="flex-shrink: 0;" @click="$emit('back')" >
+          <Back size="16" />
+        </IconButton>
+        <span class="dialog-detail-actions-title">
+          {{ dialogInfo.title }}
+        </span>
+          <span class="dialog-detail-actions-subtitle">
+          {{ messageList.length }} 条消息
+        </span>
+        <CusToggle v-model="form.withContext" highlight label="上下文" style="scale: 0.9"></CusToggle>
+      </div>
       <IconButton style="flex-shrink: 0;" @click="handleEditDialog">
         <Edit size="16" />
       </IconButton>
@@ -330,13 +345,16 @@ function handleVoicePanelToggle() {
       </IconButton>
     </div>
     <div class="dialog-detail-dialogs">
-      <DialogMessage message="Hello! How can I assist you today?" role="bot" v-if="!messageList.length" />
+      <!--   列表底部定位（此列表为 column-reverse）   -->
+      <div id="bottom-line"></div>
       <!--   消息列表   -->
-      <DialogMessage v-for="item, i in messageList" :key="i" :id="item.time" :message="item.content" :role="item.sender" :time="item.time" />
-      <DialogMessage id="user-typing-box" v-if="form.inputValue" :message="form.inputValue" role="user" />
       <DialogMessage id="bot-typing-box" v-if="form.outputValue" :message="form.outputValue" role="bot" />
+      <DialogMessage id="user-typing-box" v-if="form.inputValue" :message="form.inputValue" role="user" />
+      <DialogMessage v-for="(item, i) in messageList" :key="i" :id="item.time" :message="item.content" :role="item.sender" :time="item.time" />
+      <DialogMessage message="Hello! How can I assist you today?" role="bot" v-if="!messageList.length" />
+      <!--   列表顶部定位   -->
+      <div id="top-line"></div>
       <div v-if="voicePanel" style="min-height: 3rem;"></div>
-      <div id="bottom-line"></div><!--定位-->
     </div>
     <div class="dialog-detail-inputs">
       <textarea class="dialog-detail-inputs-textarea" @keydown="(e) => handleInputKeydown(e)" v-model="form.inputValue" placeholder="随便问点啥(●'◡'●)" />
@@ -397,6 +415,15 @@ function handleVoicePanelToggle() {
     gap: .5rem;
     margin: .25rem .25rem 0 .25rem;
 
+    &-area-left {
+      margin-right: auto;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: .5rem;
+    }
+
     &-title {
       text-align: center;
       font-weight: bold;
@@ -412,7 +439,6 @@ function handleVoicePanelToggle() {
     }
 
     &-subtitle {
-      margin-right: auto;
       font-size: .75rem;
       flex-shrink: 0;
     }
@@ -422,7 +448,7 @@ function handleVoicePanelToggle() {
     flex: 1;
     overflow-y: auto;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: .5rem;
   }
 

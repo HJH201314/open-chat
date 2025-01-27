@@ -9,6 +9,8 @@ import useRoleStore from '@/store/useRoleStore';
 import { useUserStore } from '@/store/useUserStore';
 
 interface MessageReceiver {
+  // 用户输入保存后的回调
+  onSaveUserMsg: () => void;
   onMessage: (message: string) => void;
   onFinish: (fullMessage: string) => void;
 }
@@ -63,6 +65,10 @@ export const useDataStore  = defineStore('data', () => {
     dialogData.value.dialogs![dialogId].title = newTitle;
   }
 
+  function toggleDialogContext(dialogId: string, isOpen: boolean) {
+    dialogData.value.dialogs![dialogId].withContext = isOpen;
+  }
+
   async function delDialog(sessionId: string) {
     return new Promise((resolve, reject) => {
       // 本地删除
@@ -90,26 +96,28 @@ export const useDataStore  = defineStore('data', () => {
     })) as UnwrapNestedRefs<MsgData>;
   }
 
-  function getMessageList(sessionId: string) {
+  function getMessageList(sessionId: string, reversed: boolean = true) {
     console.log(messageStorage.value)
     const storageKey = `dialog-${sessionId}`;
     if (!messageStorage.value[storageKey]) {
       loadMessagesFromStorage(sessionId);
     }
-    return messageStorage.value[storageKey].messages || [];
+    const messages = messageStorage.value[storageKey].messages ?? [];
+    return (reversed ? messages.toReversed() : messages);
   }
 
   async function sendMessageText(sessionId: string, message: string, receiver?: MessageReceiver) {
     if (message == '') return;
     saveMessage(sessionId, message, 'user', 'text');
+    receiver?.onSaveUserMsg();
     const ctrl = new AbortController();
     let fullMessage = '';
-    await api.chat.completionStream(sessionId, message, ctrl.signal, (event) => {
+    await api.chat.completionStream(sessionId, message, getDialogInfo(sessionId).withContext ?? true, ctrl.signal, (event) => {
       console.log('[data]', event.data);
       if (event.data === "[DONE]") { // 当接收到服务器端的结束标记时
-        saveMessage(sessionId, fullMessage.replace(/^【【【(.+?)】】】/, ''), 'bot', 'text'); // 保存消息
+        saveMessage(sessionId, fullMessage.replace(/^\[title:(.+?)]/, ''), 'bot', 'text'); // 保存消息
         // 修改标题
-        const regex = /^【【【(.+?)】】】/; // 匹配以```开头和结尾的内容
+        const regex = /^\[title:(.+?)]/; // 匹配以```开头和结尾的内容
         const matches = fullMessage.match(regex);
         if (matches){
           const title = matches[1];
@@ -158,6 +166,7 @@ export const useDataStore  = defineStore('data', () => {
     getDialogInfo,
     addDialog,
     editDialogTitle,
+    toggleDialogContext,
     delDialog,
     getMessageList,
     sendMessageText,

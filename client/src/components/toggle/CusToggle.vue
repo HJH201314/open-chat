@@ -1,11 +1,13 @@
 <script setup lang="ts">
 
-import { ref, watch } from "vue";
+import { computed, ref, watch } from 'vue';
 
 type ToggleProps = {
-  modelValue?: boolean;
+  modelValue?: boolean; // 双向绑定
   label?: string;
   disabled?: boolean;
+  highlight?: boolean; // 选中时是否高亮文字
+  labelPosition?: 'top' | 'bottom' | 'left' | 'right';
 }
 
 const props = withDefaults(defineProps<ToggleProps>(), {
@@ -16,6 +18,13 @@ const emit = defineEmits<{
 }>();
 
 const active = ref(props.modelValue);
+const labelClasses = computed(() => {
+  const classes = [];
+  if (props.highlight && active.value) {
+    classes.push('toggle-label--highlight')
+  }
+  return classes;
+});
 
 watch(() => props.modelValue, (newVal) => {
   active.value = newVal;
@@ -35,7 +44,7 @@ function toggle() {
     <div class="toggle-container" :class="{'active': active}" @click="toggle">
       <div class="toggle-front" :class="{'active': active}" />
     </div>
-    <label class="toggle-label" v-if="label">{{ label }}</label>
+    <label class="toggle-label" :class="labelClasses" v-if="label">{{ label }}</label>
     <slot name="after"></slot>
   </div>
 </template>
@@ -74,6 +83,11 @@ function toggle() {
       background-color: $color-primary-lighter;
     }
   }
-  &-label {}
+  &-label {
+    &--highlight {
+      transition: color .2s $ease-out-circ;
+      color: $color-primary;
+    }
+  }
 }
 </style>

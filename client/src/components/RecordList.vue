@@ -43,7 +43,7 @@ async function handleAddRecord(roleId?: number) {
   if (roleId) {
     dataStore.sendMessageText(sessionId, (await roleStore.getRoleSentence(roleId) +
       `Current Time: ${new Date().toLocaleString()}. ` +
-      '请将我后续发送的第一句话总结为一个标题（十个字左右），添加到你回复的开头，输出格式为【【【总结出的标题】】】。' +
+      '请将我后续发送的第一句话总结为一个标题（十个字左右），添加到你回复的开头，输出格式为[title:总结出的标题]。' +
       // '当你认为聊天主题发生变化时，将聊天内容总结为一个标题（十个字左右），添加到你回复的开头，输出格式为【【【总结出的标题】】】。' +
       `If you are ready, please only output：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`) ?? '');
   }
@@ -116,7 +116,7 @@ const displayList = computed(() => {
             <div class="select-role">
               <div class="select-role-title">选择角色</div>
               <div class="select-role-list">
-                <div class="select-role-item" v-for="item, i in roleStore.roles" :key="i" @click="handleAddRecord(item[0])">
+                <div class="select-role-item" v-for="(item, i) in roleStore.roles" :key="i" @click="handleAddRecord(item[0])">
                   {{ item[1] }}
                 </div>
               </div>

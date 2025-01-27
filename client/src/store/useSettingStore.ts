@@ -1,12 +1,14 @@
-import { acceptHMRUpdate, defineStore } from "pinia";
-import { useLocalStorage } from "@vueuse/core";
-import { computed } from "vue";
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { useLocalStorage } from '@vueuse/core';
+import { computed } from 'vue';
 
 export type ChatSetting = {
   host?: string;
   localCache?: boolean; // 本地对话数据缓存
   roleRemember?: boolean; // 是否使用默认角色
   roleDefaultId?: string; // 默认角色
+  timeDisplayInDialogList?: string;
+  timeDisplayInMessageList?: string;
 
   /* 语音输入相关 */
   enableVoiceToText?: boolean; // 是否启用语音输入
@@ -14,7 +16,7 @@ export type ChatSetting = {
   voiceCloudAppId?: string; // 云服务AppID
   voiceCloudSecretId?: string; // 云服务SecretId
   voiceCloudSecretKey?: string; // 云服务SecretKey
-}
+};
 
 const defaultSetting: ChatSetting = {
   host: '/api',
@@ -23,11 +25,13 @@ const defaultSetting: ChatSetting = {
   roleDefaultId: '1',
   enableVoiceToText: true,
   enableTextToVoice: false,
+  timeDisplayInDialogList: 'yyyy-MM-dd hh:mm:ss',
+  timeDisplayInMessageList: 'yyyy-MM-dd hh:mm:ss',
 
   voiceCloudAppId: import.meta.env.VITE_CLOUD_VOICE_APPID,
   voiceCloudSecretId: import.meta.env.VITE_CLOUD_VOICE_SECRET_ID,
   voiceCloudSecretKey: import.meta.env.VITE_CLOUD_VOICE_SECRET_KEY,
-}
+};
 
 /* 设置相关 */
 export const useSettingStore = defineStore('setting', () => {
@@ -45,7 +49,7 @@ export const useSettingStore = defineStore('setting', () => {
 
   function saveSettings(newSettings: ChatSetting) {
     settingStorage.value = { ...defaultSetting, ...settingStorage.value, ...newSettings }; // 第一个放defaultSetting是便于程序更新设置也能更新默认值
-    console.log(newSettings)
+    console.log(newSettings);
     return Object.keys(newSettings).length;
   }
 
@@ -58,7 +62,7 @@ export const useSettingStore = defineStore('setting', () => {
       settingStorage.value[key] = defaultSetting[key];
     } else {
       settingStorage.value = { ...defaultSetting }; // 直接赋值会导致defaultSetting被引用从而被修改，因此需要解构
-      console.log('reset', settingStorage.value, defaultSetting)
+      console.log('reset', settingStorage.value, defaultSetting);
     }
   }
 
@@ -67,7 +71,7 @@ export const useSettingStore = defineStore('setting', () => {
     saveSetting,
     saveSettings,
     resetSetting,
-  }
+  };
 });
 
 if (import.meta.hot) {

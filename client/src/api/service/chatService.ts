@@ -19,6 +19,7 @@ export const deleteSession = (sessionId: string) => createRequest<
 export const completionStream = async (
   sessionId: string,
   msg: string,
+  withContext: boolean,
   signal: AbortSignal,
   onMessage: (e: EventSourceMessage) => void,
 ) => {
@@ -29,6 +30,7 @@ export const completionStream = async (
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
+      enable_context: withContext,
       question: msg,
     }),
     signal: signal,

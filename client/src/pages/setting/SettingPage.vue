@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+import CusDropdown from '@/components/dropdown/CusDropdown.vue';
 import CusInput from '@/components/input/CusInput.vue';
 import { ref, toValue, watch } from 'vue';
 import DiliButton from '@/components/button/DiliButton.vue';
@@ -82,6 +83,13 @@ function handleClearRoleCache() {
           <span class="setting-list-item__title">对话缓存</span>
           <span class="setting-list-item__value">
             <CusToggle v-model="editingValue.localCache" />
+          </span>
+        </div>
+        <hr />
+        <div class="setting-list-item">
+          <span class="setting-list-item__title">显示日期/时间</span>
+          <span class="setting-list-item__value">
+            <CusDropdown :options="[{value: 'yyyy-MM-dd', label: 'yyyy-MM-dd'}, {value: 'yyyy-MM-dd hh:mm:ss', label: 'yyyy-MM-dd hh:mm:ss'}]" v-model="editingValue.timeDisplayInDialogList" />
           </span>
         </div>
         <hr />

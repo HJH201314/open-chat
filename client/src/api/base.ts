@@ -1,4 +1,5 @@
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { useUserStore } from '@/store/useUserStore';
+import { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import axios from 'axios';
 import { SERVER_ORIGIN_API_URL } from "@/constants";
 import { useSettingStore } from "@/store/useSettingStore";
@@ -10,6 +11,24 @@ const axiosInstance = axios.create({
   timeout: 10000,
   withCredentials: false,
 });
+
+axiosInstance.interceptors.response.use((resp) => {
+  if (resp.status === 200) {
+    if (getActivePinia()) {
+      const userStore = useUserStore();
+      if (userStore.loginStatus == 'offline') {
+        userStore.loginStatus = 'login';
+      }
+    }
+  }
+  return resp;
+}, (error) => {
+  if (error.status === 401) {
+    if (getActivePinia()) {
+      useUserStore().logout();
+    }
+  }
+}, {});
 
 /* 创建请求 */
 export const createRequest = <TRes>(path: string, args: AxiosRequestConfig) => {

@@ -1,0 +1,129 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+
+type DropdownProps = {
+  modelValue?: string; // 双向绑定
+  options: { label: string; value: string }[]; // 下拉选项
+  placeholder?: string; // 占位符
+  disabled?: boolean; // 是否禁用
+};
+
+const props = withDefaults(defineProps<DropdownProps>(), {
+  placeholder: '请选择',
+});
+
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void;
+}>();
+
+const isOpen = ref(false);
+const selectedValue = ref(props.modelValue);
+
+const selectedLabel = computed(() => {
+  const selectedOption = props.options.find((option) => option.value === selectedValue.value);
+  return selectedOption ? selectedOption.label : props.placeholder;
+});
+
+function toggleDropdown() {
+  if (!props.disabled) {
+    isOpen.value = !isOpen.value;
+  }
+}
+
+function selectOption(value: string) {
+  selectedValue.value = value;
+  emit('update:modelValue', value);
+  isOpen.value = false;
+}
+</script>
+
+<template>
+  <div class="dropdown" :class="{ active: isOpen, disabled: disabled }">
+    <div class="dropdown-toggle" :class="{ 'dropdown-toggle--active': isOpen }" @click="toggleDropdown">
+      {{ selectedLabel }}
+      <span class="arrow"></span>
+    </div>
+    <ul v-if="isOpen" class="dropdown-menu">
+      <li
+        v-for="option in options"
+        :key="option.value"
+        @click="selectOption(option.value)"
+        :class="{ 'selected': option.value === selectedValue }"
+      >
+        {{ option.label }}
+      </li>
+    </ul>
+  </div>
+</template>
+
+<style scoped lang="scss">
+@import '@/assets/variables.module';
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  &-toggle {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: $color-grey-100;
+    transition: background-color 0.2s $ease-out-circ;
+
+    &--active {
+      background-color: $color-grey-300;
+    }
+
+    &:hover {
+      border-color: $color-primary;
+    }
+  }
+
+  &-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border-radius: .5rem;
+    background-color: white;
+    list-style: none;
+    padding: 0;
+    box-shadow: $box-shadow;
+    overflow: hidden;
+    z-index: 1000;
+
+    li {
+      padding: .25rem .5rem;
+      cursor: pointer;
+      transition: background-color 0.2s $ease-out-circ;
+      background-color: white;
+
+      &:hover {
+        background-color: $color-grey-200;
+      }
+
+      &.selected {
+        color: $color-primary;
+      }
+    }
+  }
+
+  .arrow {
+    margin-left: .25rem;
+    border: solid $color-grey-500;
+    border-width: 0 .125rem .125rem 0;
+    display: inline-block;
+    padding: .175rem;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+}
+</style>

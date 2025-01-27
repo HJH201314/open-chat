@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from '@icon-park/vue-next';
@@ -41,10 +40,10 @@ type Entry = {
 const entries = computed<Entry[]>(() => {
   let data = [
     {
-      key: "dialog",
-      name: "对话",
+      key: 'dialog',
+      name: '对话',
       icon: 'message',
-      href: "/message",
+      href: '/message',
     },
     // {
     //   key: "start",
@@ -53,10 +52,10 @@ const entries = computed<Entry[]>(() => {
     //   href: "/star",
     // },
     {
-      key: "user",
-      name: "用户",
+      key: 'user',
+      name: '用户',
       icon: 'user',
-      href: "/manage/user",
+      href: '/manage/user',
       onClick() {
         if (userStore.permission == 2) {
           if ('/manage/user' == route.path) return;
@@ -64,13 +63,13 @@ const entries = computed<Entry[]>(() => {
         } else {
           ToastManager.danger('权限不足');
         }
-      }
+      },
     },
     {
       key: 'setting',
-      name: "设置",
+      name: '设置',
       icon: 'setting-two',
-      href: "/setting",
+      href: '/setting',
       onClick() {
         if (isLargeScreen.value) {
           // 如果是大屏幕，打开模态框
@@ -80,7 +79,7 @@ const entries = computed<Entry[]>(() => {
           if ('/setting' == route.path) return;
           router.push('/setting');
         }
-      }
+      },
     },
   ];
   if (userStore.permission != 2) {
@@ -93,10 +92,12 @@ const entries = computed<Entry[]>(() => {
 
 const mouseEnterTimeout = ref<number>();
 const mouseLeaveTimeout = ref<number>();
+
 function handleMouseEnter(e: MouseEvent) {
   clearTimeout(mouseLeaveTimeout.value);
   clearTimeout(mouseEnterTimeout.value);
-  if (!expandBar.value && isLargeScreen.value) { // 如果已经打开，不能重复触发
+  if (!expandBar.value && isLargeScreen.value) {
+    // 如果已经打开，不能重复触发
     mouseEnterTimeout.value = window.setTimeout(() => {
       isAutoExpand.value = true;
       expandBar.value = true;
@@ -110,15 +111,16 @@ function handleMouseLeave(e: MouseEvent | TouchEvent) {
   if (expandBar.value && isAutoExpand.value) {
     // 只有在打开并且是自动打开的情况下才能触发关闭
     mouseLeaveTimeout.value = window.setTimeout(() => {
-      isAutoExpand.value = false
+      isAutoExpand.value = false;
       expandBar.value = false;
     }, 100);
   }
 }
 
 const router = useRouter();
+
 function handleEntryClick(e: Event, entry: Entry) {
-  showToast({text: entry.name, position: 'top'});
+  showToast({ text: entry.name, position: 'top' });
   if (entry.onClick) {
     entry.onClick();
   } else if (entry.href) {
@@ -147,39 +149,61 @@ function handleGithubClick() {
 }
 
 const settingStore = useSettingStore();
+
 function handleApiClick() {
   window.open(settingStore.settings.host + '/docs/api/');
 }
-
 </script>
 
 <template>
   <div v-show="showSideBar" class="sidebar">
     <!-- 占位，避免sidebar-body变化（展开）时布局变化 -->
     <div v-show="showSideBar" class="sidebar-placeholder"></div>
-    <div v-show="showSideBar" class="sidebar-body" :class="{'sidebar-body-expand': expandBar}"
-         @mouseleave="handleMouseLeave">
+    <div
+      v-show="showSideBar"
+      class="sidebar-body"
+      :class="{ 'sidebar-body-expand': expandBar }"
+      @mouseleave="handleMouseLeave"
+    >
       <div class="sidebar-top">
-        <div v-if="expandBar" class="sidebar-logo sidebar-logo-animation">
-          OpenChat
-        </div>
-        <div class="sidebar-expand" style="aspect-ratio: 1;" @click="() => expandBar = !expandBar">
+        <div v-if="expandBar" class="sidebar-logo sidebar-logo-animation">OpenChat</div>
+        <div class="sidebar-expand" style="aspect-ratio: 1" @click="() => (expandBar = !expandBar)">
           <MenuUnfold v-if="!expandBar" size="24"></MenuUnfold>
           <MenuFold v-else size="24"></MenuFold>
         </div>
       </div>
       <div class="sidebar-entries" @mouseenter="handleMouseEnter" @mousemove="handleMouseEnter">
-        <div v-for="entry in entries" :key="entry.key" class="sidebar-entry" :class="{'sidebar-entry-focus': entry.href == route.path}" @click="(e) => handleEntryClick(e, entry)">
-          <component :is="entry.icon" v-if="!entry.href || entry.href != route.path" class="sidebar-entry-icon" theme="outline" size="24"></component>
-          <component :is="entry.icon" v-else class="sidebar-entry-icon sidebar-entry-icon-focus" theme="outline" size="24"></component>
-          <span class="sidebar-entry-name" :class="{'sidebar-entry-name-ext': expandBar}">{{ entry.name }}</span>
+        <div
+          v-for="entry in entries"
+          :key="entry.key"
+          class="sidebar-entry"
+          :class="{ 'sidebar-entry-focus': entry.href == route.path }"
+          @click="(e) => handleEntryClick(e, entry)"
+        >
+          <component
+            :is="entry.icon"
+            v-if="!entry.href || entry.href != route.path"
+            class="sidebar-entry-icon"
+            theme="outline"
+            size="24"
+          ></component>
+          <component
+            :is="entry.icon"
+            v-else
+            class="sidebar-entry-icon sidebar-entry-icon-focus"
+            theme="outline"
+            size="24"
+          ></component>
+          <span class="sidebar-entry-name" :class="{ 'sidebar-entry-name-ext': expandBar }">{{ entry.name }}</span>
         </div>
       </div>
       <Tooltip position="right" class="sidebar-entry-login" :text="userStore.isLogin ? '退出登录' : '登录'">
         <div @click="handleLogin" class="sidebar-entry">
           <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
           <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
-          <span class="sidebar-entry-name" :class="{'sidebar-entry-name-ext': expandBar}">{{ userStore.isLogin ? '退出登录' : '登录' }}</span>
+          <span class="sidebar-entry-name" :class="{ 'sidebar-entry-name-ext': expandBar }">{{
+            userStore.isLogin ? '退出登录' : '登录'
+          }}</span>
         </div>
       </Tooltip>
       <div class="sidebar-footer">
@@ -194,11 +218,17 @@ function handleApiClick() {
           </div>
         </Tooltip>
       </div>
-      <hr style="background: #4db6ac; height: 1px; width: 80%;" />
-      <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin(): void 0">
+      <hr style="background: #4db6ac; height: 1px; width: 80%" />
+      <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
         <div class="sidebar-avatar-img">
-          <img src="https://avatars.githubusercontent.com/u/24362351?v=4" alt="avatar"/>
-          <div class="sidebar-avatar-status" :class="{'sidebar-avatar-status--logout': !userStore.isLogin}"></div>
+          <img src="/favicon.ico" alt="avatar" />
+          <div
+            class="sidebar-avatar-status"
+            :class="{
+              'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
+              'sidebar-avatar-status--offline': userStore.loginStatus == 'offline',
+            }"
+          ></div>
         </div>
         <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
       </div>
@@ -211,8 +241,9 @@ function handleApiClick() {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
-@import "@/assets/functions";
+@import '@/assets/variables.module';
+@import '@/assets/functions';
+
 .sidebar {
   &-placeholder {
     width: 3.5rem;
@@ -226,15 +257,15 @@ function handleApiClick() {
     background-color: $color-teal-20;
     height: 100%;
     width: 3.5rem;
-    padding: .5rem .5rem 1rem .5rem;
+    padding: 0.5rem 0.5rem 1rem 0.5rem;
     text-align: center;
     // box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
     // border-right: 1px solid $color-grey-200;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: .5rem;
-    transition: width .25s $ease-out-circ;
+    gap: 0.5rem;
+    transition: width 0.25s $ease-out-circ;
     z-index: 999;
 
     &-expand {
@@ -249,17 +280,31 @@ function handleApiClick() {
     flex-direction: row;
     justify-content: space-between;
   }
+
   &-logo {
     flex: 1;
     font-size: 24px;
+
     &-animation {
       // background-image: linear-gradient(-135deg, #41e0a3, #56d8c0, #dc8bc3, #56d8c0, #41e0a3, #56d8c0, #dc8bc3, #56d8c0, #41e0a3);
-      background-image: linear-gradient(-135deg, #418ae0, #56a0d8, #dc8bc3, #56a0d8, #418ae0, #56a0d8, #dc8bc3, #56a0d8, #418ae0);
-      -webkit-text-fill-color: rgba(0,0,0,0);
+      background-image: linear-gradient(
+        -135deg,
+        #418ae0,
+        #56a0d8,
+        #dc8bc3,
+        #56a0d8,
+        #418ae0,
+        #56a0d8,
+        #dc8bc3,
+        #56a0d8,
+        #418ae0
+      );
+      -webkit-text-fill-color: rgba(0, 0, 0, 0);
       background-clip: text;
       background-size: 200% 200%;
       animation: text-masked-animation 3s infinite linear;
     }
+
     @keyframes text-masked-animation {
       0% {
         background-position: 0 -100%;
@@ -269,15 +314,18 @@ function handleApiClick() {
       }
     }
   }
+
   &-expand {
     display: flex;
-    padding: .5rem;
-    border-radius: .5rem;
-    transition: background-color .2s $ease-out-circ;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s $ease-out-circ;
     cursor: pointer;
+
     &:not(&-focus):hover {
       background: shade-color($color-teal-20, 5%);
     }
+
     &:not(&-focus):active {
       background: shade-color($color-teal-20, 10%);
     }
@@ -285,34 +333,43 @@ function handleApiClick() {
 
   &-avatar {
     cursor: pointer;
-    padding: .5rem 0 !important; // 取消sidebar-entry的padding
+    padding: 0.5rem 0 !important; // 取消sidebar-entry的padding
+
+    &:hover &-img > img {
+      transform: rotate(-360deg); // 头像旋转
+    }
 
     &-img {
       position: relative;
+
       > img {
         width: 2.25rem;
         height: 2.25rem;
         border-radius: 50%;
-        transition: transform .2s $ease-out-circ;
-        &:hover {
-          transform: rotate(-360deg);
-        }
+        transition: transform 0.2s $ease-out-circ;
       }
     }
+
     &-status {
       position: absolute;
       right: 0;
       bottom: 0;
-      width: .5rem;
-      height: .5rem;
+      width: 0.5rem;
+      height: 0.5rem;
       border-radius: 50%;
       box-sizing: content-box;
       border: 2px solid $color-teal-20;
       background-color: $color-success;
+
+      &--offline {
+        background-color: orange;
+      }
+
       &--logout {
         background-color: $color-danger;
       }
     }
+
     &-name {
       font-size: 1.25rem;
       font-weight: bold;
@@ -326,26 +383,30 @@ function handleApiClick() {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: 0.5rem;
     overflow: auto;
   }
+
   &-entry {
-    padding: .5rem;
+    padding: 0.5rem;
     width: 100%;
-    border-radius: .5rem;
-    transition: background-color .2s $ease-out-circ;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s $ease-out-circ;
     cursor: pointer;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 1rem;
+
     &:not(&-focus):hover {
       background: shade-color($color-teal-20, 5%);
     }
+
     &:not(&-focus):active {
       background: shade-color($color-teal-20, 10%);
     }
+
     &-focus {
       background: $color-teal-50;
       color: $color-primary;
@@ -353,10 +414,12 @@ function handleApiClick() {
 
     &-icon {
       aspect-ratio: 1;
+
       &-focus {
         color: $color-primary;
       }
     }
+
     &-name {
       text-align: start;
       display: none;
@@ -366,6 +429,7 @@ function handleApiClick() {
         visibility: visible;
         font-weight: bold;
       }
+
       &-active {
         color: $color-primary;
       }
@@ -383,7 +447,7 @@ function handleApiClick() {
     font-size: 1.5rem;
     display: flex;
     flex-direction: row;
-    gap: .25rem;
+    gap: 0.25rem;
     flex-wrap: wrap;
     justify-content: center;
 
