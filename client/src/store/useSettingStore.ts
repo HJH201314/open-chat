@@ -9,6 +9,7 @@ export type ChatSetting = {
   roleDefaultId?: string; // 默认角色
   timeDisplayInDialogList?: string;
   timeDisplayInMessageList?: string;
+  defaultProvider?: string; // 默认 API 提供商
 
   /* 语音输入相关 */
   enableVoiceToText?: boolean; // 是否启用语音输入
@@ -27,6 +28,7 @@ const defaultSetting: ChatSetting = {
   enableTextToVoice: false,
   timeDisplayInDialogList: 'yyyy-MM-dd hh:mm:ss',
   timeDisplayInMessageList: 'yyyy-MM-dd hh:mm:ss',
+  defaultProvider: 'OpenAI',
 
   voiceCloudAppId: import.meta.env.VITE_CLOUD_VOICE_APPID,
   voiceCloudSecretId: import.meta.env.VITE_CLOUD_VOICE_SECRET_ID,

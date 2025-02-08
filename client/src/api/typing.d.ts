@@ -3,6 +3,7 @@ declare namespace API {
   interface StatusResult {
     status: number;
   }
+
   /* 返回data */
   interface DataResult<T> {
     status: number;
@@ -13,7 +14,7 @@ declare namespace API {
     id?: number;
     name?: string;
     permission?: number;
-  }
+  };
 
   interface UserResult {
     user?: UserQueryResult;
@@ -27,31 +28,31 @@ declare namespace API {
     username?: string;
     password?: string;
     permission?: number;
-  }
+  };
 
   type UserId = number;
   type UserName = string;
   type UserPassword = string;
   type UserPermission = number;
-  type UserQueryResult = [UserId, UserName, UserPassword, UserPermission]
+  type UserQueryResult = [UserId, UserName, UserPassword, UserPermission];
 
   type UserVO = {
     id?: number;
     username?: string;
     password?: string;
     permission?: number;
-  }
+  };
 
   /**
    * number 为 role id
    * string 为 role name
    * */
-  type RoleResult = [number, string]
-  type RoleListResult = RoleResult[]
+  type RoleResult = [number, string];
+  type RoleListResult = RoleResult[];
 
   type RoleSentenceResult = {
     roleSentence?: string;
-  }
+  };
 
   /// 以上为旧类型
 
@@ -70,7 +71,14 @@ declare namespace API {
     username?: string;
     createdAt?: Date;
     updatedAt?: Date;
-  }
+  };
 
-  type UserLoginResponse = CommonResponse<UserLoginResult>
+  type UserLoginResponse = CommonResponse<UserLoginResult>;
+
+  type ChatCompletionOption = {
+    sessionId: string;
+    msg: string;
+    withContext: boolean;
+    modelName: string;
+  };
 }

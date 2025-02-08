@@ -87,6 +87,13 @@ function handleClearRoleCache() {
         </div>
         <hr />
         <div class="setting-list-item">
+          <span class="setting-list-item__title">默认 API 服务</span>
+          <span class="setting-list-item__value">
+            <CusDropdown :options="[{value: 'OpenAI', label: 'OpenAI'}, {value: 'DeepSeek', label: 'DeepSeek'}]" v-model="editingValue.defaultProvider" />
+          </span>
+        </div>
+        <hr />
+        <div class="setting-list-item">
           <span class="setting-list-item__title">显示日期/时间</span>
           <span class="setting-list-item__value">
             <CusDropdown :options="[{value: 'yyyy-MM-dd', label: 'yyyy-MM-dd'}, {value: 'yyyy-MM-dd hh:mm:ss', label: 'yyyy-MM-dd hh:mm:ss'}]" v-model="editingValue.timeDisplayInDialogList" />

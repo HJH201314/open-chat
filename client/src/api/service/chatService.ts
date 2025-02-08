@@ -17,12 +17,11 @@ export const deleteSession = (sessionId: string) => createRequest<
 });
 
 export const completionStream = async (
-  sessionId: string,
-  msg: string,
-  withContext: boolean,
+  options: API.ChatCompletionOption,
   signal: AbortSignal,
   onMessage: (e: EventSourceMessage) => void,
 ) => {
+  const { sessionId, withContext, msg, modelName } = options;
   return await fetchEventSource(`${SERVER_NEXT_API_URL}/chat/completion/stream/${sessionId}`, {
     method: 'POST',
     headers: {
@@ -32,6 +31,7 @@ export const completionStream = async (
     body: JSON.stringify({
       enable_context: withContext,
       question: msg,
+      provider: modelName,
     }),
     signal: signal,
     async onopen(response) {

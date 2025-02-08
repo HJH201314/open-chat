@@ -115,7 +115,7 @@ watch(() => userStore.isLogin, (v) => {
             </button>
           </form>
         </div>
-        <CusToggle style="margin-top: .5rem" label="记住我" v-model="loginForm.remember" />
+        <CusToggle style="margin-top: .5rem" label="记住我" :highlight="loginForm.remember" v-model="loginForm.remember" />
         <div class="login-footer">
           我已阅读并同意<a href="http://localhost">《OpenChat用户协议》</a>
         </div>

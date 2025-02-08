@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DiliButton from '@/components/button/DiliButton.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { CloseOne, Plus, Search } from '@icon-park/vue-next';
 import { useDataStore } from '@/store/useDataStore';
@@ -42,10 +43,10 @@ async function handleAddRecord(roleId?: number) {
   const sessionId = await dataStore.addDialog(roleId ?? 1);
   if (roleId) {
     dataStore.sendMessageText(sessionId, (await roleStore.getRoleSentence(roleId) +
-      `Current Time: ${new Date().toLocaleString()}. ` +
-      '请将我后续发送的第一句话总结为一个标题（十个字左右），添加到你回复的开头，输出格式为[title:总结出的标题]。' +
-      // '当你认为聊天主题发生变化时，将聊天内容总结为一个标题（十个字左右），添加到你回复的开头，输出格式为【【【总结出的标题】】】。' +
-      `If you are ready, please only output：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`) ?? '');
+      `当前时间: ${new Date().toLocaleString()}. ` +
+      // '请将我后续发送的第一句话总结为一个标题（十个字左右），添加到你回复的开头，输出格式为[title:总结出的标题]。' +
+      '当你认为聊天主题发生变化时，将聊天内容总结为一个标题（十个字左右），添加到你回复的开头，输出格式为[title:总结出的标题]。' +
+      `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`) ?? '');
   }
   handleListItemClick(sessionId);
   roleForm.modalVisible = false;
@@ -120,7 +121,10 @@ const displayList = computed(() => {
                   {{ item[1] }}
                 </div>
               </div>
-              <Toggle style="margin-top: 1rem;" label="记住本次选择" v-model="roleForm.remember" />
+              <div style="display: flex; align-items: center;">
+                <Toggle style="margin-top: 1rem;" label="记住本次选择" v-model="roleForm.remember" />
+                <DiliButton style="margin-left: auto;" type="primary" text="直接开始→" @click="handleAddRecord" />
+              </div>
             </div>
           </CommonModal>
         </div>

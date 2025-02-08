@@ -1,12 +1,13 @@
+import api from '@/api';
+import showToast from '@/components/toast/toast';
+import useRoleStore from '@/store/useRoleStore';
+import { useSettingStore } from '@/store/useSettingStore';
+import { useUserStore } from '@/store/useUserStore';
+import type { DialogData, MsgData } from '@/types/data';
+import { recordToMap } from '@/utils/typeUtils';
+import { useLocalStorage, useStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, reactive, ref, type UnwrapNestedRefs } from 'vue';
-import api from '@/api';
-import { useLocalStorage, useStorage } from '@vueuse/core';
-import type { DialogData, MsgData } from '@/types/data';
-import showToast from '@/components/toast/toast';
-import { recordToMap } from '@/utils/typeUtils';
-import useRoleStore from '@/store/useRoleStore';
-import { useUserStore } from '@/store/useUserStore';
 
 interface MessageReceiver {
   // 用户输入保存后的回调
@@ -16,28 +17,37 @@ interface MessageReceiver {
 }
 
 /* 数据相关 */
-export const useDataStore  = defineStore('data', () => {
+export const useDataStore = defineStore('data', () => {
   const DIALOG_DATA_VERSION = 1;
 
   // 不能直接返回其它use获取的数据dialogData，需要将其转换为dialogList
-  const dialogData = useStorage<DialogData>('dialog-data', {
-    dialogs: {},
-    version: DIALOG_DATA_VERSION,
-  }, localStorage);
+  const dialogData = useStorage<DialogData>(
+    'dialog-data',
+    {
+      dialogs: {},
+      version: DIALOG_DATA_VERSION,
+    },
+    localStorage
+  );
 
   const dialogList = computed(() => {
-    console.log(dialogData.value)
+    console.log(dialogData.value);
     return Array.from(recordToMap(dialogData.value.dialogs!).values()).reverse();
   });
 
   const roleStore = useRoleStore();
+  const settingStore = useSettingStore();
   const userStore = useUserStore();
 
   function getDialogInfo(sessionId: string) {
     return dialogData.value.dialogs![sessionId] ?? {};
   }
 
-  async function addDialog(role: number) {
+  /**
+   * 创建一个对话
+   * @param role 角色 ID
+   */
+  async function addDialog(role?: number) {
     try {
       // 获取session_id
       const { status, data } = await api.chat.createSession();
@@ -52,6 +62,8 @@ export const useDataStore  = defineStore('data', () => {
           botRole: roleStore.roles?.find((r) => r[0] === role)?.[1] || '未知',
           storageKey: `dialog-${sessionId}`,
           createAt: new Date().toLocaleString(),
+          withContext: true,
+          model: settingStore.settings.defaultProvider ?? 'DeepSeek',
         };
       }
       return sessionId;
@@ -67,6 +79,10 @@ export const useDataStore  = defineStore('data', () => {
 
   function toggleDialogContext(dialogId: string, isOpen: boolean) {
     dialogData.value.dialogs![dialogId].withContext = isOpen;
+  }
+
+  function changeDialogModel(dialogId: string, modelName: string) {
+    dialogData.value.dialogs![dialogId].model = modelName;
   }
 
   async function delDialog(sessionId: string) {
@@ -90,20 +106,21 @@ export const useDataStore  = defineStore('data', () => {
 
   function loadMessagesFromStorage(sessionId: string) {
     const storageKey = `dialog-${sessionId}`;
-    messageStorage.value[storageKey] = reactive(useLocalStorage<MsgData>(storageKey, {
-      messages: [],
-      version: 1,
-    })) as UnwrapNestedRefs<MsgData>;
+    messageStorage.value[storageKey] = reactive(
+      useLocalStorage<MsgData>(storageKey, {
+        messages: [],
+        version: 1,
+      })
+    ) as UnwrapNestedRefs<MsgData>;
   }
 
-  function getMessageList(sessionId: string, reversed: boolean = true) {
-    console.log(messageStorage.value)
+  function getMessageList(sessionId: string) {
+    console.log(messageStorage.value);
     const storageKey = `dialog-${sessionId}`;
     if (!messageStorage.value[storageKey]) {
       loadMessagesFromStorage(sessionId);
     }
-    const messages = messageStorage.value[storageKey].messages ?? [];
-    return (reversed ? messages.toReversed() : messages);
+    return messageStorage.value[storageKey].messages ?? [];
   }
 
   async function sendMessageText(sessionId: string, message: string, receiver?: MessageReceiver) {
@@ -112,31 +129,48 @@ export const useDataStore  = defineStore('data', () => {
     receiver?.onSaveUserMsg();
     const ctrl = new AbortController();
     let fullMessage = '';
-    await api.chat.completionStream(sessionId, message, getDialogInfo(sessionId).withContext ?? true, ctrl.signal, (event) => {
-      console.log('[data]', event.data);
-      if (event.data === "[DONE]") { // 当接收到服务器端的结束标记时
-        saveMessage(sessionId, fullMessage.replace(/^\[title:(.+?)]/, ''), 'bot', 'text'); // 保存消息
-        // 修改标题
-        const regex = /^\[title:(.+?)]/; // 匹配以```开头和结尾的内容
-        const matches = fullMessage.match(regex);
-        if (matches){
-          const title = matches[1];
-          editDialogTitle(sessionId, title);
+    const { withContext, model: modelName } = getDialogInfo(sessionId);
+    await api.chat.completionStream(
+      {
+        sessionId: sessionId,
+        msg: message,
+        withContext: withContext ?? true,
+        modelName: modelName ?? 'DeepSeek',
+      },
+      ctrl.signal,
+      (event) => {
+        console.log('[data]', event.data);
+        if (event.data === '[DONE]') {
+          // 当接收到服务器端的结束标记时
+          saveMessage(sessionId, fullMessage.replace(/^\[title:(.+?)]/, ''), 'bot', 'text'); // 保存消息
+          // 修改标题
+          const regex = /^\[title:(.+?)]/; // 匹配以```开头和结尾的内容
+          const matches = fullMessage.match(regex);
+          if (matches) {
+            const title = matches[1];
+            editDialogTitle(sessionId, title);
+          }
+
+          receiver?.onFinish(fullMessage); // 消息接收完毕回调
+        } else {
+          let data = event.data;
+          data = data.replaceAll('\\n', '\n');
+          fullMessage += data; // 记录已接收的消息
+          receiver?.onMessage(event.data); // 消息接收回调
         }
-        receiver?.onFinish(fullMessage); // 消息接收完毕回调
-      } else {
-        let data = event.data;
-        data = data.replaceAll('\\n', '\n');
-        fullMessage += data; // 记录已接收的消息
-        receiver?.onMessage(event.data); // 消息接收回调
       }
-    });
+    );
   }
 
-  function saveMessage(sessionId: string, message: string, sender: 'user' | 'bot', type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other') {
+  function saveMessage(
+    sessionId: string,
+    message: string,
+    sender: 'user' | 'bot',
+    type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other'
+  ) {
     try {
       const storageKey = `dialog-${sessionId}`;
-      console.log(messageStorage.value[storageKey])
+      console.log(messageStorage.value[storageKey]);
       messageStorage.value[storageKey].messages?.push({
         time: new Date().toLocaleString(),
         sender,
@@ -144,19 +178,18 @@ export const useDataStore  = defineStore('data', () => {
         content: message,
       });
       localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
-    } catch (ignore) {
-
-    }
+    } catch (ignore) {}
   }
 
   function searchDialog(text: string) {
     return dialogList.value.filter((d) => {
       const info = localStorage.getItem(d.storageKey);
-      return info &&
-          (d.storageKey.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
-              d.botRole.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
-              info.toLowerCase().indexOf(text.toLowerCase()) != -1
-          );
+      return (
+        info &&
+        (d.storageKey.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
+          d.botRole.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
+          info.toLowerCase().indexOf(text.toLowerCase()) != -1)
+      );
     });
   }
 
@@ -167,11 +200,12 @@ export const useDataStore  = defineStore('data', () => {
     addDialog,
     editDialogTitle,
     toggleDialogContext,
+    changeDialogModel,
     delDialog,
     getMessageList,
     sendMessageText,
     searchDialog,
-  }
+  };
 });
 
 if (import.meta.hot) {
