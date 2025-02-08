@@ -1,7 +1,7 @@
 <!-- 基于Modal的基础对话框组件 -->
 <script setup lang="ts">
 import CommonModal from '@/components/modal/CommonModal.vue';
-import { getCurrentInstance, ref } from 'vue';
+import { ref } from 'vue';
 import type { CommonModalFunc } from '@/components/modal/CommonModal';
 import DiliButton from '@/components/button/DiliButton.vue';
 import type { CommonDialogEmits, CommonDialogExpose, CommonDialogProps } from '@/components/dialog/CommonDialog';

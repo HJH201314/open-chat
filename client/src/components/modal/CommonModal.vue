@@ -28,6 +28,11 @@ const emit = defineEmits<{
   (event: 'update:visible', v: boolean): void;
 }>();
 
+const store = useCommonModalStore();
+
+const myDepth = ref(0);
+const zIndex = computed(() => myDepth.value * 2 + 1000);
+
 const showModal = ref(false);
 
 /* 观测visibility，可以通过切换visibility切换展示状态 */
@@ -36,23 +41,19 @@ watch(
   (v) => {
     // nextTick才真正改变可视，能够让props.visible从一开始就为true时也展示动画
     nextTick(() => {
-      showModal.value = v;
+      if (v) open();
+      else close();
     });
   },
   { immediate: true }
 );
 
-const store = useCommonModalStore();
-
-const myDepth = ref(0);
-const zIndex = computed(() => myDepth.value * 2 + 1000);
-
 /* 展示模态框（暴露的方法，配合ref使用） */
 function open() {
   if (showModal.value) return;
 
-  showModal.value = true;
   myDepth.value = store.openModal();
+  showModal.value = true;
 }
 
 /**
@@ -64,7 +65,13 @@ function close(callbackFn?: () => void) {
 
   showModal.value = false;
   store.closeModal();
-  callbackFn?.();
+  closeCallback = callbackFn;
+}
+
+let closeCallback: Function | undefined;
+
+function afterClose() {
+  closeCallback?.();
 }
 
 watch(
@@ -91,15 +98,15 @@ defineExpose<CommonModalFunc>({
 
 <template>
   <Teleport to="body">
+    <Transition name="show" @after-leave="afterClose">
+      <div v-if="showModal" class="modal-mask" :style="{ 'z-index': zIndex }"></div>
+    </Transition>
     <Transition name="show">
-      <div v-show="showModal" class="modal" :class="{ 'modal-hide': !showModal }">
-        <div class="modal-mask"></div>
-        <div class="modal-body" :style="props.modalStyle">
-          <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
-          <div class="modal-body-content">
-            <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
-            <slot :isShown="showModal" :close="close"></slot>
-          </div>
+      <div v-if="showModal" class="modal-body" :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }">
+        <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
+        <div class="modal-body-content">
+          <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
+          <slot :isShown="showModal" :close="close"></slot>
         </div>
       </div>
     </Transition>
@@ -110,17 +117,10 @@ defineExpose<CommonModalFunc>({
 @import '@/assets/variables.module';
 
 .modal {
-  visibility: unset;
-
-  &-hide {
-    visibility: hidden;
-  }
-
   &-mask {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: v-bind(zIndex);
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
@@ -134,7 +134,6 @@ defineExpose<CommonModalFunc>({
     width: 512px; // 加个默认宽度不然组件有没有生效都不知道
     max-width: calc(100% - 2rem);
     max-height: calc(100% - 2rem);
-    z-index: calc(v-bind(zIndex) + 1);
     background-color: $color-white;
     border-radius: 0.5rem;
     box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.1);

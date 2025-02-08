@@ -32,11 +32,10 @@ export class DialogManager {
               onConfirm: (close) => {
                 if (props.onConfirm) props.onConfirm(() => {});
                 close(destroyDivFn);
-                dialogDiv.remove();
                 resolve(true);
               },
               onCancel: (close) => {
-                if (props.onConfirm) props.onConfirm(() => {});
+                if (props.onCancel) props.onCancel(() => {});
                 close(destroyDivFn);
                 resolve(false);
               },
