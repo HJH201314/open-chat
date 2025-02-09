@@ -12,12 +12,9 @@ import type { DialogInfo } from '@/types/data';
 type RecordViewProps = {
   model: string;
 };
-const props  = withDefaults(
-  defineProps<RecordViewProps>(),
-  {
-    model: 'normal'
-  }
-);
+const props = withDefaults(defineProps<RecordViewProps>(), {
+  model: 'normal',
+});
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -36,17 +33,17 @@ const roleStore = useRoleStore();
 const settingStore = useSettingStore();
 const currentDialogId = ref<string>('1');
 
-onMounted(() => {
-});
+onMounted(() => {});
 
 async function handleAddRecord(roleId?: number) {
   const sessionId = await dataStore.addDialog(roleId ?? 1);
   if (roleId) {
-    dataStore.sendMessageText(sessionId, (await roleStore.getRoleSentence(roleId) +
-      `当前时间: ${new Date().toLocaleString()}. ` +
-      // '请将我后续发送的第一句话总结为一个标题（十个字左右），添加到你回复的开头，输出格式为[title:总结出的标题]。' +
-      '当你认为聊天主题发生变化时，将聊天内容总结为一个标题（十个字左右），添加到你回复的开头，输出格式为[title:总结出的标题]。' +
-      `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`) ?? '');
+    dataStore.sendMessageText(
+      sessionId,
+      (await roleStore.getRoleSentence(roleId)) +
+        `当前时间: ${new Date().toLocaleString()}. ` +
+        `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！` ?? ''
+    );
   }
   handleListItemClick(sessionId);
   roleForm.modalVisible = false;
@@ -55,18 +52,20 @@ async function handleAddRecord(roleId?: number) {
     settingStore.saveSetting('roleDefaultId', roleId?.toString());
   }
 }
+
 function handleListAddClick() {
-  console.log(roleForm.remember)
-  if (settingStore.settings.roleRemember && settingStore.settings.roleDefaultId)
+  console.log(roleForm.remember);
+  if (settingStore.settings.roleEnabled && settingStore.settings.roleRemember && settingStore.settings.roleDefaultId)
     handleAddRecord(parseInt(settingStore.settings.roleDefaultId ?? '1'));
-  else
-    roleForm.modalVisible = true;
+  else if (!settingStore.settings.roleEnabled) handleAddRecord();
+  else roleForm.modalVisible = true;
 }
+
 function handleListItemClick(id: string) {
   // 点击对话列表项
   currentDialogId.value = id;
   // nextTick(() => {
-    emit('change', currentDialogId.value);
+  emit('change', currentDialogId.value);
   // });
 }
 
@@ -80,13 +79,16 @@ const searchForm = reactive({
 });
 
 const searchList = ref<DialogInfo[]>([]);
-watch(() => searchForm.searchVal, (newVal) => {
-  if (newVal != '') {
-    searchList.value = dataStore.searchDialog(newVal);
-  } else {
-    searchList.value = [];
+watch(
+  () => searchForm.searchVal,
+  (newVal) => {
+    if (newVal != '') {
+      searchList.value = dataStore.searchDialog(newVal);
+    } else {
+      searchList.value = [];
+    }
   }
-})
+);
 
 const displayList = computed(() => {
   if (searchForm.searchVal) {
@@ -98,7 +100,7 @@ const displayList = computed(() => {
 </script>
 <template>
   <div class="message-left">
-    <span style="text-align: center; font-weight: bold; margin-bottom: .25rem;">对话 | Dialog</span>
+    <span style="text-align: center; font-weight: bold; margin-bottom: 0.25rem">对话 | Dialog</span>
     <!-- 角色列表 -->
     <div class="dialog-list">
       <div class="dialog-list-bar">
@@ -117,21 +119,32 @@ const displayList = computed(() => {
             <div class="select-role">
               <div class="select-role-title">选择角色</div>
               <div class="select-role-list">
-                <div class="select-role-item" v-for="(item, i) in roleStore.roles" :key="i" @click="handleAddRecord(item[0])">
+                <div
+                  class="select-role-item"
+                  v-for="(item, i) in roleStore.roles"
+                  :key="i"
+                  @click="handleAddRecord(item[0])"
+                >
                   {{ item[1] }}
                 </div>
               </div>
-              <div style="display: flex; align-items: center;">
-                <Toggle style="margin-top: 1rem;" label="记住本次选择" v-model="roleForm.remember" />
-                <DiliButton style="margin-left: auto;" type="primary" text="直接开始→" @click="handleAddRecord" />
+              <div style="display: flex; align-items: center">
+                <Toggle style="margin-top: 1rem" label="记住本次选择" v-model="roleForm.remember" />
+                <DiliButton style="margin-left: auto" type="primary" text="直接开始→" @click="handleAddRecord" />
               </div>
             </div>
           </CommonModal>
         </div>
       </div>
       <div class="dialog-list-container">
-        <div v-for="item in displayList" :key="item.id" @click="handleListItemClick(item.id)" class="dialog-list-item" :class="{'dialog-list-item-selected': item.id === currentDialogId}">
-          <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar">
+        <div
+          v-for="item in displayList"
+          :key="item.id"
+          @click="handleListItemClick(item.id)"
+          class="dialog-list-item"
+          :class="{ 'dialog-list-item-selected': item.id === currentDialogId }"
+        >
+          <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar" />
           <div class="dialog-list-item-center">
             <div class="title">
               {{ item.title }}
@@ -151,11 +164,13 @@ const displayList = computed(() => {
   </div>
 </template>
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@import '@/assets/variables.module';
+
 .message-left {
   display: flex;
   flex-direction: column;
 }
+
 .dialog-list {
   width: 100%;
   height: 100%;
@@ -164,12 +179,13 @@ const displayList = computed(() => {
 
   &-container {
     flex: 1;
-    margin-top: .5rem;
+    margin-top: 0.5rem;
     height: 100%;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
+
     &::-webkit-scrollbar {
       display: none;
     }
@@ -179,17 +195,18 @@ const displayList = computed(() => {
     display: flex;
     flex-direction: row;
     height: min-content;
-    gap: .25rem;
+    gap: 0.25rem;
 
     &-search {
       flex: 1;
-      border-radius: .5rem;
-      padding: .25rem .5rem;
+      border-radius: 0.5rem;
+      padding: 0.25rem 0.5rem;
       background-color: $color-grey-200;
       display: flex;
       align-items: center;
-      gap: .5rem;
-      transition: all .2s $ease-out-circ;
+      gap: 0.5rem;
+      transition: all 0.2s $ease-out-circ;
+
       &:focus-within {
         background-color: $color-grey-300;
       }
@@ -197,10 +214,12 @@ const displayList = computed(() => {
       &-icon {
         color: $color-grey-500;
       }
+
       &-reset {
         cursor: pointer;
         color: $color-grey-500;
-        transition: color .2s $ease-out-circ;
+        transition: color 0.2s $ease-out-circ;
+
         &:hover {
           color: darken($color-grey-500, 10);
         }
@@ -218,33 +237,37 @@ const displayList = computed(() => {
     height: 2rem;
     aspect-ratio: 1;
     background-color: $color-grey-200;
-    border-radius: .5rem;
+    border-radius: 0.5rem;
     color: $color-grey-400;
     display: grid;
     place-items: center;
     cursor: pointer;
-    transition: all .2s $ease-out-circ;
+    transition: all 0.2s $ease-out-circ;
+
     &:hover {
       background-color: $color-grey-300;
     }
   }
 
   &-item {
-    padding: .5rem;
-    border-radius: .5rem;
-    background-color: #FFFFFF;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
     cursor: pointer;
-    transition: background-color .2s $ease-out-circ;
+    transition: background-color 0.2s $ease-out-circ;
     display: flex;
     flex-direction: row;
-    gap: .5rem;
-    &:not(&-selected):hover  {
+    gap: 0.5rem;
+
+    &:not(&-selected):hover {
       // border-radius: 0;
       background-color: $color-grey-100;
     }
+
     &-selected {
       background-color: $color-teal-50;
     }
+
     & img {
       height: 3rem;
       width: 3rem;
@@ -257,6 +280,7 @@ const displayList = computed(() => {
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
+
       .title {
         font-weight: bold;
         font-size: 1.1rem;
@@ -269,9 +293,10 @@ const displayList = computed(() => {
         -webkit-line-clamp: 1;
         overflow: hidden;
       }
+
       .digest {
         color: $color-grey-500;
-        font-size: .8rem;
+        font-size: 0.8rem;
         // 超过长度显示省略号
         text-overflow: ellipsis;
       }
@@ -279,29 +304,32 @@ const displayList = computed(() => {
 
     &-right {
       width: 4rem;
+
       .datetime {
-        font-size: .7rem;
+        font-size: 0.7rem;
         text-align: right;
       }
     }
   }
 }
+
 .record-list {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
 
   &-action {
     &-container {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      gap: .5rem;
+      gap: 0.5rem;
     }
+
     &-item {
       flex: 1;
-      border-radius: .5rem;
+      border-radius: 0.5rem;
       cursor: pointer;
       text-align: center;
       background-color: $color-teal-50;
@@ -314,28 +342,32 @@ const displayList = computed(() => {
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: 0.5rem;
   }
-
 }
+
 .select-role {
   padding: 1rem;
+
   &-title {
     @extend %page-title;
     margin-bottom: 1rem;
   }
+
   &-list {
     display: flex;
     flex-wrap: wrap;
-    gap: .5rem;
+    gap: 0.5rem;
   }
+
   &-item {
-    border-radius: .5rem;
-    padding: .25rem .5rem;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
     cursor: pointer;
     line-height: 1.5rem;
-    transition: all .2s $ease-out-circ;
+    transition: all 0.2s $ease-out-circ;
     background-color: $color-grey-100;
+
     &:hover {
       font-size: 1.1rem;
       line-height: 1.5rem;
@@ -344,12 +376,15 @@ const displayList = computed(() => {
     }
   }
 }
+
 .bounce-enter-active {
   animation: bounce-in 0.25s;
 }
+
 .bounce-leave-active {
   animation: bounce-in 0.25s reverse;
 }
+
 @keyframes bounce-in {
   0% {
     transform: scale(0);

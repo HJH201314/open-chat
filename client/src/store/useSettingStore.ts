@@ -1,10 +1,11 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 
 export type ChatSetting = {
   host?: string;
   localCache?: boolean; // 本地对话数据缓存
+  roleEnabled?: boolean; // 是否启用角色功能，不启用则默认直接开始
   roleRemember?: boolean; // 是否使用默认角色
   roleDefaultId?: string; // 默认角色
   timeDisplayInDialogList?: string;
@@ -17,11 +18,15 @@ export type ChatSetting = {
   voiceCloudAppId?: string; // 云服务AppID
   voiceCloudSecretId?: string; // 云服务SecretId
   voiceCloudSecretKey?: string; // 云服务SecretKey
+
+  // 添加索引签名，允许使用字符串索引
+  [key: string]: string | boolean | undefined;
 };
 
 const defaultSetting: ChatSetting = {
   host: '/api',
   localCache: true,
+  roleEnabled: false,
   roleRemember: false,
   roleDefaultId: '1',
   enableVoiceToText: true,
@@ -39,6 +44,15 @@ const defaultSetting: ChatSetting = {
 export const useSettingStore = defineStore('setting', () => {
   const settingStorage = useLocalStorage('setting', defaultSetting);
   const settings = computed(() => settingStorage.value);
+
+  onMounted(() => {
+    // 扫描已有配置，若配置中缺少默认设置中有的选项，则将默认配置作为当前配置
+    Object.entries(defaultSetting).forEach(([key, value]) => {
+      if (settings.value[key] === undefined) {
+        settingStorage.value[key] = value;
+      }
+    });
+  });
 
   /**
    * 保存设置
