@@ -9,26 +9,24 @@ import { toggleSidebarKey } from '@/constants/eventBusKeys';
 const isLargeScreen = useMediaQuery("(min-width: 768px)");
 
 const showListView = computed(() => {
-  if (!isLargeScreen.value && currentRecord.id) return false;
-  else return true;
+  return !(!isLargeScreen.value && currentRecord.id);
 });
 const showDialogView = computed(() => {
-  if (isLargeScreen.value || currentRecord.id) return true;
-  else return false;
+  return isLargeScreen.value || currentRecord.id;
 });
 
 const currentRecord = reactive({
   id: '',
-  title: "",
+  title: '',
   dialogNum: 0,
-  createAt: "",
+  createAt: '',
 });
 
 // 移动端侧边栏隐藏和展示
 const toggleSideBarBus = useEventBus(toggleSidebarKey);
 watch(() => currentRecord.id, (v) => {
-  if (isLargeScreen) return;
-  // 进入对话时（id>-1）侧边栏收起
+  if (isLargeScreen.value) return;
+  // 进入对话时侧边栏收起，退出后展开
   toggleSideBarBus.emit(!currentRecord.id);
 });
 
@@ -43,7 +41,8 @@ const showEmptyTip = ref(true);
 <template>
   <div class="message-page">
     <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
-      <RecordList v-show="showListView" class="message-page-record-list transition-all-circ"
+      <RecordList v-show="showListView"
+                  class="message-page-record-list transition-all-circ"
                   :class="{'message-page-record-list-absolute': !showDialogView}"
                   @change="handleDialogChange" />
     </Transition>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from '@icon-park/vue-next';
 import { useUserStore } from '@/store/useUserStore';
@@ -21,9 +21,13 @@ const expandBar = ref(false);
 const isAutoExpand = ref(false);
 
 const toggleSideBarBus = useEventBus(toggleSidebarKey);
-toggleSideBarBus.on((e) => {
-  showSideBar.value = e;
-  expandBar.value = false;
+
+onMounted(() => {
+  toggleSideBarBus.on((e) => {
+    console.log('toggleSiderBar:', e);
+    showSideBar.value = e;
+    expandBar.value = false;
+  });
 });
 
 const route = useRoute();

@@ -9,13 +9,6 @@ import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import type { DialogInfo } from '@/types/data';
 
-type RecordViewProps = {
-  model: string;
-};
-const props = withDefaults(defineProps<RecordViewProps>(), {
-  model: 'normal',
-});
-
 const emit = defineEmits<{
   (e: 'change', value: string): void;
 }>();

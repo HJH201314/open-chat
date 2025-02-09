@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import useGlobal from '@/commands/useGlobal';
 import { useUserStore } from '@/store/useUserStore';
 import { computed } from 'vue';
 import useMarkdownIt from '@/commands/useMarkdownIt';
@@ -29,12 +30,13 @@ const avatarPath = computed(() => {
 const markdownIt = useMarkdownIt(() => props.message);
 const renderMessage = computed(() => markdownIt.result.value);
 
+const { isLargeScreen } = useGlobal();
 </script>
 
 <template>
   <div :class="['dialog-message-container', `dialog-message-container__${props.role}`]">
     <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
-      <span class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
+      <span v-if="isLargeScreen" class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
         <div class="dialog-message-content-body" v-html="renderMessage" />
       </div>
