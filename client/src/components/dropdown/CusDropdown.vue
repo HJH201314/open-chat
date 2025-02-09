@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { useMouseInElement, useMousePressed } from '@vueuse/core';
+import { ref, computed, watch, useTemplateRef, watchEffect } from 'vue';
 
 type DropdownProps = {
   modelValue?: string; // 双向绑定
@@ -18,9 +19,15 @@ const emit = defineEmits<{
   (event: 'update:modelValue', value: string): void;
 }>();
 
-watch(() => props.modelValue, (newVal) => {
-  selectedValue.value = newVal;
-})
+const selfRef = useTemplateRef('dropdown');
+const menuRef = useTemplateRef('menu');
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    selectedValue.value = newVal;
+  }
+);
 
 const isOpen = ref(false);
 const selectedValue = ref(props.modelValue);
@@ -41,20 +48,30 @@ function selectOption(value: string) {
   emit('update:modelValue', value);
   isOpen.value = false;
 }
+
+// 点击 Dropdown 外部则关闭
+const { isOutside: isOutsideSelf } = useMouseInElement(selfRef);
+const { isOutside: isOutsideMenu } = useMouseInElement(menuRef);
+const { pressed } = useMousePressed();
+watchEffect(() => {
+  if (pressed.value && isOutsideSelf.value && isOutsideMenu.value) {
+    isOpen.value = false;
+  }
+});
 </script>
 
 <template>
-  <div class="dropdown" :class="{ active: isOpen, disabled: disabled }">
+  <div ref="dropdown" class="dropdown" :class="{ active: isOpen, disabled: disabled }">
     <div class="dropdown-toggle" :class="{ 'dropdown-toggle--active': isOpen }" @click="toggleDropdown">
       {{ selectedLabel }}
       <span class="arrow"></span>
     </div>
-    <ul v-if="isOpen" class="dropdown-menu" :class="[`dropdown-menu--${position}`]">
+    <ul ref="menu" v-if="isOpen" class="dropdown-menu" :class="[`dropdown-menu--${position}`]">
       <li
         v-for="option in options"
         :key="option.value"
         @click="selectOption(option.value)"
-        :class="{ 'selected': option.value === selectedValue }"
+        :class="{ selected: option.value === selectedValue }"
       >
         {{ option.label }}
       </li>
@@ -95,7 +112,7 @@ function selectOption(value: string) {
 
   &-menu {
     position: absolute;
-    border-radius: .5rem;
+    border-radius: 0.5rem;
     background-color: white;
     list-style: none;
     padding: 0;
@@ -126,7 +143,7 @@ function selectOption(value: string) {
     }
 
     li {
-      padding: .25rem .5rem;
+      padding: 0.25rem 0.5rem;
       cursor: pointer;
       transition: background-color 0.2s $ease-out-circ;
       background-color: white;
@@ -142,11 +159,11 @@ function selectOption(value: string) {
   }
 
   .arrow {
-    margin-left: .25rem;
+    margin-left: 0.25rem;
     border: solid $color-grey-500;
-    border-width: 0 .125rem .125rem 0;
+    border-width: 0 0.125rem 0.125rem 0;
     display: inline-block;
-    padding: .175rem;
+    padding: 0.175rem;
     transform: rotate(45deg);
     transition: transform 0.2s ease;
   }

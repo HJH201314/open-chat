@@ -119,10 +119,10 @@ const renderMessage = computed(() => markdownIt.result.value);
 }
 </style>
 <style lang="scss">
-// 解决v-html中的展示问题
+// 无 scoped 解决 v-html 中的展示问题
 .dialog-message-content-body {
   :is(ol, li) {
-    white-space: nowrap;
+    //white-space: nowrap;
   }
   p {
     white-space: pre-line;
