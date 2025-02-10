@@ -139,7 +139,6 @@ export const useDataStore = defineStore('data', () => {
       },
       ctrl.signal,
       (event) => {
-        console.log('[data]', event.data);
         if (event.data === '[DONE]') {
           // 当接收到服务器端的结束标记时
           saveMessage(sessionId, fullMessage.replace(/^\[title:(.+?)]/, ''), 'bot', 'text'); // 保存消息
@@ -155,8 +154,9 @@ export const useDataStore = defineStore('data', () => {
         } else {
           let data = event.data;
           data = data.replaceAll('\\n', '\n');
+          console.log('[data]', event.data, `'${data}'`);
           fullMessage += data; // 记录已接收的消息
-          receiver?.onMessage(event.data); // 消息接收回调
+          receiver?.onMessage(data); // 消息接收回调
         }
       }
     );
