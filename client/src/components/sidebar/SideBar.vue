@@ -1,18 +1,18 @@
-<script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from '@icon-park/vue-next';
-import { useUserStore } from '@/store/useUserStore';
-import Tooltip from '@/components/tooltip/CusTooltip.vue';
-import CommonModal from '@/components/modal/CommonModal.vue';
-import type { CommonModalFunc } from '@/components/modal/CommonModal';
-import { useEventBus, useMediaQuery } from '@vueuse/core';
-import { toggleSidebarKey } from '@/constants/eventBusKeys';
+<script lang="ts" setup>
 import LoginForm from '@/components/login-form/LoginForm.vue';
+import type { CommonModalFunc } from '@/components/modal/CommonModal';
+import CommonModal from '@/components/modal/CommonModal.vue';
 import showToast from '@/components/toast/toast';
+import ToastManager from '@/components/toast/ToastManager';
+import Tooltip from '@/components/tooltip/CusTooltip.vue';
+import { toggleSidebarKey } from '@/constants/eventBusKeys';
 import SettingPage from '@/pages/setting/SettingPage.vue';
 import { useSettingStore } from '@/store/useSettingStore';
-import ToastManager from '@/components/toast/ToastManager';
+import { useUserStore } from '@/store/useUserStore';
+import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from '@icon-park/vue-next';
+import { useEventBus, useMediaQuery, useMouseInElement, useMousePressed } from '@vueuse/core';
+import { computed, onMounted, ref, useTemplateRef, watchEffect } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const userStore = useUserStore();
 
@@ -24,7 +24,6 @@ const toggleSideBarBus = useEventBus(toggleSidebarKey);
 
 onMounted(() => {
   toggleSideBarBus.on((e) => {
-    console.log('toggleSiderBar:', e);
     showSideBar.value = e;
     expandBar.value = false;
   });
@@ -157,6 +156,16 @@ const settingStore = useSettingStore();
 function handleApiClick() {
   window.open(settingStore.settings.host + '/docs/api/');
 }
+
+// 点击 Sidebar 外部隐藏
+const sidebarRef = useTemplateRef('sidebar-body');
+const { isOutside: isMouseOutside } = useMouseInElement(sidebarRef);
+const { pressed } = useMousePressed();
+watchEffect(() => {
+  if (pressed.value && isMouseOutside.value) {
+    expandBar.value = false;
+  }
+});
 </script>
 
 <template>
@@ -165,8 +174,9 @@ function handleApiClick() {
     <div v-show="showSideBar" class="sidebar-placeholder"></div>
     <div
       v-show="showSideBar"
-      class="sidebar-body"
+      ref="sidebar-body"
       :class="{ 'sidebar-body-expand': expandBar }"
+      class="sidebar-body"
       @mouseleave="handleMouseLeave"
     >
       <div class="sidebar-top">
@@ -180,43 +190,43 @@ function handleApiClick() {
         <div
           v-for="entry in entries"
           :key="entry.key"
-          class="sidebar-entry"
           :class="{ 'sidebar-entry-focus': entry.href == route.path }"
+          class="sidebar-entry"
           @click="(e) => handleEntryClick(e, entry)"
         >
           <component
             :is="entry.icon"
             v-if="!entry.href || entry.href != route.path"
             class="sidebar-entry-icon"
-            theme="outline"
             size="24"
+            theme="outline"
           ></component>
           <component
             :is="entry.icon"
             v-else
             class="sidebar-entry-icon sidebar-entry-icon-focus"
-            theme="outline"
             size="24"
+            theme="outline"
           ></component>
-          <span class="sidebar-entry-name" :class="{ 'sidebar-entry-name-ext': expandBar }">{{ entry.name }}</span>
+          <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{ entry.name }}</span>
         </div>
       </div>
-      <Tooltip position="right" class="sidebar-entry-login" :text="userStore.isLogin ? '退出登录' : '登录'">
-        <div @click="handleLogin" class="sidebar-entry">
+      <Tooltip :text="userStore.isLogin ? '退出登录' : '登录'" class="sidebar-entry-login" position="right">
+        <div class="sidebar-entry" @click="handleLogin">
           <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
           <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
-          <span class="sidebar-entry-name" :class="{ 'sidebar-entry-name-ext': expandBar }">{{
+          <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{
             userStore.isLogin ? '退出登录' : '登录'
           }}</span>
         </div>
       </Tooltip>
       <div class="sidebar-footer">
-        <Tooltip text="开源地址" position="bottom" :enabled="expandBar">
+        <Tooltip :enabled="expandBar" position="bottom" text="开源地址">
           <div class="sidebar-entry sidebar-footer-item">
             <Github class="sidebar-entry-icon" size="1.5rem" @click="handleGithubClick"></Github>
           </div>
         </Tooltip>
-        <Tooltip text="查看接口" position="bottom" :enabled="expandBar">
+        <Tooltip :enabled="expandBar" position="bottom" text="查看接口">
           <div class="sidebar-entry sidebar-footer-item">
             <Api class="sidebar-entry-icon" size="1.5rem" @click="handleApiClick"></Api>
           </div>
@@ -225,13 +235,13 @@ function handleApiClick() {
       <hr style="background: #4db6ac; height: 1px; width: 80%" />
       <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
         <div class="sidebar-avatar-img">
-          <img src="/favicon.ico" alt="avatar" />
+          <img alt="avatar" src="/favicon.ico" />
           <div
-            class="sidebar-avatar-status"
             :class="{
               'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
               'sidebar-avatar-status--offline': userStore.loginStatus == 'offline',
             }"
+            class="sidebar-avatar-status"
           ></div>
         </div>
         <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
@@ -244,7 +254,7 @@ function handleApiClick() {
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/variables.module';
 @import '@/assets/functions';
 

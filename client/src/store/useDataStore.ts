@@ -37,7 +37,6 @@ export const useDataStore = defineStore('data', () => {
 
   const roleStore = useRoleStore();
   const settingStore = useSettingStore();
-  const userStore = useUserStore();
 
   function getDialogInfo(sessionId: string) {
     return dialogData.value.dialogs![sessionId] ?? {};
@@ -98,7 +97,8 @@ export const useDataStore = defineStore('data', () => {
         showToast({ text: '删除失败' });
         reject('删除失败');
       }
-      // TODO: 远程删除
+      // 远程删除
+      api.chat.deleteSession(sessionId);
     });
   }
 

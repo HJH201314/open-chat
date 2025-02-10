@@ -6,10 +6,10 @@ function useGlobal() {
   const isLargeScreen = useMediaQuery('(min-width: 768px)');
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
 
-  return reactive({
+  return {
     isLargeScreen: toRef(isLargeScreen), // 第三方ref似乎要转换为vue的ref才会具有响应性
     isSmallScreen: toRef(isSmallScreen),
-  });
+  };
 }
 
 export default useGlobal;

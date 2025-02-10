@@ -1,5 +1,5 @@
 import { type MaybeElementRef, unrefElement } from '@vueuse/core';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 const classnameHidden = 'scrollbar-auto-hidden';
 const hideRuleSelector = `.${classnameHidden}::-webkit-scrollbar-thumb`;
@@ -34,6 +34,13 @@ export const useAutoScrollbar = (target: MaybeElementRef) => {
   StyleInjector.initStyle();
   const targetRef = ref(target);
   let hideTimer: number | undefined;
+
+  onMounted(() => {
+    const el = unrefElement(targetRef);
+    if (!el || !(el instanceof Element)) return;
+
+    el.classList.add(classnameHidden);
+  });
 
   const onScroll = () => {
     const el = unrefElement(targetRef);
