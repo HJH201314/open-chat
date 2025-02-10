@@ -1,25 +1,24 @@
-<script setup lang="ts">
-import CusDropdown from '@/components/dropdown/CusDropdown.vue';
-import { Acoustic, Back, Delete, Edit, ArrowUp, Voice } from '@icon-park/vue-next';
-import IconButton from '@/components/IconButton.vue';
-import DialogMessage from '@/pages/message/components/DialogMessage.vue';
-import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { useDataStore } from '@/store/useDataStore';
-import type { DialogInfo, MsgInfo } from '@/types/data';
-import { useUserStore } from '@/store/useUserStore';
-import showToast from '@/components/toast/toast';
-import DiliButton from '@/components/button/DiliButton.vue';
-import { useDevicesList, useMousePressed, useUserMedia } from '@vueuse/core';
-import { useSettingStore } from '@/store/useSettingStore';
-import ToastManager from '@/components/toast/ToastManager';
+<script lang="ts" setup>
 import api from '@/api';
-import { DialogManager } from '@/components/dialog';
 import variables from '@/assets/variables.module.scss';
+import { useAutoScrollbar } from '@/commands/useAutoScrollbar';
+import DiliButton from '@/components/button/DiliButton.vue';
+import { DialogManager } from '@/components/dialog';
+import CusDropdown from '@/components/dropdown/CusDropdown.vue';
+import IconButton from '@/components/IconButton.vue';
 import CusCircularProgress from '@/components/progress/CusCircularProgress.vue';
 import Spinning from '@/components/spinning/Spinning.vue';
+import showToast from '@/components/toast/toast';
+import ToastManager from '@/components/toast/ToastManager';
 import CusToggle from '@/components/toggle/CusToggle.vue';
-
-const dataStore = useDataStore();
+import DialogMessage from '@/pages/message/components/DialogMessage.vue';
+import { useDataStore } from '@/store/useDataStore';
+import { useSettingStore } from '@/store/useSettingStore';
+import { useUserStore } from '@/store/useUserStore';
+import type { DialogInfo, MsgInfo } from '@/types/data';
+import { Acoustic, ArrowUp, Back, Delete, Edit, Voice } from '@icon-park/vue-next';
+import { useDevicesList, useMousePressed, useUserMedia } from '@vueuse/core';
+import { computed, nextTick, reactive, ref, useTemplateRef, watch } from 'vue';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -29,6 +28,11 @@ const props = withDefaults(defineProps<DialogDetailProps>(), {
   dialogId: '',
 });
 
+const emit = defineEmits<{
+  (e: 'back'): void;
+}>();
+
+const dataStore = useDataStore();
 const userStore = useUserStore();
 const settingStore = useSettingStore();
 
@@ -87,9 +91,7 @@ watch(
   }
 );
 
-const emit = defineEmits<{
-  (e: 'back'): void;
-}>();
+useAutoScrollbar(useTemplateRef('dialog-list'));
 
 function handleInputKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter') {
@@ -371,16 +373,16 @@ function handleVoicePanelToggle() {
         <Delete size="16" />
       </IconButton>
     </div>
-    <div class="dialog-detail-dialogs">
+    <div ref="dialog-list" class="dialog-detail-dialogs">
       <!--   列表底部定位（此列表为 column-reverse）   -->
       <div id="bottom-line"></div>
       <!--   消息列表   -->
-      <DialogMessage id="bot-typing-box" v-if="form.outputValue" :message="form.outputValue" role="bot" />
-      <DialogMessage id="user-typing-box" v-if="form.inputValue" :message="form.inputValue" role="user" />
+      <DialogMessage v-if="form.outputValue" id="bot-typing-box" :message="form.outputValue" role="bot" />
+      <DialogMessage v-if="form.inputValue" id="user-typing-box" :message="form.inputValue" role="user" />
       <DialogMessage
         v-for="(item, i) in messageList.toReversed()"
-        :key="i"
         :id="item.time"
+        :key="i"
         :message="item.content"
         :role="item.sender"
         :time="item.time"
@@ -389,13 +391,13 @@ function handleVoicePanelToggle() {
       <div id="top-line"></div>
       <div v-if="voicePanel" style="min-height: 3rem"></div>
     </div>
-    <div class="dialog-detail-inputs" :class="{ 'dialog-detail-inputs--first': messageList.length === 0 }">
+    <div :class="{ 'dialog-detail-inputs--first': messageList.length === 0 }" class="dialog-detail-inputs">
       <textarea
         id="message-input"
-        class="dialog-detail-inputs-textarea"
-        @keydown="(e) => handleInputKeydown(e)"
         v-model="form.inputValue"
+        class="dialog-detail-inputs-textarea"
         placeholder="随便问点啥(●'◡'●)"
+        @keydown="(e) => handleInputKeydown(e)"
       />
       <div class="dialog-detail-inputs-bar">
         <!--        <span class="dialog-detail-inputs-bar-icon transition-all-circ">-->
@@ -403,11 +405,11 @@ function handleVoicePanelToggle() {
         <!--        </span>-->
 
         <DiliButton v-if="settingStore.settings.enableVoiceToText" type="text" @click="handleVoicePanelToggle">
-          <div style="display: contents" v-if="!voicePanel">
+          <div v-if="!voicePanel" style="display: contents">
             <Voice size="20" />
             语音面板
           </div>
-          <div style="display: contents" v-else>
+          <div v-else style="display: contents">
             <Acoustic size="20" />
             收起面板
           </div>
@@ -415,11 +417,11 @@ function handleVoicePanelToggle() {
         <CusToggle v-model="form.withContext" highlight label="上下文" style="scale: 0.9"></CusToggle>
         <CusDropdown
           v-model="form.dialogModel"
-          position="top"
           :options="[
             { value: 'DeepSeek', label: 'DeepSeek' },
             { value: 'OpenAI', label: 'OpenAI' },
           ]"
+          position="top"
         />
         <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
           <ArrowUp fill="white" size="16" />
@@ -428,14 +430,14 @@ function handleVoicePanelToggle() {
     </div>
     <!-- 语音面板 -->
     <transition name="flow-in">
-      <section class="audio-input" v-show="voicePanel">
+      <section v-show="voicePanel" class="audio-input">
         <div
-          class="audio-input-status"
           :class="{
             'audio-input-status--ready': !audioHandling && currentMicrophone,
             'audio-input-status--handling': audioHandling,
             'audio-input-status--error': !currentMicrophone,
           }"
+          class="audio-input-status"
         >
           <Spinning v-if="audioHandling" :color="variables.colorWarning" />
           <div v-else class="signal" />
@@ -449,10 +451,10 @@ function handleVoicePanelToggle() {
               : '就绪'
           }}
         </div>
-        <div class="audio-input-speak" ref="audioButtonRef" @touchend="stopVoiceRecording">
-          <CusCircularProgress :value="(audioTimeout * 100) / 60" :bar-style="{ opacity: '0.25' }">
-            <Voice fill="white" size="2rem" v-if="!mediaStream" />
-            <Acoustic fill="white" size="2rem" v-else />
+        <div ref="audioButtonRef" class="audio-input-speak" @touchend="stopVoiceRecording">
+          <CusCircularProgress :bar-style="{ opacity: '0.25' }" :value="(audioTimeout * 100) / 60">
+            <Voice v-if="!mediaStream" fill="white" size="2rem" />
+            <Acoustic v-else fill="white" size="2rem" />
           </CusCircularProgress>
         </div>
       </section>
@@ -460,7 +462,7 @@ function handleVoicePanelToggle() {
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/variables.module';
 
 .dialog-detail {
@@ -533,7 +535,7 @@ function handleVoicePanelToggle() {
     }
 
     &-textarea {
-      margin-inline: .25rem;
+      margin-inline: 0.25rem;
       flex: 1;
       background-color: transparent;
       width: 100%;
