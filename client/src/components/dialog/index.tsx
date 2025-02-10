@@ -1,3 +1,4 @@
+import initPlugins from '@/utils/initPlugins';
 import { getRandomString } from '@/utils/string';
 import type { App, VNode } from 'vue';
 import { createApp, h, nextTick, ref } from 'vue';
@@ -18,9 +19,6 @@ export class DialogManager {
     new Promise<boolean>((resolve) => {
       const id = getRandomString(5);
       const dialogDiv = document.createElement('div');
-      const destroyDivFn = () => {
-        dialogDiv.remove();
-      };
       document.querySelector('#app')?.appendChild(dialogDiv);
       const dialogRef = ref<CommonDialogExpose>();
       const dialogApp = createApp({
@@ -29,15 +27,16 @@ export class DialogManager {
             CommonDialog,
             {
               ...props,
-              onConfirm: (close) => {
-                if (props.onConfirm) props.onConfirm(() => {});
-                close(destroyDivFn);
+              onConfirm() {
+                close();
                 resolve(true);
               },
-              onCancel: (close) => {
-                if (props.onCancel) props.onCancel(() => {});
-                close(destroyDivFn);
+              onCancel() {
+                close();
                 resolve(false);
+              },
+              onAfterClose() {
+                DialogManager.destroy(id);
               },
               _id: id, // 指定组件全局唯一ID
               ref: dialogRef,
@@ -48,6 +47,7 @@ export class DialogManager {
           );
         },
       });
+      initPlugins(dialogApp);
       dialogApp.mount(dialogDiv);
       nextTick(() => {
         // nextTick确保dialog已完成挂载
@@ -98,6 +98,7 @@ export class DialogManager {
   public static destroy(_id: string) {
     const instance = this.instances.get(_id);
     if (!instance) return;
+
     instance.app.unmount();
     instance.dom.remove();
     this.instances.delete(_id);

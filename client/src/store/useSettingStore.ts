@@ -29,7 +29,7 @@ const defaultSetting: ChatSetting = {
   roleEnabled: false,
   roleRemember: false,
   roleDefaultId: '1',
-  enableVoiceToText: true,
+  enableVoiceToText: false,
   enableTextToVoice: false,
   timeDisplayInDialogList: 'yyyy-MM-dd hh:mm:ss',
   timeDisplayInMessageList: 'yyyy-MM-dd hh:mm:ss',

@@ -57,7 +57,7 @@ function scrollToBottom() {
 
 watch(
   () => props.dialogId,
-  (v) => {
+  async (v) => {
     if (props.dialogId != '') {
       dialogInfo.value = dataStore.getDialogInfo(v);
       form.sessionId = v;
@@ -65,6 +65,7 @@ watch(
       form.dialogModel = dialogInfo.value.model ?? 'DeepSeek';
       messageList.value = dataStore.getMessageList(v);
       nextTick(() => {
+        // 滚动到列表底部并默认聚焦输入框
         scrollToBottom();
         (document.querySelector('#message-input') as HTMLTextAreaElement)?.focus();
       });

@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+import type { CommonModalFunc } from '@/components/modal/CommonModal';
 import { useCommonModalStore } from '@/components/modal/useCommonModalStore';
 
 /**
@@ -9,7 +10,6 @@ import { useCommonModalStore } from '@/components/modal/useCommonModalStore';
  * */
 import { Close } from '@icon-park/vue-next';
 import { computed, type CSSProperties, nextTick, ref, toRef, watch } from 'vue';
-import type { CommonModalFunc } from '@/components/modal/CommonModal';
 
 interface CommonModalProps {
   showClose?: boolean;
@@ -23,8 +23,9 @@ const props = withDefaults(defineProps<CommonModalProps>(), {
 });
 
 const emit = defineEmits<{
-  (event: 'onOpen'): void;
-  (event: 'onClose'): void;
+  (event: 'open'): void;
+  (event: 'close'): void;
+  (event: 'after-close'): void;
   (event: 'update:visible', v: boolean): void;
 }>();
 
@@ -54,6 +55,7 @@ function open() {
 
   myDepth.value = store.openModal();
   showModal.value = true;
+  emit('open');
 }
 
 /**
@@ -72,6 +74,7 @@ let closeCallback: Function | undefined;
 
 function afterClose() {
   closeCallback?.();
+  emit('after-close');
 }
 
 watch(
@@ -85,7 +88,7 @@ watch(
 
 function handleClose() {
   close();
-  emit('onClose');
+  emit('close');
 }
 
 /* 暴露接口 */
@@ -99,21 +102,21 @@ defineExpose<CommonModalFunc>({
 <template>
   <Teleport to="body">
     <Transition name="show" @after-leave="afterClose">
-      <div v-if="showModal" class="modal-mask" :style="{ 'z-index': zIndex }"></div>
+      <div v-if="showModal" :style="{ 'z-index': zIndex }" class="modal-mask"></div>
     </Transition>
     <Transition name="show">
-      <div v-if="showModal" class="modal-body" :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }">
+      <div v-if="showModal" :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }" class="modal-body">
         <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
         <div class="modal-body-content">
           <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
-          <slot :isShown="showModal" :close="close"></slot>
+          <slot :close="close" :isShown="showModal"></slot>
         </div>
       </div>
     </Transition>
   </Teleport>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/variables.module';
 
 .modal {

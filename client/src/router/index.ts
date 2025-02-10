@@ -1,19 +1,25 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import MessagePage from '@/pages/message/MessagePage.vue';
+import LoginPage from '@/pages/login/LoginPage.vue';
 import ManageUserPage from '@/pages/manage/user/ManageUserPage.vue';
+import MessagePage from '@/pages/message/MessagePage.vue';
 import SettingPage from '@/pages/setting/SettingPage.vue';
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/message'
+      redirect: '/message',
     },
     {
       path: '/message',
       name: 'message',
-      component: MessagePage
+      component: MessagePage,
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginPage,
     },
     {
       path: '/manage/user',
@@ -25,7 +31,7 @@ const router = createRouter({
       name: 'setting',
       component: SettingPage,
     },
-  ]
-})
+  ],
+});
 
 export default router;

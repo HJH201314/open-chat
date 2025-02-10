@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import LoginForm from '@/components/login-form/LoginForm.vue';
+import { showLoginDialog } from '@/pages/login';
 import type { CommonModalFunc } from '@/components/modal/CommonModal';
 import CommonModal from '@/components/modal/CommonModal.vue';
 import showToast from '@/components/toast/toast';
@@ -62,7 +62,7 @@ const entries = computed<Entry[]>(() => {
       onClick() {
         if (userStore.permission == 2) {
           if ('/manage/user' == route.path) return;
-          router.push('/manage/user');
+          router.replace('/manage/user');
         } else {
           ToastManager.danger('权限不足');
         }
@@ -80,7 +80,7 @@ const entries = computed<Entry[]>(() => {
         } else {
           // 小屏幕跳转页面
           if ('/setting' == route.path) return;
-          router.push('/setting');
+          router.replace('/setting');
         }
       },
     },
@@ -128,12 +128,11 @@ function handleEntryClick(e: Event, entry: Entry) {
     entry.onClick();
   } else if (entry.href) {
     if (entry.href == route.path) return;
-    router.push(entry.href);
+    router.replace(entry.href);
   }
   expandBar.value = false;
 }
 
-const refLoginForm = ref();
 const refSettingModal = ref<CommonModalFunc>();
 const settingModalVisible = computed(() => {
   return refSettingModal?.value?.isVisible;
@@ -143,7 +142,11 @@ function handleLogin() {
   if (userStore.isLogin) {
     userStore.logout();
   } else {
-    refLoginForm.value?.open();
+    if (isLargeScreen.value) {
+      showLoginDialog();
+    } else {
+      router.push('/login');
+    }
   }
 }
 
@@ -169,89 +172,90 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div v-show="showSideBar" class="sidebar">
-    <!-- 占位，避免sidebar-body变化（展开）时布局变化 -->
-    <div v-show="showSideBar" class="sidebar-placeholder"></div>
-    <div
-      v-show="showSideBar"
-      ref="sidebar-body"
-      :class="{ 'sidebar-body-expand': expandBar }"
-      class="sidebar-body"
-      @mouseleave="handleMouseLeave"
-    >
-      <div class="sidebar-top">
-        <div v-if="expandBar" class="sidebar-logo sidebar-logo-animation">OpenChat</div>
-        <div class="sidebar-expand" style="aspect-ratio: 1" @click="() => (expandBar = !expandBar)">
-          <MenuUnfold v-if="!expandBar" size="24"></MenuUnfold>
-          <MenuFold v-else size="24"></MenuFold>
-        </div>
-      </div>
-      <div class="sidebar-entries" @mouseenter="handleMouseEnter" @mousemove="handleMouseEnter">
-        <div
-          v-for="entry in entries"
-          :key="entry.key"
-          :class="{ 'sidebar-entry-focus': entry.href == route.path }"
-          class="sidebar-entry"
-          @click="(e) => handleEntryClick(e, entry)"
-        >
-          <component
-            :is="entry.icon"
-            v-if="!entry.href || entry.href != route.path"
-            class="sidebar-entry-icon"
-            size="24"
-            theme="outline"
-          ></component>
-          <component
-            :is="entry.icon"
-            v-else
-            class="sidebar-entry-icon sidebar-entry-icon-focus"
-            size="24"
-            theme="outline"
-          ></component>
-          <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{ entry.name }}</span>
-        </div>
-      </div>
-      <Tooltip :text="userStore.isLogin ? '退出登录' : '登录'" class="sidebar-entry-login" position="right">
-        <div class="sidebar-entry" @click="handleLogin">
-          <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
-          <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
-          <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{
-            userStore.isLogin ? '退出登录' : '登录'
-          }}</span>
-        </div>
-      </Tooltip>
-      <div class="sidebar-footer">
-        <Tooltip :enabled="expandBar" position="bottom" text="开源地址">
-          <div class="sidebar-entry sidebar-footer-item">
-            <Github class="sidebar-entry-icon" size="1.5rem" @click="handleGithubClick"></Github>
+  <Transition name="show">
+    <div v-show="showSideBar" class="sidebar">
+      <!-- 占位，避免sidebar-body变化（展开）时布局变化 -->
+      <div v-show="showSideBar" class="sidebar-placeholder"></div>
+      <div
+        v-show="showSideBar"
+        ref="sidebar-body"
+        :class="{ 'sidebar-body-expand': expandBar }"
+        class="sidebar-body"
+        @mouseleave="handleMouseLeave"
+      >
+        <div class="sidebar-top">
+          <div v-if="expandBar" class="sidebar-logo sidebar-logo-animation">OpenChat</div>
+          <div class="sidebar-expand" style="aspect-ratio: 1" @click="() => (expandBar = !expandBar)">
+            <MenuUnfold v-if="!expandBar" size="24"></MenuUnfold>
+            <MenuFold v-else size="24"></MenuFold>
           </div>
-        </Tooltip>
-        <Tooltip :enabled="expandBar" position="bottom" text="查看接口">
-          <div class="sidebar-entry sidebar-footer-item">
-            <Api class="sidebar-entry-icon" size="1.5rem" @click="handleApiClick"></Api>
-          </div>
-        </Tooltip>
-      </div>
-      <hr style="background: #4db6ac; height: 1px; width: 80%" />
-      <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
-        <div class="sidebar-avatar-img">
-          <img alt="avatar" src="/favicon.ico" />
+        </div>
+        <div class="sidebar-entries" @mouseenter="handleMouseEnter" @mousemove="handleMouseEnter">
           <div
-            :class="{
-              'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
-              'sidebar-avatar-status--offline': userStore.loginStatus == 'offline',
-            }"
-            class="sidebar-avatar-status"
-          ></div>
+            v-for="entry in entries"
+            :key="entry.key"
+            :class="{ 'sidebar-entry-focus': entry.href == route.path }"
+            class="sidebar-entry"
+            @click="(e) => handleEntryClick(e, entry)"
+          >
+            <component
+              :is="entry.icon"
+              v-if="!entry.href || entry.href != route.path"
+              class="sidebar-entry-icon"
+              size="24"
+              theme="outline"
+            ></component>
+            <component
+              :is="entry.icon"
+              v-else
+              class="sidebar-entry-icon sidebar-entry-icon-focus"
+              size="24"
+              theme="outline"
+            ></component>
+            <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{ entry.name }}</span>
+          </div>
         </div>
-        <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
+        <Tooltip :text="userStore.isLogin ? '退出登录' : '登录'" class="sidebar-entry-login" position="right">
+          <div class="sidebar-entry" @click="handleLogin">
+            <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
+            <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
+            <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{
+              userStore.isLogin ? '退出登录' : '登录'
+            }}</span>
+          </div>
+        </Tooltip>
+        <div class="sidebar-footer">
+          <Tooltip :enabled="expandBar" position="bottom" text="开源地址">
+            <div class="sidebar-entry sidebar-footer-item">
+              <Github class="sidebar-entry-icon" size="1.5rem" @click="handleGithubClick"></Github>
+            </div>
+          </Tooltip>
+          <Tooltip :enabled="expandBar" position="bottom" text="查看接口">
+            <div class="sidebar-entry sidebar-footer-item">
+              <Api class="sidebar-entry-icon" size="1.5rem" @click="handleApiClick"></Api>
+            </div>
+          </Tooltip>
+        </div>
+        <hr style="background: #4db6ac; height: 1px; width: 80%" />
+        <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
+          <div class="sidebar-avatar-img">
+            <img alt="avatar" src="/favicon.ico" />
+            <div
+              :class="{
+                'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
+                'sidebar-avatar-status--offline': userStore.loginStatus == 'offline',
+              }"
+              class="sidebar-avatar-status"
+            ></div>
+          </div>
+          <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
+        </div>
       </div>
+      <CommonModal ref="refSettingModal" v-slot:default="{ close: closeSetting }">
+        <SettingPage v-if="settingModalVisible" @cancel="closeSetting" />
+      </CommonModal>
     </div>
-    <LoginForm ref="refLoginForm" />
-    <CommonModal ref="refSettingModal" v-slot:default="{ close: closeSetting }">
-      <SettingPage v-if="settingModalVisible" @cancel="closeSetting" />
-    </CommonModal>
-  </div>
+  </Transition>
 </template>
 
 <style lang="scss" scoped>

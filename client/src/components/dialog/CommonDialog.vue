@@ -1,11 +1,10 @@
 <!-- 基于Modal的基础对话框组件 -->
-<script setup lang="ts">
-import CommonModal from '@/components/modal/CommonModal.vue';
-import { ref } from 'vue';
-import type { CommonModalFunc } from '@/components/modal/CommonModal';
+<script lang="ts" setup>
 import DiliButton from '@/components/button/DiliButton.vue';
 import type { CommonDialogEmits, CommonDialogExpose, CommonDialogProps } from '@/components/dialog/CommonDialog';
-import { DialogManager } from '@/components/dialog';
+import type { CommonModalFunc } from '@/components/modal/CommonModal';
+import CommonModal from '@/components/modal/CommonModal.vue';
+import { ref } from 'vue';
 
 const props = withDefaults(defineProps<CommonDialogProps>(), {
   title: '',
@@ -19,30 +18,22 @@ function show() {
   modalRef.value?.open();
 }
 
-function close(callback?: () => void) {
-  modalRef.value?.close(callback);
-  if (props._id) {
-    // 如果有props.id，需要在manager中销毁自身
-    DialogManager.destroy(props._id);
-  }
+function close() {
+  modalRef.value?.close();
+}
+
+function afterClose() {
+  emits('after-close');
 }
 
 function handleConfirm() {
-  if (props.onConfirm) {
-    props.onConfirm(close);
-    emits('onConfirm', close); // 传递关闭回调函数
-  } else {
-    close(); // 不存在回调函数时默认自动关闭
-  }
+  emits('confirm'); // 传递关闭回调函数
+  close(); // 不存在回调函数时默认自动关闭
 }
 
 function handleCancel() {
-  if (props.onCancel) {
-    props.onCancel(close);
-    emits('onCancel', close); // 传递关闭回调函数
-  } else {
-    close(); // 不存在回调函数时默认自动关闭
-  }
+  emits('cancel'); // 传递关闭回调函数
+  close(); // 不存在回调函数时默认自动关闭
 }
 
 defineExpose<CommonDialogExpose>({
@@ -52,7 +43,12 @@ defineExpose<CommonDialogExpose>({
 </script>
 
 <template>
-  <CommonModal :modal-style="{ 'background-color': 'white', ...props.modalStyle }" ref="modalRef" :show-close="false">
+  <CommonModal
+    ref="modalRef"
+    :modal-style="{ 'background-color': 'white', ...props.modalStyle }"
+    :show-close="false"
+    @after-close="afterClose"
+  >
     <div class="dialog">
       <header>
         <div class="dialog-title">{{ title }}</div>
@@ -64,17 +60,17 @@ defineExpose<CommonDialogExpose>({
       </main>
       <hr />
       <footer>
-        <DiliButton text="取消" type="normal" @click="handleCancel" v-bind="props.cancelButtonProps" />
-        <DiliButton text="确认" type="primary" @click="handleConfirm" v-bind="props.confirmButtonProps" />
+        <DiliButton text="取消" type="normal" v-bind="props.cancelButtonProps" @click="handleCancel" />
+        <DiliButton text="确认" type="primary" v-bind="props.confirmButtonProps" @click="handleConfirm" />
       </footer>
     </div>
   </CommonModal>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .dialog {
   width: 100%;
-  padding: 0.25rem 0.5rem 0.5rem 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -96,6 +92,7 @@ defineExpose<CommonDialogExpose>({
   &-title {
     font-weight: bold;
     font-size: 1.25rem;
+    padding-left: 0.5rem;
   }
 }
 </style>

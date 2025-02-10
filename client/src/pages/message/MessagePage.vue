@@ -42,7 +42,7 @@ function handleDialogChange(sessionId: string) {
   currentRecord.id = sessionId;
 }
 
-/* 通过Transition的事件控制showEmptyTip，避免应用动画时刷新空空如也和消息列表挤压 */
+// 通过Transition的事件控制showEmptyTip，避免应用动画时刷新空空如也和消息列表挤压
 const showEmptyTip = ref(true);
 </script>
 
@@ -51,21 +51,19 @@ const showEmptyTip = ref(true);
     <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
       <RecordList
         v-show="showListView"
-        :class="{ 'message-page-record-list-absolute': !showDialogView }"
+        :class="{ 'message-page-record-list-absolute': !isLargeScreen }"
         class="message-page-record-list transition-all-circ"
         @change="handleDialogChange"
       />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <Transition
-      :name="showListView ? 'slide-fade' : 'slide-fade-rev'"
-      @before-enter="showEmptyTip = false"
-      @after-leave="showEmptyTip = true"
-    >
+    <Transition :name="isLargeScreen ? 'slide-fade' : 'show'" @before-enter="showEmptyTip = false" @after-leave="showEmptyTip = true">
       <DialogDetail
-        v-if="showDialogView && currentRecord.id"
+        v-show="showDialogView && currentRecord.id"
         id="dialog-detail-view"
-        :class="{ 'message-page-dialog-detail-absolute': !showListView }"
+        :class="{
+          'message-page-dialog-detail-absolute': !isLargeScreen,
+        }"
         :dialog-id="currentRecord.id"
         class="message-page-dialog-detail transition-all-circ"
         @back="() => (currentRecord.id = '')"
@@ -130,6 +128,7 @@ const showEmptyTip = ref(true);
     &-absolute {
       position: absolute;
       inset: 0.5rem;
+      background-color: white;
     }
   }
 
@@ -142,5 +141,15 @@ const showEmptyTip = ref(true);
     font-size: 24px;
     font-weight: bold;
   }
+}
+
+.show-enter-active,
+.show-leave-active {
+  transition: opacity 0.2s $ease-out-circ;
+}
+
+.show-enter-from,
+.show-leave-to {
+  opacity: 0;
 }
 </style>
