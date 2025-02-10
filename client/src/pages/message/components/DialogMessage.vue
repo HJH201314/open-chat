@@ -124,7 +124,7 @@ const { isLargeScreen } = useGlobal();
 // 无 scoped 解决 v-html 中的展示问题
 .dialog-message-content-body {
   :is(ol, li) {
-    //white-space: nowrap;
+    white-space: normal;
   }
   p {
     white-space: pre-line;
