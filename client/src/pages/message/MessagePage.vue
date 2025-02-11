@@ -4,16 +4,9 @@ import RecordList from '@/components/RecordList.vue';
 import { noPaddingKey, toggleSidebarKey } from '@/constants/eventBusKeys';
 import DialogDetail from '@/pages/message/components/DialogDetail.vue';
 import { useEventBus } from '@vueuse/core';
+import { useRouteParams } from '@vueuse/router';
 import { computed, reactive, ref, watchEffect } from 'vue';
-
-const { isLargeScreen } = useGlobal();
-
-const showListView = computed(() => {
-  return !(!isLargeScreen.value && currentRecord.id);
-});
-const showDialogView = computed(() => {
-  return isLargeScreen.value || currentRecord.id;
-});
+import { useRouter } from 'vue-router';
 
 const currentRecord = reactive({
   id: '',
@@ -22,11 +15,31 @@ const currentRecord = reactive({
   createAt: '',
 });
 
+// 路由处理，根据 sessionId 退出或进入详情
+const router = useRouter();
+const sessionId = useRouteParams('sessionId');
+watchEffect(() => {
+  console.log(currentRecord);
+  if (sessionId.value) {
+    currentRecord.id = String(sessionId.value);
+  } else {
+    currentRecord.id = '';
+  }
+})
+
+const { isLargeScreen } = useGlobal();
+const showListView = computed(() => {
+  return isLargeScreen.value || !currentRecord.id;
+});
+const showDialogView = computed(() => {
+  return isLargeScreen.value || currentRecord.id;
+});
+
 // 移动端侧边栏隐藏和展示
 const toggleSideBarBus = useEventBus(toggleSidebarKey);
 const noPaddingBus = useEventBus(noPaddingKey);
 watchEffect(() => {
-  console.log(isLargeScreen.value);
+  // 大屏时展示边栏、关闭零内衬
   if (isLargeScreen.value) {
     toggleSideBarBus.emit(true);
     noPaddingBus.emit(false);
@@ -39,7 +52,8 @@ watchEffect(() => {
 });
 
 function handleDialogChange(sessionId: string) {
-  currentRecord.id = sessionId;
+  let routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
+  routerHandler(`/message/${sessionId}`);
 }
 
 // 通过Transition的事件控制showEmptyTip，避免应用动画时刷新空空如也和消息列表挤压
@@ -57,7 +71,11 @@ const showEmptyTip = ref(true);
       />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <Transition :name="isLargeScreen ? 'slide-fade' : 'show'" @before-enter="showEmptyTip = false" @after-leave="showEmptyTip = true">
+    <Transition
+      :name="isLargeScreen ? 'slide-fade' : 'show'"
+      @before-enter="showEmptyTip = false"
+      @after-leave="showEmptyTip = true"
+    >
       <DialogDetail
         v-show="showDialogView && currentRecord.id"
         id="dialog-detail-view"
@@ -66,7 +84,7 @@ const showEmptyTip = ref(true);
         }"
         :dialog-id="currentRecord.id"
         class="message-page-dialog-detail transition-all-circ"
-        @back="() => (currentRecord.id = '')"
+        @back="() => router.back()"
       />
     </Transition>
     <Transition name="ease-in">

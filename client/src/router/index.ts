@@ -13,7 +13,12 @@ const router = createRouter({
     },
     {
       path: '/message',
-      name: 'message',
+      name: 'messageList',
+      component: MessagePage,
+    },
+    {
+      path: '/message/:sessionId',
+      name: 'messageDetail',
       component: MessagePage,
     },
     {

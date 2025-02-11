@@ -10,7 +10,7 @@ import SettingPage from '@/pages/setting/SettingPage.vue';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from '@icon-park/vue-next';
-import { useEventBus, useMediaQuery, useMouseInElement, useMousePressed } from '@vueuse/core';
+import { onClickOutside, useEventBus, useMediaQuery, useMouseInElement, useMousePressed } from '@vueuse/core';
 import { computed, onMounted, ref, useTemplateRef, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -161,13 +161,8 @@ function handleApiClick() {
 }
 
 // 点击 Sidebar 外部隐藏
-const sidebarRef = useTemplateRef('sidebar-body');
-const { isOutside: isMouseOutside } = useMouseInElement(sidebarRef);
-const { pressed } = useMousePressed();
-watchEffect(() => {
-  if (pressed.value && isMouseOutside.value) {
-    expandBar.value = false;
-  }
+onClickOutside(useTemplateRef('sidebar-body'), () => {
+  expandBar.value = false;
 });
 </script>
 

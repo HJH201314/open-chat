@@ -16,9 +16,16 @@ import { useDataStore } from '@/store/useDataStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import type { DialogInfo, MsgInfo } from '@/types/data';
-import { Acoustic, ArrowUp, Back, Delete, Edit, Voice } from '@icon-park/vue-next';
-import { useDevicesList, useMousePressed, useUserMedia } from '@vueuse/core';
-import { computed, nextTick, reactive, ref, useTemplateRef, watch } from 'vue';
+import { Acoustic, ArrowUp, Back, CollapseTextInput, Delete, Edit, Voice } from '@icon-park/vue-next';
+import {
+  useDevicesList,
+  useElementSize,
+  useFocusWithin,
+  useMousePressed,
+  useTextareaAutosize,
+  useUserMedia,
+} from '@vueuse/core';
+import { computed, nextTick, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -92,10 +99,18 @@ watch(
   }
 );
 
-useAutoScrollbar(useTemplateRef('dialog-list'));
+const smallInput = ref(true);
+const inputPanelRef = useTemplateRef('input-panel');
+const { focused: inputFocused } = useFocusWithin(inputPanelRef);
+const { height: panelHeight } = useElementSize(inputPanelRef);
+const dialogListRef = useTemplateRef('dialog-list');
+useAutoScrollbar(dialogListRef);
+watchEffect(() => {
+  if (inputFocused.value) smallInput.value = false;
+});
 
 function handleInputKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter') {
+  if (e.key === 'Enter' && settingStore.settings.fastSendKey == 'enter') {
     if (e.shiftKey || e.ctrlKey) {
       form.inputValue += '\n';
     } else {
@@ -376,6 +391,8 @@ function handleVoicePanelToggle() {
     <div ref="dialog-list" class="dialog-detail-dialogs">
       <!--   列表底部定位（此列表为 column-reverse）   -->
       <div id="bottom-line"></div>
+      <!-- 输入面板占位 -->
+      <div :style="{ minHeight: `${panelHeight}px` }" class="panel-placeholder"></div>
       <!--   消息列表   -->
       <DialogMessage v-if="form.outputValue" id="bot-typing-box" :message="form.outputValue" role="bot" />
       <DialogMessage v-if="form.inputValue" id="user-typing-box" :message="form.inputValue" role="user" />
@@ -391,41 +408,49 @@ function handleVoicePanelToggle() {
       <div id="top-line"></div>
       <div v-if="voicePanel" style="min-height: 3rem"></div>
     </div>
-    <div :class="{ 'dialog-detail-inputs--first': messageList.length === 0 }" class="dialog-detail-inputs">
+    <!-- 浮动输入面板 -->
+    <div
+      ref="input-panel"
+      :class="{ 'dialog-detail-inputs--first': messageList.length === 0, 'small-input': smallInput }"
+      class="dialog-detail-inputs"
+    >
+      <Transition name="slide-top-fade">
+        <div v-show="!smallInput" class="dialog-detail-inputs-bar">
+          <DiliButton v-if="settingStore.settings.enableVoiceToText" type="text" @click="handleVoicePanelToggle">
+            <div v-if="!voicePanel" style="display: contents">
+              <Voice size="20" />
+              语音面板
+            </div>
+            <div v-else style="display: contents">
+              <Acoustic size="20" />
+              收起面板
+            </div>
+          </DiliButton>
+          <CusDropdown
+            v-model="form.dialogModel"
+            :options="[
+              { value: 'DeepSeek', label: 'DeepSeek' },
+              { value: 'OpenAI', label: 'OpenAI' },
+            ]"
+            :toggle-style="{ background: 'transparent' }"
+            position="top"
+          />
+          <CusToggle v-model="form.withContext" highlight label="上下文" style="scale: 0.9"></CusToggle>
+          <div class="dialog-detail-inputs-bar-expand" @click="smallInput = !smallInput">
+            <CollapseTextInput size="16" />
+          </div>
+        </div>
+      </Transition>
       <textarea
         id="message-input"
+        ref="inputTextarea"
         v-model="form.inputValue"
-        class="dialog-detail-inputs-textarea"
         placeholder="随便问点啥(●'◡'●)"
+        class="dialog-detail-inputs-textarea"
         @keydown="(e) => handleInputKeydown(e)"
       />
-      <div class="dialog-detail-inputs-bar">
-        <!--        <span class="dialog-detail-inputs-bar-icon transition-all-circ">-->
-        <!--          <NewPicture size="24" />-->
-        <!--        </span>-->
-
-        <DiliButton v-if="settingStore.settings.enableVoiceToText" type="text" @click="handleVoicePanelToggle">
-          <div v-if="!voicePanel" style="display: contents">
-            <Voice size="20" />
-            语音面板
-          </div>
-          <div v-else style="display: contents">
-            <Acoustic size="20" />
-            收起面板
-          </div>
-        </DiliButton>
-        <CusToggle v-model="form.withContext" highlight label="上下文" style="scale: 0.9"></CusToggle>
-        <CusDropdown
-          v-model="form.dialogModel"
-          :options="[
-            { value: 'DeepSeek', label: 'DeepSeek' },
-            { value: 'OpenAI', label: 'OpenAI' },
-          ]"
-          position="top"
-        />
-        <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
-          <ArrowUp fill="white" size="16" />
-        </div>
+      <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
+        <ArrowUp fill="white" size="16" />
       </div>
     </div>
     <!-- 语音面板 -->
@@ -509,6 +534,7 @@ function handleVoicePanelToggle() {
   }
 
   &-dialogs {
+    //flex: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column-reverse;
@@ -516,15 +542,23 @@ function handleVoicePanelToggle() {
   }
 
   &-inputs {
-    position: relative;
-    min-height: 128px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     margin-top: auto;
-    background-color: $color-grey-100;
-    border-radius: 1rem;
+    border: 1px solid transparentize($color-grey-100, 0.1);
+    background-color: transparentize($color-grey-100, 0.2);
+    border-radius: 0.5rem;
     padding: 0.25rem;
+    backdrop-filter: blur(10px);
+
+    &.small-input {
+      gap: 0;
+    }
 
     &--first {
       margin-top: unset;
@@ -536,21 +570,30 @@ function handleVoicePanelToggle() {
 
     &-textarea {
       margin-inline: 0.25rem;
-      flex: 1;
       background-color: transparent;
-      width: 100%;
+      width: calc(100% - 2rem);
       box-sizing: border-box;
       overflow: auto;
       outline: none;
       font-size: 16px;
       resize: none;
+      height: 5rem;
+      transition: all 0.2s $ease-in-out-back;
+
+      .small-input & {
+        height: 2rem;
+
+        &::placeholder {
+          top: 50%;
+          transform: translateY(-50%);
+        }
+      }
 
       &::placeholder {
         text-align: center;
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        left: 0.25rem;
+        transition: all 0.2s $ease-in-out-circ;
       }
     }
 
@@ -572,7 +615,14 @@ function handleVoicePanelToggle() {
         }
       }
 
+      &-expand {
+        margin-left: auto;
+      }
+
       &-send {
+        position: absolute;
+        right: 0.25rem;
+        bottom: 0.25rem;
         width: 2rem;
         height: 2rem;
         margin-left: auto;
@@ -584,7 +634,14 @@ function handleVoicePanelToggle() {
         align-items: center;
         gap: 0.5rem;
         cursor: pointer;
-        transition: background-color 0.2s $ease-out-circ;
+        transition: all 0.2s $ease-out-circ;
+
+        .small-input & {
+          width: 1.75rem;
+          height: 1.75rem;
+          right: 0.375rem;
+          bottom: 0.375rem;
+        }
 
         &:hover {
           background: $color-primary-darker;
@@ -694,6 +751,17 @@ function handleVoicePanelToggle() {
 .flow-in-enter-active,
 .flow-in-leave-active {
   transition: all 0.3s $ease-in-out-back;
+}
+
+.slide-top-fade-enter-from,
+.slide-top-fade-leave-to {
+  margin-bottom: -1.5rem;
+  opacity: 0;
+}
+
+.slide-top-fade-enter-active,
+.slide-top-fade-leave-active {
+  transition: all 0.2s $ease-out-circ;
 }
 
 @keyframes recording {

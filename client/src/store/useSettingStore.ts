@@ -1,3 +1,4 @@
+import useGlobal from '@/commands/useGlobal';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { computed, onMounted } from 'vue';
@@ -5,6 +6,7 @@ import { computed, onMounted } from 'vue';
 export type ChatSetting = {
   host?: string;
   localCache?: boolean; // 本地对话数据缓存
+  fastSendKey?: 'enter' | 'none'; // 快速发送按键
   roleEnabled?: boolean; // 是否启用角色功能，不启用则默认直接开始
   roleRemember?: boolean; // 是否使用默认角色
   roleDefaultId?: string; // 默认角色
@@ -26,6 +28,7 @@ export type ChatSetting = {
 const defaultSetting: ChatSetting = {
   host: '/api',
   localCache: true,
+  fastSendKey: useGlobal().isLargeScreen ? 'enter' : 'none', // 宽屏默认回车发送
   roleEnabled: false,
   roleRemember: false,
   roleDefaultId: '1',

@@ -9,40 +9,39 @@
 @tailwind utilities;
 
 body {
-    background-color: var(--white);
-    color: var(--black);
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-    touch-action: pan-x pan-y;
-    overflow: hidden;
-    transition:
-            color 0.5s,
-            background-color 0.5s;
-    line-height: 1.6;
-    font-family: system-ui,
-            "MiSans Normal",
-            "Microsoft YaHei UI",
-            Inter,
-            -apple-system,
-            BlinkMacSystemFont,
-            'Segoe UI',
-            Roboto,
-            Oxygen,
-            Ubuntu,
-            Cantarell,
-            'Fira Sans',
-            'Droid Sans',
-            'Helvetica Neue',
-            sans-serif;
-    font-size: 15px;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  background-color: var(--white);
+  color: var(--black);
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  touch-action: pan-x pan-y;
+  overflow: hidden;
+  transition: color 0.5s,
+  background-color 0.5s;
+  line-height: 1.6;
+  font-family: system-ui,
+  "MiSans Normal",
+  "Microsoft YaHei UI",
+  Inter,
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  Oxygen,
+  Ubuntu,
+  Cantarell,
+  'Fira Sans',
+  'Droid Sans',
+  'Helvetica Neue',
+  sans-serif;
+  font-size: 15px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body, html {
@@ -58,6 +57,7 @@ a {
   transition: all 0.2s $ease-out-circ;
   background: linear-gradient(to right, $color-primary, $color-primary) no-repeat left bottom;
   background-size: 0 1px;
+
   &:hover {
     color: $color-primary-darker;
     background-position: left bottom;
@@ -67,50 +67,60 @@ a {
 
 /* 滚动条 */
 ::-webkit-scrollbar {
-    --bar-width: 5px;
-    width: var(--bar-width);
-    height: var(--bar-width);
+  --bar-width: 5px;
+  width: var(--bar-width);
+  height: var(--bar-width);
 }
 
 /* 滚动条滑块样式 */
 ::-webkit-scrollbar-thumb {
-    background-color: var(--bar-color);
-    border-radius: .5rem;
-    background-clip: content-box;
-    border: 1px solid transparent;
+  background-color: var(--bar-color);
+  border-radius: .5rem;
+  background-clip: content-box;
+  border: 1px solid transparent;
 }
 
 /* 滚动条轨道样式 */
 ::-webkit-scrollbar-track {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 /* 划词样式 */
 ::selection {
-    background-color: $color-primary-lighter;
-    color: $color-black;
+  background-color: $color-primary-lighter;
+  color: $color-black;
+}
+
+/* 重置 textarea 滚动条样式 */
+textarea {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+textarea::-webkit-scrollbar {
+  display: none;
 }
 
 #app {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  //padding: 24px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+@media screen and (max-width: $screen-sm) {
+  #app {
     flex: 1;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    //padding: 24px;
+    //padding: 12px;
     box-sizing: border-box;
     position: relative;
-}
-
-@media screen and (max-width: $screen-sm) {
-    #app {
-        flex: 1;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        //padding: 12px;
-        box-sizing: border-box;
-        position: relative;
-    }
+  }
 }
 
 /* v-shake 的动画 */
@@ -154,16 +164,18 @@ a {
 /* 改变hover和active时的颜色、鼠标指针 */
 .enable-click {
   cursor: pointer;
+
   &:hover {
     background: $color-hover;
   }
+
   &:active {
     background: $color-active;
   }
 }
 
 .transition-all-circ {
-    transition: all 0.2s $ease-out-circ;
+  transition: all 0.2s $ease-out-circ;
 }
 
 /* 闪烁光标，一般配合typer使用 */

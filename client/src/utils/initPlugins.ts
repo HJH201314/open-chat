@@ -5,6 +5,10 @@ import { MenuFold, MenuUnfold, Message, SettingTwo, Star, User } from '@icon-par
 import { createPinia } from 'pinia';
 import type { App } from 'vue';
 
+/**
+ * 在 vue app 中注册应用所需的插件
+ * @param app APP 实例
+ */
 export default (app: App) => {
   app.use(createPinia());
   app.use(router);
