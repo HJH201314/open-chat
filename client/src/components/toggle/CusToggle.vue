@@ -55,14 +55,14 @@ function toggle() {
 .toggle {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.5rem;
+  gap: 0.5em;
   align-items: center;
 
   &-container {
     cursor: pointer;
-    width: 40px;
-    height: 24px;
-    border-radius: 8px;
+    width: 2.5em;
+    height: 1.5em;
+    border-radius: 0.5em;
     background-color: $color-grey-400;
     position: relative;
     transition: background-color 0.2s $ease-out-circ;
@@ -74,11 +74,11 @@ function toggle() {
 
   &-front {
     position: absolute;
-    width: 16px;
-    left: 4px;
-    top: 4px;
-    bottom: 4px;
-    border-radius: 4px;
+    width: 1em;
+    left: 0.25em;
+    top: 0.25em;
+    bottom: 0.25em;
+    border-radius: 0.25em;
     background-color: $color-grey-200;
     transition:
       background-color 0.2s $ease-out-circ,

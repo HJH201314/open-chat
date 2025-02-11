@@ -1,18 +1,23 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+import type { DropdownOption } from '@/components/dropdown/CusDropdown';
+import DropdownMenuItem from '@/components/dropdown/DropdownMenuItem.vue';
 import { useMouseInElement, useMousePressed } from '@vueuse/core';
-import { ref, computed, watch, useTemplateRef, watchEffect } from 'vue';
+import { computed, type CSSProperties, ref, useTemplateRef, watch, watchEffect } from 'vue';
 
 type DropdownProps = {
   modelValue?: string; // 双向绑定
-  options: { label: string; value: string }[]; // 下拉选项
+  options: DropdownOption[]; // 下拉选项，支持嵌套
   placeholder?: string; // 占位符
   position?: 'top' | 'bottom' | 'left' | 'right'; // 弹出方位
   disabled?: boolean; // 是否禁用
+
+  toggleStyle?: CSSProperties;
 };
 
 const props = withDefaults(defineProps<DropdownProps>(), {
   placeholder: '请选择',
   position: 'bottom',
+  toggleStyle: () => ({}),
 });
 
 const emit = defineEmits<{
@@ -61,25 +66,29 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div ref="dropdown" class="dropdown" :class="{ active: isOpen, disabled: disabled }">
-    <div class="dropdown-toggle" :class="{ 'dropdown-toggle--active': isOpen }" @click="toggleDropdown">
+  <div ref="dropdown" :class="{ active: isOpen, disabled: disabled }" class="dropdown">
+    <div
+      :class="{ 'dropdown-toggle--active': isOpen }"
+      :style="toggleStyle"
+      class="dropdown-toggle"
+      @click="toggleDropdown"
+    >
       {{ selectedLabel }}
       <span class="arrow"></span>
     </div>
-    <ul ref="menu" v-if="isOpen" class="dropdown-menu" :class="[`dropdown-menu--${position}`]">
-      <li
+    <ul v-if="isOpen" ref="menu" :class="[`dropdown-menu--${position}`]" class="dropdown-menu">
+      <dropdown-menu-item
         v-for="option in options"
         :key="option.value"
-        @click="selectOption(option.value)"
-        :class="{ selected: option.value === selectedValue }"
-      >
-        {{ option.label }}
-      </li>
+        :option="option"
+        :selected-value="selectedValue"
+        @select="selectOption"
+      ></dropdown-menu-item>
     </ul>
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/variables.module';
 
 .dropdown {
@@ -92,8 +101,8 @@ watchEffect(() => {
   }
 
   &-toggle {
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.5rem;
+    padding: 0.25em 0.5em;
+    border-radius: 0.5em;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -112,7 +121,7 @@ watchEffect(() => {
 
   &-menu {
     position: absolute;
-    border-radius: 0.5rem;
+    border-radius: 0.5em;
     background-color: white;
     list-style: none;
     padding: 0;
@@ -143,7 +152,7 @@ watchEffect(() => {
     }
 
     li {
-      padding: 0.25rem 0.5rem;
+      padding: 0.25em 0.5em;
       cursor: pointer;
       transition: background-color 0.2s $ease-out-circ;
       background-color: white;
@@ -159,11 +168,11 @@ watchEffect(() => {
   }
 
   .arrow {
-    margin-left: 0.25rem;
+    margin-left: 0.25em;
     border: solid $color-grey-500;
-    border-width: 0 0.125rem 0.125rem 0;
+    border-width: 0 0.125em 0.125em 0;
     display: inline-block;
-    padding: 0.175rem;
+    padding: 0.175em;
     transform: rotate(45deg);
     transition: transform 0.2s ease;
   }
