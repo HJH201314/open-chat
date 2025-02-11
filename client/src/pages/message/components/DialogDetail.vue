@@ -17,14 +17,7 @@ import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import type { DialogInfo, MsgInfo } from '@/types/data';
 import { Acoustic, ArrowUp, Back, CollapseTextInput, Delete, Edit, Voice } from '@icon-park/vue-next';
-import {
-  useDevicesList,
-  useElementSize,
-  useFocusWithin,
-  useMousePressed,
-  useTextareaAutosize,
-  useUserMedia,
-} from '@vueuse/core';
+import { useDevicesList, useElementSize, useFocusWithin, useMousePressed, useUserMedia } from '@vueuse/core';
 import { computed, nextTick, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 
 interface DialogDetailProps {
@@ -110,14 +103,12 @@ watchEffect(() => {
 });
 
 function handleInputKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter' && settingStore.settings.fastSendKey == 'enter') {
-    if (e.shiftKey || e.ctrlKey) {
-      form.inputValue += '\n';
-    } else {
-      if (e.isComposing) return;
+  if (e.key === 'Enter' && !e.isComposing && settingStore.settings.fastSendKey == 'enter') {
+    if (!e.shiftKey && !e.ctrlKey) {
+      // 回车发送
       handleSendMessage();
+      e.preventDefault();
     }
-    e.preventDefault();
   }
 }
 
@@ -401,6 +392,7 @@ function handleVoicePanelToggle() {
         :id="item.time"
         :key="i"
         :message="item.content"
+        :html-message="item.htmlContent"
         :role="item.sender"
         :time="item.time"
       />
@@ -432,10 +424,16 @@ function handleVoicePanelToggle() {
               { value: 'DeepSeek', label: 'DeepSeek' },
               { value: 'OpenAI', label: 'OpenAI' },
             ]"
-            :toggle-style="{ background: 'transparent' }"
+            :toggle-style="{ opacity: 0.75 }"
             position="top"
+            style="font-size: 0.75rem"
           />
-          <CusToggle v-model="form.withContext" highlight label="上下文" style="scale: 0.9"></CusToggle>
+          <CusToggle
+            v-model="form.withContext"
+            highlight
+            label="上下文"
+            style="font-size: 0.75rem; opacity: 0.75"
+          ></CusToggle>
           <div class="dialog-detail-inputs-bar-expand" @click="smallInput = !smallInput">
             <CollapseTextInput size="16" />
           </div>
@@ -445,8 +443,8 @@ function handleVoicePanelToggle() {
         id="message-input"
         ref="inputTextarea"
         v-model="form.inputValue"
-        placeholder="随便问点啥(●'◡'●)"
         class="dialog-detail-inputs-textarea"
+        placeholder="随便问点啥(●'◡'●)"
         @keydown="(e) => handleInputKeydown(e)"
       />
       <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
@@ -578,7 +576,7 @@ function handleVoicePanelToggle() {
       font-size: 16px;
       resize: none;
       height: 5rem;
-      transition: all 0.2s $ease-in-out-back;
+      transition: all 0.2s $ease-out-circ;
 
       .small-input & {
         height: 2rem;
@@ -628,7 +626,7 @@ function handleVoicePanelToggle() {
         margin-left: auto;
         background: $color-primary;
         color: white;
-        border-radius: 50%;
+        border-radius: 35%;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -637,10 +635,7 @@ function handleVoicePanelToggle() {
         transition: all 0.2s $ease-out-circ;
 
         .small-input & {
-          width: 1.75rem;
-          height: 1.75rem;
-          right: 0.375rem;
-          bottom: 0.375rem;
+          transform: scale(0.875);
         }
 
         &:hover {

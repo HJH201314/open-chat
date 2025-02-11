@@ -5,7 +5,8 @@ import { computed } from 'vue';
 import useMarkdownIt from '@/commands/useMarkdownIt';
 
 type DialogMessageProps = {
-  message: string;
+  message?: string;
+  htmlMessage?: string;
   role: 'user' | 'bot';
   time?: string;
 };
@@ -27,8 +28,8 @@ const avatarPath = computed(() => {
   return '';
 });
 
-const markdownIt = useMarkdownIt(() => props.message);
-const renderMessage = computed(() => markdownIt.result.value);
+const markdownIt = useMarkdownIt(() => props.htmlMessage ? '' : props.message);
+const renderMessage = computed(() => props.htmlMessage || markdownIt.result.value);
 
 const { isLargeScreen } = useGlobal();
 </script>

@@ -1,4 +1,5 @@
 import api from '@/api';
+import useMarkdownIt from '@/commands/useMarkdownIt';
 import showToast from '@/components/toast/toast';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
@@ -12,7 +13,12 @@ import { computed, reactive, ref, type UnwrapNestedRefs } from 'vue';
 interface MessageReceiver {
   // 用户输入保存后的回调
   onSaveUserMsg: () => void;
-  onMessage: (message: string) => void;
+  /**
+   * 收到数据回调
+   * @param data 收到的数据
+   * @param fullMessage 编译后的 html 完整数据
+   */
+  onMessage: (data: string, fullMessage: string) => void;
   onFinish: (fullMessage: string) => void;
 }
 
@@ -128,7 +134,8 @@ export const useDataStore = defineStore('data', () => {
     saveMessage(sessionId, message, 'user', 'text');
     receiver?.onSaveUserMsg();
     const ctrl = new AbortController();
-    let fullMessage = '';
+    const rawMsg = ref('');
+    const { result: fullMsg } = useMarkdownIt(rawMsg);
     const { withContext, model: modelName } = getDialogInfo(sessionId);
     await api.chat.completionStream(
       {
@@ -141,22 +148,24 @@ export const useDataStore = defineStore('data', () => {
       (event) => {
         if (event.data === '[DONE]') {
           // 当接收到服务器端的结束标记时
-          saveMessage(sessionId, fullMessage.replace(/^\[title:(.+?)]/, ''), 'bot', 'text'); // 保存消息
-          // 修改标题
-          const regex = /^\[title:(.+?)]/; // 匹配以```开头和结尾的内容
-          const matches = fullMessage.match(regex);
-          if (matches) {
-            const title = matches[1];
-            editDialogTitle(sessionId, title);
-          }
-
-          receiver?.onFinish(fullMessage); // 消息接收完毕回调
+          saveMessage(sessionId, rawMsg.value, 'bot', 'text', fullMsg.value); // 保存消息
+          receiver?.onFinish(fullMsg.value); // 消息接收完毕回调
         } else {
           let data = event.data;
           data = data.replaceAll('\\n', '\n');
           console.log('[data]', event.data, `'${data}'`);
-          fullMessage += data; // 记录已接收的消息
-          receiver?.onMessage(data); // 消息接收回调
+          rawMsg.value += data; // 记录已接收的消息
+
+          // 修改标题并替换掉标题内容
+          const regex = /^\[title:(.+?)]/; // 匹配以```开头和结尾的内容
+          const matches = rawMsg.value.match(regex);
+          if (matches) {
+            const title = matches[1];
+            editDialogTitle(sessionId, title);
+          }
+          rawMsg.value = rawMsg.value.replace(/^\[title:(.+?)]/, '');
+
+          receiver?.onMessage(data, fullMsg.value); // 消息接收回调
         }
       }
     );
@@ -166,7 +175,8 @@ export const useDataStore = defineStore('data', () => {
     sessionId: string,
     message: string,
     sender: 'user' | 'bot',
-    type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other'
+    type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other',
+    htmlMessage?: string,
   ) {
     try {
       const storageKey = `dialog-${sessionId}`;
@@ -176,6 +186,7 @@ export const useDataStore = defineStore('data', () => {
         sender,
         type,
         content: message,
+        htmlContent: htmlMessage,
       });
       localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
     } catch (ignore) {}
