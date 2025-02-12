@@ -49,12 +49,7 @@ function handleReset() {
   });
 }
 
-const globe = useGlobal();
-watch(
-  () => globe.isLargeScreen,
-  (val) => {},
-  { immediate: true }
-);
+const { isLargeScreen } = useGlobal();
 
 function handleClearRoleCache() {
   DialogManager.commonDialog({
@@ -82,7 +77,7 @@ const roleSelectorOptions = computed(() =>
 </script>
 
 <template>
-  <div :class="{ 'setting-page--large': globe.isLargeScreen }" class="setting-page">
+  <div :class="{ 'setting-page--large': isLargeScreen }" class="setting-page">
     <div class="setting-page-title">设置 | Setting</div>
     <div class="setting-list">
       <div class="setting-list-container">
@@ -194,7 +189,7 @@ const roleSelectorOptions = computed(() =>
           </span>
         </div>
         <div class="setting-actions-placeholder"></div>
-        <div :class="{ 'setting-actions--large': globe.isLargeScreen }" class="setting-list-item setting-actions">
+        <div :class="{ 'setting-actions--large': isLargeScreen }" class="setting-list-item setting-actions">
           <DiliButton
             :background-color="variables.colorPrimary"
             :button-style="{ width: '100%', 'text-align': 'center' }"
@@ -203,7 +198,7 @@ const roleSelectorOptions = computed(() =>
             type="primary"
             @click="handleSave"
           />
-          <DiliButton v-if="globe.isLargeScreen" shadow text="关闭" type="normal" @click="$emit('cancel')" />
+          <DiliButton v-if="isLargeScreen" shadow text="关闭" type="normal" @click="$emit('cancel')" />
           <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset" />
         </div>
       </div>
