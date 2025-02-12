@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
+import { VitePWA } from 'vite-plugin-pwa';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import sassDts from 'vite-plugin-sass-dts';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -26,6 +27,7 @@ export default defineConfig({
       outputDir: path.resolve(__dirname, './dist'),
     }),
     basicSsl(),
+    VitePWA(),
   ],
   css: {
     // 对css的行为进行配置

@@ -189,7 +189,7 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
           <div
             v-for="entry in entries"
             :key="entry.key"
-            :class="{ 'sidebar-entry-focus': entry.href == route.path }"
+            :class="{ 'sidebar-entry--active': entry.href && route.path.startsWith(entry.href) }"
             class="sidebar-entry"
             @click="(e) => handleEntryClick(e, entry)"
           >
@@ -203,7 +203,7 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
             <component
               :is="entry.icon"
               v-else
-              class="sidebar-entry-icon sidebar-entry-icon-focus"
+              class="sidebar-entry-icon sidebar-entry-icon--active"
               size="24"
               theme="outline"
             ></component>
@@ -335,11 +335,11 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
     transition: background-color 0.2s $ease-out-circ;
     cursor: pointer;
 
-    &:not(&-focus):hover {
+    &:not(&--active):hover {
       background: shade-color($color-teal-20, 5%);
     }
 
-    &:not(&-focus):active {
+    &:not(&--active):active {
       background: shade-color($color-teal-20, 10%);
     }
   }
@@ -412,15 +412,15 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
     justify-content: center;
     gap: 1rem;
 
-    &:not(&-focus):hover {
+    &:not(&--active):hover {
       background: shade-color($color-teal-20, 5%);
     }
 
-    &:not(&-focus):active {
+    &:not(&--active):active {
       background: shade-color($color-teal-20, 10%);
     }
 
-    &-focus {
+    &--active {
       background: $color-teal-50;
       color: $color-primary;
     }
@@ -428,7 +428,7 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
     &-icon {
       aspect-ratio: 1;
 
-      &-focus {
+      &--active {
         color: $color-primary;
       }
     }

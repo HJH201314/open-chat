@@ -1,6 +1,7 @@
+import api from '@/api';
+import { useIntervalFn } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
-import api from '@/api';
 
 // setup 风格的 store
 // https://pinia.vuejs.org/core-concepts/#Setup-Stores
@@ -18,7 +19,21 @@ export const useUserStore = defineStore('user', () => {
     return loginStatus.value === 'login';
   });
 
-  const heartbeatInterval = ref<number>();
+  const { pause: pausePing, resume: resumePing } = useIntervalFn(
+    async () => {
+      const res = await api.user.ping();
+      if (!res) {
+        // 切换到 offline 表明登录态可能存在问题
+        loginStatus.value = 'offline';
+      } else {
+        loginStatus.value = 'login';
+      }
+    },
+    60000,
+    {
+      immediate: false,
+    }
+  );
 
   onMounted(() => {
     // 自动登录逻辑
@@ -31,53 +46,40 @@ export const useUserStore = defineStore('user', () => {
     }
   });
 
-  const login = async (_username: string, _password: string, _remember: boolean = false) =>
-    new Promise((resolve, reject) => {
-      api.user
-        .login({
-          username: _username,
-          password: _password,
-        })
-        .then((res) => {
-          if (res.data.code === 200) {
-            loginStatus.value = 'login';
-            user_id.value = res.data.data.id ?? -1;
-            username.value = _username ?? '匿名用户';
-            permission.value = 0; // TODO
-            currentUser.value = res.data.data;
-            localStorage.setItem('token', res.headers['oc-auth-token'] || '');
-            if (_remember) {
-              // 记忆自动登录信息
-              localStorage.setItem(
-                'up',
-                btoa(`${_username},${_password},${new Date().getTime() + 3 * 24 * 60 * 60 * 1000}`)
-              );
-            }
-            // 登录成功后，定时查询状态
-            clearInterval(heartbeatInterval.value);
-            heartbeatInterval.value = window.setInterval(async () => {
-              const res = await api.user.ping();
-              if (!res) {
-                // 切换到 offline 表明登录态可能存在问题
-                loginStatus.value = 'offline';
-              } else {
-                loginStatus.value = 'login';
-              }
-            }, 60000);
-            resolve(res.data);
-          } else {
-            localStorage.removeItem('up');
-            clearInterval(heartbeatInterval.value);
-            reject(res);
-          }
-        })
-        .catch((err) => {
-          localStorage.removeItem('up');
-          clearInterval(heartbeatInterval.value);
-          logout();
-          reject(err);
-        });
-    });
+  const login = async (_username: string, _password: string, _remember: boolean = false) => {
+    try {
+      const res = await api.user.login({
+        username: _username,
+        password: _password,
+      });
+      if (res.data.code === 200) {
+        loginStatus.value = 'login';
+        user_id.value = res.data.data.id ?? -1;
+        username.value = _username ?? '匿名用户';
+        permission.value = 0; // TODO
+        currentUser.value = res.data.data;
+        localStorage.setItem('token', res.headers['oc-auth-token'] || '');
+        if (_remember) {
+          // 记忆自动登录信息
+          localStorage.setItem(
+            'up',
+            btoa(`${_username},${_password},${new Date().getTime() + 3 * 24 * 60 * 60 * 1000}`)
+          );
+        }
+        resumePing();
+        return true;
+      } else {
+        localStorage.removeItem('up');
+        pausePing();
+        return false;
+      }
+    } catch (e) {
+      localStorage.removeItem('up');
+      pausePing();
+      logout();
+      return false;
+    }
+  };
 
   /**
    * 登出，清除本地登录信息
@@ -90,7 +92,7 @@ export const useUserStore = defineStore('user', () => {
     currentUser.value = {};
     localStorage.removeItem('token');
     localStorage.removeItem('up'); // 清除自动登录信息
-    clearInterval(heartbeatInterval.value);
+    pausePing();
   }
 
   return {

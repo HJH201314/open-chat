@@ -30,6 +30,8 @@ onMounted(() => {});
 
 async function handleAddRecord(roleId?: number) {
   const sessionId = await dataStore.addDialog(roleId ?? 1);
+  if (!sessionId) return;
+
   if (roleId) {
     dataStore.sendMessageText(
       sessionId,

@@ -1,15 +1,15 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+import variables from '@/assets/variables.module.scss';
+import useGlobal from '@/commands/useGlobal';
+import DiliButton from '@/components/button/DiliButton.vue';
+import { DialogManager } from '@/components/dialog';
 import CusDropdown from '@/components/dropdown/CusDropdown.vue';
 import CusInput from '@/components/input/CusInput.vue';
-import { computed, ref, toValue, watch } from 'vue';
-import DiliButton from '@/components/button/DiliButton.vue';
-import variables from '@/assets/variables.module.scss';
-import { useSettingStore } from '@/store/useSettingStore';
-import useGlobal from '@/commands/useGlobal';
 import showToast from '@/components/toast/toast';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import useRoleStore from '@/store/useRoleStore';
-import { DialogManager } from '@/components/dialog';
+import { useSettingStore } from '@/store/useSettingStore';
+import { computed, ref, toValue, watch } from 'vue';
 
 const settingStore = useSettingStore();
 const roleStore = useRoleStore();
@@ -82,7 +82,7 @@ const roleSelectorOptions = computed(() =>
 </script>
 
 <template>
-  <div class="setting-page" :class="{ 'setting-page--large': globe.isLargeScreen }">
+  <div :class="{ 'setting-page--large': globe.isLargeScreen }" class="setting-page">
     <div class="setting-page-title">设置 | Setting</div>
     <div class="setting-list">
       <div class="setting-list-container">
@@ -104,11 +104,18 @@ const roleSelectorOptions = computed(() =>
           <span class="setting-list-item__title">默认 API 服务</span>
           <span class="setting-list-item__value">
             <CusDropdown
-              :options="[
-                { value: 'OpenAI', label: 'OpenAI' },
-                { value: 'DeepSeek', label: 'DeepSeek' },
-              ]"
               v-model="editingValue.defaultProvider"
+              :options="[
+                { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-40', label: 'gpt-4o' }] },
+                {
+                  value: 'DeepSeek',
+                  label: 'DeepSeek',
+                  children: [
+                    { value: 'deepseek-chat', label: 'V3' },
+                    { value: 'deepseek-reasoner', label: 'R1' },
+                  ],
+                },
+              ]"
             />
           </span>
         </div>
@@ -117,11 +124,11 @@ const roleSelectorOptions = computed(() =>
           <span class="setting-list-item__title">显示日期/时间</span>
           <span class="setting-list-item__value">
             <CusDropdown
+              v-model="editingValue.timeDisplayInDialogList"
               :options="[
                 { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
                 { value: 'yyyy-MM-dd hh:mm:ss', label: 'yyyy-MM-dd hh:mm:ss' },
               ]"
-              v-model="editingValue.timeDisplayInDialogList"
             />
           </span>
         </div>
@@ -134,7 +141,7 @@ const roleSelectorOptions = computed(() =>
         </div>
         <div class="setting-list-item">
           <span class="setting-list-item__title">默认角色</span>
-          <span class="setting-list-item__value" style="flex-direction: row; align-items: center;">
+          <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
             <CusToggle v-model="editingValue.roleRemember" />
             <CusDropdown v-model="editingValue.roleDefaultId" :options="roleSelectorOptions" />
           </span>
@@ -169,8 +176,8 @@ const roleSelectorOptions = computed(() =>
           <span class="setting-list-item__value">
             <CusInput
               v-model="editingValue.voiceCloudSecretKey"
-              placeholder="SECRET_KEY"
               :input-attrs="{ type: 'password' }"
+              placeholder="SECRET_KEY"
             />
           </span>
         </div>
@@ -179,32 +186,32 @@ const roleSelectorOptions = computed(() =>
           <span class="setting-list-item__title">清除缓存</span>
           <span class="setting-list-item__value">
             <DiliButton
-              type="primary"
               :background-color="variables.colorDanger"
               text="清除角色缓存"
+              type="primary"
               @click="handleClearRoleCache"
             />
           </span>
         </div>
         <div class="setting-actions-placeholder"></div>
-        <div class="setting-list-item setting-actions" :class="{ 'setting-actions--large': globe.isLargeScreen }">
+        <div :class="{ 'setting-actions--large': globe.isLargeScreen }" class="setting-list-item setting-actions">
           <DiliButton
-            style="flex: 1"
-            :button-style="{ width: '100%', 'text-align': 'center' }"
-            type="primary"
-            text="保存"
             :background-color="variables.colorPrimary"
+            :button-style="{ width: '100%', 'text-align': 'center' }"
+            style="flex: 1"
+            text="保存"
+            type="primary"
             @click="handleSave"
           />
-          <DiliButton shadow type="normal" text="关闭" v-if="globe.isLargeScreen" @click="$emit('cancel')" />
-          <DiliButton style="margin-left: auto" type="normal" text="重置" @click="handleReset" />
+          <DiliButton v-if="globe.isLargeScreen" shadow text="关闭" type="normal" @click="$emit('cancel')" />
+          <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset" />
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/variables.module';
 
 .setting-page {

@@ -1,5 +1,5 @@
 // @ts-ignore
-import { definer as highlightJsVueDefiner } from 'highlightjs-vue';
+import highlightJsVueDefiner from './highlightVue';
 import MarkdownIt from 'markdown-it';
 import MarkdownItHighlightJs from 'markdown-it-highlightjs';
 import type { MaybeRefOrGetter } from 'vue';
@@ -15,6 +15,7 @@ const markdownIt = MarkdownIt({
     vue: highlightJsVueDefiner,
   },
 });
+
 function useMarkdownIt(text: MaybeRefOrGetter<string>) {
   const result = computed(() => {
     let value = <string>toValue(text);

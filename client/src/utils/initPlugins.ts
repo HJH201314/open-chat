@@ -1,5 +1,6 @@
 import shake from '@/commands/shake';
-import router from '@/router';
+import pinia from '@/plugins/pinia';
+import router from '@/plugins/router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { MenuFold, MenuUnfold, Message, SettingTwo, Star, User } from '@icon-park/vue-next';
 import { createPinia } from 'pinia';
@@ -10,7 +11,7 @@ import type { App } from 'vue';
  * @param app APP 实例
  */
 export default (app: App) => {
-  app.use(createPinia());
+  app.use(pinia);
   app.use(router);
 
   // 自定义指令v-shake

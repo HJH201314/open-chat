@@ -22,7 +22,8 @@ export type MsgInfo = {
   time: string; // 消息发送/接收时间
   sender: 'user' | 'bot'; // 消息发送者
   type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other'; // 消息类型
-  content: string; // 消息内容
+  content: string; // 消息原始内容
+  htmlContent?: string; // 编译后的html 消息内容
 };
 
 /* Storage中储存的Msg数据列表 */

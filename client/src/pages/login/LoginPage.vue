@@ -56,6 +56,7 @@ function initPage() {
 }
 
 const router = useRouter();
+
 function closePage() {
   if (isModal) {
     emit('close');
@@ -107,12 +108,12 @@ function showUserAgreement() {
   DialogManager.commonDialog({
     title: 'OpenChat用户协议',
     content: '没有协议拜了个拜',
-  })
+  });
 }
 </script>
 
 <template>
-  <div class="login" :class="{'in-page': !isModal}">
+  <div :class="{ 'in-page': !isModal }" class="login">
     <Close
       v-if="isModal"
       class="login-close transition-all-circ enable-hover enable-active"
@@ -274,8 +275,8 @@ function showUserAgreement() {
       transition: all 0.2s $ease-out-circ;
 
       .in-page & {
-        padding: .25rem 0;
-        margin-top: .5rem;
+        padding: 0.25rem 0;
+        margin-top: 0.5rem;
       }
 
       &:hover {

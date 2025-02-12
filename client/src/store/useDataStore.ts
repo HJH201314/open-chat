@@ -3,7 +3,6 @@ import useMarkdownIt from '@/commands/useMarkdownIt';
 import showToast from '@/components/toast/toast';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
-import { useUserStore } from '@/store/useUserStore';
 import type { DialogData, MsgData } from '@/types/data';
 import { recordToMap } from '@/utils/typeUtils';
 import { useLocalStorage, useStorage } from '@vueuse/core';
@@ -49,7 +48,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   /**
-   * 创建一个对话
+   * 创建一个对话，成功返回 sessionId，失败返回 ''
    * @param role 角色 ID
    */
   async function addDialog(role?: number) {
@@ -176,7 +175,7 @@ export const useDataStore = defineStore('data', () => {
     message: string,
     sender: 'user' | 'bot',
     type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other',
-    htmlMessage?: string,
+    htmlMessage?: string
   ) {
     try {
       const storageKey = `dialog-${sessionId}`;
