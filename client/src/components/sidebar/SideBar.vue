@@ -1,17 +1,17 @@
 <script lang="ts" setup>
-import { showLoginDialog } from '@/pages/login';
 import type { CommonModalFunc } from '@/components/modal/CommonModal';
 import CommonModal from '@/components/modal/CommonModal.vue';
 import showToast from '@/components/toast/toast';
 import ToastManager from '@/components/toast/ToastManager';
 import Tooltip from '@/components/tooltip/CusTooltip.vue';
 import { toggleSidebarKey } from '@/constants/eventBusKeys';
+import { showLoginDialog } from '@/pages/login';
 import SettingPage from '@/pages/setting/SettingPage.vue';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from '@icon-park/vue-next';
-import { onClickOutside, useEventBus, useMediaQuery, useMouseInElement, useMousePressed } from '@vueuse/core';
-import { computed, onMounted, ref, useTemplateRef, watchEffect } from 'vue';
+import { onClickOutside, useEventBus, useMediaQuery } from '@vueuse/core';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const userStore = useUserStore();
@@ -247,7 +247,7 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
         </div>
       </div>
       <CommonModal ref="refSettingModal" v-slot:default="{ close: closeSetting }">
-        <SettingPage v-if="settingModalVisible" @cancel="closeSetting" />
+        <SettingPage v-if="settingModalVisible" is-modal @cancel="closeSetting" />
       </CommonModal>
     </div>
   </Transition>

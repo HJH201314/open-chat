@@ -19,7 +19,6 @@ const currentRecord = reactive({
 const router = useRouter();
 const sessionId = useRouteParams('sessionId');
 watchEffect(() => {
-  console.log(currentRecord);
   if (sessionId.value) {
     currentRecord.id = String(sessionId.value);
   } else {
@@ -29,10 +28,10 @@ watchEffect(() => {
 
 const { isLargeScreen } = useGlobal();
 const showListView = computed(() => {
-  return isLargeScreen.value || !currentRecord.id;
+  return isLargeScreen.value || !sessionId.value;
 });
 const showDialogView = computed(() => {
-  return isLargeScreen.value || currentRecord.id;
+  return isLargeScreen.value || sessionId.value;
 });
 
 // 移动端侧边栏隐藏和展示
@@ -51,11 +50,6 @@ watchEffect(() => {
   }
 });
 
-function handleDialogChange(sessionId: string) {
-  let routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
-  routerHandler(`/message/${sessionId}`);
-}
-
 // 通过Transition的事件控制showEmptyTip，避免应用动画时刷新空空如也和消息列表挤压
 const showEmptyTip = ref(true);
 </script>
@@ -67,7 +61,6 @@ const showEmptyTip = ref(true);
         v-show="showListView"
         :class="{ 'message-page-record-list-absolute': !isLargeScreen }"
         class="message-page-record-list transition-all-circ"
-        @change="handleDialogChange"
       />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
@@ -77,7 +70,7 @@ const showEmptyTip = ref(true);
       @after-leave="showEmptyTip = true"
     >
       <DialogDetail
-        v-show="showDialogView && currentRecord.id"
+        v-if="showDialogView && currentRecord.id"
         id="dialog-detail-view"
         :class="{
           'message-page-dialog-detail-absolute': !isLargeScreen,
@@ -112,16 +105,19 @@ const showEmptyTip = ref(true);
   gap: 8px;
   overflow: hidden;
   padding: 0.5rem;
+  align-items: center;
 
   .split {
     flex-shrink: 0;
     width: 2px;
-    height: auto;
+    height: 100%;
     background-color: $color-grey;
-    opacity: 0.666;
+    opacity: 0.233;
   }
 
   &-record-list {
+    height: 100%;
+
     &:not(&-absolute) {
       min-width: calc(30% - 8px); // 防止右侧消息列表关闭时被挤压
       max-width: calc(30% - 8px); // 防止右侧消息列表关闭时被挤压
@@ -135,6 +131,7 @@ const showEmptyTip = ref(true);
   }
 
   &-dialog-detail {
+    height: 100%;
     flex-shrink: 0;
 
     &:not(&-absolute) {

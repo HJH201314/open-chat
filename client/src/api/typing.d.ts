@@ -78,7 +78,9 @@ declare namespace API {
   type ChatCompletionOption = {
     sessionId: string;
     msg: string;
-    withContext: boolean;
-    modelName: string;
+    withContext?: boolean;
+    provider?: string;
+    modelName?: string;
+    systemPrompt?: string;
   };
 }

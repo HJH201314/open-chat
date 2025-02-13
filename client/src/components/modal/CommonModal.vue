@@ -102,14 +102,13 @@ defineExpose<CommonModalFunc>({
 <template>
   <Teleport to="body">
     <Transition name="show" @after-leave="afterClose">
-      <div v-if="showModal" :style="{ 'z-index': zIndex }" class="modal-mask"></div>
-    </Transition>
-    <Transition name="show">
-      <div v-if="showModal" :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }" class="modal-body">
-        <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
-        <div class="modal-body-content">
-          <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
-          <slot :close="close" :isShown="showModal"></slot>
+      <div v-if="showModal" :style="{ 'z-index': zIndex }" class="modal-mask">
+        <div :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }" class="modal-body">
+          <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
+          <div class="modal-body-content">
+            <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
+            <slot :close="close" :isShown="showModal"></slot>
+          </div>
         </div>
       </div>
     </Transition>
@@ -127,13 +126,13 @@ defineExpose<CommonModalFunc>({
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &-body {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
     width: 512px; // 加个默认宽度不然组件有没有生效都不知道
     max-width: calc(100% - 2rem);
     max-height: calc(100% - 2rem);
@@ -157,7 +156,7 @@ defineExpose<CommonModalFunc>({
 
     &-content {
       flex: 1;
-      overflow: auto;
+      overflow: visible;
     }
   }
 }

@@ -13,6 +13,7 @@ export type ChatSetting = {
   timeDisplayInDialogList?: string;
   timeDisplayInMessageList?: string;
   defaultProvider?: string; // 默认 API 提供商
+  defaultModel?: [string, string]; // 默认模型，形如 ['OpenAI', 'gpt-4o']
 
   /* 语音输入相关 */
   enableVoiceToText?: boolean; // 是否启用语音输入
@@ -22,7 +23,7 @@ export type ChatSetting = {
   voiceCloudSecretKey?: string; // 云服务SecretKey
 
   // 添加索引签名，允许使用字符串索引
-  [key: string]: string | boolean | undefined;
+  [key: string]: any;
 };
 
 const defaultSetting: ChatSetting = {
@@ -37,6 +38,7 @@ const defaultSetting: ChatSetting = {
   timeDisplayInDialogList: 'yyyy-MM-dd hh:mm:ss',
   timeDisplayInMessageList: 'yyyy-MM-dd hh:mm:ss',
   defaultProvider: 'OpenAI',
+  defaultModel: ['OpenAI', 'gpt-4o'],
 
   voiceCloudAppId: import.meta.env.VITE_CLOUD_VOICE_APPID,
   voiceCloudSecretId: import.meta.env.VITE_CLOUD_VOICE_SECRET_ID,

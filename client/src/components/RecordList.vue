@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DiliButton from '@/components/button/DiliButton.vue';
+import { useRouteParams } from '@vueuse/router';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { CloseOne, Plus, Search } from '@icon-park/vue-next';
 import { useDataStore } from '@/store/useDataStore';
@@ -8,6 +9,7 @@ import Toggle from '@/components/toggle/CusToggle.vue';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import type { DialogInfo } from '@/types/data';
+import { useRouter } from 'vue-router';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -24,7 +26,7 @@ type RecordListItem = {
 const dataStore = useDataStore();
 const roleStore = useRoleStore();
 const settingStore = useSettingStore();
-const currentDialogId = ref<string>('1');
+const currentSessionId = useRouteParams<string>('sessionId');
 
 onMounted(() => {});
 
@@ -56,12 +58,11 @@ function handleListAddClick() {
   else roleForm.modalVisible = true;
 }
 
+const router = useRouter();
+// 点击对话列表项
 function handleListItemClick(id: string) {
-  // 点击对话列表项
-  currentDialogId.value = id;
-  // nextTick(() => {
-  emit('change', currentDialogId.value);
-  // });
+  let routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
+  routerHandler(`/message/${id}`);
 }
 
 const roleForm = reactive({
@@ -137,7 +138,7 @@ const displayList = computed(() => {
           :key="item.id"
           @click="handleListItemClick(item.id)"
           class="dialog-list-item"
-          :class="{ 'dialog-list-item-selected': item.id === currentDialogId }"
+          :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
         >
           <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar" />
           <div class="dialog-list-item-center">

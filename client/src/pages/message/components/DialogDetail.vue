@@ -4,7 +4,7 @@ import variables from '@/assets/variables.module.scss';
 import { useAutoScrollbar } from '@/commands/useAutoScrollbar';
 import DiliButton from '@/components/button/DiliButton.vue';
 import { DialogManager } from '@/components/dialog';
-import CusDropdown from '@/components/dropdown/CusDropdown.vue';
+import CusSelect from '@/components/dropdown/CusSelect.vue';
 import IconButton from '@/components/IconButton.vue';
 import CusCircularProgress from '@/components/progress/CusCircularProgress.vue';
 import Spinning from '@/components/spinning/Spinning.vue';
@@ -17,8 +17,8 @@ import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import type { DialogInfo, MsgInfo } from '@/types/data';
 import { Acoustic, ArrowUp, Back, CollapseTextInput, Delete, Edit, Voice } from '@icon-park/vue-next';
-import { useDevicesList, useElementSize, useFocusWithin, useMousePressed, useUserMedia } from '@vueuse/core';
-import { computed, nextTick, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { until, useDevicesList, useElementSize, useFocusWithin, useMousePressed, useUserMedia } from '@vueuse/core';
+import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -42,7 +42,7 @@ const messageList = ref([] as MsgInfo[]);
 const form = reactive({
   sessionId: ref(''),
   withContext: ref(false),
-  dialogModel: ref('DeepSeek'),
+  providerModel: ref<[string, string]>(['DeepSeek', 'deepseek-chat']),
   inputValue: ref(''),
   outputValue: ref(''),
 });
@@ -55,24 +55,28 @@ function scrollToBottom() {
   });
 }
 
-watch(
-  () => props.dialogId,
-  async (v) => {
-    if (props.dialogId != '') {
-      dialogInfo.value = dataStore.getDialogInfo(v);
-      form.sessionId = v;
-      form.withContext = dialogInfo.value.withContext ?? false;
-      form.dialogModel = dialogInfo.value.model ?? 'DeepSeek';
-      messageList.value = dataStore.getMessageList(v);
-      nextTick(() => {
-        // 滚动到列表底部并默认聚焦输入框
-        scrollToBottom();
-        (document.querySelector('#message-input') as HTMLTextAreaElement)?.focus();
-      });
-    }
-  },
-  { immediate: true }
-);
+onMounted(() => {
+  watch(
+    () => props.dialogId,
+    async (v) => {
+      if (props.dialogId != '') {
+        dialogInfo.value = dataStore.getDialogInfo(v);
+        form.sessionId = v;
+        form.withContext = dialogInfo.value.withContext ?? false;
+        form.providerModel = [dialogInfo.value.provider ?? 'DeepSeek', dialogInfo.value.model ?? 'deepseek-chat'];
+        messageList.value = dataStore.getMessageList(v);
+        // 等待到 panelHeight 被成功计算、插入占位高度并 nextTick 渲染完成后
+        await until(panelHeight).toMatch((v) => v > 0);
+        await nextTick(() => {
+          // 滚动到列表底部并默认聚焦输入框
+          scrollToBottom();
+          focusTextArea();
+        });
+      }
+    },
+    { immediate: true }
+  );
+});
 
 watch(
   () => form.withContext,
@@ -84,16 +88,17 @@ watch(
 );
 
 watch(
-  () => form.dialogModel,
+  () => form.providerModel,
   (newVal, oldVal) => {
     if (newVal !== oldVal) {
-      dataStore.changeDialogModel(form.sessionId, newVal);
+      dataStore.changeDialogModel(form.sessionId, newVal[0], newVal[1]);
     }
   }
 );
 
-const smallInput = ref(true);
+const smallInput = ref(false);
 const inputPanelRef = useTemplateRef('input-panel');
+const textAreaRef = useTemplateRef('input-textarea');
 const { focused: inputFocused } = useFocusWithin(inputPanelRef);
 const { height: panelHeight } = useElementSize(inputPanelRef);
 const dialogListRef = useTemplateRef('dialog-list');
@@ -101,6 +106,10 @@ useAutoScrollbar(dialogListRef);
 watchEffect(() => {
   if (inputFocused.value) smallInput.value = false;
 });
+
+function focusTextArea() {
+  textAreaRef.value?.focus();
+}
 
 function handleInputKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.isComposing && settingStore.settings.fastSendKey == 'enter') {
@@ -391,8 +400,8 @@ function handleVoicePanelToggle() {
         v-for="(item, i) in messageList.toReversed()"
         :id="item.time"
         :key="i"
-        :message="item.content"
         :html-message="item.htmlContent"
+        :message="item.content"
         :role="item.sender"
         :time="item.time"
       />
@@ -418,15 +427,25 @@ function handleVoicePanelToggle() {
               收起面板
             </div>
           </DiliButton>
-          <CusDropdown
-            v-model="form.dialogModel"
+          <CusSelect
+            v-model:value-path="form.providerModel"
+            :label-render-text="(_, selectedPath) => selectedPath?.join('/')"
+            :model-value="form.providerModel[1]"
             :options="[
-              { value: 'DeepSeek', label: 'DeepSeek' },
-              { value: 'OpenAI', label: 'OpenAI' },
+              { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-4o', label: 'gpt-4o' }] },
+              {
+                value: 'DeepSeek',
+                label: 'DeepSeek',
+                children: [
+                  { value: 'deepseek-chat', label: 'deepseek-chat' },
+                  { value: 'deepseek-reasoner', label: 'deepseek-reasoner' },
+                ],
+              },
             ]"
             :toggle-style="{ opacity: 0.75 }"
             position="top"
             style="font-size: 0.75rem"
+            @select="() => focusTextArea()"
           />
           <CusToggle
             v-model="form.withContext"
@@ -441,7 +460,7 @@ function handleVoicePanelToggle() {
       </Transition>
       <textarea
         id="message-input"
-        ref="inputTextarea"
+        ref="input-textarea"
         v-model="form.inputValue"
         class="dialog-detail-inputs-textarea"
         placeholder="随便问点啥(●'◡'●)"
@@ -541,14 +560,13 @@ function handleVoicePanelToggle() {
 
   &-inputs {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: -0.25rem;
+    right: -0.25rem;
+    bottom: -0.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     margin-top: auto;
-    border: 1px solid transparentize($color-grey-100, 0.1);
     background-color: transparentize($color-grey-100, 0.2);
     border-radius: 0.5rem;
     padding: 0.25rem;

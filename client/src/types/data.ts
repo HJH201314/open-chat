@@ -8,6 +8,7 @@ export type DialogInfo = {
   storageKey: string;
   createAt: string;
   withContext?: boolean; // 是否启用上下文
+  provider?: string; // 模型供应商
   model?: string; // 模型名称
 };
 

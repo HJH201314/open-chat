@@ -28,17 +28,14 @@ export class DialogManager {
             {
               ...props,
               onConfirm() {
-                close();
                 resolve(true);
               },
               onCancel() {
-                close();
                 resolve(false);
               },
               onAfterClose() {
                 DialogManager.destroy(id);
               },
-              _id: id, // 指定组件全局唯一ID
               ref: dialogRef,
             },
             {

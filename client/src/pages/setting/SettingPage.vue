@@ -3,13 +3,17 @@ import variables from '@/assets/variables.module.scss';
 import useGlobal from '@/commands/useGlobal';
 import DiliButton from '@/components/button/DiliButton.vue';
 import { DialogManager } from '@/components/dialog';
-import CusDropdown from '@/components/dropdown/CusDropdown.vue';
+import CusSelect from '@/components/dropdown/CusSelect.vue';
 import CusInput from '@/components/input/CusInput.vue';
 import showToast from '@/components/toast/toast';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { computed, ref, toValue, watch } from 'vue';
+
+const { isModal = false } = defineProps<{
+  isModal?: boolean;
+}>();
 
 const settingStore = useSettingStore();
 const roleStore = useRoleStore();
@@ -77,119 +81,129 @@ const roleSelectorOptions = computed(() =>
 </script>
 
 <template>
-  <div :class="{ 'setting-page--large': isLargeScreen }" class="setting-page">
+  <div :class="{ large: !isModal && isLargeScreen, modal: isModal }" class="setting-page">
     <div class="setting-page-title">设置 | Setting</div>
     <div class="setting-list">
       <div class="setting-list-container">
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">API地址</span>
-          <span class="setting-list-item__value">
-            <CusInput v-model="editingValue.host" placeholder="Cloud API" />
-          </span>
+        <div class="setting-list-section">
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">API地址</span>
+            <span class="setting-list-item__value">
+              <CusInput v-model="editingValue.host" placeholder="Cloud API" />
+            </span>
+          </div>
         </div>
-        <hr />
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">对话缓存</span>
-          <span class="setting-list-item__value">
-            <CusToggle v-model="editingValue.localCache" />
-          </span>
+        <div class="setting-list-section">
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">对话缓存</span>
+            <span class="setting-list-item__value">
+              <CusToggle v-model="editingValue.localCache" />
+            </span>
+          </div>
         </div>
-        <hr />
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">默认 API 服务</span>
-          <span class="setting-list-item__value">
-            <CusDropdown
-              v-model="editingValue.defaultProvider"
-              :options="[
-                { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-40', label: 'gpt-4o' }] },
-                {
-                  value: 'DeepSeek',
-                  label: 'DeepSeek',
-                  children: [
-                    { value: 'deepseek-chat', label: 'V3' },
-                    { value: 'deepseek-reasoner', label: 'R1' },
-                  ],
-                },
-              ]"
-            />
-          </span>
+        <div class="setting-list-section">
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">默认 API 服务</span>
+            <span class="setting-list-item__value">
+              <CusSelect
+                v-model="editingValue.defaultProvider"
+                v-model:value-path="editingValue.defaultModel"
+                position="bottom"
+                :options="[
+                  { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-4o', label: 'gpt-4o' }] },
+                  {
+                    value: 'DeepSeek',
+                    label: 'DeepSeek',
+                    children: [
+                      { value: 'deepseek-chat', label: 'deepseek-chat' },
+                      { value: 'deepseek-reasoner', label: 'deepseek-reasoner' },
+                    ],
+                  },
+                ]"
+              />
+            </span>
+          </div>
         </div>
-        <hr />
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">显示日期/时间</span>
-          <span class="setting-list-item__value">
-            <CusDropdown
-              v-model="editingValue.timeDisplayInDialogList"
-              :options="[
-                { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
-                { value: 'yyyy-MM-dd hh:mm:ss', label: 'yyyy-MM-dd hh:mm:ss' },
-              ]"
-            />
-          </span>
+        <div class="setting-list-section">
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">显示日期/时间</span>
+            <span class="setting-list-item__value">
+              <CusSelect
+                v-model="editingValue.timeDisplayInDialogList"
+                :options="[
+                  { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
+                  { value: 'yyyy-MM-dd hh:mm:ss', label: 'yyyy-MM-dd hh:mm:ss' },
+                ]"
+              />
+            </span>
+          </div>
         </div>
-        <hr />
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">启用角色功能</span>
-          <span class="setting-list-item__value">
-            <CusToggle v-model="editingValue.roleEnabled" />
-          </span>
+        <div class="setting-list-section">
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">启用角色功能</span>
+            <span class="setting-list-item__value">
+              <CusToggle v-model="editingValue.roleEnabled" />
+            </span>
+          </div>
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">默认角色</span>
+            <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
+              <CusToggle v-model="editingValue.roleRemember" />
+              <CusSelect v-model="editingValue.roleDefaultId" :options="roleSelectorOptions" />
+            </span>
+          </div>
         </div>
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">默认角色</span>
-          <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
-            <CusToggle v-model="editingValue.roleRemember" />
-            <CusDropdown v-model="editingValue.roleDefaultId" :options="roleSelectorOptions" />
-          </span>
+        <div class="setting-list-section">
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">语音输入</span>
+            <span class="setting-list-item__value">
+              <CusToggle v-model="editingValue.enableVoiceToText" />
+            </span>
+          </div>
+          <!--        <div class="setting-list-item">-->
+          <!--          <span class="setting-list-item__title">语音输出</span>-->
+          <!--          <span class="setting-list-item__value">-->
+          <!--            <CusToggle v-model="editingValue.enableTextToVoice" />-->
+          <!--          </span>-->
+          <!--        </div>-->
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">语音服务APPID</span>
+            <span class="setting-list-item__value">
+              <CusInput v-model="editingValue.voiceCloudAppId" placeholder="APPID" />
+            </span>
+          </div>
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">语音服务SECRET_ID</span>
+            <span class="setting-list-item__value">
+              <CusInput v-model="editingValue.voiceCloudSecretId" placeholder="SECRET_ID" />
+            </span>
+          </div>
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">语音服务SECRET_KEY</span>
+            <span class="setting-list-item__value">
+              <CusInput
+                v-model="editingValue.voiceCloudSecretKey"
+                :input-attrs="{ type: 'password' }"
+                placeholder="SECRET_KEY"
+              />
+            </span>
+          </div>
         </div>
-        <hr />
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">语音输入</span>
-          <span class="setting-list-item__value">
-            <CusToggle v-model="editingValue.enableVoiceToText" />
-          </span>
-        </div>
-        <!--        <div class="setting-list-item">-->
-        <!--          <span class="setting-list-item__title">语音输出</span>-->
-        <!--          <span class="setting-list-item__value">-->
-        <!--            <CusToggle v-model="editingValue.enableTextToVoice" />-->
-        <!--          </span>-->
-        <!--        </div>-->
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">语音服务APPID</span>
-          <span class="setting-list-item__value">
-            <CusInput v-model="editingValue.voiceCloudAppId" placeholder="APPID" />
-          </span>
-        </div>
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">语音服务SECRET_ID</span>
-          <span class="setting-list-item__value">
-            <CusInput v-model="editingValue.voiceCloudSecretId" placeholder="SECRET_ID" />
-          </span>
-        </div>
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">语音服务SECRET_KEY</span>
-          <span class="setting-list-item__value">
-            <CusInput
-              v-model="editingValue.voiceCloudSecretKey"
-              :input-attrs="{ type: 'password' }"
-              placeholder="SECRET_KEY"
-            />
-          </span>
-        </div>
-        <hr />
-        <div class="setting-list-item">
-          <span class="setting-list-item__title">清除缓存</span>
-          <span class="setting-list-item__value">
-            <DiliButton
-              :background-color="variables.colorDanger"
-              text="清除角色缓存"
-              type="primary"
-              @click="handleClearRoleCache"
-            />
-          </span>
+        <div class="setting-list-section">
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">清除缓存</span>
+            <span class="setting-list-item__value">
+              <DiliButton
+                :background-color="variables.colorDanger"
+                text="清除角色缓存"
+                type="primary"
+                @click="handleClearRoleCache"
+              />
+            </span>
+          </div>
         </div>
         <div class="setting-actions-placeholder"></div>
-        <div :class="{ 'setting-actions--large': isLargeScreen }" class="setting-list-item setting-actions">
+        <div :class="{ 'setting-actions--large': isLargeScreen }" class="setting-actions">
           <DiliButton
             :background-color="variables.colorPrimary"
             :button-style="{ width: '100%', 'text-align': 'center' }"
@@ -198,7 +212,7 @@ const roleSelectorOptions = computed(() =>
             type="primary"
             @click="handleSave"
           />
-          <DiliButton v-if="isLargeScreen" shadow text="关闭" type="normal" @click="$emit('cancel')" />
+          <DiliButton v-if="isModal" shadow text="关闭" type="normal" @click="$emit('cancel')" />
           <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset" />
         </div>
       </div>
@@ -218,7 +232,7 @@ const roleSelectorOptions = computed(() =>
   display: flex;
   flex-direction: column;
 
-  &--large {
+  &.large, &.modal {
     padding: 1rem;
   }
 
@@ -226,57 +240,90 @@ const roleSelectorOptions = computed(() =>
     @extend %page-title;
     margin-bottom: 0.5rem;
   }
+}
 
-  .setting-list {
-    flex: 1;
+.setting-list {
+  flex: 1;
 
-    &-container {
-      max-height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+  &-container {
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 
-    &-item {
-      display: flex;
+    .large & {
       flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
+      flex-wrap: wrap;
       gap: 0.5rem;
-
-      &__title {
-        // font-weight: bold;
-      }
-
-      &__value {
-        flex-shrink: 0; // 阻止压缩，尤其是在小屏幕上
-        display: flex;
-        gap: 0.5rem;
-        align-items: flex-end;
-        flex-direction: column;
-      }
     }
   }
 
-  .setting-actions {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 0.5rem;
-    opacity: 0.95;
-    background-color: white;
+  &-section {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    box-sizing: border-box;
+    padding-bottom: .25rem;
+    border-bottom: 1px solid $color-grey-100;
 
-    &--large {
-      padding: 0.5rem 1rem 1rem 1rem;
+    .large & {
+      border-bottom: none;
+      flex-direction: row;
+      border-radius: 0.5rem;
+      background-color: $color-teal-20;
+      padding: 0.5rem;
+    }
+  }
+
+  &-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+
+    .large & {
+      flex-direction: column;
+      align-items: start;
     }
 
-    &-placeholder {
-      height: 2rem;
-      // 使用 :not 来排除 .setting-actions--large 的上下文
-      &:not(.setting-actions--large) {
-        height: 2.5rem;
+    &__title {
+      .large & {
+        font-weight: bold;
       }
+    }
+
+    &__value {
+      flex-shrink: 0; // 阻止压缩，尤其是在小屏幕上
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+      flex-direction: column;
+    }
+  }
+}
+
+.setting-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5rem;
+  opacity: 0.95;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+
+  &--large {
+    padding: 0.5rem 1rem 1rem 1rem;
+  }
+
+  &-placeholder {
+    height: 2rem;
+    // 使用 :not 来排除 .setting-actions--large 的上下文
+    &:not(.setting-actions--large) {
+      height: 2.5rem;
     }
   }
 }

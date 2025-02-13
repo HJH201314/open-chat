@@ -67,7 +67,8 @@ export const useDataStore = defineStore('data', () => {
           storageKey: `dialog-${sessionId}`,
           createAt: new Date().toLocaleString(),
           withContext: true,
-          model: settingStore.settings.defaultProvider ?? 'DeepSeek',
+          provider: settingStore.settings.defaultModel?.[0] ?? 'OpenAI',
+          model: settingStore.settings.defaultModel?.[1] ?? 'gpt-4o',
         };
       }
       return sessionId;
@@ -85,7 +86,8 @@ export const useDataStore = defineStore('data', () => {
     dialogData.value.dialogs![dialogId].withContext = isOpen;
   }
 
-  function changeDialogModel(dialogId: string, modelName: string) {
+  function changeDialogModel(dialogId: string, modelProvider: string, modelName: string) {
+    dialogData.value.dialogs![dialogId].provider = modelProvider;
     dialogData.value.dialogs![dialogId].model = modelName;
   }
 
@@ -135,13 +137,14 @@ export const useDataStore = defineStore('data', () => {
     const ctrl = new AbortController();
     const rawMsg = ref('');
     const { result: fullMsg } = useMarkdownIt(rawMsg);
-    const { withContext, model: modelName } = getDialogInfo(sessionId);
+    const { withContext, provider, model: modelName } = getDialogInfo(sessionId);
     await api.chat.completionStream(
       {
+        provider: provider,
+        modelName: modelName,
         sessionId: sessionId,
         msg: message,
-        withContext: withContext ?? true,
-        modelName: modelName ?? 'DeepSeek',
+        withContext: withContext,
       },
       ctrl.signal,
       (event) => {
