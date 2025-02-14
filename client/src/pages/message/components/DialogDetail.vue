@@ -121,32 +121,38 @@ function handleInputKeydown(e: KeyboardEvent) {
   }
 }
 
-function handleSendMessage() {
+async function handleSendMessage() {
   if (!userStore.isLogin) {
     showToast({ text: '请先登录！', type: 'warning' });
     return;
   }
   if (!form.sessionId || !form.inputValue) return;
-  dataStore.sendMessageText(form.sessionId, form.inputValue, {
-    onSaveUserMsg() {
-      messageList.value = dataStore.getMessageList(form.sessionId);
-    },
-    onMessage(msg: string) {
-      form.outputValue += msg;
-      if (form.outputValue.match(/^\[title:(.+?)]/)) {
-        form.outputValue = form.outputValue.replace(/^\[title:(.+?)]/, '');
-      }
-    },
-    onFinish(fullMessage: string) {
-      form.outputValue = '';
-      messageList.value = dataStore.getMessageList(form.sessionId);
-      scrollToBottom();
-    },
-  });
+  const inputValue = form.inputValue;
   form.inputValue = '';
-  nextTick(() => {
-    scrollToBottom();
-  });
+  // 发送消息
+  try {
+    await dataStore.sendMessageText(form.sessionId, inputValue, {
+      onSaveUserMsg() {
+        messageList.value = dataStore.getMessageList(form.sessionId);
+      },
+      onMessage(msg: string) {
+        form.outputValue += msg;
+        if (form.outputValue.match(/\[title:(.+?)]/)) {
+          form.outputValue = form.outputValue.replace(/\[title:(.+?)]/, '');
+        }
+      },
+      onFinish(fullMessage: string) {
+        form.outputValue = '';
+        messageList.value = dataStore.getMessageList(form.sessionId);
+        scrollToBottom();
+      },
+    });
+    nextTick(() => {
+      scrollToBottom();
+    });
+  } catch (e) {
+    form.outputValue = '[ERROR]'
+  }
 }
 
 function handleEditDialog() {

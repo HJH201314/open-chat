@@ -1,14 +1,14 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import DiliButton from '@/components/button/DiliButton.vue';
-import { useRouteParams } from '@vueuse/router';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { CloseOne, Plus, Search } from '@icon-park/vue-next';
-import { useDataStore } from '@/store/useDataStore';
 import CommonModal from '@/components/modal/CommonModal.vue';
 import Toggle from '@/components/toggle/CusToggle.vue';
+import { useDataStore } from '@/store/useDataStore';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import type { DialogInfo } from '@/types/data';
+import { CloseOne, Plus, Search } from '@icon-park/vue-next';
+import { useRouteParams } from '@vueuse/router';
+import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const emit = defineEmits<{
@@ -27,8 +27,6 @@ const dataStore = useDataStore();
 const roleStore = useRoleStore();
 const settingStore = useSettingStore();
 const currentSessionId = useRouteParams<string>('sessionId');
-
-onMounted(() => {});
 
 async function handleAddRecord(roleId?: number) {
   const sessionId = await dataStore.addDialog(roleId ?? 1);
@@ -59,6 +57,7 @@ function handleListAddClick() {
 }
 
 const router = useRouter();
+
 // 点击对话列表项
 function handleListItemClick(id: string) {
   let routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
@@ -102,31 +101,31 @@ const displayList = computed(() => {
       <div class="dialog-list-bar">
         <div class="dialog-list-bar-search">
           <span class="dialog-list-bar-search-icon"><Search /></span>
-          <input placeholder="搜索对话" autocomplete="new-password" v-model="searchForm.searchVal" />
-          <span v-if="searchForm.searchVal" @click="searchForm.searchVal = ''" class="dialog-list-bar-search-reset">
+          <input v-model="searchForm.searchVal" autocomplete="new-password" placeholder="搜索对话" />
+          <span v-if="searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
             <CloseOne theme="filled" />
           </span>
         </div>
         <div>
           <div class="dialog-list-add" @click="handleListAddClick">
-            <Plus theme="outline" size="24" />
+            <Plus size="24" theme="outline" />
           </div>
-          <CommonModal v-model:visible="roleForm.modalVisible" title="选择角色" subtitle="单击角色以创建对话">
+          <CommonModal v-model:visible="roleForm.modalVisible" subtitle="单击角色以创建对话" title="选择角色">
             <div class="select-role">
               <div class="select-role-title">选择角色</div>
               <div class="select-role-list">
                 <div
-                  class="select-role-item"
                   v-for="(item, i) in roleStore.roles"
                   :key="i"
+                  class="select-role-item"
                   @click="handleAddRecord(item[0])"
                 >
                   {{ item[1] }}
                 </div>
               </div>
               <div style="display: flex; align-items: center">
-                <Toggle style="margin-top: 1rem" label="记住本次选择" v-model="roleForm.remember" />
-                <DiliButton style="margin-left: auto" type="primary" text="直接开始→" @click="handleAddRecord" />
+                <Toggle v-model="roleForm.remember" label="记住本次选择" style="margin-top: 1rem" />
+                <DiliButton style="margin-left: auto" text="直接开始→" type="primary" @click="handleAddRecord" />
               </div>
             </div>
           </CommonModal>
@@ -136,9 +135,9 @@ const displayList = computed(() => {
         <div
           v-for="item in displayList"
           :key="item.id"
-          @click="handleListItemClick(item.id)"
-          class="dialog-list-item"
           :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
+          class="dialog-list-item"
+          @click="handleListItemClick(item.id)"
         >
           <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar" />
           <div class="dialog-list-item-center">
@@ -159,7 +158,7 @@ const displayList = computed(() => {
     </div>
   </div>
 </template>
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/variables.module';
 
 .message-left {

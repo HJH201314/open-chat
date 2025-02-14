@@ -3,11 +3,12 @@ import useMarkdownIt from '@/commands/useMarkdownIt';
 import showToast from '@/components/toast/toast';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
-import type { DialogData, MsgData } from '@/types/data';
+import type { DialogData, MsgData, MsgInfo } from '@/types/data';
+import { useCommandParser } from '@/utils/command-parser';
 import { recordToMap } from '@/utils/typeUtils';
 import { useLocalStorage, useStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, ref, type UnwrapNestedRefs } from 'vue';
+import { computed, reactive, ref, type UnwrapNestedRefs, watchEffect } from 'vue';
 
 interface MessageReceiver {
   // 用户输入保存后的回调
@@ -132,13 +133,29 @@ export const useDataStore = defineStore('data', () => {
 
   async function sendMessageText(sessionId: string, message: string, receiver?: MessageReceiver) {
     if (message == '') return;
-    saveMessage(sessionId, message, 'user', 'text');
+    const userMsgIndex = saveMessage(sessionId, message, 'user', 'text');
     receiver?.onSaveUserMsg();
     const ctrl = new AbortController();
     const rawMsg = ref('');
+    const { commandMap } = useCommandParser(rawMsg);
     const { result: fullMsg } = useMarkdownIt(rawMsg);
     const { withContext, provider, model: modelName } = getDialogInfo(sessionId);
-    await api.chat.completionStream(
+    let msgIds: [string|undefined, string|undefined] = [undefined, undefined];
+
+    // 观测回答数据中的指令
+    watchEffect(() => {
+      const titleCmd = commandMap.value['title'];
+      if (titleCmd) {
+        editDialogTitle(sessionId, titleCmd.values[0]);
+        rawMsg.value = rawMsg.value.replace(titleCmd.raw, '');
+      }
+      const idCmd = commandMap.value['ID'];
+      if (idCmd) {
+        msgIds = [idCmd.values[0], idCmd.values[1]];
+        rawMsg.value = rawMsg.value.replace(idCmd.raw, '');
+      }
+    });
+    return await api.chat.completionStream(
       {
         provider: provider,
         modelName: modelName,
@@ -149,37 +166,32 @@ export const useDataStore = defineStore('data', () => {
       ctrl.signal,
       (event) => {
         if (event.data === '[DONE]') {
-          // 当接收到服务器端的结束标记时
-          saveMessage(sessionId, rawMsg.value, 'bot', 'text', fullMsg.value); // 保存消息
+          // 当接收到服务器端的结束标记时，保存消息
+          saveMessage(sessionId, rawMsg.value, 'bot', 'text', fullMsg.value, msgIds[1]); // 保存消息
+          updateMessage(sessionId, userMsgIndex, { id: msgIds[0] });
           receiver?.onFinish(fullMsg.value); // 消息接收完毕回调
         } else {
           let data = event.data;
           data = data.replaceAll('\\n', '\n');
           console.log('[data]', event.data, `'${data}'`);
           rawMsg.value += data; // 记录已接收的消息
-
-          // 修改标题并替换掉标题内容
-          const regex = /^\[title:(.+?)]/; // 匹配以```开头和结尾的内容
-          const matches = rawMsg.value.match(regex);
-          if (matches) {
-            const title = matches[1];
-            editDialogTitle(sessionId, title);
-          }
-          rawMsg.value = rawMsg.value.replace(/^\[title:(.+?)]/, '');
-
           receiver?.onMessage(data, fullMsg.value); // 消息接收回调
         }
       }
     );
   }
 
+  /**
+   * 保存消息数据到本地，返回消息在本地的编号
+   */
   function saveMessage(
     sessionId: string,
     message: string,
     sender: 'user' | 'bot',
     type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other',
-    htmlMessage?: string
-  ) {
+    htmlMessage?: string,
+    remoteId?: string,
+  ): number {
     try {
       const storageKey = `dialog-${sessionId}`;
       console.log(messageStorage.value[storageKey]);
@@ -189,9 +201,35 @@ export const useDataStore = defineStore('data', () => {
         type,
         content: message,
         htmlContent: htmlMessage,
+        id: remoteId,
       });
       localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
+      return (messageStorage.value[storageKey].messages?.length || 0) - 1;
     } catch (ignore) {}
+    return -1;
+  }
+
+  /**
+   * 更新本地消息数据
+   */
+  function updateMessage(
+    sessionId: string,
+    index: number,
+    updateObj: Partial<MsgInfo>,
+  ): boolean {
+    try {
+      const storageKey = `dialog-${sessionId}`;
+      const msg = messageStorage.value[storageKey].messages?.[index];
+      if (msg) {
+        Object.entries(updateObj).forEach(([key, value]) => {
+          msg[key] = value;
+        })
+        localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function searchDialog(text: string) {
