@@ -6,6 +6,7 @@ import type { MaybeRefOrGetter } from 'vue';
 import { computed, toValue } from 'vue';
 
 const markdownIt = MarkdownIt({
+  linkify: true,
   // typographer: true,
   // html: true,
 }).use(MarkdownItHighlightJs, {
@@ -15,6 +16,21 @@ const markdownIt = MarkdownIt({
     vue: highlightJsVueDefiner,
   },
 });
+// 获取 MarkdownItHighlightJs 设置的渲染函数并替换
+const highlightJsRender = markdownIt.renderer.rules.fence;
+markdownIt.renderer.rules.fence = function (tokens, idx, options, env, slf) {
+  const token = tokens[idx];
+  const lang = token.info;
+  const highlighted = highlightJsRender?.(tokens, idx, options, env, slf) || '';
+
+  return `<div class="cus-code-container">
+            <section>
+              <span class="lang-name">${lang}</span>
+              <button type="button" class="copy-button">复制</button>
+            </section>
+            ${highlighted}
+          </div>`;
+};
 
 function useMarkdownIt(text: MaybeRefOrGetter<string>) {
   const result = computed(() => {

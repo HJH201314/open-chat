@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import useGlobal from '@/commands/useGlobal';
+import useMarkdownIt from '@/commands/useMarkdownIt';
 import { useUserStore } from '@/store/useUserStore';
 import { computed } from 'vue';
-import useMarkdownIt from '@/commands/useMarkdownIt';
 
 type DialogMessageProps = {
   message?: string;
@@ -11,14 +11,37 @@ type DialogMessageProps = {
   time?: string;
 };
 
-const props = withDefaults(
-  defineProps<DialogMessageProps>(),
-  {
-    role: 'user',
-    message: '',
-    time: new Date().toLocaleString(),
+const props = withDefaults(defineProps<DialogMessageProps>(), {
+  role: 'user',
+  message: '',
+  time: new Date().toLocaleString(),
+});
+
+// 处理消息内容框内的点击
+async function handleClick(event: MouseEvent) {
+  if (event.target instanceof HTMLElement) {
+    // 点击“复制”按钮时复制代码块中的内容
+    if (event.target?.classList.contains('copy-button')) {
+      const button = event.target;
+      const codeContainer = button.closest('.cus-code-container');
+      const codeBlock = codeContainer?.querySelector('pre code')?.textContent || '';
+
+      try {
+        await navigator.clipboard.writeText(codeBlock);
+        button.textContent = '复制成功';
+        setTimeout(() => {
+          button.textContent = '复制';
+        }, 2000);
+      } catch (err) {
+        console.error('复制失败:', err);
+        button.textContent = '复制失败';
+        setTimeout(() => {
+          button.textContent = '复制';
+        }, 2000);
+      }
+    }
   }
-);
+}
 
 const userStore = useUserStore();
 
@@ -28,14 +51,14 @@ const avatarPath = computed(() => {
   return '';
 });
 
-const markdownIt = useMarkdownIt(() => props.htmlMessage ? '' : props.message);
+const markdownIt = useMarkdownIt(() => (props.htmlMessage ? '' : props.message));
 const renderMessage = computed(() => props.htmlMessage || markdownIt.result.value);
 
 const { isLargeScreen } = useGlobal();
 </script>
 
 <template>
-  <div :class="['dialog-message-container', `dialog-message-container__${props.role}`]">
+  <div :class="['dialog-message-container', `dialog-message-container__${props.role}`]" @click="handleClick">
     <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
       <span v-if="isLargeScreen" class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
@@ -48,48 +71,56 @@ const { isLargeScreen } = useGlobal();
   </div>
 </template>
 
-<style scoped lang="scss">
-@import "@/assets/variables.module";
-.dialog-message {
+<style lang="scss" scoped>
+@import '@/assets/variables.module';
 
+.dialog-message {
   &-container {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
     margin-inline: 2px;
+
     &__user {
       align-items: flex-end;
     }
+
     &__bot {
       align-items: flex-start;
     }
   }
+
   &-body {
-    max-width: 100%;  // 此处是消息盒子宽度的关键限制
+    max-width: 100%; // 此处是消息盒子宽度的关键限制
     display: flex;
-    gap: .5rem;
+    gap: 0.5rem;
+
     &__user {
       flex-direction: row-reverse;
     }
+
     &__bot {
       flex-direction: row;
     }
   }
+
   &-avatar {
     min-width: 32px;
     max-width: 32px;
     min-height: 32px;
     max-height: 32px;
-    border-radius: .5rem;
+    border-radius: 0.5rem;
     overflow: hidden;
+
     & img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
   }
+
   &-content {
-    padding: .25rem .5rem;
+    padding: 0.25rem 0.5rem;
     user-select: text;
     white-space: pre-wrap;
     word-break: break-word;
@@ -97,13 +128,15 @@ const { isLargeScreen } = useGlobal();
     &__user {
       background-color: $color-teal-500;
       color: $color-white;
-      border-radius: .5rem .5rem 0 .5rem;
+      border-radius: 0.5rem 0.5rem 0 0.5rem;
     }
+
     &__bot {
       background-color: $color-grey-200;
       color: $color-black;
-      border-radius: .5rem .5rem .5rem 0;
+      border-radius: 0.5rem 0.5rem 0.5rem 0;
     }
+
     &-body {
       width: 100%;
       display: flex;
@@ -114,10 +147,11 @@ const { isLargeScreen } = useGlobal();
       -webkit-text-size-adjust: 100%;
     }
   }
+
   &-time {
     color: $color-grey;
     font-size: 12px;
-    margin-left: .5rem;
+    margin-left: 0.5rem;
   }
 }
 </style>
@@ -127,6 +161,7 @@ const { isLargeScreen } = useGlobal();
   :is(ol, li) {
     white-space: normal;
   }
+
   p {
     white-space: pre-line;
   }
