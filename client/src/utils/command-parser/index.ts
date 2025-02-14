@@ -63,7 +63,7 @@ export class CommandParser {
 }
 
 export const useCommandParser = (input: MaybeRefOrGetter<string>) => {
-  const parser = new CommandParser(toValue(input));
+  const parser = new CommandParser('');
   const commands = ref<Command[]>([]);
   const commandMap = ref<{ [name: string]: Command }>({});
 

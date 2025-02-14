@@ -2,7 +2,7 @@
 import DropdownMenu from '@/components/dropdown/DropdownMenu.vue';
 import type { CusSelectProps, DropdownMenuEmits, DropdownOption } from '@/components/dropdown/types';
 import { onClickOutside, useElementBounding } from '@vueuse/core';
-import { computed, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 
 const props = withDefaults(defineProps<CusSelectProps>(), {
   placeholder: '请选择',
@@ -10,11 +10,12 @@ const props = withDefaults(defineProps<CusSelectProps>(), {
   _depth: 0,
   toggleStyle: () => ({}),
 });
-const modelValuePath = defineModel<string[]>('value-path');
 
-const emit = defineEmits<{
-  (event: 'update:modelValue', value: string): void;
-} & DropdownMenuEmits>();
+const emit = defineEmits<
+  {
+    (event: 'update:modelValue', value: string): void;
+  } & DropdownMenuEmits
+>();
 
 const toggleRef = useTemplateRef('dropdown-toggle');
 const toggleBounding = useElementBounding(toggleRef);
@@ -27,50 +28,53 @@ watch(
 );
 
 const isOpen = ref(false);
-const selectedValue = ref(props.modelValue);
 
+const findCurrentValueOption = (options: DropdownOption[], target: string | undefined): DropdownOption | undefined => {
+  if (!target) return undefined;
+  return options
+    .flatMap((opt) => {
+      return [opt, ...(opt.children ?? [])];
+    })
+    .find((opt) => opt.value === target);
+};
+// 当前选中值
+const selectedValue = ref(props.modelValue);
 // 当前选中项
-const selectedOption = computed(() => {
-  const findCurrentValueOption = (options: DropdownOption[]): DropdownOption | undefined => {
-    return options
-      .flatMap((opt) => {
-        return [opt, ...(opt.children ?? [])];
-      })
-      .find((opt) => opt.value === selectedValue.value);
-  };
-  return findCurrentValueOption(props.options);
-});
+const selectedOption = ref(findCurrentValueOption(props.options, props.modelValue));
 // 当前选中项的 label
 const selectedLabel = computed(() => {
   return selectedOption.value ? selectedOption.value.label : props.placeholder;
 });
-// 当当前选中项路径为空时，计算当前选中项的路径并双向绑定
-watchEffect(() => {
-  if (!modelValuePath.value?.length && selectedOption.value) {
-    const findCurrentOptionPath = (
-      options: DropdownOption[],
-      target: DropdownOption,
-      path: string[] = []
-    ): string[] | null => {
-      for (let option of options) {
-        // 包含当前 level 的 value
-        const currentPath = path.concat(option.value);
-        // 如果找到了目标，返回当前路径
-        if (option.value === target.value) {
-          return currentPath;
-        }
-        // 如果存在 children，递归查找
-        if (option.children) {
-          const result = findCurrentOptionPath(option.children, target, currentPath);
-          if (result) {
-            return result;
-          }
-        }
+// 计算目标路径
+const getTargetPath = (
+  options: DropdownOption[],
+  target: DropdownOption,
+  path: DropdownOption[] = []
+): DropdownOption[] | null => {
+  for (let option of options) {
+    // 包含当前 level 的 value
+    const currentPath = path.concat(option);
+    // 如果找到了目标，返回当前路径
+    if (option.value === target.value) {
+      return currentPath;
+    }
+    // 如果存在 children，递归查找
+    if (option.children) {
+      const result = getTargetPath(option.children, target, currentPath);
+      if (result) {
+        return result;
       }
-      // 未找到返回 null
-      return null;
-    };
-    modelValuePath.value = findCurrentOptionPath(props.options, selectedOption.value) ?? [];
+    }
+  }
+  // 未找到返回 null
+  return null;
+};
+// 当前选中项的路径
+const selectedOptionPath = computed(() => {
+  if (selectedOption.value) {
+    return getTargetPath(props.options, selectedOption.value) || [];
+  } else {
+    return [];
   }
 });
 
@@ -85,6 +89,7 @@ function toggleDropdown() {
 onClickOutside(
   useTemplateRef<HTMLElement>('root-menu'),
   () => {
+    // console.log('root-menu-click-outside');
     isOpen.value = false;
   },
   {
@@ -92,12 +97,12 @@ onClickOutside(
   }
 );
 
-function selectOption(value: string, valuePath: string[]) {
-  console.log('selected', value, valuePath);
+function selectOption(value: string, option: DropdownOption, valuePath: string[]) {
+  console.log('selected', value, option, valuePath);
   selectedValue.value = value;
+  selectedOption.value = option;
   emit('update:modelValue', value);
-  emit('select', value, valuePath);
-  modelValuePath.value = valuePath;
+  emit('select', value, option, valuePath);
   isOpen.value = false;
 }
 </script>
@@ -111,13 +116,13 @@ function selectOption(value: string, valuePath: string[]) {
       class="dropdown-toggle"
       @click="toggleDropdown"
     >
-      {{ labelRenderText?.(selectedOption, modelValuePath) || selectedLabel }}
+      {{ labelRenderText?.(selectedOption, selectedOptionPath) || selectedLabel }}
       <span class="arrow"></span>
     </div>
     <Teleport to="body">
       <dropdown-menu
         ref="root-menu"
-        :_current-value-path="modelValuePath"
+        :_current-value-path="selectedOptionPath"
         :_depth="0"
         :_value-path="[]"
         :is-open="isOpen"

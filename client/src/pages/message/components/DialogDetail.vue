@@ -2,6 +2,7 @@
 import api from '@/api';
 import variables from '@/assets/variables.module.scss';
 import { useAutoScrollbar } from '@/commands/useAutoScrollbar';
+import useGlobal from '@/commands/useGlobal';
 import DiliButton from '@/components/button/DiliButton.vue';
 import { DialogManager } from '@/components/dialog';
 import CusSelect from '@/components/dropdown/CusSelect.vue';
@@ -370,10 +371,12 @@ function handleVoicePanelToggle() {
     });
   }
 }
+
+const { isSmallScreen } = useGlobal();
 </script>
 
 <template>
-  <div class="dialog-detail">
+  <div class="dialog-detail" :class="{ 'small-screen': isSmallScreen }">
     <div class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton style="flex-shrink: 0" @click="$emit('back')">
@@ -435,16 +438,16 @@ function handleVoicePanelToggle() {
           </DiliButton>
           <CusSelect
             v-model:value-path="form.providerModel"
-            :label-render-text="(_, selectedPath) => selectedPath?.join('/')"
+            :label-render-text="(_, path) => path?.map(o => o.label)?.join('/')"
             :model-value="form.providerModel[1]"
             :options="[
-              { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-4o', label: 'gpt-4o' }] },
+              { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-4o', label: 'ChatGPT' }] },
               {
                 value: 'DeepSeek',
                 label: 'DeepSeek',
                 children: [
-                  { value: 'deepseek-chat', label: 'deepseek-chat' },
-                  { value: 'deepseek-reasoner', label: 'deepseek-reasoner' },
+                  { value: 'deepseek-chat', label: 'Chat (V3)' },
+                  { value: 'deepseek-reasoner', label: 'R1' },
                 ],
               },
             ]"
@@ -577,6 +580,13 @@ function handleVoicePanelToggle() {
     border-radius: 0.5rem;
     padding: 0.25rem;
     backdrop-filter: blur(10px);
+
+    .small-screen & {
+      position: fixed;
+      bottom: .25rem;
+      left: .25rem;
+      right: .25rem;
+    }
 
     &.small-input {
       gap: 0;

@@ -6,9 +6,9 @@ import { useSettingStore } from '@/store/useSettingStore';
 import type { DialogData, MsgData, MsgInfo } from '@/types/data';
 import { useCommandParser } from '@/utils/command-parser';
 import { recordToMap } from '@/utils/typeUtils';
-import { useLocalStorage, useStorage } from '@vueuse/core';
+import { useLocalStorage, useStorage, watchArray } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, ref, type UnwrapNestedRefs, watchEffect } from 'vue';
+import { computed, reactive, ref, type UnwrapNestedRefs } from 'vue';
 
 interface MessageReceiver {
   // 用户输入保存后的回调
@@ -137,21 +137,23 @@ export const useDataStore = defineStore('data', () => {
     receiver?.onSaveUserMsg();
     const ctrl = new AbortController();
     const rawMsg = ref('');
-    const { commandMap } = useCommandParser(rawMsg);
+    const { commands, commandMap } = useCommandParser(rawMsg);
     const { result: fullMsg } = useMarkdownIt(rawMsg);
     const { withContext, provider, model: modelName } = getDialogInfo(sessionId);
-    let msgIds: [string|undefined, string|undefined] = [undefined, undefined];
+    let msgIds: [string | undefined, string | undefined] = [undefined, undefined];
 
     // 观测回答数据中的指令
-    watchEffect(() => {
+    watchArray(commands, () => {
       const titleCmd = commandMap.value['title'];
       if (titleCmd) {
         editDialogTitle(sessionId, titleCmd.values[0]);
+        // console.log('findTitle', titleCmd, rawMsg.value);
         rawMsg.value = rawMsg.value.replace(titleCmd.raw, '');
       }
       const idCmd = commandMap.value['ID'];
       if (idCmd) {
         msgIds = [idCmd.values[0], idCmd.values[1]];
+        // console.log('findId', idCmd, rawMsg.value);
         rawMsg.value = rawMsg.value.replace(idCmd.raw, '');
       }
     });
@@ -190,7 +192,7 @@ export const useDataStore = defineStore('data', () => {
     sender: 'user' | 'bot',
     type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other',
     htmlMessage?: string,
-    remoteId?: string,
+    remoteId?: string
   ): number {
     try {
       const storageKey = `dialog-${sessionId}`;
@@ -212,18 +214,14 @@ export const useDataStore = defineStore('data', () => {
   /**
    * 更新本地消息数据
    */
-  function updateMessage(
-    sessionId: string,
-    index: number,
-    updateObj: Partial<MsgInfo>,
-  ): boolean {
+  function updateMessage(sessionId: string, index: number, updateObj: Partial<MsgInfo>): boolean {
     try {
       const storageKey = `dialog-${sessionId}`;
       const msg = messageStorage.value[storageKey].messages?.[index];
       if (msg) {
         Object.entries(updateObj).forEach(([key, value]) => {
           msg[key] = value;
-        })
+        });
         localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
       }
       return true;

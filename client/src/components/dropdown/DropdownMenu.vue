@@ -7,13 +7,13 @@
       v-on-click-outside="() => closeSubMenu(option)"
       :_current-value-path="_currentValuePath"
       :_depth="_depth"
-      :class="{ selected: option.value === selectedValue || _currentValuePath?.includes(option.value) }"
+      :class="{ selected: option.value === selectedValue || _currentValuePath?.includes(option) }"
       :option="option"
       :selected-value="selectedValue"
       :show-sub-menu="showSubMenu[option.value] || false"
       class="dropdown-menu-item"
       @click="handleClick(option)"
-      @select="(v, arr) => $emit('select', v, arr)"
+      @select="(v, o, arr) => $emit('select', v, o, arr)"
     />
   </ul>
 </template>
@@ -55,13 +55,15 @@ const showSubMenu = reactive({
 // 收起当前 item 的下级菜单
 function closeSubMenu(option: DropdownOption) {
   if (option.children && option.children.length) {
+    // console.log(`menu item click outside, ${option.value} => false`);
     showSubMenu[option.value] = false;
   }
 }
 
-// 展示当前 item 的下级菜单，收起其它 item 的下级菜单
+// 展示当前 item 的下级菜单，收起其它 item 的下级菜单，v-element-hover 在手机端点击时也会触发
 function showOneSubMenu(option: DropdownOption) {
   Object.entries(showSubMenu).forEach(([key]) => {
+    // console.log(`show one submenu, ${key} => ${key === option.value}`)
     showSubMenu[key] = key === option.value;
   });
 }
@@ -83,9 +85,9 @@ const emit = defineEmits<DropdownMenuEmits>();
 
 function handleClick(option: DropdownOption) {
   if (option.children && option.children.length) {
-    showSubMenu[option.value] = !showSubMenu[option.value];
+    // do nothing...
   } else {
-    emit('select', option.value, [...props._valuePath, option.value]);
+    emit('select', option.value, option,[...props._valuePath, option.value]);
   }
 }
 </script>

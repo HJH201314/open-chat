@@ -13,6 +13,7 @@ const props = withDefaults(
     } & DropdownMenuProps
   >(),
   {
+    _depth: 0,
     position: 'bottom',
     _valuePath: () => [],
   }
@@ -49,7 +50,7 @@ const bounding = useElementBounding(menuItemRef);
       :parentBounding="bounding"
       :position="getChildrenPos(option)"
       :selected-value="selectedValue"
-      @select="(v, arr) => $emit('select', v, arr)"
+      @select="(v, o, arr) => $emit('select', v, o, arr)"
     ></dropdown-menu>
   </li>
 </template>

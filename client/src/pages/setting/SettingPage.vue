@@ -107,19 +107,25 @@ const roleSelectorOptions = computed(() =>
             <span class="setting-list-item__value">
               <CusSelect
                 v-model="editingValue.defaultProvider"
-                v-model:value-path="editingValue.defaultModel"
-                position="bottom"
+                :position="isLargeScreen ? 'right' : 'left'"
                 :options="[
-                  { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-4o', label: 'gpt-4o' }] },
+                  {
+                    value: 'OpenAI',
+                    label: 'OpenAI',
+                    children: [{ value: 'gpt-4o', label: 'ChatGPT' }],
+                    childrenMenuOption: { position: isLargeScreen ? 'right' : 'left' },
+                  },
                   {
                     value: 'DeepSeek',
                     label: 'DeepSeek',
                     children: [
-                      { value: 'deepseek-chat', label: 'deepseek-chat' },
-                      { value: 'deepseek-reasoner', label: 'deepseek-reasoner' },
+                      { value: 'deepseek-chat', label: 'Chat-V3' },
+                      { value: 'deepseek-reasoner', label: 'R1' },
                     ],
+                    childrenMenuOption: { position: isLargeScreen ? 'right' : 'left' },
                   },
                 ]"
+                @select="(option, value, path) => (editingValue.defaultModel = [path[0], path[1]])"
               />
             </span>
           </div>
@@ -232,7 +238,8 @@ const roleSelectorOptions = computed(() =>
   display: flex;
   flex-direction: column;
 
-  &.large, &.modal {
+  &.large,
+  &.modal {
     padding: 1rem;
   }
 
@@ -261,9 +268,9 @@ const roleSelectorOptions = computed(() =>
   &-section {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: 0.5rem;
     box-sizing: border-box;
-    padding-bottom: .25rem;
+    padding-bottom: 0.25rem;
     border-bottom: 1px solid $color-grey-100;
 
     .large & {
