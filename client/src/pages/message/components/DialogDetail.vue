@@ -122,6 +122,13 @@ function handleInputKeydown(e: KeyboardEvent) {
   }
 }
 
+function handleModelSelect(selectPath: string[]) {
+  if (selectPath.length == 2) {
+    form.providerModel = [selectPath[0], selectPath[1]];
+  }
+  focusTextArea();
+}
+
 async function handleSendMessage() {
   if (!userStore.isLogin) {
     showToast({ text: '请先登录！', type: 'warning' });
@@ -152,7 +159,7 @@ async function handleSendMessage() {
       scrollToBottom();
     });
   } catch (e) {
-    form.outputValue = '[ERROR]'
+    form.outputValue = '[ERROR]';
   }
 }
 
@@ -376,7 +383,7 @@ const { isSmallScreen } = useGlobal();
 </script>
 
 <template>
-  <div class="dialog-detail" :class="{ 'small-screen': isSmallScreen }">
+  <div :class="{ 'small-screen': isSmallScreen }" class="dialog-detail">
     <div class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton style="flex-shrink: 0" @click="$emit('back')">
@@ -437,9 +444,8 @@ const { isSmallScreen } = useGlobal();
             </div>
           </DiliButton>
           <CusSelect
-            v-model:value-path="form.providerModel"
-            :label-render-text="(_, path) => path?.map(o => o.label)?.join('/')"
-            :model-value="form.providerModel[1]"
+            :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
+            v-model="form.providerModel[1]"
             :options="[
               { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-4o', label: 'ChatGPT' }] },
               {
@@ -454,7 +460,7 @@ const { isSmallScreen } = useGlobal();
             :toggle-style="{ opacity: 0.75 }"
             position="top"
             style="font-size: 0.75rem"
-            @select="() => focusTextArea()"
+            @select="(v, o, path) => handleModelSelect(path)"
           />
           <CusToggle
             v-model="form.withContext"
@@ -583,9 +589,9 @@ const { isSmallScreen } = useGlobal();
 
     .small-screen & {
       position: fixed;
-      bottom: .25rem;
-      left: .25rem;
-      right: .25rem;
+      bottom: 0.25rem;
+      left: 0.25rem;
+      right: 0.25rem;
     }
 
     &.small-input {

@@ -103,11 +103,30 @@ const roleSelectorOptions = computed(() =>
         </div>
         <div class="setting-list-section">
           <div class="setting-list-item">
+            <span class="setting-list-item__title">默认发送方式</span>
+            <span class="setting-list-item__value">
+              <CusSelect
+                v-model="editingValue.fastSendKey"
+                :options="[
+                  {
+                    value: 'enter',
+                    label: 'Enter',
+                  },
+                  {
+                    value: 'none',
+                    label: 'None',
+                  },
+                ]"
+              />
+            </span>
+          </div>
+        </div>
+        <div class="setting-list-section">
+          <div class="setting-list-item">
             <span class="setting-list-item__title">默认 API 服务</span>
             <span class="setting-list-item__value">
               <CusSelect
                 v-model="editingValue.defaultProvider"
-                :position="isLargeScreen ? 'right' : 'left'"
                 :options="[
                   {
                     value: 'OpenAI',
@@ -125,6 +144,7 @@ const roleSelectorOptions = computed(() =>
                     childrenMenuOption: { position: isLargeScreen ? 'right' : 'left' },
                   },
                 ]"
+                :position="isLargeScreen ? 'bottom' : 'left'"
                 @select="(option, value, path) => (editingValue.defaultModel = [path[0], path[1]])"
               />
             </span>

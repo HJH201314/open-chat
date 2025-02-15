@@ -23,7 +23,9 @@ const toggleBounding = useElementBounding(toggleRef);
 watch(
   () => props.modelValue,
   (newVal) => {
+    // v-model 更新时手动更新选中项
     selectedValue.value = newVal;
+    selectedOption.value = findCurrentValueOption(props.options, newVal);
   }
 );
 
