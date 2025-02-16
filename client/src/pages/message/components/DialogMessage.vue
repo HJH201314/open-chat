@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import useGlobal from '@/commands/useGlobal';
 import useMarkdownIt from '@/commands/useMarkdownIt';
+import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import { computed } from 'vue';
 
@@ -44,6 +45,7 @@ async function handleClick(event: MouseEvent) {
 }
 
 const userStore = useUserStore();
+const { settings } = useSettingStore();
 
 const avatarPath = computed(() => {
   if (props.role == 'user') return userStore.avatar ?? '';
@@ -51,8 +53,9 @@ const avatarPath = computed(() => {
   return '';
 });
 
-const markdownIt = useMarkdownIt(() => (props.htmlMessage ? '' : props.message));
-const renderMessage = computed(() => props.htmlMessage || markdownIt.result.value);
+const useCachedHtmlMessage = computed(() => props.htmlMessage && settings.markdownCache);
+const markdownIt = useMarkdownIt(() => (useCachedHtmlMessage.value ? '' : props.message));
+const renderMessage = computed(() => (useCachedHtmlMessage.value ? props.htmlMessage : markdownIt.result.value));
 
 const { isLargeScreen } = useGlobal();
 </script>
@@ -141,7 +144,7 @@ const { isLargeScreen } = useGlobal();
       width: 100%;
       display: flex;
       flex-direction: column;
-      white-space: pre-line; // 去除额外的换行
+      white-space: normal;
       line-height: 1.5;
       -ms-text-size-adjust: 100%;
       -webkit-text-size-adjust: 100%;
@@ -156,14 +159,38 @@ const { isLargeScreen } = useGlobal();
 }
 </style>
 <style lang="scss">
+@import '@/assets/variables.module';
 // 无 scoped 解决 v-html 中的展示问题
 .dialog-message-content-body {
-  :is(ol, li) {
+  ol,
+  ul {
     white-space: normal;
+    padding-left: 1em;
+    margin: 0.75em 0;
+  }
+
+  ol {
+    list-style-type: demical;
+    list-style-position: inside;
+  }
+
+  li::marker {
+    color: $color-grey-500;
   }
 
   p {
     white-space: pre-line;
+  }
+
+  h3 {
+    line-height: 1.75;
+    // 用户代理样式表默认值
+    font-size: 1.17em;
+    font-weight: 700;
+  }
+
+  .cus-code-container {
+    margin-bottom: 0.6em;
   }
 }
 </style>

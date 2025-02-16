@@ -2,7 +2,7 @@
 import DropdownMenu from '@/components/dropdown/DropdownMenu.vue';
 import type { CusSelectProps, DropdownMenuEmits, DropdownOption } from '@/components/dropdown/types';
 import { onClickOutside, useElementBounding } from '@vueuse/core';
-import { computed, ref, useTemplateRef, watch } from 'vue';
+import { computed, ref, useTemplateRef, watch, watchEffect } from 'vue';
 
 const props = withDefaults(defineProps<CusSelectProps>(), {
   placeholder: '请选择',
@@ -17,6 +17,7 @@ const emit = defineEmits<
   } & DropdownMenuEmits
 >();
 
+const selfRef = useTemplateRef('dropdown');
 const toggleRef = useTemplateRef('dropdown-toggle');
 const toggleBounding = useElementBounding(toggleRef);
 
@@ -80,22 +81,27 @@ const selectedOptionPath = computed(() => {
   }
 });
 
+// 当前展开的路径
+const currentShowingPath = ref<string[]>([]);
+
 // 切换 Dropdown 展示状态
 function toggleDropdown() {
   if (!props.disabled) {
     isOpen.value = !isOpen.value;
+    currentShowingPath.value = [];
   }
 }
 
 // 点击 Dropdown 外部则关闭
 onClickOutside(
   useTemplateRef<HTMLElement>('root-menu'),
-  () => {
-    // console.log('root-menu-click-outside');
+  (event) => {
+    // console.log('root-menu-click-outside', event.target);
     isOpen.value = false;
+    currentShowingPath.value = [];
   },
   {
-    ignore: [toggleRef],
+    ignore: [selfRef, toggleRef],
   }
 );
 
@@ -106,11 +112,12 @@ function selectOption(value: string, option: DropdownOption, valuePath: string[]
   emit('update:modelValue', value);
   emit('select', value, option, valuePath);
   isOpen.value = false;
+  currentShowingPath.value = [];
 }
 </script>
 
 <template>
-  <div :class="{ active: isOpen, disabled: disabled }" class="dropdown">
+  <div ref="dropdown" :class="{ active: isOpen, disabled: disabled }" class="dropdown">
     <div
       ref="dropdown-toggle"
       :class="{ 'dropdown-toggle--active': isOpen }"
@@ -124,8 +131,9 @@ function selectOption(value: string, option: DropdownOption, valuePath: string[]
     <Teleport to="body">
       <dropdown-menu
         ref="root-menu"
-        :_current-value-path="selectedOptionPath"
-        :_depth="0"
+        v-model:current-showing-path="currentShowingPath"
+        :_current-option-path="selectedOptionPath"
+        :_depth="1"
         :_value-path="[]"
         :is-open="isOpen"
         :options="options"

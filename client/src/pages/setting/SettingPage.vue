@@ -96,8 +96,18 @@ const roleSelectorOptions = computed(() =>
         <div class="setting-list-section">
           <div class="setting-list-item">
             <span class="setting-list-item__title">对话缓存</span>
+            <span class="setting-list-item__subtitle">
+              将对话数据缓存在本地，不进行联网查询
+            </span>
             <span class="setting-list-item__value">
               <CusToggle v-model="editingValue.localCache" />
+            </span>
+          </div>
+          <div class="setting-list-item">
+            <span class="setting-list-item__title"> Markdown 缓存结果渲染 </span>
+            <span class="setting-list-item__subtitle"> 使用缓存结果渲染对话，提升长对话加载效率 </span>
+            <span class="setting-list-item__value">
+              <CusToggle v-model="editingValue.markdownCache" />
             </span>
           </div>
         </div>
@@ -123,7 +133,7 @@ const roleSelectorOptions = computed(() =>
         </div>
         <div class="setting-list-section">
           <div class="setting-list-item">
-            <span class="setting-list-item__title">默认 API 服务</span>
+            <span class="setting-list-item__title">默认 API 服务模型</span>
             <span class="setting-list-item__value">
               <CusSelect
                 v-model="editingValue.defaultProvider"
@@ -286,9 +296,12 @@ const roleSelectorOptions = computed(() =>
   }
 
   &-section {
+    --gap: 1rem;
+
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: calc(var(--gap) / 2) var(--gap);
     box-sizing: border-box;
     padding-bottom: 0.25rem;
     border-bottom: 1px solid $color-grey-100;
@@ -303,24 +316,54 @@ const roleSelectorOptions = computed(() =>
   }
 
   &-item {
-    display: flex;
-    flex-direction: row;
+    position: relative;
+    display: grid;
+    grid-template-areas:
+      'title value'
+      'subtitle value';
+    grid-auto-rows: auto;
     justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
 
     .large & {
-      flex-direction: column;
-      align-items: start;
+      column-gap: 0.5rem;
+
+      /* 添加竖线 */
+      &:not(&:last-child)::after {
+        position: absolute;
+        content: '';
+        left: calc(100% + var(--gap) / 2);
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 1px;
+        height: 60%;
+        background: $color-grey-300;
+      }
     }
 
     &__title {
+      grid-area: title;
       .large & {
         font-weight: bold;
       }
     }
 
+    // subtitle 不存在时，title 居中
+    &:not(:has(&__subtitle)) &__title {
+      grid-row: 1 / 3;
+      align-self: center;
+    }
+
+    &__subtitle {
+      grid-area: subtitle;
+      display: block;
+      font-weight: normal;
+      font-size: 0.7em;
+      opacity: 0.7;
+    }
+
     &__value {
+      grid-area: value;
+      align-self: center;
       flex-shrink: 0; // 阻止压缩，尤其是在小屏幕上
       display: flex;
       gap: 0.5rem;

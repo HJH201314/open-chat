@@ -22,10 +22,13 @@ export type DropdownMenuProps = {
   position?: 'top' | 'bottom' | 'left' | 'right'; // 弹出方位
   disabled?: boolean; // 是否禁用
   selectedValue?: string | undefined;
-  _valuePath?: string[];
-  _currentValuePath?: DropdownOption[];
-  _depth?: number;
 };
+
+export type DropdownMenuInnerProps = {
+  _valuePath: string[];
+  _currentOptionPath?: DropdownOption[];
+  _depth: number;
+} & DropdownMenuProps;
 
 export type CusSelectProps = {
   modelValue?: string; // 双向绑定

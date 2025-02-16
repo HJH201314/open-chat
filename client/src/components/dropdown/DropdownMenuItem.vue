@@ -1,21 +1,55 @@
+<template>
+  <li
+    ref="menu-item"
+    v-element-hover="(state) => handleHover(state)"
+    class="menu-item"
+    @click.stop="handleClick(option)"
+  >
+    <div>
+      <span>{{ option.label }}</span>
+    </div>
+    <Right v-if="option.children" class="arrow" style="margin-left: auto"></Right>
+    <dropdown-menu
+      v-if="option.children"
+      v-model:current-showing-path="currentShowingPath"
+      :_current-option-path="_currentOptionPath"
+      :_depth="_depth + 1"
+      :_value-path="[..._valuePath, option.value]"
+      :is-open="isSubMenuOpen"
+      :options="option.children"
+      :parentBounding="bounding"
+      :position="getChildrenPos(option)"
+      :selected-value="selectedValue"
+      @select="(v, o, arr) => $emit('select', v, o, arr)"
+    ></dropdown-menu>
+  </li>
+</template>
+
 <script lang="ts" setup>
+import useGlobal from '@/commands/useGlobal';
 import DropdownMenu from '@/components/dropdown/DropdownMenu.vue';
-import type { DropdownMenuEmits, DropdownMenuProps, DropdownOption } from '@/components/dropdown/types';
+import type { DropdownMenuEmits, DropdownMenuInnerProps, DropdownOption } from '@/components/dropdown/types';
 import { Right } from '@icon-park/vue-next';
-import { useElementBounding } from '@vueuse/core';
+import { vElementHover } from '@vueuse/components';
+import { useArrayFilter, useArrayIncludes, useElementBounding } from '@vueuse/core';
 import { defineEmits, defineProps, useTemplateRef } from 'vue';
 
 const props = withDefaults(
   defineProps<
     {
       option: DropdownOption;
-      showSubMenu: boolean;
-    } & DropdownMenuProps
+    } & DropdownMenuInnerProps
   >(),
   {
-    _depth: 0,
     position: 'bottom',
-    _valuePath: () => [],
+  }
+);
+
+const currentShowingPath = defineModel<string[]>('currentShowingPath');
+const frontPath = useArrayFilter(
+  () => currentShowingPath.value ?? [],
+  (v, i) => {
+    return i < props._depth - 1;
   }
 );
 
@@ -32,27 +66,53 @@ const getChildrenPos = (option: DropdownOption) => {
 
 const menuItemRef = useTemplateRef('menu-item');
 const bounding = useElementBounding(menuItemRef);
+const isSubMenuOpen = useArrayIncludes(
+  () => currentShowingPath.value ?? [],
+  () => props.option.value
+);
+
+const showSubMenu = () => {
+  // console.log('showSubMenu', props.option, [...frontPath.value, props.option.value]);
+  currentShowingPath.value = [...frontPath.value, props.option.value];
+};
+const hideSubMenu = () => {
+  // console.log('hideSubMenu', props.option, [...frontPath.value]);
+  currentShowingPath.value = [...frontPath.value];
+};
+
+// 处理鼠标悬停，切换子菜单显示状态
+function handleHover(state: boolean) {
+  if (currentShowingPath.value && state) {
+    showSubMenu();
+  }
+}
+
+const { isLargeScreen } = useGlobal();
+
+// 处理菜单项点击
+function handleClick(option: DropdownOption) {
+  if (option.children && option.children.length) {
+    isLargeScreen.value && isSubMenuOpen.value ? hideSubMenu() : showSubMenu();
+  } else {
+    emit('select', option.value, option, [...props._valuePath, option.value]);
+  }
+}
 </script>
 
-<template>
-  <li ref="menu-item">
-    <div>
-      <span>{{ option.label }}</span>
-    </div>
-    <Right v-if="option.children" class="arrow" style="margin-left: auto"></Right>
-    <dropdown-menu
-      v-if="option.children"
-      :_current-value-path="_currentValuePath"
-      :_depth="_depth + 1"
-      :_value-path="[..._valuePath, option.value]"
-      :is-open="showSubMenu"
-      :options="option.children"
-      :parentBounding="bounding"
-      :position="getChildrenPos(option)"
-      :selected-value="selectedValue"
-      @select="(v, o, arr) => $emit('select', v, o, arr)"
-    ></dropdown-menu>
-  </li>
-</template>
+<style lang="scss" scoped>
+.menu-item {
+  white-space: nowrap;
 
-<style lang="scss" scoped></style>
+  &:not(:last-child):first-child {
+    border-radius: 8px 8px 0 0;
+  }
+
+  &:not(:first-child):last-child {
+    border-radius: 0 0 8px 8px;
+  }
+
+  &:is(:first-child):last-child {
+    border-radius: 8px;
+  }
+}
+</style>

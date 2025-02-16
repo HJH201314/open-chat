@@ -1,28 +1,27 @@
 <template>
-  <ul v-show="isOpen" ref="menu" :class="[`dropdown-menu--${position}`]" class="dropdown-menu">
-    <dropdown-menu-item
-      v-for="option in options"
-      :key="option.value"
-      v-element-hover="() => showOneSubMenu(option)"
-      v-on-click-outside="() => closeSubMenu(option)"
-      :_current-value-path="_currentValuePath"
-      :_depth="_depth"
-      :class="{ selected: option.value === selectedValue || _currentValuePath?.includes(option) }"
-      :option="option"
-      :selected-value="selectedValue"
-      :show-sub-menu="showSubMenu[option.value] || false"
-      class="dropdown-menu-item"
-      @click="handleClick(option)"
-      @select="(v, o, arr) => $emit('select', v, o, arr)"
-    />
-  </ul>
+  <transition name="dropdown">
+    <ul v-show="isOpen" ref="menu" :class="[`dropdown-menu--${position}`]" class="dropdown-menu">
+      <dropdown-menu-item
+        v-for="option in options"
+        :key="option.value"
+        v-model:current-showing-path="currentShowingPath"
+        :_current-option-path="_currentOptionPath"
+        :_depth="_depth"
+        :_value-path="_valuePath"
+        :class="{ selected: option.value === selectedValue || _currentOptionPath?.includes(option) }"
+        :option="option"
+        :selected-value="selectedValue"
+        class="dropdown-menu-item"
+        @select="(v, o, arr) => $emit('select', v, o, arr)"
+      />
+    </ul>
+  </transition>
 </template>
 
 <script lang="ts" setup>
 import DropdownMenuItem from '@/components/dropdown/DropdownMenuItem.vue';
-import type { DropdownMenuEmits, DropdownMenuProps, DropdownOption } from '@/components/dropdown/types';
-import { vElementHover, vOnClickOutside } from '@vueuse/components';
-import { useArrayFilter, useElementBounding } from '@vueuse/core';
+import type { DropdownMenuEmits, DropdownMenuInnerProps, DropdownOption } from '@/components/dropdown/types';
+import { useElementBounding } from '@vueuse/core';
 import { computed, defineEmits, defineProps, reactive, useTemplateRef } from 'vue';
 
 const props = withDefaults(
@@ -31,65 +30,40 @@ const props = withDefaults(
       options: DropdownOption[];
       parentBounding: ReturnType<typeof useElementBounding>;
       isOpen: boolean;
-    } & DropdownMenuProps
+    } & DropdownMenuInnerProps
   >(),
   {
     position: 'bottom',
-    _valuePath: () => [],
   }
 );
 
-const optionsWithChildren = useArrayFilter(props.options, (e) => {
-  return e.children;
-});
-const showSubMenu = reactive({
-  ...optionsWithChildren.value.reduce(
-    (acc, opt) => {
-      acc[opt.value] = false;
-      return acc;
-    },
-    {} as Record<string, boolean>
-  ),
-});
-
-// 收起当前 item 的下级菜单
-function closeSubMenu(option: DropdownOption) {
-  if (option.children && option.children.length) {
-    // console.log(`menu item click outside, ${option.value} => false`);
-    showSubMenu[option.value] = false;
-  }
-}
-
-// 展示当前 item 的下级菜单，收起其它 item 的下级菜单，v-element-hover 在手机端点击时也会触发
-function showOneSubMenu(option: DropdownOption) {
-  Object.entries(showSubMenu).forEach(([key]) => {
-    // console.log(`show one submenu, ${key} => ${key === option.value}`)
-    showSubMenu[key] = key === option.value;
-  });
-}
+const currentShowingPath = defineModel<string[]>('currentShowingPath');
 
 const selfRef = useTemplateRef('menu');
 
-const selfBounding = useElementBounding(selfRef);
-const { left: parentLeft, right: parentRight, top: parentTop, bottom: parentBottom } = props.parentBounding;
+const { height: selfHeight, width: selfWidth } = useElementBounding(selfRef);
+const {
+  left: parentLeft,
+  right: parentRight,
+  top: parentTop,
+  bottom: parentBottom,
+  width: parentWidth,
+} = props.parentBounding;
 const pos = reactive({
   top: computed(() => `${parentTop.value}px`),
   left: computed(() => `${parentLeft.value}px`),
   right: computed(() => `${parentRight.value}px`),
   bottom: computed(() => `${parentBottom.value}px`),
 });
-const topTop = computed(() => `${parentTop.value - selfBounding.height.value}px`);
-const leftLeft = computed(() => `${parentLeft.value - selfBounding.width.value}px`);
+const topTop = computed(() => `${parentTop.value - selfHeight.value}px`);
+const leftLeft = computed(() => `${parentLeft.value - selfWidth.value}px`);
+// 菜单最小宽度
+const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `unset`));
+// 遮罩放大倍数
+// const scaleY = computed(() => `${window.outerHeight / selfHeight.value}`);
+// const scaleX = computed(() => `${window.outerWidth / selfWidth.value}`);
 
 const emit = defineEmits<DropdownMenuEmits>();
-
-function handleClick(option: DropdownOption) {
-  if (option.children && option.children.length) {
-    // do nothing...
-  } else {
-    emit('select', option.value, option,[...props._valuePath, option.value]);
-  }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -102,8 +76,24 @@ function handleClick(option: DropdownOption) {
   list-style: none;
   padding: 0;
   box-shadow: $box-shadow;
-  z-index: calc(2000 + v-bind(_depth));
-  overflow: hidden;
+  z-index: calc(2000 + 2 * v-bind(_depth));
+  min-width: v-bind(minWidth);
+
+  //@media screen and (max-width: $screen-sm) {
+  //  left: 50% !important;
+  //  top: 50% !important;
+  //  transform: translate(-50%, -50%);
+  //  font-size: 1.5em;
+  //
+  //  &::before {
+  //    position: fixed;
+  //    inset: 0;
+  //    scale: v-bind(scaleX) v-bind(scaleY);
+  //    content: '';
+  //    z-index: -1;
+  //    background-color: rgba(0 0 0 / 50%);
+  //  }
+  //}
 
   &--top {
     top: v-bind(topTop);
@@ -145,5 +135,18 @@ function handleClick(option: DropdownOption) {
       color: $color-primary;
     }
   }
+}
+</style>
+<style lang="scss">
+@import '@/assets/variables.module';
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 0.1s $ease-out-circ;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
 }
 </style>

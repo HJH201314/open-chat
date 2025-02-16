@@ -2,7 +2,6 @@
 
 // 所有代码块
 code.hljs {
-  border-radius: .5rem;
   line-height: normal;
   backdrop-filter: opacity(50%);
   -webkit-backdrop-filter: opacity(50%);
@@ -11,11 +10,11 @@ code.hljs {
 
 // 独立代码块
 :is(pre) > code.hljs {
-  font-size: .8rem;
+  font-size: .8em;
+  border-radius: 0 0 .5em .5em;
 }
 
 .cus-code-container {
-  white-space-collapse: collapse;
   position: relative;
   background-color: rgba(23 27 36 / 90%) !important;
   border-radius: 8px;
@@ -41,10 +40,9 @@ code.hljs {
 
 // 行内代码块
 :not(pre) > code.hljs {
-  background-color: rgba(236 253 245 / 50%) !important;
-  font-size: .9rem;
-  border-radius: .3rem;
-  margin-inline: .1rem;
-  line-height: 1.5rem;
-  margin: 2px 0;
+  background-color: rgba(0 0 0 / 5%) !important;
+  font-size: .8em;
+  border-radius: .3em;
+  margin-inline: .1em;
+  line-height: 1.5em;
 }
