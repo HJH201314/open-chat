@@ -15,7 +15,6 @@ class StyleInjector {
 
   private constructor() {
     document.styleSheets[0].insertRule(hideRuleText, 0);
-    console.log(document.styleSheets);
   }
 
   public static initStyle(): StyleInjector {
