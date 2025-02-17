@@ -1,10 +1,10 @@
-import type { ToastProps } from "./index";
+import type { ToastProps } from "./types";
 import type { App } from "vue";
 import { createApp, h } from "vue";
 import Toast from "./Toast.vue";
 
 /**
- * 使用ToastManager来创建令人心动的土司通知吧！
+ * 使用ToastManager来创建令人心动的吐司通知吧！
  */
 class ToastManager {
   static toastDiv?: HTMLDivElement = undefined;

@@ -1,4 +1,4 @@
-import type { ToastProps } from "./index";
+import type { ToastProps } from "./types";
 import type { App } from "vue";
 import { createApp, h } from "vue";
 import Toast from "./Toast.vue";

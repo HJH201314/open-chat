@@ -1,4 +1,4 @@
-import { createRequest } from '@/api/base';
+import { createRequest, errorHandler, successHandler } from '@/api/base';
 import { SERVER_NEXT_API_URL } from '@/constants';
 import { type EventSourceMessage, EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source';
 
@@ -20,7 +20,7 @@ export const completionStream = async (
   onMessage: (e: EventSourceMessage) => void
 ) => {
   const { sessionId, withContext, msg, provider, modelName, systemPrompt } = options;
-  return await fetchEventSource(`${SERVER_NEXT_API_URL}/chat/completion/stream/${sessionId}`, {
+  return fetchEventSource(`${SERVER_NEXT_API_URL}/chat/completion/stream/${sessionId}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -36,7 +36,10 @@ export const completionStream = async (
     signal: signal,
     async onopen(response) {
       if (response.ok && response.headers.get('Content-Type') === EventStreamContentType) {
+        successHandler(response);
         return;
+      } else {
+        errorHandler(response);
       }
     },
     // 接收流式消息

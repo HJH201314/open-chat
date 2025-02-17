@@ -1,9 +1,10 @@
+import ToastManager from '@/components/toast/ToastManager';
+import { SERVER_ORIGIN_API_URL } from '@/constants';
+import router from '@/plugins/router';
+import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { type AxiosRequestConfig, type AxiosResponse } from 'axios';
-import axios from 'axios';
-import { SERVER_ORIGIN_API_URL } from "@/constants";
-import { useSettingStore } from "@/store/useSettingStore";
-import { getActivePinia } from "pinia";
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import { getActivePinia } from 'pinia';
 
 /* 创建axios实例 */
 const axiosInstance = axios.create({
@@ -12,7 +13,17 @@ const axiosInstance = axios.create({
   withCredentials: false,
 });
 
-axiosInstance.interceptors.response.use((resp) => {
+axiosInstance.interceptors.response.use(
+  (resp) => {
+    successHandler(resp);
+    return resp;
+  },
+  (error) => {
+    errorHandler(error);
+  }
+);
+
+export const successHandler = (resp: any) => {
   if (resp.status === 200) {
     if (getActivePinia()) {
       const userStore = useUserStore();
@@ -21,26 +32,38 @@ axiosInstance.interceptors.response.use((resp) => {
       }
     }
   }
-  return resp;
-}, (error) => {
+}
+
+export const errorHandler = (error: any) => {
   if (error.status === 401) {
+    // 后端返回登录失败，前端配合清除登录态
     if (getActivePinia()) {
       useUserStore().logout();
+      ToastManager.danger('登录态已过期，请登录后重试~', {
+        onClick() {
+          router.push('/login');
+        },
+      });
     }
   }
-}, {});
+};
 
 /* 创建请求 */
-export const createRequest = <TRes>(path: string, args: AxiosRequestConfig) => {
-  const config: AxiosRequestConfig<any> = {
+export const createRequest = <TRes>(path: string, args: AxiosRequestConfig = {}): Promise<AxiosResponse<TRes>> => {
+  const token = localStorage.getItem('token') ?? '';
+  const config: AxiosRequestConfig = {
     url: path,
     ...args,
+    headers: {
+      ...args.headers,
+      token,
+      Authorization: `Bearer ${token}`,
+    },
   };
-  if (getActivePinia()) {
-    if (useSettingStore().settings.host) config.baseURL = useSettingStore().settings.host + '/next';
-  }
-  if (!config.headers) config.headers = {};
-  config.headers['token'] = localStorage.getItem("token") ?? '';
-  config.headers['Authorization'] = 'Bearer ' + (localStorage.getItem("token") ?? '');
-  return axiosInstance.request<any, AxiosResponse<TRes>>(config);
-}
+
+  // Optionally update the base URL
+  const host = useSettingStore().settings.host;
+  if (host) config.baseURL = `${host}/next`;
+
+  return axiosInstance.request<TRes>(config);
+};

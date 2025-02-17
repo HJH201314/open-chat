@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import type { ToastProps } from './index';
+import type { ToastProps } from './types';
 import variables from "@/assets/variables.module.scss";
 
 const props = withDefaults(defineProps<ToastProps>(), {
@@ -9,6 +9,10 @@ const props = withDefaults(defineProps<ToastProps>(), {
   duration: 'normal',
   type: 'normal',
 });
+
+const emits = defineEmits<{
+  (evt: 'click'): void;
+}>()
 
 const myself = ref<HTMLElement>();
 const durationTimeMs = computed(() => {
@@ -55,7 +59,7 @@ const wrapperColor = computed(() => {
 
 <template>
   <Teleport to="body">
-    <div :class="toastClass" ref="myself">
+    <div :class="toastClass" ref="myself" @click="$emit('click')">
       <div class="toast-wrapper">
         <span v-if="text" class="toast-text">{{ props.text }}</span>
         <slot v-if="$slots.default"></slot>

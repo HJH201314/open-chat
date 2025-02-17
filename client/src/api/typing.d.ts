@@ -73,7 +73,11 @@ declare namespace API {
     updatedAt?: Date;
   };
 
+  type UserPingResult = UserLoginResult | string;
+
   type UserLoginResponse = CommonResponse<UserLoginResult>;
+
+  type UserPingResponse = CommonResponse<UserPingResult>;
 
   type ChatCompletionOption = {
     sessionId: string;

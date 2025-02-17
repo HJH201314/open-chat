@@ -44,7 +44,6 @@ const loginForm = reactive({
   username: ref(''),
   password: ref(''),
   shake: ref(0),
-  remember: ref(false),
 });
 const emoji = ref('🚀');
 const submitDisabled = ref(false);
@@ -77,7 +76,7 @@ async function handleLoginSubmit() {
   } else {
     try {
       submitDisabled.value = true;
-      const result = await userStore.login(loginForm.username, loginForm.password, loginForm.remember);
+      await userStore.login(loginForm.username, loginForm.password);
     } catch (e) {
       console.error(e);
       loginForm.shake += 1;
@@ -96,7 +95,7 @@ watch(
       emoji.value = '🎉';
       // @ts-ignore
       typer.value = new EasyTyper(typerObj, '欢迎回来');
-      showToast({ text: `登录成功，欢迎回来，UID:${userStore.user_id}`, position: 'top' });
+      showToast({ text: `登录成功，欢迎回来，UID:${userStore.userId}`, position: 'top' });
       setTimeout(() => {
         closePage();
       }, 1500);
@@ -158,7 +157,6 @@ function showUserAgreement() {
         </button>
       </form>
     </div>
-    <CusToggle v-model="loginForm.remember" :highlight="loginForm.remember" label="记住我" style="margin-top: 0.5rem" />
     <div class="login-footer">我已阅读并同意<a @click="showUserAgreement">《OpenChat用户协议》</a></div>
   </div>
 </template>
