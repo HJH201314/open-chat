@@ -143,13 +143,10 @@ async function handleSendMessage() {
       onSaveUserMsg() {
         messageList.value = dataStore.getMessageList(form.sessionId);
       },
-      onMessage(msg: string) {
-        form.outputValue += msg;
-        if (form.outputValue.match(/\[title:(.+?)]/)) {
-          form.outputValue = form.outputValue.replace(/\[title:(.+?)]/, '');
-        }
+      onMessage(msg: string, fullMsg: string) {
+        form.outputValue = fullMsg;
       },
-      onFinish(fullMessage: string) {
+      onFinish() {
         form.outputValue = '';
         messageList.value = dataStore.getMessageList(form.sessionId);
         scrollToBottom();
@@ -410,8 +407,8 @@ const { isSmallScreen } = useGlobal();
       <!-- 输入面板占位 -->
       <div :style="{ minHeight: `${panelHeight}px` }" class="panel-placeholder"></div>
       <!--   消息列表   -->
-      <DialogMessage v-if="form.outputValue" id="bot-typing-box" :message="form.outputValue" role="bot" />
-      <DialogMessage v-if="form.inputValue" id="user-typing-box" :message="form.inputValue" role="user" />
+      <DialogMessage v-if="form.outputValue" id="bot-typing-box" :html-message="form.outputValue" role="bot" />
+      <DialogMessage v-if="form.inputValue" id="user-typing-box" :message="form.inputValue" :markdown-render="false" role="user" />
       <DialogMessage
         v-for="(item, i) in messageList.toReversed()"
         :id="item.time"

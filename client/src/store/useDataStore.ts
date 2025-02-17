@@ -131,14 +131,14 @@ export const useDataStore = defineStore('data', () => {
     return messageStorage.value[storageKey].messages ?? [];
   }
 
-  async function sendMessageText(sessionId: string, message: string, receiver?: MessageReceiver) {
+  const sendMessageText = async (sessionId: string, message: string, receiver?: MessageReceiver) => {
     if (message == '') return;
     const userMsgIndex = saveMessage(sessionId, message, 'user', 'text');
     receiver?.onSaveUserMsg();
     const ctrl = new AbortController();
     const rawMsg = ref('');
     const { commands, commandMap } = useCommandParser(rawMsg);
-    const { result: fullMsg } = useMarkdownIt(rawMsg);
+    const { result: renderedMsg } = useMarkdownIt(rawMsg);
     const { withContext, provider, model: modelName } = getDialogInfo(sessionId);
     let msgIds: [string | undefined, string | undefined] = [undefined, undefined];
 
@@ -153,7 +153,6 @@ export const useDataStore = defineStore('data', () => {
       const idCmd = commandMap.value['ID'];
       if (idCmd) {
         msgIds = [idCmd.values[0], idCmd.values[1]];
-        // console.log('findId', idCmd, rawMsg.value);
         rawMsg.value = rawMsg.value.replace(idCmd.raw, '');
       }
     });
@@ -169,15 +168,15 @@ export const useDataStore = defineStore('data', () => {
       (event) => {
         if (event.data === '[DONE]') {
           // 当接收到服务器端的结束标记时，保存消息
-          saveMessage(sessionId, rawMsg.value, 'bot', 'text', fullMsg.value, msgIds[1]); // 保存消息
+          saveMessage(sessionId, rawMsg.value, 'bot', 'text', renderedMsg.value, msgIds[1]); // 保存消息
           updateMessage(sessionId, userMsgIndex, { id: msgIds[0] });
-          receiver?.onFinish(fullMsg.value); // 消息接收完毕回调
+          receiver?.onFinish(renderedMsg.value); // 消息接收完毕回调
         } else {
           let data = event.data;
           data = data.replaceAll('\\n', '\n');
           console.log('[data]', event.data, `'${data}'`);
           rawMsg.value += data; // 记录已接收的消息
-          receiver?.onMessage(data, fullMsg.value); // 消息接收回调
+          receiver?.onMessage(data, renderedMsg.value); // 消息接收回调
         }
       }
     );
@@ -207,8 +206,10 @@ export const useDataStore = defineStore('data', () => {
       });
       localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
       return (messageStorage.value[storageKey].messages?.length || 0) - 1;
-    } catch (ignore) {}
-    return -1;
+    } catch (err) {
+      console.error(err);
+      return -1;
+    }
   }
 
   /**

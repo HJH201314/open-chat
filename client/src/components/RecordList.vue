@@ -40,7 +40,6 @@ async function handleAddRecord(roleId?: number) {
 }
 
 function handleListAddClick() {
-  console.log(roleForm.remember);
   if (settingStore.settings.roleEnabled && settingStore.settings.roleRemember && settingStore.settings.roleDefaultId)
     handleAddRecord(parseInt(settingStore.settings.roleDefaultId ?? '1'));
   else if (!settingStore.settings.roleEnabled) handleAddRecord();

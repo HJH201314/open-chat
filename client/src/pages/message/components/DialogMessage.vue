@@ -10,12 +10,15 @@ type DialogMessageProps = {
   htmlMessage?: string;
   role: 'user' | 'bot';
   time?: string;
+  markdownRender?: boolean;
 };
 
 const props = withDefaults(defineProps<DialogMessageProps>(), {
   role: 'user',
   message: '',
+  htmlMessage: '',
   time: new Date().toLocaleString(),
+  markdownRender: true,
 });
 
 // 处理消息内容框内的点击
@@ -45,7 +48,6 @@ async function handleClick(event: MouseEvent) {
 }
 
 const userStore = useUserStore();
-const { settings } = useSettingStore();
 
 const avatarPath = computed(() => {
   if (props.role == 'user') return userStore.avatar ?? '';
@@ -53,9 +55,12 @@ const avatarPath = computed(() => {
   return '';
 });
 
-const useCachedHtmlMessage = computed(() => props.htmlMessage && settings.markdownCache);
-const markdownIt = useMarkdownIt(() => (useCachedHtmlMessage.value ? '' : props.message));
-const renderMessage = computed(() => (useCachedHtmlMessage.value ? props.htmlMessage : markdownIt.result.value));
+const useCachedHtmlMessage = computed(() => !!props.htmlMessage);
+const useOriginMessage = computed(() => !useCachedHtmlMessage.value && !props.markdownRender);
+const markdownIt = useMarkdownIt(() => (useCachedHtmlMessage.value || useOriginMessage.value ? '' : props.message));
+const renderMessage = computed(() =>
+  useCachedHtmlMessage.value ? props.htmlMessage : useOriginMessage.value ? props.message : markdownIt.result.value
+);
 
 const { isLargeScreen } = useGlobal();
 </script>
@@ -174,8 +179,13 @@ const { isLargeScreen } = useGlobal();
     list-style-position: inside;
   }
 
-  li::marker {
-    color: $color-grey-500;
+  li {
+    &::marker {
+      color: $color-grey-500;
+    }
+    p {
+      display: inline;
+    }
   }
 
   p {
@@ -190,6 +200,7 @@ const { isLargeScreen } = useGlobal();
   }
 
   .cus-code-container {
+    margin-top: 0.1em;
     margin-bottom: 0.6em;
   }
 }

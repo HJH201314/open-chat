@@ -51,7 +51,6 @@ const useRoleStore = defineStore('bot-roles', () => {
         const res = await api.gpt.getSentenceByRoleId(roleId);
         if (res.data.roleSentence) {
           roleSentenceStorage.value[roleId] = res.data.roleSentence;
-          console.log(roleId, res.data.roleSentence);
           return res.data.roleSentence;
         }
       } catch (ignore) {}
