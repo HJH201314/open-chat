@@ -93,8 +93,8 @@ const showEmptyTip = ref(true);
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
-@import '@/assets/animations';
+@use '@/assets/variables' as *;
+@use '@/assets/animations';
 
 .message-page {
   height: 100%;

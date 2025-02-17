@@ -14,15 +14,6 @@ import { useRouter } from 'vue-router';
 const emit = defineEmits<{
   (e: 'change', value: string): void;
 }>();
-
-type RecordListItem = {
-  id: number;
-  title: string;
-  digest: string;
-  dialogNum: number;
-  createAt: string;
-  avatarPath: string;
-};
 const dataStore = useDataStore();
 const roleStore = useRoleStore();
 const settingStore = useSettingStore();
@@ -37,7 +28,7 @@ async function handleAddRecord(roleId?: number) {
       sessionId,
       (await roleStore.getRoleSentence(roleId)) +
         `当前时间: ${new Date().toLocaleString()}. ` +
-        `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！` ?? ''
+        `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`
     );
   }
   handleListItemClick(sessionId);
@@ -60,7 +51,7 @@ const router = useRouter();
 
 // 点击对话列表项
 function handleListItemClick(id: string) {
-  let routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
+  const routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
   routerHandler(`/message/${id}`);
 }
 
@@ -159,7 +150,9 @@ const displayList = computed(() => {
   </div>
 </template>
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
+@use 'sass:color';
+@use '@/assets/variables' as *;
+@use '@/assets/extension' as *;
 
 .message-left {
   display: flex;
@@ -216,7 +209,7 @@ const displayList = computed(() => {
         transition: color 0.2s $ease-out-circ;
 
         &:hover {
-          color: darken($color-grey-500, 10);
+          color: color.adjust($color-grey-500, $lightness: -10%);
         }
       }
 
@@ -345,7 +338,7 @@ const displayList = computed(() => {
   padding: 1rem;
 
   &-title {
-    @extend %page-title;
+    @include page-title;
     margin-bottom: 1rem;
   }
 

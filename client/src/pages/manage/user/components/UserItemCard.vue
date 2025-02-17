@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Delete, Edit } from "@icon-park/vue-next";
 import DiliButton from "@/components/button/DiliButton.vue";
-import variables from "@/assets/variables.module.scss";
+import variables from '@/assets/variables.module.scss';
 import { computed } from "vue";
 
 type UserItemCardProps = {
@@ -64,21 +64,17 @@ function getPermissionName(permissionId: number) {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use 'sass:color';
+@use '@/assets/variables' as *;
 .user-item-card {
   height: max-content;
   width: 333px;
   padding: .5rem;
   border-radius: .5rem;
-  background-color: lighten($color-primary-lighter, 30);
+  background-color: color.adjust($color-primary-lighter, $lightness: 30%);
   transition: all .25s $ease-out-circ;
   display: flex;
   gap: .5rem;
-
-  &:hover {
-    //box-shadow: $box-shadow;
-    //background-color: lighten($color-primary-lighter, 29);
-  }
 
   > .info {
     flex: 1;

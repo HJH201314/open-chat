@@ -147,7 +147,7 @@ function selectOption(value: string, option: DropdownOption, valuePath: string[]
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 
 .dropdown {
   position: relative;

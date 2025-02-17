@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CusButtonEmits, CusButtonProps } from "@/components/button/DiliButton";
-import variables from "@/assets/variables.module.scss";
+import variables from '@/assets/variables.module.scss';
 import type { CSSProperties } from "vue";
 import { computed, ref } from "vue";
 import { getDarkerColor } from "@/utils/color";
@@ -73,7 +73,7 @@ function handleClick() {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use '@/assets/variables' as *;
 .dili-button {
   position: relative;
   > .mask {

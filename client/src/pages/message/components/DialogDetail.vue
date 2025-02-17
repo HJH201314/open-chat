@@ -520,7 +520,8 @@ const { isSmallScreen } = useGlobal();
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
+@use 'sass:color';
+@use '@/assets/variables' as *;
 
 .dialog-detail {
   position: relative;
@@ -582,7 +583,7 @@ const { isSmallScreen } = useGlobal();
     flex-direction: column;
     gap: 0.25rem;
     margin-top: auto;
-    background-color: transparentize($color-grey-100, 0.2);
+    background-color: color.scale($color-grey-100, $alpha: -20%);
     border-radius: 0.5rem;
     padding: 0.25rem;
     backdrop-filter: blur(10px);
@@ -710,7 +711,7 @@ const { isSmallScreen } = useGlobal();
         border-radius: 50%;
         position: absolute;
         inset: 0;
-        background-color: transparentize($color-primary, 0.5);
+        background-color: color.scale($color-primary, $alpha: -20%);
         animation: recording 5s infinite;
       }
     }
@@ -746,7 +747,7 @@ const { isSmallScreen } = useGlobal();
 
       &--error {
         color: $color-danger;
-        background-color: transparentize($color-danger, 0.75);
+        background-color: color.scale($color-danger, $alpha: -75%);
 
         > .signal {
           background-color: $color-danger;
@@ -755,7 +756,7 @@ const { isSmallScreen } = useGlobal();
 
       &--handling {
         color: $color-warning;
-        background-color: transparentize($color-warning, 0.75);
+        background-color: color.scale($color-warning, $alpha: -75%);
 
         > .signal {
           background-color: $color-warning;
@@ -764,7 +765,7 @@ const { isSmallScreen } = useGlobal();
 
       &--ready {
         color: $color-primary;
-        background-color: transparentize($color-primary, 0.75);
+        background-color: color.scale($color-primary, $alpha: -75%);
 
         > .signal {
           background-color: $color-primary;
@@ -775,7 +776,7 @@ const { isSmallScreen } = useGlobal();
 }
 </style>
 <style lang="scss">
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 
 .flow-in-enter-from,
 .flow-in-leave-to {

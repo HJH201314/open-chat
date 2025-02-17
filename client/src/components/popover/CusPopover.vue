@@ -98,7 +98,7 @@ function hide(e?: MouseEvent) {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use '@/assets/variables' as *;
 .popover {
   position: relative;
   &-slot {

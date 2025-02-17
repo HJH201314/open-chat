@@ -13,8 +13,8 @@
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
-@import "@/assets/animations";
+@use '@/assets/variables' as *;
+@use '@/assets/animations';
 .panel {
   position: relative;
   background-color: white;

@@ -33,7 +33,7 @@ function handleInput(e: any) {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use '@/assets/variables' as *;
 .cus-input {
   outline: none;
   resize: none;

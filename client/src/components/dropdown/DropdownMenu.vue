@@ -67,7 +67,7 @@ const emit = defineEmits<DropdownMenuEmits>();
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 
 .dropdown-menu {
   position: fixed;
@@ -138,7 +138,7 @@ const emit = defineEmits<DropdownMenuEmits>();
 }
 </style>
 <style lang="scss">
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 
 .dropdown-enter-active,
 .dropdown-leave-active {

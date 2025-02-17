@@ -1,0 +1,35 @@
+@use 'sass:color';
+@use 'variables';
+
+@mixin hover-able {
+  &:hover {
+    background: color.scale(variables.$color-hover, $alpha: -50%);
+  }
+}
+
+@mixin active-able {
+  &:active {
+    background: color.scale(variables.$color-active, $alpha: -50%);
+  }
+}
+
+@mixin transition-all-circ {
+  transition: all 0.2s variables.$ease-out-circ;
+}
+
+@mixin click-able {
+  cursor: pointer;
+  @include hover-able;
+  @include active-able;
+  @include transition-all-circ;
+}
+
+@mixin button-like {
+  border-radius: .5rem;
+  padding: .5rem;
+}
+
+@mixin page-title {
+  font-weight: bold;
+  font-size: large;
+}

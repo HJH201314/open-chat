@@ -202,7 +202,8 @@ function getPermissionName(permissionId: number) {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use '@/assets/extension' as *;
+
 .page {
   height: 100%;
   padding: .5rem;
@@ -211,7 +212,7 @@ function getPermissionName(permissionId: number) {
   gap: .5rem;
 
   &-title {
-    @extend %page-title;
+    @include page-title;
     display: flex;
     align-items: center;
   }

@@ -11,7 +11,7 @@
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use '@/assets/variables' as *;
 .icon-button {
   position: relative;
   height: 2rem;

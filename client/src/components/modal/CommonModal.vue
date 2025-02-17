@@ -116,7 +116,8 @@ defineExpose<CommonModalFunc>({
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
+@use '@/assets/extension' as *;
 
 .modal {
   &-mask {
@@ -144,8 +145,8 @@ defineExpose<CommonModalFunc>({
     overflow: hidden;
 
     &-close {
-      @extend %click-able;
-      @extend %transition-all-circ;
+      @include click-able;
+      @include transition-all-circ;
       position: absolute;
       top: 0;
       right: 0;

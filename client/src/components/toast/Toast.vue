@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import type { ToastProps } from './types';
-import variables from "@/assets/variables.module.scss";
+import variables from '@/assets/variables.module.scss';
 
 const props = withDefaults(defineProps<ToastProps>(), {
   text: '',
@@ -69,7 +69,7 @@ const wrapperColor = computed(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use '@/assets/variables' as *;
 .toast {
   position: absolute;
   z-index: 10000;

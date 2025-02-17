@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<SpinningProps>(), {
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 @keyframes spinning-rotate {
   to {
     transform: rotate(360deg);

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, type CSSProperties, ref, watch } from 'vue';
-import variables from "@/assets/variables.module.scss";
+import variables from '@/assets/variables.module.scss';
 import { TransitionPresets, useTransition } from "@vueuse/core";
 
 type CircularProgressProps = {
@@ -54,7 +54,7 @@ const progressStyle = computed(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use '@/assets/variables' as *;
 .circular-progress {
   position: relative;
   width: v-bind(size);

@@ -1,7 +1,7 @@
-@import './base.css';
-@import "variables.module";
+@use 'variables';
+@use './base.css';
 /* IconPark图标 */
-@import '@icon-park/vue-next/styles/index.css';
+@use '@icon-park/vue-next/styles/index.css';
 
 /* TailwindCSS */
 @tailwind base;
@@ -46,20 +46,20 @@ body {
 
 body, html {
   height: 100%;
-  background: linear-gradient(90deg, $color-teal-20, $color-teal-10);
+  background: linear-gradient(90deg, variables.$color-teal-20, variables.$color-teal-10);
 }
 
 /* 定义链接样式 */
 a {
   text-decoration: none;
   display: inline-block;
-  color: $color-primary;
-  transition: all 0.2s $ease-out-circ;
-  background: linear-gradient(to right, $color-primary, $color-primary) no-repeat left bottom;
+  color: variables.$color-primary;
+  transition: all 0.2s variables.$ease-out-circ;
+  background: linear-gradient(to right, variables.$color-primary, variables.$color-primary) no-repeat left bottom;
   background-size: 0 1px;
 
   &:hover {
-    color: $color-primary-darker;
+    color: variables.$color-primary-darker;
     background-position: left bottom;
     background-size: 100% 1px;
   }
@@ -87,8 +87,8 @@ a {
 
 /* 划词样式 */
 ::selection {
-  background-color: $color-primary-lighter;
-  color: $color-black;
+  background-color: variables.$color-primary-lighter;
+  color: variables.$color-black;
 }
 
 /* 重置 textarea 滚动条样式 */
@@ -111,7 +111,7 @@ textarea::-webkit-scrollbar {
   position: relative;
 }
 
-@media screen and (max-width: $screen-sm) {
+@media screen and (max-width: variables.$screen-sm) {
   #app {
     flex: 1;
     width: 100%;
@@ -151,13 +151,13 @@ textarea::-webkit-scrollbar {
 
 .enable-hover {
   &:hover {
-    background: $color-hover;
+    background: variables.$color-hover;
   }
 }
 
 .enable-active {
   &:active {
-    background: $color-active;
+    background: variables.$color-active;
   }
 }
 
@@ -166,16 +166,16 @@ textarea::-webkit-scrollbar {
   cursor: pointer;
 
   &:hover {
-    background: $color-hover;
+    background: variables.$color-hover;
   }
 
   &:active {
-    background: $color-active;
+    background: variables.$color-active;
   }
 }
 
 .transition-all-circ {
-  transition: all 0.2s $ease-out-circ;
+  transition: all 0.2s variables.$ease-out-circ;
 }
 
 /* 闪烁光标，一般配合typer使用 */

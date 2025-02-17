@@ -50,7 +50,7 @@ function toggle() {
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 
 .toggle {
   display: flex;

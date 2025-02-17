@@ -1,11 +1,13 @@
+@use 'sass:color';
+
 // Tint a color: mix a color with white
 @function tint-color($color, $weight) {
-  @return mix(white, $color, $weight);
+  @return color.mix(white, $color, $weight: $weight);
 }
 
 // Shade a color: mix a color with black
 @function shade-color($color, $weight) {
-  @return mix(black, $color, $weight);
+  @return color.mix(black, $color, $weight: $weight);
 }
 
 // Shade the color if the weight is positive, else tint it

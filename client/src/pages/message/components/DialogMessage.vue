@@ -75,7 +75,7 @@ const { isLargeScreen } = useGlobal();
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 
 .dialog-message {
   &-container {
@@ -159,7 +159,7 @@ const { isLargeScreen } = useGlobal();
 }
 </style>
 <style lang="scss">
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 // 无 scoped 解决 v-html 中的展示问题
 .dialog-message-content-body {
   ol,

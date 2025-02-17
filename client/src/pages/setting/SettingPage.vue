@@ -257,7 +257,8 @@ const roleSelectorOptions = computed(() =>
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
+@use '@/assets/extension' as *;
 
 .setting-page {
   height: 100%;
@@ -274,7 +275,7 @@ const roleSelectorOptions = computed(() =>
   }
 
   &-title {
-    @extend %page-title;
+    @include page-title;
     margin-bottom: 0.5rem;
   }
 }

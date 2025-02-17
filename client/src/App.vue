@@ -22,7 +22,7 @@ noPaddingBus.on((v) => {
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/variables.module';
+@use '@/assets/variables' as *;
 
 .app-base {
   height: 100%;

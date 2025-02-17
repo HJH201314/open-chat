@@ -12,7 +12,9 @@
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/variables.module";
+@use '@/assets/variables' as *;
+@use '@/assets/extension' as *;
+
 .star-page {
   display: flex;
   flex-direction: column;
@@ -20,7 +22,7 @@
   padding: .5rem;
 
   &-title {
-    @extend %page-title;
+    @include page-title;
   }
 
   &-collection-list {
