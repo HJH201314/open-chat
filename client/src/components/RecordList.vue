@@ -85,7 +85,7 @@ const displayList = computed(() => {
 </script>
 <template>
   <div class="message-left">
-    <span style="text-align: center; font-weight: bold; margin-bottom: 0.25rem">对话 | Dialog</span>
+    <span style="text-align: center; font-weight: bold; margin-bottom: 0.25rem">自由对话</span>
     <!-- 角色列表 -->
     <div class="dialog-list">
       <div class="dialog-list-bar">
@@ -132,7 +132,7 @@ const displayList = computed(() => {
           <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar" />
           <div class="dialog-list-item-center">
             <div class="title">
-              {{ item.title }}
+              {{ item.title || '未命名对话' }}
             </div>
             <div class="digest">
               {{ item.botRole }}

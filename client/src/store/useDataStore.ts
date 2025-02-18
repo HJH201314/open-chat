@@ -61,7 +61,7 @@ export const useDataStore = defineStore('data', () => {
       if (status === 200 && data.data) {
         dialogData.value.dialogs![sessionId] = {
           id: sessionId,
-          title: '新会话',
+          title: '',
           avatarPath: '',
           digest: '',
           botRole: roleStore.roles?.find((r) => r[0] === role)?.[1] || '未知',

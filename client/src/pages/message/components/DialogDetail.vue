@@ -149,6 +149,10 @@ async function handleSendMessage() {
       onFinish() {
         form.outputValue = '';
         messageList.value = dataStore.getMessageList(form.sessionId);
+        console.log(messageList.value);
+        if (messageList.value.length < 3 && messageList.value[0] && !dataStore.getDialogInfo(form.sessionId).title) {
+          dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
+        }
         scrollToBottom();
       },
     });
@@ -387,7 +391,7 @@ const { isSmallScreen } = useGlobal();
           <Back size="16" />
         </IconButton>
         <span class="dialog-detail-actions-title">
-          {{ dialogInfo.title }}
+          {{ dialogInfo.title || '未命名对话' }}
         </span>
         <span class="dialog-detail-actions-subtitle"> {{ messageList.length }} 条消息 </span>
       </div>
@@ -408,11 +412,17 @@ const { isSmallScreen } = useGlobal();
       <div :style="{ minHeight: `${panelHeight}px` }" class="panel-placeholder"></div>
       <!--   消息列表   -->
       <DialogMessage v-if="form.outputValue" id="bot-typing-box" :html-message="form.outputValue" role="bot" />
-      <DialogMessage v-if="form.inputValue" id="user-typing-box" :message="form.inputValue" :markdown-render="false" role="user" />
       <DialogMessage
-        v-for="(item, i) in messageList.toReversed()"
+        v-if="form.inputValue"
+        id="user-typing-box"
+        :markdown-render="false"
+        :message="form.inputValue"
+        role="user"
+      />
+      <DialogMessage
+        v-for="item in messageList.toReversed()"
         :id="item.time"
-        :key="i"
+        :key="item.id || item.time"
         :html-message="item.htmlContent"
         :message="item.content"
         :role="item.sender"
@@ -441,8 +451,8 @@ const { isSmallScreen } = useGlobal();
             </div>
           </DiliButton>
           <CusSelect
-            :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
             v-model="form.providerModel[1]"
+            :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
             :options="[
               { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-4o', label: 'ChatGPT' }] },
               {
@@ -499,10 +509,10 @@ const { isSmallScreen } = useGlobal();
             mediaStream
               ? `录制中 ${audioTimeout}s`
               : audioHandling
-              ? '处理中'
-              : !currentMicrophone
-              ? '无麦克风'
-              : '就绪'
+                ? '处理中'
+                : !currentMicrophone
+                  ? '无麦克风'
+                  : '就绪'
           }}
         </div>
         <div ref="audioButtonRef" class="audio-input-speak" @touchend="stopVoiceRecording">
