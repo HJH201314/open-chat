@@ -2,10 +2,10 @@
 import DiliButton from '@/components/button/DiliButton.vue';
 import CommonModal from '@/components/modal/CommonModal.vue';
 import Toggle from '@/components/toggle/CusToggle.vue';
-import { useDataStore } from '@/store/useDataStore';
-import useRoleStore from '@/store/useRoleStore';
-import { useSettingStore } from '@/store/useSettingStore';
-import type { DialogInfo } from '@/types/data';
+import { useDataStore } from '@/store/useDataStore.ts';
+import useRoleStore from '@/store/useRoleStore.ts';
+import { useSettingStore } from '@/store/useSettingStore.ts';
+import type { DialogInfo } from '@/types/data.ts';
 import { CloseOne, Plus, Search } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
 import { computed, reactive, ref, watch } from 'vue';
@@ -159,8 +159,8 @@ const displayList = computed(() => {
 }
 
 .dialog-list {
+  flex: 1;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
 

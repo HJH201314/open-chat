@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import useGlobal from '@/commands/useGlobal';
-import RecordList from '@/components/RecordList.vue';
+import RecordList from '@/pages/message/components/RecordList.vue';
 import { noPaddingKey, toggleSidebarKey } from '@/constants/eventBusKeys';
 import DialogDetail from '@/pages/message/components/DialogDetail.vue';
 import { useEventBus } from '@vueuse/core';

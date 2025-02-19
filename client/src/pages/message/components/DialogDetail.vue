@@ -49,10 +49,12 @@ const form = reactive({
 });
 
 function scrollToBottom() {
-  document.querySelector(`#bottom-line`)?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start',
-    inline: 'nearest',
+  nextTick(() => {
+    document.querySelector(`#bottom-line`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+      inline: 'nearest',
+    });
   });
 }
 
@@ -578,7 +580,11 @@ const { isSmallScreen } = useGlobal();
     overflow-y: auto;
     display: flex;
     flex-direction: column-reverse;
-    gap: 0.5rem;
+    margin-bottom: auto;
+
+    > :not(:last-child) {
+      margin-bottom: 0.5rem;
+    }
   }
 
   &-inputs {
@@ -589,7 +595,6 @@ const { isSmallScreen } = useGlobal();
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    margin-top: auto;
     background-color: color.scale($color-grey-100, $alpha: -20%);
     border-radius: 0.5rem;
     padding: 0.25rem;
