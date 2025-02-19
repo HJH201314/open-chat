@@ -1,5 +1,5 @@
 import api from '@/api';
-import { useIntervalFn } from '@vueuse/core';
+import { useIntervalFn, useSessionStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 
@@ -7,7 +7,7 @@ import { computed, onMounted, ref } from 'vue';
 export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token'));
   const avatar = ref('/favicon.ico');
-  const currentUser = ref<API.UserLoginResult>({});
+  const currentUser = useSessionStorage<API.UserLoginResult>('current-user', {});
   const loginStatus = ref<'login' | 'logout' | 'offline'>('logout');
   const isLogin = computed(() => {
     // 状态不为登出即视作已登录，offline 状态允许再次请求进行尝试
@@ -42,7 +42,7 @@ export const useUserStore = defineStore('user', () => {
       loginStatus.value = 'login';
       currentUser.value = res;
     }
-  }
+  };
 
   const login = async (_username: string, _password: string) => {
     try {

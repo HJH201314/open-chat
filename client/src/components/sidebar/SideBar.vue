@@ -46,7 +46,7 @@ const entries = computed<Entry[]>(() => {
       key: 'dialog',
       name: '对话',
       icon: 'message',
-      href: '/message',
+      href: '/chat/message',
     },
     // {
     //   key: "start",
@@ -72,15 +72,15 @@ const entries = computed<Entry[]>(() => {
       key: 'setting',
       name: '设置',
       icon: 'setting-two',
-      href: '/setting',
+      href: '/chat/setting',
       onClick() {
         if (isLargeScreen.value) {
           // 如果是大屏幕，打开模态框
           refSettingModal.value?.open();
         } else {
           // 小屏幕跳转页面
-          if ('/setting' == route.path) return;
-          router.replace('/setting');
+          if ('/chat/setting' == route.path) return;
+          router.replace('/chat/setting');
         }
       },
     },

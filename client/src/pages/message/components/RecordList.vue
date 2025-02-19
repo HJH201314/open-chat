@@ -51,7 +51,7 @@ const router = useRouter();
 // 点击对话列表项
 function handleListItemClick(id: string) {
   const routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
-  routerHandler(`/message/${id}`);
+  routerHandler(`/chat/message/${id}`);
 }
 
 const roleForm = reactive({
@@ -85,13 +85,12 @@ const displayList = computed(() => {
 </script>
 <template>
   <div class="message-left">
-    <span style="text-align: center; font-weight: bold; margin-bottom: 0.25rem">自由对话</span>
     <!-- 角色列表 -->
     <div class="dialog-list">
       <div class="dialog-list-bar">
         <div class="dialog-list-bar-search">
           <span class="dialog-list-bar-search-icon"><Search /></span>
-          <input v-model="searchForm.searchVal" autocomplete="new-password" placeholder="搜索对话" />
+          <input v-model="searchForm.searchVal" autocomplete="new-password" placeholder="搜索对话内容" />
           <span v-if="searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
             <CloseOne theme="filled" />
           </span>
@@ -100,7 +99,7 @@ const displayList = computed(() => {
           <div class="dialog-list-add" @click="handleListAddClick">
             <Plus size="24" theme="outline" />
           </div>
-          <CommonModal v-model:visible="roleForm.modalVisible" subtitle="单击角色以创建对话" title="选择角色">
+          <CommonModal v-model:visible="roleForm.modalVisible">
             <div class="select-role">
               <div class="select-role-title">选择角色</div>
               <div class="select-role-list">

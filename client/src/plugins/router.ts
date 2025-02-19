@@ -9,15 +9,15 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/message',
+      redirect: '/chat/message',
     },
     {
-      path: '/message',
+      path: '/chat/message',
       name: 'messageList',
       component: MessagePage,
     },
     {
-      path: '/message/:sessionId',
+      path: '/chat/message/:sessionId',
       name: 'messageDetail',
       component: MessagePage,
     },
@@ -32,7 +32,7 @@ const router = createRouter({
       component: ManageUserPage,
     },
     {
-      path: '/setting',
+      path: '/chat/setting',
       name: 'setting',
       component: SettingPage,
     },

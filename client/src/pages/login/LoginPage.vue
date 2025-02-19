@@ -2,16 +2,20 @@
 import useGlobal from '@/commands/useGlobal';
 import { DialogManager } from '@/components/dialog';
 import showToast from '@/components/toast/toast';
-import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useUserStore } from '@/store/useUserStore';
 import { Close, Right } from '@icon-park/vue-next';
 import EasyTyper from 'easy-typer-js';
 import { onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-const { isModal = false } = defineProps<{
-  isModal: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    isModal: boolean;
+  }>(),
+  {
+    isModal: false,
+  }
+);
 
 const emit = defineEmits<{
   (event: 'close'): void;
@@ -19,7 +23,7 @@ const emit = defineEmits<{
 
 onMounted(() => {
   if (userStore.isLogin) {
-    if (isModal) emit('close');
+    if (props.isModal) emit('close');
     else router.replace('/');
   }
   initPage();
@@ -57,7 +61,7 @@ function initPage() {
 const router = useRouter();
 
 function closePage() {
-  if (isModal) {
+  if (props.isModal) {
     emit('close');
   } else {
     router.replace('/');
