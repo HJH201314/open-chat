@@ -1,11 +1,13 @@
 {
   "name": "open-chat",
   "version": "1.0.0",
-  "description": "An OpenAI chatbot interface",
+  "description": "OpenChat - Next Generation AI Chatbot Interface",
+  "packageManager": "pnpm@9.0.0+",
   "scripts": {
     "dev": "concurrently \"pnpm run dev:client\" \"pnpm run dev:server\"",
     "dev:client": "cd client && pnpm run dev",
     "dev:server": "cd server && pnpm run start:dev",
+    "gen:swagger-typescript-api": "ts-node scripts/gen-swagger-typescript-api.ts",
     "build": "ts-node scripts/build.ts",
     "build:client": "cd client && pnpm run build",
     "build:server": "cd server && go build",
@@ -26,6 +28,7 @@
     "concurrently": "^8.2.2",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
+    "swagger-typescript-api": "^13.0.23",
     "ts-node": "^10.9.1",
     "typescript": "^5.7.3"
   },

@@ -37,14 +37,14 @@ let buildCommands: string[];
 
 if (platform === 'win32') {
   buildCommands = [
-    'cd server',
+    'cd ../server',
     'set GOOS=linux GOARCH=amd64 && go build -o dist\\OpenChat_linux_amd64',
     'set GOOS=darwin GOARCH=amd64 && go build -o dist\\OpenChat_darwin_amd64',
     'set GOOS=windows GOARCH=amd64 && go build -o dist\\OpenChat_windows_amd64.exe'
   ];
 } else {
   buildCommands = [
-    'cd server',
+    'cd ../server',
     'GOOS=linux GOARCH=amd64 go build -o dist/OpenChat_linux_amd64',
     'GOOS=darwin GOARCH=amd64 go build -o dist/OpenChat_darwin_amd64',
     'GOOS=windows GOARCH=amd64 go build -o dist/OpenChat_windows_amd64.exe'
