@@ -1,0 +1,17 @@
+{
+  "include": ["scripts/**/*.ts"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "composite": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"]
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "NodeNext"
+    },
+    "transpileOnly": true,
+    "files": true
+  }
+}

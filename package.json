@@ -6,9 +6,9 @@
     "dev": "concurrently \"pnpm run dev:client\" \"pnpm run dev:server\"",
     "dev:client": "cd client && pnpm run dev",
     "dev:server": "cd server && pnpm run start:dev",
-    "build": "ts-node build.ts",
+    "build": "ts-node scripts/build.ts",
     "build:client": "cd client && pnpm run build",
-    "build:server": "cd server && pnpm run build",
+    "build:server": "cd server && go build",
     "start": "node dist/server/main.js"
   },
   "keywords": [
@@ -17,11 +17,12 @@
     "vue",
     "vite",
     "node",
-    "nest.js"
+    "go"
   ],
   "author": "HJH201314",
   "license": "GPL-3.0",
   "devDependencies": {
+    "@types/node": "^22.13.4",
     "concurrently": "^8.2.2",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
@@ -29,6 +30,6 @@
     "typescript": "^5.7.3"
   },
   "requirements": {
-    "node": ">=16.7.0"
+    "node": ">=20.0.0"
   }
 }
