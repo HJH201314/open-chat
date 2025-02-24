@@ -64,7 +64,7 @@ function handleClick() {
   <div class="dili-button" @click="handleClick">
     <button ref="buttonRef" :style="buttonStyle" :class="{'disabled': props.disabled}">
       <slot></slot>
-      <span class="button-text" v-if="props.text">{{ props.text }}</span>
+      <span v-if="props.text" class="button-text">{{ props.text }}</span>
     </button>
     <div class="mask" :class="{'disabled': props.disabled}">
 

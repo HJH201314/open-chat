@@ -29,7 +29,7 @@ function handleInput(e: any) {
 </script>
 
 <template>
-  <input class="cus-input" :value="v" :placeholder="props.placeholder" :disabled="props.disabled" @input="handleInput" v-bind="props.inputAttrs" />
+  <input class="cus-input" :value="v" :placeholder="props.placeholder" :disabled="props.disabled" v-bind="props.inputAttrs" @input="handleInput" />
 </template>
 
 <style scoped lang="scss">

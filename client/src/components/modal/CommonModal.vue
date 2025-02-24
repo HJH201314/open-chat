@@ -107,7 +107,7 @@ defineExpose<CommonModalFunc>({
           <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
           <div class="modal-body-content">
             <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
-            <slot :close="close" :isShown="showModal"></slot>
+            <slot :close="close" :is-shown="showModal"></slot>
           </div>
         </div>
       </div>

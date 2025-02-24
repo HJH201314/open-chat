@@ -5,7 +5,7 @@ import globals from 'globals';
 import typescriptEslint from 'typescript-eslint';
 
 export default typescriptEslint.config(
-  { ignores: ['*.d.ts', '**/coverage', '**/dist', '**/gen'] },
+  { ignores: ['*.d.ts', '**/coverage', '**/dist'] },
   {
     extends: [
       eslint.configs.recommended,
@@ -25,7 +25,10 @@ export default typescriptEslint.config(
       },
     },
     rules: {
-      // your rules
+      // 允许 any
+      "@typescript-eslint/no-explicit-any": "off",
+      // 明确指定导入 type
+      "@typescript-eslint/consistent-type-imports": "error",
     },
   },
   eslintConfigPrettier

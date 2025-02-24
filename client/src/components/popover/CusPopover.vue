@@ -85,12 +85,12 @@ function hide(e?: MouseEvent) {
 </script>
 
 <template>
-  <div class="popover" @mouseenter="show" @mouseleave="hide" ref="refContainer">
-    <span class="popover-wrapper" ref="refTrigger">
+  <div ref="refContainer" class="popover" @mouseenter="show" @mouseleave="hide">
+    <span ref="refTrigger" class="popover-wrapper">
       <slot name="body" />
     </span>
     <Transition>
-      <div v-show="showPopover || props.alwaysShow" class="popover-slot" ref="refPopover" role="tooltip" @mouseleave="hide">
+      <div v-show="showPopover || props.alwaysShow" ref="refPopover" class="popover-slot" role="tooltip" @mouseleave="hide">
         <slot name="popover" />
       </div>
     </Transition>

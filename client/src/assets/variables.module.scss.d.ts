@@ -1,4 +1,4 @@
-import globalClassNames from '../style.d'
+import type globalClassNames from '../style.d'
 declare const classNames: typeof globalClassNames & {
   readonly colorWhite: 'colorWhite'
   readonly colorGrey: 'colorGrey'

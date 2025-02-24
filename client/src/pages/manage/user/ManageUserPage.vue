@@ -1,22 +1,22 @@
 <script setup lang="ts">
 
-import UserItemCard from "@/pages/manage/user/components/UserItemCard.vue";
-import DiliButton from "@/components/button/DiliButton.vue";
+import UserItemCard from '@/pages/manage/user/components/UserItemCard.vue';
+import DiliButton from '@/components/button/DiliButton.vue';
 
-import { Left, Minus, Plus, Right } from "@icon-park/vue-next";
-import { onMounted, reactive, ref } from "vue";
-import api from "@/api";
-import ToastManager from "@/components/toast/ToastManager";
-import CusInput from "@/components/input/CusInput.vue";
-import CommonDialog from "@/components/dialog/CommonDialog.vue";
-import type { CommonDialogExpose } from "@/components/dialog/CommonDialog";
-import { DialogManager } from "@/components/dialog";
+import { Left, Minus, Plus, Right } from '@icon-park/vue-next';
+import { onMounted, reactive, ref } from 'vue';
+import api from '@/api';
+import ToastManager from '@/components/toast/ToastManager';
+import CusInput from '@/components/input/CusInput.vue';
+import CommonDialog from '@/components/dialog/CommonDialog.vue';
+import type { CommonDialogExpose } from '@/components/dialog/CommonDialog';
+import { DialogManager } from '@/components/dialog';
 
 onMounted(() => {
-  console.log('hello')
+  console.log('hello');
   Promise.all([
-    getUsers()
-  ])
+    getUsers(),
+  ]);
 });
 
 const form = reactive({
@@ -68,7 +68,7 @@ function handleAdd() {
 }
 
 async function handleAddConfirm(close: CommonDialogExpose['close']) {
-  console.log(editForm)
+  console.log(editForm);
   if (!editForm.username || !editForm.password) {
     ToastManager.info('请输入信息');
     return;
@@ -93,7 +93,7 @@ async function handleAddConfirm(close: CommonDialogExpose['close']) {
 }
 
 function handleEdit(user: API.UserVO) {
-  console.log(user)
+  console.log(user);
   dialogRef.value?.show();
   editUsername.value = user.username!;
   editForm.username = user.username ?? '';
@@ -125,7 +125,7 @@ async function handleDelete(user: API.UserVO) {
   const dialogRes = await DialogManager.commonDialog({
     title: '删除用户',
     content: `确定要删除用户 ${user.username} 吗？`,
-  })
+  });
   if (!dialogRes) return;
   try {
     const res = await api.manage.deleteUser(user.id!);
@@ -150,9 +150,12 @@ function handlePermissionChange(delta: number) {
 
 function getPermissionName(permissionId: number) {
   switch (permissionId) {
-    case 0: return '访客';
-    case 1: return '用户';
-    case 2: return '管理员';
+    case 0:
+      return '访客';
+    case 1:
+      return '用户';
+    case 2:
+      return '管理员';
   }
 }
 </script>
@@ -164,36 +167,42 @@ function getPermissionName(permissionId: number) {
       <div class="page-control">
         <DiliButton text="New" type="primary" @click="handleAdd"></DiliButton>
         <DiliButton @click="handlePageChange(-1)">
-          <Left size="1rem" />
+          <Left size="1rem"/>
         </DiliButton>
         <span>{{ (form.pageNum - 1) * 10 + 1 }}-{{ (form.pageNum - 1) * 10 + users.length }}</span>
         <DiliButton @click="handlePageChange(1)">
-          <Right />
+          <Right/>
         </DiliButton>
       </div>
     </section>
     <section class="user-list">
-      <UserItemCard class="user-list-item" v-for="user in users" :key="user[0]"
-                    :id="user[0]" :username="user[1]" :password="user[2]" :permission="user[3]"
-                    @edit="(u) => handleEdit(u)" @delete="(u) => handleDelete(u)" />
+      <UserItemCard
+          v-for="user in users" :id="user[0]" :key="user[0]"
+          class="user-list-item" :username="user[1]" :password="user[2]" :permission="user[3]"
+          @edit="(u) => handleEdit(u)" @delete="(u) => handleDelete(u)"/>
     </section>
-    <CommonDialog ref="dialogRef" title="修改用户" :modal-style="{'width': '25rem'}"
-                  :on-confirm="(c) => editUsername ? handleEditConfirm(c) : handleAddConfirm(c)">
+    <CommonDialog
+        ref="dialogRef" title="修改用户" :modal-style="{'width': '25rem'}"
+        :on-confirm="(c) => editUsername ? handleEditConfirm(c) : handleAddConfirm(c)">
       <div class="input-container">
         <div class="input-item">
           <span class="input-item__label">用户名</span>
-          <CusInput class="input-item__input" placeholder="请输入用户名" v-model="editForm.username" />
+          <CusInput v-model="editForm.username" class="input-item__input" placeholder="请输入用户名"/>
         </div>
         <div class="input-item">
           <span class="input-item__label">新密码</span>
-          <CusInput class="input-item__input" placeholder="请输入新密码" v-model="editForm.password" />
+          <CusInput v-model="editForm.password" class="input-item__input" placeholder="请输入新密码"/>
         </div>
         <div class="input-item">
           <span class="input-item__label">权限</span>
           <div class="input-item__input">
-            <dili-button @click="handlePermissionChange(-1)"><minus /></dili-button>
+            <dili-button @click="handlePermissionChange(-1)">
+              <minus/>
+            </dili-button>
             <span>{{ editForm.permission }} ({{ getPermissionName(editForm.permission) }})</span>
-            <dili-button @click="handlePermissionChange(1)"><plus /></dili-button>
+            <dili-button @click="handlePermissionChange(1)">
+              <plus/>
+            </dili-button>
           </div>
         </div>
       </div>
@@ -250,6 +259,7 @@ function getPermissionName(permissionId: number) {
   flex-direction: column;
   gap: .5rem;
 }
+
 .input-item {
   display: flex;
   align-items: center;
@@ -258,6 +268,7 @@ function getPermissionName(permissionId: number) {
   &__label {
     flex: 2;
   }
+
   &__input {
     flex: 7;
     display: flex;

@@ -6,7 +6,7 @@
   <div class="panel">
     <RouterView v-slot="{ Component }">
       <Transition name="slide-fade">
-        <component class="child-view" :is="Component" />
+        <component :is="Component" class="child-view" />
       </Transition>
     </RouterView>
   </div>

@@ -19,11 +19,11 @@ export default (app: App) => {
     updated: shake,
   });
 
-  app.component('font-awesome-icon', FontAwesomeIcon);
-  app.component('setting-two', SettingTwo);
-  app.component('message', Message);
-  app.component('menu-unfold', MenuUnfold);
-  app.component('menu-fold', MenuFold);
-  app.component('star', Star);
-  app.component('user', User);
+  app.component('FontAwesomeIcon', FontAwesomeIcon);
+  app.component('SettingTwo', SettingTwo);
+  app.component('Message', Message);
+  app.component('MenuUnfold', MenuUnfold);
+  app.component('MenuFold', MenuFold);
+  app.component('Star', Star);
+  app.component('User', User);
 };

@@ -54,7 +54,7 @@ const getTargetPath = (
   target: DropdownOption,
   path: DropdownOption[] = []
 ): DropdownOption[] | null => {
-  for (let option of options) {
+  for (const option of options) {
     // 包含当前 level 的 value
     const currentPath = path.concat(option);
     // 如果找到了目标，返回当前路径
@@ -137,7 +137,7 @@ function selectOption(value: string, option: DropdownOption, valuePath: string[]
         :_value-path="[]"
         :is-open="isOpen"
         :options="options"
-        :parentBounding="toggleBounding"
+        :parent-bounding="toggleBounding"
         :position="position"
         :selected-value="selectedValue"
         @select="selectOption"

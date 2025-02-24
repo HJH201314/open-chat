@@ -17,7 +17,7 @@
       :_value-path="[..._valuePath, option.value]"
       :is-open="isSubMenuOpen"
       :options="option.children"
-      :parentBounding="bounding"
+      :parent-bounding="bounding"
       :position="getChildrenPos(option)"
       :selected-value="selectedValue"
       @select="(v, o, arr) => $emit('select', v, o, arr)"

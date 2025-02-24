@@ -84,12 +84,12 @@ function hide(e?: MouseEvent) {
 </script>
 
 <template>
-  <div class="tooltip" @mouseenter="show" @mouseleave="hide" ref="refTooltip">
-    <span class="tooltip-wrapper" ref="refTrigger">
+  <div ref="refTooltip" class="tooltip" @mouseenter="show" @mouseleave="hide">
+    <span ref="refTrigger" class="tooltip-wrapper">
       <slot />
     </span>
     <Transition>
-      <div v-if="showTip" :class="{'tooltip-info': text, 'tooltip-slot': !text}" @mouseleave="hide" ref="refPopover" role="tooltip">
+      <div v-if="showTip" ref="refPopover" :class="{'tooltip-info': text, 'tooltip-slot': !text}" role="tooltip" @mouseleave="hide">
         <span v-if="text" class="tooltip-info-text">{{ props.text }}</span>
         <div v-else><slot name="tip" /></div>
       </div>

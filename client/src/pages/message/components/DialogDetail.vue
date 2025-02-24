@@ -43,7 +43,7 @@ const messageList = ref([] as MsgInfo[]);
 const form = reactive({
   sessionId: ref(''),
   withContext: ref(false),
-  providerModel: ref<[string, string]>(['DeepSeek', 'deepseek-chat']),
+  providerModel: ref<[string, string]>(['DeepSeek', 'deepseek-v3-241226']),
   inputValue: ref(''),
   outputValue: ref(''),
 });
@@ -66,7 +66,7 @@ onMounted(() => {
         dialogInfo.value = dataStore.getDialogInfo(v);
         form.sessionId = v;
         form.withContext = dialogInfo.value.withContext ?? false;
-        form.providerModel = [dialogInfo.value.provider ?? 'DeepSeek', dialogInfo.value.model ?? 'deepseek-chat'];
+        form.providerModel = [dialogInfo.value.provider ?? 'DeepSeek', dialogInfo.value.model ?? 'deepseek-v3-241226'];
         messageList.value = dataStore.getMessageList(v);
         // 等待到 panelHeight 被成功计算、插入占位高度并 nextTick 渲染完成后
         await until(panelHeight).toMatch((v) => v > 0);
@@ -295,7 +295,7 @@ function startVoiceRecording() {
         // 录制结束时触发该事件
         mediaRecorder.onstop = function () {
           // 将音频数据合并成一个Blob对象
-          let blob = new Blob(chunks, { type: 'audio/wav' });
+          const blob = new Blob(chunks, { type: 'audio/wav' });
 
           // 将音频转换为base64
           const reader = new FileReader();
@@ -461,8 +461,8 @@ const { isSmallScreen } = useGlobal();
                 value: 'DeepSeek',
                 label: 'DeepSeek',
                 children: [
-                  { value: 'deepseek-chat', label: 'Chat (V3)' },
-                  { value: 'deepseek-reasoner', label: 'R1' },
+                  { value: 'deepseek-v3-241226', label: 'Chat (V3)' },
+                  { value: 'deepseek-r1-250120', label: 'R1' },
                 ],
               },
             ]"

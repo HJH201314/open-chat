@@ -59,7 +59,7 @@ const wrapperColor = computed(() => {
 
 <template>
   <Teleport to="body">
-    <div :class="toastClass" ref="myself" @click="$emit('click')">
+    <div ref="myself" :class="toastClass" @click="$emit('click')">
       <div class="toast-wrapper">
         <span v-if="text" class="toast-text">{{ props.text }}</span>
         <slot v-if="$slots.default"></slot>

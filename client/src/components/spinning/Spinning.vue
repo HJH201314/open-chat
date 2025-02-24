@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<SpinningProps>(), {
 </script>
 
 <template>
-  <div class="damping-circle" v-show="show"></div>
+  <div v-show="show" class="damping-circle"></div>
 </template>
 
 <style scoped lang="scss">
