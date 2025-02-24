@@ -148,8 +148,8 @@ const roleSelectorOptions = computed(() =>
                     value: 'DeepSeek',
                     label: 'DeepSeek',
                     children: [
-                      { value: 'deepseek-chat', label: 'Chat-V3' },
-                      { value: 'deepseek-reasoner', label: 'R1' },
+                      { value: 'deepseek-v3-241226', label: 'Chat-V3' },
+                      { value: 'deepseek-r1-250120', label: 'R1' },
                     ],
                     childrenMenuOption: { position: isLargeScreen ? 'right' : 'left' },
                   },

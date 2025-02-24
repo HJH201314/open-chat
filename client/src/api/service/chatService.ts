@@ -14,6 +14,12 @@ export const deleteSession = (sessionId: string) =>
     method: 'POST',
   });
 
+/**
+ * 流式输出聊天
+ * @param options
+ * @param signal
+ * @param onMessage
+ */
 export const completionStream = async (
   options: API.ChatCompletionOption,
   signal: AbortSignal,
@@ -34,6 +40,7 @@ export const completionStream = async (
       question: msg,
     }),
     signal: signal,
+    openWhenHidden: true,
     async onopen(response) {
       if (response.ok && response.headers.get('Content-Type') === EventStreamContentType) {
         successHandler(response);
