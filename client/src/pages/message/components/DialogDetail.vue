@@ -40,12 +40,15 @@ const settingStore = useSettingStore();
 const dialogInfo = ref<DialogInfo>({} as DialogInfo);
 const messageList = ref([] as MsgInfo[]);
 
+const messageOutput = ref('');
+const thinkingOutput = ref('');
 const form = reactive({
   sessionId: ref(''),
   withContext: ref(false),
   providerModel: ref<[string, string]>(['DeepSeek', 'deepseek-v3-241226']),
   inputValue: ref(''),
-  outputValue: ref(''),
+  outputMessage: messageOutput,
+  outputThinking: thinkingOutput,
 });
 
 function scrollToBottom() {
@@ -145,11 +148,9 @@ async function handleSendMessage() {
       onSaveUserMsg() {
         messageList.value = dataStore.getMessageList(form.sessionId);
       },
-      onMessage(msg: string, fullMsg: string) {
-        form.outputValue = fullMsg;
-      },
       onFinish() {
-        form.outputValue = '';
+        form.outputMessage = '';
+        thinkingOutput.value = '';
         messageList.value = dataStore.getMessageList(form.sessionId);
         console.log(messageList.value);
         if (messageList.value.length < 3 && messageList.value[0] && !dataStore.getDialogInfo(form.sessionId).title) {
@@ -157,12 +158,15 @@ async function handleSendMessage() {
         }
         scrollToBottom();
       },
+    }, {
+      thinkRef: thinkingOutput,
+      msgRef: messageOutput,
     });
     nextTick(() => {
       scrollToBottom();
     });
   } catch (e) {
-    form.outputValue = '[ERROR]';
+    form.outputMessage = '[ERROR]';
   }
 }
 
@@ -413,7 +417,7 @@ const { isSmallScreen } = useGlobal();
       <!-- 输入面板占位 -->
       <div :style="{ minHeight: `${panelHeight}px` }" class="panel-placeholder"></div>
       <!--   消息列表   -->
-      <DialogMessage v-if="form.outputValue" id="bot-typing-box" :html-message="form.outputValue" role="bot" />
+      <DialogMessage v-if="form.outputMessage || form.outputThinking" id="bot-typing-box" :thinking="form.outputThinking" :html-message="form.outputMessage" role="bot" />
       <DialogMessage
         v-if="form.inputValue"
         id="user-typing-box"
@@ -427,6 +431,7 @@ const { isSmallScreen } = useGlobal();
         :key="item.id || item.time"
         :html-message="item.htmlContent"
         :message="item.content"
+        :thinking="item.reasoningContent"
         :role="item.sender"
         :time="item.time"
       />

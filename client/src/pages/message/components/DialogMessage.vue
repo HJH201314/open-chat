@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import useGlobal from '@/commands/useGlobal';
 import useMarkdownIt from '@/commands/useMarkdownIt';
-import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import { computed } from 'vue';
 
 type DialogMessageProps = {
   message?: string;
   htmlMessage?: string;
+  thinking?: string;
   role: 'user' | 'bot';
   time?: string;
   markdownRender?: boolean;
@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<DialogMessageProps>(), {
   role: 'user',
   message: '',
   htmlMessage: '',
+  thinking: '',
   time: new Date().toLocaleString(),
   markdownRender: true,
 });
@@ -70,6 +71,9 @@ const { isLargeScreen } = useGlobal();
     <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
       <span v-if="isLargeScreen" class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
+        <div v-if="thinking" class="dialog-message-content-think">
+          {{ thinking }}
+        </div>
         <div class="dialog-message-content-body" v-html="renderMessage" />
       </div>
     </div>
@@ -128,7 +132,7 @@ const { isLargeScreen } = useGlobal();
   }
 
   &-content {
-    padding: 0.25rem 0.5rem;
+    padding: 0.25em 0.5em;
     user-select: text;
     white-space: pre-wrap;
     word-break: break-word;
@@ -153,6 +157,13 @@ const { isLargeScreen } = useGlobal();
       line-height: 1.5;
       -ms-text-size-adjust: 100%;
       -webkit-text-size-adjust: 100%;
+    }
+
+    &-think {
+      border-radius: 8px;
+      padding: 0.25em 0.5em;
+      margin: 0.25em 0;
+      background-color: $color-grey-300;
     }
   }
 

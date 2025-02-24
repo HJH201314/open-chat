@@ -5,7 +5,7 @@ import { type EventSourceMessage, EventStreamContentType, fetchEventSource } fro
 /* 创建对话，返回一个 session_id 作为对话的唯一标识 */
 export const createSession = () =>
   createRequest<API.CommonStringResponse>('/chat/session/new', {
-    method: 'GET',
+    method: 'POST',
   });
 
 /* 删除对话，成功返回 true */

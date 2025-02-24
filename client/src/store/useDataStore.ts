@@ -8,18 +8,22 @@ import { useCommandParser } from '@/utils/command-parser';
 import { recordToMap } from '@/utils/typeUtils';
 import { useLocalStorage, useStorage, watchArray } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, ref, type UnwrapNestedRefs } from 'vue';
+import { computed, reactive, type Ref, ref, type UnwrapNestedRefs, watch } from 'vue';
 
 interface MessageReceiver {
   // 用户输入保存后的回调
-  onSaveUserMsg: () => void;
+  onSaveUserMsg?: () => void;
   /**
    * 收到数据回调
-   * @param data 收到的数据
    * @param fullMessage 编译后的 html 完整数据
    */
-  onMessage: (data: string, fullMessage: string) => void;
-  onFinish: (fullMessage: string) => void;
+  onMessage?: (fullMessage: string) => void;
+  /**
+   * 收到思考数据回调
+   * @param fullMessage 当前完整思考数据
+   */
+  onThinkMessage?: (fullMessage: string) => void;
+  onFinish?: (fullMessage: string) => void;
 }
 
 /* 数据相关 */
@@ -33,7 +37,7 @@ export const useDataStore = defineStore('data', () => {
       dialogs: {},
       version: DIALOG_DATA_VERSION,
     },
-    localStorage
+    localStorage,
   );
 
   const dialogList = computed(() => {
@@ -55,7 +59,7 @@ export const useDataStore = defineStore('data', () => {
   async function addDialog(role?: number) {
     try {
       // 获取session_id
-      const { status, data } = await api.chat.createSession();
+      const {status, data} = await api.chat.createSession();
       const sessionId = data.data;
       console.log(data);
       if (status === 200 && data.data) {
@@ -74,7 +78,7 @@ export const useDataStore = defineStore('data', () => {
       }
       return sessionId;
     } catch (e) {
-      showToast({ text: '请求失败，请先登录~', type: 'danger', position: 'top-left' });
+      showToast({text: '请求失败，请先登录~', type: 'danger', position: 'top-left'});
     }
     return '';
   }
@@ -99,10 +103,10 @@ export const useDataStore = defineStore('data', () => {
       if (storageKey) {
         delete dialogData.value.dialogs![sessionId];
         localStorage.removeItem(storageKey);
-        showToast({ text: '删除成功√' });
+        showToast({text: '删除成功√'});
         resolve('删除成功');
       } else {
-        showToast({ text: '删除失败' });
+        showToast({text: '删除失败'});
         reject('删除失败');
       }
       // 远程删除
@@ -118,7 +122,7 @@ export const useDataStore = defineStore('data', () => {
       useLocalStorage<MsgData>(storageKey, {
         messages: [],
         version: 1,
-      })
+      }),
     ) as UnwrapNestedRefs<MsgData>;
   }
 
@@ -131,15 +135,28 @@ export const useDataStore = defineStore('data', () => {
     return messageStorage.value[storageKey].messages ?? [];
   }
 
-  const sendMessageText = async (sessionId: string, message: string, receiver?: MessageReceiver) => {
+  /**
+   * 发送文本信息
+   * @param sessionId 会话 ID
+   * @param message 发送的文本消息
+   * @param receiver 实现 MessageReceiver
+   * @param refs 传入 Ref，接收到消息时会更新
+   */
+  const sendMessageText = async (sessionId: string, message: string, receiver?: MessageReceiver, refs?: {
+    msgRef?: Ref<string>;
+    thinkRef?: Ref<string>;
+  }) => {
     if (message == '') return;
     const userMsgIndex = saveMessage(sessionId, message, 'user', 'text');
-    receiver?.onSaveUserMsg();
+    receiver?.onSaveUserMsg?.();
     const ctrl = new AbortController();
-    const rawMsg = ref('');
-    const { commands, commandMap } = useCommandParser(rawMsg);
-    const { result: renderedMsg } = useMarkdownIt(rawMsg);
-    const { withContext, provider, model: modelName } = getDialogInfo(sessionId);
+    const rawData = reactive({
+      msg: refs?.msgRef || '',
+      think: refs?.thinkRef || '',
+    });
+    const {commands, commandMap} = useCommandParser(() => rawData.msg);
+    const {result: renderedMsg} = useMarkdownIt(() => rawData.msg);
+    const {withContext, provider, model: modelName} = getDialogInfo(sessionId);
     let msgIds: [string | undefined, string | undefined] = [undefined, undefined];
 
     // 观测回答数据中的指令
@@ -148,13 +165,23 @@ export const useDataStore = defineStore('data', () => {
       if (titleCmd) {
         editDialogTitle(sessionId, titleCmd.values[0]);
         // console.log('findTitle', titleCmd, rawMsg.value);
-        rawMsg.value = rawMsg.value.replace(titleCmd.raw, '');
+        rawData.msg = rawData.msg.replace(titleCmd.raw, '');
       }
       const idCmd = commandMap.value['ID'];
       if (idCmd) {
         msgIds = [idCmd.values[0], idCmd.values[1]];
-        rawMsg.value = rawMsg.value.replace(idCmd.raw, '');
+        rawData.msg = rawData.msg.replace(idCmd.raw, '');
       }
+    });
+    // 观测回答的变化
+    watch(() => renderedMsg, (v, ov) => {
+      if (v == ov) return;
+      receiver?.onMessage?.(renderedMsg.value); // 消息接收回调
+    });
+    // 观测思考的变化
+    watch(() => rawData.think, (v, ov) => {
+      if (v == ov) return;
+      receiver?.onThinkMessage?.(rawData.think); // 消息接收回调
     });
     return await api.chat.completionStream(
       {
@@ -166,21 +193,25 @@ export const useDataStore = defineStore('data', () => {
       },
       ctrl.signal,
       (event) => {
-        if (event.data === '[DONE]') {
+        if (event.event === 'done') {
           // 当接收到服务器端的结束标记时，保存消息
-          saveMessage(sessionId, rawMsg.value, 'bot', 'text', renderedMsg.value, msgIds[1]); // 保存消息
-          updateMessage(sessionId, userMsgIndex, { id: msgIds[0] });
-          receiver?.onFinish(renderedMsg.value); // 消息接收完毕回调
-        } else {
-          let data = event.data;
+          saveMessage(sessionId, rawData.msg, 'bot', 'text', renderedMsg.value, rawData.think, msgIds[1]); // 保存消息
+          updateMessage(sessionId, userMsgIndex, {id: msgIds[0]});
+          receiver?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
+        } else if (event.event === 'msg') {
+          let data = JSON.parse(event.data)?.content;
           data = data.replaceAll('\\n', '\n');
-          console.log('[data]', event.data, `'${data}'`);
-          rawMsg.value += data; // 记录已接收的消息
-          receiver?.onMessage(data, renderedMsg.value); // 消息接收回调
+          console.log('[msg]', event.data, `'${data}'`);
+          rawData.msg += data; // 记录已接收的消息
+        } else if (event.event === 'think') {
+          let data = JSON.parse(event.data)?.content;
+          data = data.replaceAll('\\n', '\n');
+          console.log('[think]', event.data, `'${data}'`);
+          rawData.think += data;
         }
-      }
+      },
     );
-  }
+  };
 
   /**
    * 保存消息数据到本地，返回消息在本地的编号
@@ -191,7 +222,8 @@ export const useDataStore = defineStore('data', () => {
     sender: 'user' | 'bot',
     type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other',
     htmlMessage?: string,
-    remoteId?: string
+    thinking?: string,
+    remoteId?: string,
   ): number {
     try {
       const storageKey = `dialog-${sessionId}`;
@@ -201,6 +233,7 @@ export const useDataStore = defineStore('data', () => {
         sender,
         type,
         content: message,
+        reasoningContent: thinking,
         htmlContent: htmlMessage,
         id: remoteId,
       });

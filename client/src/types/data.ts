@@ -25,6 +25,7 @@ export type MsgInfo = {
   sender: 'user' | 'bot'; // 消息发送者
   type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other'; // 消息类型
   content: string; // 消息原始内容
+  reasoningContent?: string; // 思考消息原始内容
   htmlContent?: string; // 编译后的html 消息内容
 
   [key: string]: any;
