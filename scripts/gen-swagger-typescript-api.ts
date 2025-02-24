@@ -32,12 +32,13 @@ generateApi({
     moduleNameFirstTag: false,
     modular: true,
     generateUnionEnums: false,
-    typePrefix: "",
+    typePrefix: "Api",
     typeSuffix: "",
-    enumKeyPrefix: "",
+    enumKeyPrefix: "Enum",
     enumKeySuffix: "",
     addReadonly: false,
-    sortTypes: false,
+    sortTypes: true,
+    sortRoutes: true,
     extractingOptions: {
         requestBodySuffix: ["Payload", "Body", "Input"],
         requestParamsSuffix: ["Params"],
@@ -56,11 +57,3 @@ generateApi({
     fixInvalidEnumKeyPrefix: "Value",
 })
     .catch((e) => console.error(e));
-
-generateTemplates({
-    cleanOutput: false,
-    output: path.resolve(process.cwd(), "./client/src/api/template/"),
-    httpClientType: "axios",
-    modular: true,
-    silent: false,
-});
