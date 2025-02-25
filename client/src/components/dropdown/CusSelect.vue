@@ -2,7 +2,7 @@
 import DropdownMenu from '@/components/dropdown/DropdownMenu.vue';
 import type { CusSelectProps, DropdownMenuEmits, DropdownOption } from '@/components/dropdown/types';
 import { onClickOutside, useElementBounding } from '@vueuse/core';
-import { computed, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 
 const props = withDefaults(defineProps<CusSelectProps>(), {
   placeholder: '请选择',
@@ -25,10 +25,21 @@ watch(
   () => props.modelValue,
   (newVal) => {
     // v-model 更新时手动更新选中项
-    selectedValue.value = newVal;
-    selectedOption.value = findCurrentValueOption(props.options, newVal);
-  }
+    receiveModelValue(newVal);
+  },
 );
+watch(
+  () => props.options,
+  () => {
+    // 选项更新时重新更新选中项
+    receiveModelValue(props.modelValue);
+  },
+);
+
+const receiveModelValue = (newVal?: string) => {
+  selectedValue.value = newVal;
+  selectedOption.value = findCurrentValueOption(props.options, newVal);
+};
 
 const isOpen = ref(false);
 
@@ -52,7 +63,7 @@ const selectedLabel = computed(() => {
 const getTargetPath = (
   options: DropdownOption[],
   target: DropdownOption,
-  path: DropdownOption[] = []
+  path: DropdownOption[] = [],
 ): DropdownOption[] | null => {
   for (const option of options) {
     // 包含当前 level 的 value
@@ -95,14 +106,14 @@ function toggleDropdown() {
 // 点击 Dropdown 外部则关闭
 onClickOutside(
   useTemplateRef<HTMLElement>('root-menu'),
-  (event) => {
+  () => {
     // console.log('root-menu-click-outside', event.target);
     isOpen.value = false;
     currentShowingPath.value = [];
   },
   {
     ignore: [selfRef, toggleRef],
-  }
+  },
 );
 
 function selectOption(value: string, option: DropdownOption, valuePath: string[]) {

@@ -33,9 +33,9 @@ export const completionStream = async (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      provider,
       enable_context: withContext,
       system_prompt: systemPrompt,
+      provider_name: provider,
       model_name: modelName,
       question: msg,
     }),

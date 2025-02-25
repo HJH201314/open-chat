@@ -10,6 +10,8 @@ import CusToggle from '@/components/toggle/CusToggle.vue';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { computed, ref, toValue, watch } from 'vue';
+import { useModelStore } from '@/store/useModelStore.ts';
+import { addChildrenDropdownOptions } from '@/components/dropdown/utils.ts';
 
 const { isModal = false } = defineProps<{
   isModal?: boolean;
@@ -17,6 +19,7 @@ const { isModal = false } = defineProps<{
 
 const settingStore = useSettingStore();
 const roleStore = useRoleStore();
+const { providerDropdown } = useModelStore();
 // 解构赋值editingValue避免使用proxy，此处并不希望未点击保存前生效
 const editingValue = ref({ ...toValue(settingStore.settings) });
 
@@ -29,7 +32,7 @@ watch(
   () => settingStore.settings,
   () => {
     editingValue.value = { ...toValue(settingStore.settings) };
-  }
+  },
 );
 
 function handleSave() {
@@ -76,7 +79,7 @@ const roleSelectorOptions = computed(() =>
       value: v[0].toString(),
       label: v[1],
     };
-  })
+  }),
 );
 </script>
 
@@ -89,7 +92,7 @@ const roleSelectorOptions = computed(() =>
           <div class="setting-list-item">
             <span class="setting-list-item__title">API地址</span>
             <span class="setting-list-item__value">
-              <CusInput v-model="editingValue.host" placeholder="Cloud API" />
+              <CusInput v-model="editingValue.host" placeholder="Cloud API"/>
             </span>
           </div>
         </div>
@@ -100,14 +103,14 @@ const roleSelectorOptions = computed(() =>
               将对话数据缓存在本地，不进行联网查询
             </span>
             <span class="setting-list-item__value">
-              <CusToggle v-model="editingValue.localCache" />
+              <CusToggle v-model="editingValue.localCache"/>
             </span>
           </div>
           <div class="setting-list-item">
             <span class="setting-list-item__title"> Markdown 缓存结果渲染 </span>
             <span class="setting-list-item__subtitle"> 使用缓存结果渲染对话，提升长对话加载效率 </span>
             <span class="setting-list-item__value">
-              <CusToggle v-model="editingValue.markdownCache" />
+              <CusToggle v-model="editingValue.markdownCache"/>
             </span>
           </div>
         </div>
@@ -137,23 +140,9 @@ const roleSelectorOptions = computed(() =>
             <span class="setting-list-item__value">
               <CusSelect
                 v-model="editingValue.defaultProvider"
-                :options="[
-                  {
-                    value: 'OpenAI',
-                    label: 'OpenAI',
-                    children: [{ value: 'gpt-4o', label: 'ChatGPT' }],
-                    childrenMenuOption: { position: isLargeScreen ? 'right' : 'left' },
-                  },
-                  {
-                    value: 'DeepSeek',
-                    label: 'DeepSeek',
-                    children: [
-                      { value: 'deepseek-v3-241226', label: 'Chat-V3' },
-                      { value: 'deepseek-r1-250120', label: 'R1' },
-                    ],
-                    childrenMenuOption: { position: isLargeScreen ? 'right' : 'left' },
-                  },
-                ]"
+                :options="addChildrenDropdownOptions(providerDropdown, () => ({
+                  position: isLargeScreen ? 'right' : 'left'
+                }))"
                 :position="isLargeScreen ? 'bottom' : 'left'"
                 @select="(option, value, path) => (editingValue.defaultModel = [path[0], path[1]])"
               />
@@ -178,14 +167,14 @@ const roleSelectorOptions = computed(() =>
           <div class="setting-list-item">
             <span class="setting-list-item__title">启用角色功能</span>
             <span class="setting-list-item__value">
-              <CusToggle v-model="editingValue.roleEnabled" />
+              <CusToggle v-model="editingValue.roleEnabled"/>
             </span>
           </div>
           <div class="setting-list-item">
             <span class="setting-list-item__title">默认角色</span>
             <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
-              <CusToggle v-model="editingValue.roleRemember" />
-              <CusSelect v-model="editingValue.roleDefaultId" :options="roleSelectorOptions" />
+              <CusToggle v-model="editingValue.roleRemember"/>
+              <CusSelect v-model="editingValue.roleDefaultId" :options="roleSelectorOptions"/>
             </span>
           </div>
         </div>
@@ -193,7 +182,7 @@ const roleSelectorOptions = computed(() =>
           <div class="setting-list-item">
             <span class="setting-list-item__title">语音输入</span>
             <span class="setting-list-item__value">
-              <CusToggle v-model="editingValue.enableVoiceToText" />
+              <CusToggle v-model="editingValue.enableVoiceToText"/>
             </span>
           </div>
           <!--        <div class="setting-list-item">-->
@@ -205,13 +194,13 @@ const roleSelectorOptions = computed(() =>
           <div class="setting-list-item">
             <span class="setting-list-item__title">语音服务APPID</span>
             <span class="setting-list-item__value">
-              <CusInput v-model="editingValue.voiceCloudAppId" placeholder="APPID" />
+              <CusInput v-model="editingValue.voiceCloudAppId" placeholder="APPID"/>
             </span>
           </div>
           <div class="setting-list-item">
             <span class="setting-list-item__title">语音服务SECRET_ID</span>
             <span class="setting-list-item__value">
-              <CusInput v-model="editingValue.voiceCloudSecretId" placeholder="SECRET_ID" />
+              <CusInput v-model="editingValue.voiceCloudSecretId" placeholder="SECRET_ID"/>
             </span>
           </div>
           <div class="setting-list-item">
@@ -248,8 +237,8 @@ const roleSelectorOptions = computed(() =>
             type="primary"
             @click="handleSave"
           />
-          <DiliButton v-if="isModal" shadow text="关闭" type="normal" @click="$emit('cancel')" />
-          <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset" />
+          <DiliButton v-if="isModal" shadow text="关闭" type="normal" @click="$emit('cancel')"/>
+          <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset"/>
         </div>
       </div>
     </div>
@@ -343,6 +332,7 @@ const roleSelectorOptions = computed(() =>
 
     &__title {
       grid-area: title;
+
       .large & {
         font-weight: bold;
       }

@@ -20,6 +20,7 @@ import type { DialogInfo, MsgInfo } from '@/types/data';
 import { Acoustic, ArrowUp, Back, CollapseTextInput, Delete, Edit, Voice } from '@icon-park/vue-next';
 import { until, useDevicesList, useElementSize, useFocusWithin, useMousePressed, useUserMedia } from '@vueuse/core';
 import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { useModelStore } from '@/store/useModelStore.ts';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -36,6 +37,7 @@ const emit = defineEmits<{
 const dataStore = useDataStore();
 const userStore = useUserStore();
 const settingStore = useSettingStore();
+const { providerDropdown } = useModelStore();
 
 const dialogInfo = ref<DialogInfo>({} as DialogInfo);
 const messageList = ref([] as MsgInfo[]);
@@ -80,7 +82,7 @@ onMounted(() => {
         });
       }
     },
-    { immediate: true }
+    { immediate: true },
   );
 });
 
@@ -90,7 +92,7 @@ watch(
     if (newVal !== oldVal) {
       dataStore.toggleDialogContext(form.sessionId, newVal);
     }
-  }
+  },
 );
 
 watch(
@@ -99,7 +101,7 @@ watch(
     if (newVal !== oldVal) {
       dataStore.changeDialogModel(form.sessionId, newVal[0], newVal[1]);
     }
-  }
+  },
 );
 
 const smallInput = ref(false);
@@ -179,7 +181,7 @@ function handleEditDialog() {
     {
       placeholder: '新对话名称',
       value: dialogInfo.value.title,
-    }
+    },
   ).then((res) => {
     if (res.status && res.value) {
       // 确认修改
@@ -249,7 +251,7 @@ watch(
       audioTimeout.value = 60;
       stopVoiceRecording();
     }
-  }
+  },
 );
 
 function startVoiceRecording() {
@@ -394,7 +396,7 @@ const { isSmallScreen } = useGlobal();
     <div class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton style="flex-shrink: 0" @click="$emit('back')">
-          <Back size="16" />
+          <Back size="16"/>
         </IconButton>
         <span class="dialog-detail-actions-title">
           {{ dialogInfo.title || '未命名对话' }}
@@ -402,13 +404,13 @@ const { isSmallScreen } = useGlobal();
         <span class="dialog-detail-actions-subtitle"> {{ messageList.length }} 条消息 </span>
       </div>
       <IconButton style="flex-shrink: 0" @click="handleEditDialog">
-        <Edit size="16" />
+        <Edit size="16"/>
       </IconButton>
       <!--      <IconButton>-->
       <!--        <Share size="16" />-->
       <!--      </IconButton>-->
       <IconButton style="flex-shrink: 0" @click="handleDeleteDialog">
-        <Delete size="16" />
+        <Delete size="16"/>
       </IconButton>
     </div>
     <div ref="dialog-list" class="dialog-detail-dialogs">
@@ -417,7 +419,9 @@ const { isSmallScreen } = useGlobal();
       <!-- 输入面板占位 -->
       <div :style="{ minHeight: `${panelHeight}px` }" class="panel-placeholder"></div>
       <!--   消息列表   -->
-      <DialogMessage v-if="form.outputMessage || form.outputThinking" id="bot-typing-box" :thinking="form.outputThinking" :html-message="form.outputMessage" role="bot" />
+      <DialogMessage
+        v-if="form.outputMessage || form.outputThinking" id="bot-typing-box"
+        :thinking="form.outputThinking" :html-message="form.outputMessage" role="bot"/>
       <DialogMessage
         v-if="form.inputValue"
         id="user-typing-box"
@@ -449,28 +453,18 @@ const { isSmallScreen } = useGlobal();
         <div v-show="!smallInput" class="dialog-detail-inputs-bar">
           <DiliButton v-if="settingStore.settings.enableVoiceToText" type="text" @click="handleVoicePanelToggle">
             <div v-if="!voicePanel" style="display: contents">
-              <Voice size="20" />
+              <Voice size="20"/>
               语音面板
             </div>
             <div v-else style="display: contents">
-              <Acoustic size="20" />
+              <Acoustic size="20"/>
               收起面板
             </div>
           </DiliButton>
           <CusSelect
             v-model="form.providerModel[1]"
             :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
-            :options="[
-              { value: 'OpenAI', label: 'OpenAI', children: [{ value: 'gpt-4o', label: 'ChatGPT' }] },
-              {
-                value: 'DeepSeek',
-                label: 'DeepSeek',
-                children: [
-                  { value: 'deepseek-v3-241226', label: 'Chat (V3)' },
-                  { value: 'deepseek-r1-250120', label: 'R1' },
-                ],
-              },
-            ]"
+            :options="providerDropdown"
             :toggle-style="{ opacity: 0.75 }"
             position="top"
             style="font-size: 0.75rem"
@@ -483,7 +477,7 @@ const { isSmallScreen } = useGlobal();
             style="font-size: 0.75rem; opacity: 0.75"
           ></CusToggle>
           <div class="dialog-detail-inputs-bar-expand" @click="smallInput = !smallInput">
-            <CollapseTextInput size="16" />
+            <CollapseTextInput size="16"/>
           </div>
         </div>
       </Transition>
@@ -496,7 +490,7 @@ const { isSmallScreen } = useGlobal();
         @keydown="(e) => handleInputKeydown(e)"
       />
       <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
-        <ArrowUp fill="white" size="16" />
+        <ArrowUp fill="white" size="16"/>
       </div>
     </div>
     <!-- 语音面板 -->
@@ -510,8 +504,8 @@ const { isSmallScreen } = useGlobal();
           }"
           class="audio-input-status"
         >
-          <Spinning v-if="audioHandling" :color="variables.colorWarning" />
-          <div v-else class="signal" />
+          <Spinning v-if="audioHandling" :color="variables.colorWarning"/>
+          <div v-else class="signal"/>
           {{
             mediaStream
               ? `录制中 ${audioTimeout}s`
@@ -524,8 +518,8 @@ const { isSmallScreen } = useGlobal();
         </div>
         <div ref="audioButtonRef" class="audio-input-speak" @touchend="stopVoiceRecording">
           <CusCircularProgress :bar-style="{ opacity: '0.25' }" :value="(audioTimeout * 100) / 60">
-            <Voice v-if="!mediaStream" fill="white" size="2rem" />
-            <Acoustic v-else fill="white" size="2rem" />
+            <Voice v-if="!mediaStream" fill="white" size="2rem"/>
+            <Acoustic v-else fill="white" size="2rem"/>
           </CusCircularProgress>
         </div>
       </section>
