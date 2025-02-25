@@ -8,22 +8,22 @@ import { useCommandParser } from '@/utils/command-parser';
 import { recordToMap } from '@/utils/typeUtils';
 import { useLocalStorage, useStorage, watchArray } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, type Ref, ref, type UnwrapNestedRefs, watch } from 'vue';
+import { computed, reactive, ref, shallowRef, type UnwrapNestedRefs, watch } from 'vue';
 
-interface MessageReceiver {
+interface MessageCallback {
   // 用户输入保存后的回调
   onSaveUserMsg?: () => void;
   /**
    * 收到数据回调
-   * @param fullMessage 编译后的 html 完整数据
+   * @param renderedMsg 编译后的 html 完整数据
    */
-  onMessage?: (fullMessage: string) => void;
+  onMessage?: (renderedMsg: string) => void;
   /**
    * 收到思考数据回调
-   * @param fullMessage 当前完整思考数据
+   * @param thinkMsg 当前完整思考数据
    */
-  onThinkMessage?: (fullMessage: string) => void;
-  onFinish?: (fullMessage: string) => void;
+  onThinkMessage?: (thinkMsg: string) => void;
+  onFinish?: (renderedMsg: string) => void;
 }
 
 /* 数据相关 */
@@ -59,7 +59,7 @@ export const useDataStore = defineStore('data', () => {
   async function addDialog(role?: number) {
     try {
       // 获取session_id
-      const {status, data} = await api.chat.createSession();
+      const { status, data } = await api.chat.createSession();
       const sessionId = data.data;
       console.log(data);
       if (status === 200 && data.data) {
@@ -78,7 +78,7 @@ export const useDataStore = defineStore('data', () => {
       }
       return sessionId;
     } catch (e) {
-      showToast({text: '请求失败，请先登录~', type: 'danger', position: 'top-left'});
+      showToast({ text: '请求失败，请先登录~', type: 'danger', position: 'top-left' });
     }
     return '';
   }
@@ -103,10 +103,10 @@ export const useDataStore = defineStore('data', () => {
       if (storageKey) {
         delete dialogData.value.dialogs![sessionId];
         localStorage.removeItem(storageKey);
-        showToast({text: '删除成功√'});
+        showToast({ text: '删除成功√' });
         resolve('删除成功');
       } else {
-        showToast({text: '删除失败'});
+        showToast({ text: '删除失败' });
         reject('删除失败');
       }
       // 远程删除
@@ -139,24 +139,21 @@ export const useDataStore = defineStore('data', () => {
    * 发送文本信息
    * @param sessionId 会话 ID
    * @param message 发送的文本消息
-   * @param receiver 实现 MessageReceiver
-   * @param refs 传入 Ref，接收到消息时会更新
+   * @param  callback 回调
+   * @param abort AbortController
    */
-  const sendMessageText = async (sessionId: string, message: string, receiver?: MessageReceiver, refs?: {
-    msgRef?: Ref<string>;
-    thinkRef?: Ref<string>;
-  }) => {
+  const sendMessageText = async (sessionId: string, message: string, callback?: MessageCallback, abort?: AbortController) => {
     if (message == '') return;
     const userMsgIndex = saveMessage(sessionId, message, 'user', 'text');
-    receiver?.onSaveUserMsg?.();
-    const ctrl = new AbortController();
+    callback?.onSaveUserMsg?.();
+    const ctrl = abort || new AbortController();
     const rawData = reactive({
-      msg: refs?.msgRef || '',
-      think: refs?.thinkRef || '',
+      msg: '',
+      think: '',
     });
-    const {commands, commandMap} = useCommandParser(() => rawData.msg);
-    const {result: renderedMsg} = useMarkdownIt(() => rawData.msg);
-    const {withContext, provider, model: modelName} = getDialogInfo(sessionId);
+    const { commands, commandMap } = useCommandParser(() => rawData.msg);
+    const { result: renderedMsg } = useMarkdownIt(() => rawData.msg);
+    const { withContext, provider, model: modelName } = getDialogInfo(sessionId);
     let msgIds: [string | undefined, string | undefined] = [undefined, undefined];
 
     // 观测回答数据中的指令
@@ -174,14 +171,14 @@ export const useDataStore = defineStore('data', () => {
       }
     });
     // 观测回答的变化
-    watch(() => renderedMsg, (v, ov) => {
+    watch(() => renderedMsg.value, (v, ov) => {
       if (v == ov) return;
-      receiver?.onMessage?.(renderedMsg.value); // 消息接收回调
+      callback?.onMessage?.(v); // 消息接收回调
     });
     // 观测思考的变化
     watch(() => rawData.think, (v, ov) => {
       if (v == ov) return;
-      receiver?.onThinkMessage?.(rawData.think); // 消息接收回调
+      callback?.onThinkMessage?.(v); // 消息接收回调
     });
     return await api.chat.completionStream(
       {
@@ -196,8 +193,8 @@ export const useDataStore = defineStore('data', () => {
         if (event.event === 'done') {
           // 当接收到服务器端的结束标记时，保存消息
           saveMessage(sessionId, rawData.msg, 'bot', 'text', renderedMsg.value, rawData.think, msgIds[1]); // 保存消息
-          updateMessage(sessionId, userMsgIndex, {id: msgIds[0]});
-          receiver?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
+          updateMessage(sessionId, userMsgIndex, { id: msgIds[0] });
+          callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
         } else if (event.event === 'msg') {
           let data = JSON.parse(event.data)?.content;
           data = data.replaceAll('\\n', '\n');
@@ -211,6 +208,45 @@ export const useDataStore = defineStore('data', () => {
         }
       },
     );
+  };
+
+  const useSendMessageText = () => {
+    const thinkMessage = shallowRef('');
+    const answerMessage = shallowRef('');
+    const isStreaming = shallowRef(false);
+    let abortController = new AbortController();
+
+    const startStreaming = (sessionId: string, message: string, customReceiver?: MessageCallback) => {
+      isStreaming.value = true;
+      abortController = new AbortController();
+      sendMessageText(sessionId, message, {
+        ...customReceiver || {},
+        onMessage(msg) {
+          answerMessage.value = msg;
+          console.log('onMsg');
+          customReceiver?.onMessage?.(msg);
+        },
+        onThinkMessage(msg) {
+          thinkMessage.value = msg;
+          console.log('onThink');
+          customReceiver?.onThinkMessage?.(msg);
+        },
+      }, abortController).finally(() => {
+        isStreaming.value = false;
+      });
+    };
+
+    return {
+      isStreaming,
+      think: thinkMessage,
+      answer: answerMessage,
+      start: startStreaming,
+      stop: () => abortController.abort(),
+      clear: () => {
+        answerMessage.value = '';
+        thinkMessage.value = '';
+      },
+    };
   };
 
   /**
@@ -288,6 +324,7 @@ export const useDataStore = defineStore('data', () => {
     getMessageList,
     sendMessageText,
     searchDialog,
+    useSendMessageText,
   };
 });
 

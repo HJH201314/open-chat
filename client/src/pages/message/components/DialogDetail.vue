@@ -42,15 +42,11 @@ const { providerDropdown } = useModelStore();
 const dialogInfo = ref<DialogInfo>({} as DialogInfo);
 const messageList = ref([] as MsgInfo[]);
 
-const messageOutput = ref('');
-const thinkingOutput = ref('');
 const form = reactive({
   sessionId: ref(''),
   withContext: ref(false),
   providerModel: ref<[string, string]>(['DeepSeek', 'deepseek-v3-241226']),
   inputValue: ref(''),
-  outputMessage: messageOutput,
-  outputThinking: thinkingOutput,
 });
 
 function scrollToBottom() {
@@ -129,6 +125,14 @@ function handleInputKeydown(e: KeyboardEvent) {
   }
 }
 
+function handleSendClick() {
+  if (!isReceivingMsg.value) {
+    handleSendMessage();
+  } else {
+    stopReceivingMsg();
+  }
+}
+
 function handleModelSelect(selectPath: string[]) {
   if (selectPath.length == 2) {
     form.providerModel = [selectPath[0], selectPath[1]];
@@ -136,40 +140,44 @@ function handleModelSelect(selectPath: string[]) {
   focusTextArea();
 }
 
+const {
+  start: startReceivingMsg,
+  stop: stopReceivingMsg,
+  answer: answerMsg,
+  think: thinkMsg,
+  clear: clearReceivingMsg,
+  isStreaming: isReceivingMsg,
+} = dataStore.useSendMessageText();
+
 async function handleSendMessage() {
   if (!userStore.isLogin) {
     showToast({ text: '请先登录！', type: 'warning' });
     return;
   }
   if (!form.sessionId || !form.inputValue) return;
-  const inputValue = form.inputValue;
-  form.inputValue = '';
-  // 发送消息
-  try {
-    await dataStore.sendMessageText(form.sessionId, inputValue, {
-      onSaveUserMsg() {
-        messageList.value = dataStore.getMessageList(form.sessionId);
-      },
-      onFinish() {
-        form.outputMessage = '';
-        thinkingOutput.value = '';
-        messageList.value = dataStore.getMessageList(form.sessionId);
-        console.log(messageList.value);
-        if (messageList.value.length < 3 && messageList.value[0] && !dataStore.getDialogInfo(form.sessionId).title) {
-          dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
-        }
-        scrollToBottom();
-      },
-    }, {
-      thinkRef: thinkingOutput,
-      msgRef: messageOutput,
-    });
-    nextTick(() => {
-      scrollToBottom();
-    });
-  } catch (e) {
-    form.outputMessage = '[ERROR]';
+  if (isReceivingMsg.value) {
+    showToast({ text: '不能同时回答多个问题哦！', type: 'warning' });
+    return;
   }
+  // 发送消息
+  startReceivingMsg(form.sessionId, form.inputValue, {
+    onSaveUserMsg() {
+      form.inputValue = '';
+      messageList.value = dataStore.getMessageList(form.sessionId);
+    },
+    onFinish() {
+      clearReceivingMsg();
+      messageList.value = dataStore.getMessageList(form.sessionId);
+      console.log(messageList.value);
+      if (messageList.value.length < 3 && messageList.value[0] && !dataStore.getDialogInfo(form.sessionId).title) {
+        dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
+      }
+      scrollToBottom();
+    },
+  });
+  nextTick(() => {
+    scrollToBottom();
+  });
 }
 
 function handleEditDialog() {
@@ -420,10 +428,10 @@ const { isSmallScreen } = useGlobal();
       <div :style="{ minHeight: `${panelHeight}px` }" class="panel-placeholder"></div>
       <!--   消息列表   -->
       <DialogMessage
-        v-if="form.outputMessage || form.outputThinking" id="bot-typing-box"
-        :thinking="form.outputThinking" :html-message="form.outputMessage" role="bot"/>
+        v-if="thinkMsg || answerMsg" id="bot-typing-box"
+        :thinking="thinkMsg" :html-message="answerMsg" role="bot"/>
       <DialogMessage
-        v-if="form.inputValue"
+        v-if="!isReceivingMsg && form.inputValue"
         id="user-typing-box"
         :markdown-render="false"
         :message="form.inputValue"
@@ -489,8 +497,9 @@ const { isSmallScreen } = useGlobal();
         placeholder="随便问点啥(●'◡'●)"
         @keydown="(e) => handleInputKeydown(e)"
       />
-      <div class="dialog-detail-inputs-bar-send" @click="handleSendMessage">
-        <ArrowUp fill="white" size="16"/>
+      <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
+        <ArrowUp v-if="!isReceivingMsg" fill="white" size="16"/>
+        <spinning v-else />
       </div>
     </div>
     <!-- 语音面板 -->
