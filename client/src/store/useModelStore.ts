@@ -17,8 +17,8 @@ type ProviderModel = {
 export const useModelStore = defineStore('model', () => {
   // 供应商及模型数据
   const providerModels = useLocalStorage<ProviderModel[]>('provider-model', []);
-  // 转换为下拉菜单结果
-  const providerDropdown = useArrayMap(providerModels, convertProviderToDropdown)
+  // 转换为下拉菜单结果fix
+  const providerDropdown = useArrayMap(providerModels, convertProviderToDropdown);
 
   const getModelsOnServer = async () => {
     // 获取模型数据
@@ -74,7 +74,7 @@ const convertProviderToDropdown = (provider: ProviderModel) => {
   }
 
   return dropdownOption;
-}
+};
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useModelStore, import.meta.hot));

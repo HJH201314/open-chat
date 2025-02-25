@@ -12,6 +12,7 @@ import { useSettingStore } from '@/store/useSettingStore';
 import { computed, ref, toValue, watch } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { addChildrenDropdownOptions } from '@/components/dropdown/utils.ts';
+import { storeToRefs } from 'pinia';
 
 const { isModal = false } = defineProps<{
   isModal?: boolean;
@@ -19,7 +20,7 @@ const { isModal = false } = defineProps<{
 
 const settingStore = useSettingStore();
 const roleStore = useRoleStore();
-const { providerDropdown } = useModelStore();
+const { providerDropdown } = storeToRefs(useModelStore());
 // 解构赋值editingValue避免使用proxy，此处并不希望未点击保存前生效
 const editingValue = ref({ ...toValue(settingStore.settings) });
 
@@ -58,6 +59,7 @@ function handleReset() {
 
 const { isLargeScreen } = useGlobal();
 
+// 角色相关
 function handleClearRoleCache() {
   DialogManager.commonDialog({
     title: '清除缓存',
@@ -72,7 +74,6 @@ function handleClearRoleCache() {
   });
 }
 
-// 角色相关
 const roleSelectorOptions = computed(() =>
   roleStore.roles.map((v) => {
     return {
@@ -81,6 +82,11 @@ const roleSelectorOptions = computed(() =>
     };
   }),
 );
+
+function forceReloadPage() {
+  // @ts-ignore lib 类型标注错误
+  window.location.reload(true);
+}
 </script>
 
 <template>
@@ -223,6 +229,17 @@ const roleSelectorOptions = computed(() =>
                 text="清除角色缓存"
                 type="primary"
                 @click="handleClearRoleCache"
+              />
+            </span>
+          </div>
+          <div class="setting-list-item">
+            <span class="setting-list-item__title">强制刷新页面</span>
+            <span class="setting-list-item__value">
+              <DiliButton
+                :background-color="variables.colorDanger"
+                text="立即重启"
+                type="primary"
+                @click="forceReloadPage"
               />
             </span>
           </div>

@@ -21,6 +21,7 @@ import { Acoustic, ArrowUp, Back, CollapseTextInput, Delete, Edit, Voice } from 
 import { until, useDevicesList, useElementSize, useFocusWithin, useMousePressed, useUserMedia } from '@vueuse/core';
 import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
+import { storeToRefs } from 'pinia';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -37,7 +38,7 @@ const emit = defineEmits<{
 const dataStore = useDataStore();
 const userStore = useUserStore();
 const settingStore = useSettingStore();
-const { providerDropdown } = useModelStore();
+const { providerDropdown } = storeToRefs(useModelStore());
 
 const dialogInfo = ref<DialogInfo>({} as DialogInfo);
 const messageList = ref([] as MsgInfo[]);
