@@ -1,16 +1,16 @@
-import * as User from "./service/userService";
-import * as Chat from "./service/chatService";
-import * as Gpt from "./service/gptService";
-import * as Star from "./service/starService";
-import * as Manage from "./service/manageService";
+import * as UserService from "./service/userService";
+import * as ChatService from "./service/chatService";
+import * as GptService from "./service/gptService";
+import * as StarService from "./service/starService";
+import * as ManageService from "./service/manageService";
 import * as voiceService from "./cloud/voiceService";
 
 export default {
-  user: User,
-  gpt: Gpt,
-  chat: Chat,
-  star: Star,
-  manage: Manage,
+  user: UserService,
+  gpt: GptService,
+  chat: ChatService,
+  star: StarService,
+  manage: ManageService,
   cloud: {
     voice: voiceService,
   }

@@ -1,17 +1,20 @@
 import ToastManager from '@/components/toast/ToastManager';
-import { SERVER_ORIGIN_API_URL } from '@/constants';
+import { SERVER_NEXT_API_URL } from '@/constants';
 import router from '@/plugins/router';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { getActivePinia } from 'pinia';
+import { HttpClient } from '@/api/gen/http-client.ts';
 
-/* 创建axios实例 */
-const axiosInstance = axios.create({
-  baseURL: SERVER_ORIGIN_API_URL,
+const axiosConfig: AxiosRequestConfig = {
+  baseURL: SERVER_NEXT_API_URL,
   timeout: 10000,
   withCredentials: false,
-});
+};
+
+/* 创建axios实例 */
+const axiosInstance = axios.create(axiosConfig);
 
 axiosInstance.interceptors.response.use(
   (resp) => {
@@ -20,7 +23,7 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     errorHandler(error);
-  }
+  },
 );
 
 export const successHandler = (resp: any) => {
@@ -32,7 +35,7 @@ export const successHandler = (resp: any) => {
       }
     }
   }
-}
+};
 
 export const errorHandler = (error: any) => {
   if (error.status === 401) {
@@ -48,7 +51,7 @@ export const errorHandler = (error: any) => {
   }
 };
 
-/* 创建请求 */
+/* 创建自定义请求 */
 export const createRequest = <TRes>(path: string, args: AxiosRequestConfig = {}): Promise<AxiosResponse<TRes>> => {
   const token = localStorage.getItem('token') ?? '';
   const config: AxiosRequestConfig = {
@@ -67,3 +70,27 @@ export const createRequest = <TRes>(path: string, args: AxiosRequestConfig = {})
 
   return axiosInstance.request<TRes>(config);
 };
+
+/* 生成的 API 客户端 */
+export const genApiClient = new HttpClient({
+  ...axiosConfig,
+});
+// 添加拦截器
+genApiClient.instance.interceptors.response.use(
+  (resp) => {
+    successHandler(resp);
+    return resp;
+  },
+  (error) => {
+    errorHandler(error);
+  },
+);
+// 添加 header
+genApiClient.instance.interceptors.request.use(
+  (req) => {
+    req.headers['Authorization'] = localStorage.getItem('token')
+      ? `Bearer ${localStorage.getItem('token')}`
+      : '';
+    return req;
+  },
+);

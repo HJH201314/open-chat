@@ -50,6 +50,9 @@ importers:
       '@icon-park/vue-next':
         specifier: ^1.4.2
         version: 1.4.2(vue@3.5.13(typescript@5.7.3))
+      '@liuli-util/tree':
+        specifier: ^3.9.0
+        version: 3.9.0
       '@microsoft/fetch-event-source':
         specifier: ^2.0.1
         version: 2.0.1
@@ -1053,6 +1056,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@liuli-util/tree@3.9.0':
+    resolution: {integrity: sha512-wse8jtiKRi0kJ8yMvs2Cvg9iZlnmvAQAd9RwHIHlIeMfaU5fm+ubJsD1rQ0p75enGyNYpxZPk7ktOGnRV55rHA==}
 
   '@microsoft/fetch-event-source@2.0.1':
     resolution: {integrity: sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==}
@@ -5446,6 +5452,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@liuli-util/tree@3.9.0': {}
 
   '@microsoft/fetch-event-source@2.0.1': {}
 
