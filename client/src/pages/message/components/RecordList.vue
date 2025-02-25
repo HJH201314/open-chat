@@ -84,63 +84,61 @@ const displayList = computed(() => {
 });
 </script>
 <template>
-  <div class="message-left">
-    <!-- 角色列表 -->
-    <div class="dialog-list">
-      <div class="dialog-list-bar">
-        <div class="dialog-list-bar-search">
-          <span class="dialog-list-bar-search-icon"><Search /></span>
-          <input v-model="searchForm.searchVal" placeholder="搜索对话内容" />
-          <span v-if="searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
-            <CloseOne theme="filled" />
-          </span>
-        </div>
-        <div>
-          <div class="dialog-list-add" @click="handleListAddClick">
-            <Plus size="24" theme="outline" />
-          </div>
-          <CommonModal v-model:visible="roleForm.modalVisible">
-            <div class="select-role">
-              <div class="select-role-title">选择角色</div>
-              <div class="select-role-list">
-                <div
-                  v-for="(item, i) in roleStore.roles"
-                  :key="i"
-                  class="select-role-item"
-                  @click="handleAddRecord(item[0])"
-                >
-                  {{ item[1] }}
-                </div>
-              </div>
-              <div style="display: flex; align-items: center">
-                <Toggle v-model="roleForm.remember" label="记住本次选择" style="margin-top: 1rem" />
-                <DiliButton style="margin-left: auto" text="直接开始→" type="primary" @click="handleAddRecord" />
-              </div>
-            </div>
-          </CommonModal>
-        </div>
+  <!-- 角色列表 -->
+  <div class="dialog-list">
+    <div class="dialog-list-bar">
+      <div class="dialog-list-bar-search">
+        <span class="dialog-list-bar-search-icon"><Search /></span>
+        <input v-model="searchForm.searchVal" placeholder="搜索对话内容" />
+        <span v-if="searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
+          <CloseOne theme="filled" />
+        </span>
       </div>
-      <div class="dialog-list-container">
-        <div
-          v-for="item in displayList"
-          :key="item.id"
-          :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
-          class="dialog-list-item"
-          @click="handleListItemClick(item.id)"
-        >
-          <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar" />
-          <div class="dialog-list-item-center">
-            <div class="title">
-              {{ item.title || '未命名对话' }}
+      <div>
+        <div class="dialog-list-add" @click="handleListAddClick">
+          <Plus size="24" theme="outline" />
+        </div>
+        <CommonModal v-model:visible="roleForm.modalVisible">
+          <div class="select-role">
+            <div class="select-role-title">选择角色</div>
+            <div class="select-role-list">
+              <div
+                v-for="(item, i) in roleStore.roles"
+                :key="i"
+                class="select-role-item"
+                @click="handleAddRecord(item[0])"
+              >
+                {{ item[1] }}
+              </div>
             </div>
-            <div class="digest">
-              {{ item.botRole }}
+            <div style="display: flex; align-items: center">
+              <Toggle v-model="roleForm.remember" label="记住本次选择" style="margin-top: 1rem" />
+              <DiliButton style="margin-left: auto" text="直接开始→" type="primary" @click="handleAddRecord" />
             </div>
           </div>
-          <div class="dialog-list-item-right">
-            <div class="datetime">
-              {{ item.createAt ?? '' }}
-            </div>
+        </CommonModal>
+      </div>
+    </div>
+    <div class="dialog-list-container">
+      <div
+        v-for="item in displayList"
+        :key="item.id"
+        :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
+        class="dialog-list-item"
+        @click="handleListItemClick(item.id)"
+      >
+        <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar" />
+        <div class="dialog-list-item-center">
+          <div class="title">
+            {{ item.title || '未命名对话' }}
+          </div>
+          <div class="digest">
+            {{ item.botRole }}
+          </div>
+        </div>
+        <div class="dialog-list-item-right">
+          <div class="datetime">
+            {{ item.createAt ?? '' }}
           </div>
         </div>
       </div>
@@ -152,11 +150,6 @@ const displayList = computed(() => {
 @use '@/assets/variables' as *;
 @use '@/assets/extension' as *;
 
-.message-left {
-  display: flex;
-  flex-direction: column;
-}
-
 .dialog-list {
   position: relative;
   flex: 1;
@@ -164,7 +157,8 @@ const displayList = computed(() => {
   height: 100%;
 
   &-container {
-    padding-top: 2.5rem;
+    padding-top: 3rem;
+    padding-inline: 0.5rem;
     width: 100%;
     height: 100%;
     display: flex;
@@ -186,7 +180,7 @@ const displayList = computed(() => {
     flex-direction: row;
     height: min-content;
     gap: 0.25rem;
-    padding-bottom: 0.5rem;
+    padding: 0.5rem;
     background-color: rgba(255 255 255 / 75%);
     backdrop-filter: blur(10px);
 

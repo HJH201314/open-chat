@@ -102,9 +102,7 @@ const showEmptyTip = ref(true);
   flex-direction: row;
   box-sizing: border-box;
   border-radius: 0.5rem;
-  gap: 8px;
   overflow: hidden;
-  padding: 0.5rem;
   align-items: center;
 
   .split {
@@ -119,14 +117,15 @@ const showEmptyTip = ref(true);
     height: 100%;
 
     &:not(&-absolute) {
-      min-width: calc(30% - 8px); // 防止右侧消息列表关闭时被挤压
-      max-width: calc(30% - 8px); // 防止右侧消息列表关闭时被挤压
+      min-width: calc(30% - 1px); // 防止右侧消息列表关闭时被挤压
+      max-width: calc(30% - 1px); // 防止右侧消息列表关闭时被挤压
     }
 
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
     &-absolute {
       position: absolute;
-      inset: 0.5rem;
+      left: 0;
+      right: 0;
     }
   }
 
@@ -135,14 +134,15 @@ const showEmptyTip = ref(true);
     flex-shrink: 0;
 
     &:not(&-absolute) {
-      max-width: calc(70% - 8px);
-      min-width: calc(70% - 8px);
+      max-width: calc(70% - 1px);
+      min-width: calc(70% - 1px);
     }
 
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
     &-absolute {
       position: absolute;
-      inset: 0.5rem;
+      left: 0;
+      right: 0;
       background-color: white;
     }
   }

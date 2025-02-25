@@ -1,24 +1,20 @@
 <script lang="ts" setup>
-import api from '@/api';
 import variables from '@/assets/variables.module.scss';
 import { useAutoScrollbar } from '@/commands/useAutoScrollbar';
 import useGlobal from '@/commands/useGlobal';
-import DiliButton from '@/components/button/DiliButton.vue';
 import { DialogManager } from '@/components/dialog';
 import CusSelect from '@/components/dropdown/CusSelect.vue';
 import IconButton from '@/components/IconButton.vue';
-import CusCircularProgress from '@/components/progress/CusCircularProgress.vue';
 import Spinning from '@/components/spinning/Spinning.vue';
 import showToast from '@/components/toast/toast';
-import ToastManager from '@/components/toast/ToastManager';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import DialogMessage from '@/pages/message/components/DialogMessage.vue';
 import { useDataStore } from '@/store/useDataStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import type { DialogInfo, MsgInfo } from '@/types/data';
-import { Acoustic, ArrowUp, Back, CollapseTextInput, Delete, Edit, Voice } from '@icon-park/vue-next';
-import { until, useDevicesList, useElementSize, useFocusWithin, useMousePressed, useUserMedia } from '@vueuse/core';
+import { ArrowUp, Back, CollapseTextInput, Delete, Edit } from '@icon-park/vue-next';
+import { until, useElementSize, useFocusWithin } from '@vueuse/core';
 import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { storeToRefs } from 'pinia';
@@ -106,6 +102,7 @@ const inputPanelRef = useTemplateRef('input-panel');
 const textAreaRef = useTemplateRef('input-textarea');
 const { focused: inputFocused } = useFocusWithin(inputPanelRef);
 const { height: panelHeight } = useElementSize(inputPanelRef);
+const panelPlaceholderPx = computed(() => `${panelHeight.value + 8}px`);
 const dialogListRef = useTemplateRef('dialog-list');
 useAutoScrollbar(dialogListRef);
 watchEffect(() => {
@@ -214,189 +211,6 @@ function handleDeleteDialog() {
   });
 }
 
-/* 音频录制相关 */
-// 需要https或localhost才能测试
-const {
-  audioInputs: microphones, // 麦克风设备列表
-} = useDevicesList({
-  requestPermissions: true,
-});
-const currentMicrophone = computed(() => microphones.value[0]?.deviceId); // 取首个设备为当前设备
-
-const {
-  stream: mediaStream,
-  start: startStream,
-  stop: stopStream,
-} = useUserMedia({
-  constraints: {
-    video: false, // 不获取视频流
-    audio: {
-      deviceId: currentMicrophone.value, // 传入麦克风设备ID
-      channelCount: 1, // 单声道
-    },
-  },
-});
-
-let mediaRecorder: MediaRecorder;
-let chunks: BlobPart[] = [];
-const audioTimeout = ref(60);
-const audioInterval = ref();
-const audioHandling = ref(false);
-
-const audioButtonRef = ref<HTMLDivElement>();
-const audioButtonPress = useMousePressed({
-  target: audioButtonRef,
-  capture: true,
-  initialValue: false,
-});
-
-watch(
-  () => audioButtonPress.pressed.value,
-  (p) => {
-    console.log(audioButtonPress, p);
-    if (p) {
-      startVoiceRecording();
-    } else {
-      audioTimeout.value = 60;
-      stopVoiceRecording();
-    }
-  },
-);
-
-function startVoiceRecording() {
-  if (microphones.value.length <= 0) {
-    ToastManager.warning('无音频输入设备！');
-    return;
-  }
-  if (!userStore.isLogin) {
-    ToastManager.warning('请先登录！');
-    return;
-  }
-  startStream()
-    .then((s) => {
-      if (s) {
-        mediaRecorder = new MediaRecorder(s, {
-          audioBitsPerSecond: 16000,
-        });
-        chunks = [];
-
-        // 开始录制
-        mediaRecorder.start();
-
-        // 倒计时60秒，超时自动停止
-        audioTimeout.value = 60;
-        clearInterval(audioInterval.value);
-        audioInterval.value = setInterval(() => {
-          // 如果已经关闭就清除倒计时
-          if (!mediaRecorder.stream.active) {
-            clearInterval(audioInterval.value);
-            return;
-          }
-          if (audioTimeout.value <= 0) {
-            clearInterval(audioInterval.value);
-            mediaRecorder.stop();
-          } else {
-            audioTimeout.value = audioTimeout.value - 1;
-          }
-        }, 1000);
-
-        // 当有音频数据可用时触发该事件
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            chunks.push(event.data);
-          }
-        };
-
-        // 录制结束时触发该事件
-        mediaRecorder.onstop = function () {
-          // 将音频数据合并成一个Blob对象
-          const blob = new Blob(chunks, { type: 'audio/wav' });
-
-          // 将音频转换为base64
-          const reader = new FileReader();
-          reader.readAsDataURL(blob);
-          reader.onload = (e) => {
-            console.log(e.target?.result);
-            let base64 = e.target?.result as string;
-            if (base64) {
-              // 去除文件头
-              base64 = base64.replace(/^data:audio\/\w+;base64,/, '');
-              try {
-                // return;
-                if (base64 == '') {
-                  ToastManager.warning('说话时间太短啦');
-                  return;
-                }
-                audioHandling.value = true;
-                api.cloud.voice.uploadAudioFileUsingPost(base64).then((res) => {
-                  if (res.data.status == 200) {
-                    // 上传成功，开始定时轮询
-                    const interval = setInterval(() => {
-                      api.cloud.voice.checkAudioResultUsingGet(res.data.data).then((res) => {
-                        if (res.data.data.status == 2) {
-                          // 已经处理完成
-                          audioHandling.value = false;
-                          clearInterval(interval);
-                          const textResultSplit = res.data.data.result.split(' ');
-                          form.inputValue = textResultSplit[textResultSplit.length - 1];
-                          if (!form.inputValue) {
-                            ToastManager.info('哎呀没听清，再说一次吧~');
-                          } else {
-                            handleSendMessage();
-                          }
-                        } else if (res.data.data.status != 1) {
-                          // 处理失败
-                          audioHandling.value = false;
-                          clearInterval(interval);
-                          ToastManager.danger('语音模块异常，请联系管理员！');
-                        } else {
-                          // status = 1，处理中
-                        }
-                      });
-                    }, 1000);
-                  }
-                });
-              } catch (e) {
-                // ignore
-              }
-            }
-          };
-
-          // 创建一个音频元素并播放录制的音频
-          // const audioElement = new Audio();
-          // audioElement.src = URL.createObjectURL(blob);
-          // audioElement.controls = true;
-          // document.body.appendChild(audioElement);
-        };
-      } else {
-        ToastManager.danger('无权访问麦克风，请给予权限');
-        mediaRecorder?.stop();
-      }
-    })
-    .catch(() => {
-      ToastManager.danger('无权访问麦克风，请给予权限');
-    });
-}
-
-function stopVoiceRecording() {
-  stopStream();
-  mediaRecorder?.stop();
-}
-
-const voicePanel = ref(false);
-
-function handleVoicePanelToggle() {
-  voicePanel.value = !voicePanel.value;
-  if (!voicePanel.value) {
-    stopStream();
-    mediaRecorder?.stop();
-  } else {
-    nextTick(() => {
-      scrollToBottom();
-    });
-  }
-}
-
 const { isSmallScreen } = useGlobal();
 </script>
 
@@ -425,8 +239,6 @@ const { isSmallScreen } = useGlobal();
     <div ref="dialog-list" class="dialog-detail-dialogs">
       <!--   列表底部定位（此列表为 column-reverse）   -->
       <div id="bottom-line"></div>
-      <!-- 输入面板占位 -->
-      <div :style="{ minHeight: `${panelHeight}px` }" class="panel-placeholder"></div>
       <!--   消息列表   -->
       <DialogMessage
         v-if="thinkMsg || answerMsg" id="bot-typing-box"
@@ -450,7 +262,6 @@ const { isSmallScreen } = useGlobal();
       />
       <!--   列表顶部定位   -->
       <div id="top-line"></div>
-      <div v-if="voicePanel" style="min-height: 3rem"></div>
     </div>
     <!-- 浮动输入面板 -->
     <div
@@ -460,16 +271,6 @@ const { isSmallScreen } = useGlobal();
     >
       <Transition name="slide-top-fade">
         <div v-show="!smallInput" class="dialog-detail-inputs-bar">
-          <DiliButton v-if="settingStore.settings.enableVoiceToText" type="text" @click="handleVoicePanelToggle">
-            <div v-if="!voicePanel" style="display: contents">
-              <Voice size="20"/>
-              语音面板
-            </div>
-            <div v-else style="display: contents">
-              <Acoustic size="20"/>
-              收起面板
-            </div>
-          </DiliButton>
           <CusSelect
             v-model="form.providerModel[1]"
             :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
@@ -500,40 +301,9 @@ const { isSmallScreen } = useGlobal();
       />
       <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
         <ArrowUp v-if="!isReceivingMsg" fill="white" size="16"/>
-        <spinning v-else />
+        <spinning v-else/>
       </div>
     </div>
-    <!-- 语音面板 -->
-    <transition name="flow-in">
-      <section v-show="voicePanel" class="audio-input">
-        <div
-          :class="{
-            'audio-input-status--ready': !audioHandling && currentMicrophone,
-            'audio-input-status--handling': audioHandling,
-            'audio-input-status--error': !currentMicrophone,
-          }"
-          class="audio-input-status"
-        >
-          <Spinning v-if="audioHandling" :color="variables.colorWarning"/>
-          <div v-else class="signal"/>
-          {{
-            mediaStream
-              ? `录制中 ${audioTimeout}s`
-              : audioHandling
-                ? '处理中'
-                : !currentMicrophone
-                  ? '无麦克风'
-                  : '就绪'
-          }}
-        </div>
-        <div ref="audioButtonRef" class="audio-input-speak" @touchend="stopVoiceRecording">
-          <CusCircularProgress :bar-style="{ opacity: '0.25' }" :value="(audioTimeout * 100) / 60">
-            <Voice v-if="!mediaStream" fill="white" size="2rem"/>
-            <Acoustic v-else fill="white" size="2rem"/>
-          </CusCircularProgress>
-        </div>
-      </section>
-    </transition>
   </div>
 </template>
 
@@ -543,17 +313,21 @@ const { isSmallScreen } = useGlobal();
 
 .dialog-detail {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 
   &-actions {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
     gap: 0.5rem;
-    margin: 0.25rem 0.25rem 0 0.25rem;
+    padding: 0.5rem;
+    background-color: rgba(255 255 255 / 80%);
+    backdrop-filter: blur(10px);
+
 
     &-area-left {
       margin-right: auto;
@@ -585,22 +359,29 @@ const { isSmallScreen } = useGlobal();
   }
 
   &-dialogs {
-    //flex: 1;
+    width: 100%;
+    height: 100%;
+    padding-inline: 0.25rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column-reverse;
-    margin-bottom: auto;
+    padding-bottom: v-bind(panelPlaceholderPx);
 
-    > :not(:last-child) {
+    > :not(:first-child) {
       margin-bottom: 0.5rem;
+    }
+
+    // 最顶上的元素
+    > :last-child {
+      margin-top: 2.6rem;
     }
   }
 
   &-inputs {
     position: absolute;
-    left: -0.25rem;
-    right: -0.25rem;
-    bottom: -0.25rem;
+    left: 0.25rem;
+    right: 0.25rem;
+    bottom: 0.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
