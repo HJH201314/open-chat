@@ -90,7 +90,7 @@ const displayList = computed(() => {
       <div class="dialog-list-bar">
         <div class="dialog-list-bar-search">
           <span class="dialog-list-bar-search-icon"><Search /></span>
-          <input v-model="searchForm.searchVal" autocomplete="new-password" placeholder="搜索对话内容" />
+          <input v-model="searchForm.searchVal" placeholder="搜索对话内容" />
           <span v-if="searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
             <CloseOne theme="filled" />
           </span>
@@ -158,14 +158,14 @@ const displayList = computed(() => {
 }
 
 .dialog-list {
+  position: relative;
   flex: 1;
   width: 100%;
-  display: flex;
-  flex-direction: column;
+  height: 100%;
 
   &-container {
-    flex: 1;
-    margin-top: 0.5rem;
+    padding-top: 2.5rem;
+    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -178,10 +178,17 @@ const displayList = computed(() => {
   }
 
   &-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     flex-direction: row;
     height: min-content;
     gap: 0.25rem;
+    padding-bottom: 0.5rem;
+    background-color: rgba(255 255 255 / 75%);
+    backdrop-filter: blur(10px);
 
     &-search {
       flex: 1;
@@ -192,6 +199,7 @@ const displayList = computed(() => {
       align-items: center;
       gap: 0.5rem;
       transition: all 0.2s $ease-out-circ;
+      opacity: 0.6;
 
       &:focus-within {
         background-color: $color-grey-300;
@@ -229,6 +237,7 @@ const displayList = computed(() => {
     place-items: center;
     cursor: pointer;
     transition: all 0.2s $ease-out-circ;
+    opacity: 0.6;
 
     &:hover {
       background-color: $color-grey-300;

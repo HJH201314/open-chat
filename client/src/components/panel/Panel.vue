@@ -6,7 +6,7 @@
   <div class="panel">
     <RouterView v-slot="{ Component }">
       <Transition name="slide-fade">
-        <component :is="Component" class="child-view" />
+        <component :is="Component" class="child-view"/>
       </Transition>
     </RouterView>
   </div>
@@ -15,6 +15,7 @@
 <style scoped lang="scss">
 @use '@/assets/variables' as *;
 @use '@/assets/animations';
+
 .panel {
   position: relative;
   background-color: white;
@@ -32,7 +33,7 @@
 /* 路由动画 */
 .child-view {
   position: absolute;
-  width:100%;
+  width: 100%;
   overflow: hidden;
   transition: all .5s cubic-bezier(.55, 0, .1, 1);
 }
