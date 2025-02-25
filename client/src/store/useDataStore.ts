@@ -233,8 +233,14 @@ export const useDataStore = defineStore('data', () => {
         },
       }, abortController).finally(() => {
         isStreaming.value = false;
+        clearMessage();
       });
     };
+
+    const clearMessage = () => {
+      answerMessage.value = '';
+      thinkMessage.value = '';
+    }
 
     return {
       isStreaming,
@@ -242,10 +248,7 @@ export const useDataStore = defineStore('data', () => {
       answer: answerMessage,
       start: startStreaming,
       stop: () => abortController.abort(),
-      clear: () => {
-        answerMessage.value = '';
-        thinkMessage.value = '';
-      },
+      clear: clearMessage,
     };
   };
 
