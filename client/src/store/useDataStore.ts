@@ -9,6 +9,7 @@ import { recordToMap } from '@/utils/typeUtils';
 import { useLocalStorage, useStorage, watchArray } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, reactive, ref, shallowRef, type UnwrapNestedRefs, watch } from 'vue';
+import { useUserStore } from '@/store/useUserStore.ts';
 
 interface MessageCallback {
   // 用户输入保存后的回调
@@ -46,6 +47,7 @@ export const useDataStore = defineStore('data', () => {
   });
 
   const roleStore = useRoleStore();
+  const userStore = useUserStore();
   const settingStore = useSettingStore();
 
   function getDialogInfo(sessionId: string) {
@@ -78,7 +80,11 @@ export const useDataStore = defineStore('data', () => {
       }
       return sessionId;
     } catch (e) {
-      showToast({ text: '请求失败，请先登录~', type: 'danger', position: 'top-left' });
+      if (!userStore.isLogin) {
+        showToast({ text: '请先登录~', type: 'danger', position: 'top-left' });
+      } else {
+        showToast({ text: '请求失败，请稍候重试 TAT', type: 'danger', position: 'top-left' });
+      }
     }
     return '';
   }

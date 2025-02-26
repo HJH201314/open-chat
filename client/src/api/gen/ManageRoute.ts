@@ -20,12 +20,12 @@ export namespace Manage {
   /**
    * @description 创建 API 提供商
    * @tags Provider
-   * @name ProviderCreateCreate
+   * @name ProviderCreatePost
    * @summary 创建 API 提供商
    * @request POST:/manage/provider/create
    * @response `200` `ApiEntityCommonResponseModelsProvider` 成功创建的 API 提供商
    */
-  export namespace ProviderCreateCreate {
+  export namespace ProviderCreatePost {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = ApiModelsProvider;
@@ -36,12 +36,12 @@ export namespace Manage {
   /**
    * @description 删除 API 提供商
    * @tags Provider
-   * @name ProviderDeleteCreate
+   * @name ProviderDeletePost
    * @summary 删除 API 提供商
    * @request POST:/manage/provider/delete/{provider_id}
    * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
    */
-  export namespace ProviderDeleteCreate {
+  export namespace ProviderDeletePost {
     export type RequestParams = {
       /** API 提供商 ID */
       providerId: number;
@@ -55,12 +55,12 @@ export namespace Manage {
   /**
    * @description 获取 API 提供商
    * @tags Provider
-   * @name ProviderDetail
+   * @name ProviderGet
    * @summary 获取 API 提供商
    * @request GET:/manage/provider/{provider_id}
    * @response `200` `ApiEntityCommonResponseModelsProvider` API 提供商
    */
-  export namespace ProviderDetail {
+  export namespace ProviderGet {
     export type RequestParams = {
       /** API 提供商 ID */
       providerId: number;
@@ -74,12 +74,12 @@ export namespace Manage {
   /**
    * @description 批量获取 API 提供商
    * @tags Provider
-   * @name ProviderListList
+   * @name ProviderListGet
    * @summary 批量获取 API 提供商
    * @request GET:/manage/provider/list
    * @response `200` `ApiEntityCommonResponseArrayModelsProvider` API 提供商列表
    */
-  export namespace ProviderListList {
+  export namespace ProviderListGet {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = never;
@@ -90,12 +90,12 @@ export namespace Manage {
   /**
    * @description 更新 API 提供商
    * @tags Provider
-   * @name ProviderUpdateCreate
+   * @name ProviderUpdatePost
    * @summary 更新 API 提供商
    * @request POST:/manage/provider/update
    * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
    */
-  export namespace ProviderUpdateCreate {
+  export namespace ProviderUpdatePost {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = ApiModelsProvider;

@@ -119,9 +119,11 @@ export interface ApiModelsModelCache {
   id?: number;
   /** 模型名称 */
   name?: string;
+  /** 关联的 Provider DisplayName */
   provider_display_name?: string;
   /** 关联的 Provider ID */
   provider_id?: number;
+  /** 关联的 Provider Name */
   provider_name?: string;
   updated_at?: string;
 }

@@ -29,12 +29,12 @@ export class Manage<SecurityDataType = unknown> {
    * @description 创建 API 提供商
    *
    * @tags Provider
-   * @name ProviderCreateCreate
+   * @name ProviderCreatePost
    * @summary 创建 API 提供商
    * @request POST:/manage/provider/create
    * @response `200` `ApiEntityCommonResponseModelsProvider` 成功创建的 API 提供商
    */
-  providerCreateCreate = (provider: ApiModelsProvider, params: RequestParams = {}) =>
+  providerCreatePost = (provider: ApiModelsProvider, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseModelsProvider, any>({
       path: `/manage/provider/create`,
       method: 'POST',
@@ -47,12 +47,12 @@ export class Manage<SecurityDataType = unknown> {
    * @description 删除 API 提供商
    *
    * @tags Provider
-   * @name ProviderDeleteCreate
+   * @name ProviderDeletePost
    * @summary 删除 API 提供商
    * @request POST:/manage/provider/delete/{provider_id}
    * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
    */
-  providerDeleteCreate = (providerId: number, params: RequestParams = {}) =>
+  providerDeletePost = (providerId: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/manage/provider/delete/${providerId}`,
       method: 'POST',
@@ -64,12 +64,12 @@ export class Manage<SecurityDataType = unknown> {
    * @description 获取 API 提供商
    *
    * @tags Provider
-   * @name ProviderDetail
+   * @name ProviderGet
    * @summary 获取 API 提供商
    * @request GET:/manage/provider/{provider_id}
    * @response `200` `ApiEntityCommonResponseModelsProvider` API 提供商
    */
-  providerDetail = (providerId: number, params: RequestParams = {}) =>
+  providerGet = (providerId: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseModelsProvider, any>({
       path: `/manage/provider/${providerId}`,
       method: 'GET',
@@ -81,12 +81,12 @@ export class Manage<SecurityDataType = unknown> {
    * @description 批量获取 API 提供商
    *
    * @tags Provider
-   * @name ProviderListList
+   * @name ProviderListGet
    * @summary 批量获取 API 提供商
    * @request GET:/manage/provider/list
    * @response `200` `ApiEntityCommonResponseArrayModelsProvider` API 提供商列表
    */
-  providerListList = (params: RequestParams = {}) =>
+  providerListGet = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseArrayModelsProvider, any>({
       path: `/manage/provider/list`,
       method: 'GET',
@@ -98,12 +98,12 @@ export class Manage<SecurityDataType = unknown> {
    * @description 更新 API 提供商
    *
    * @tags Provider
-   * @name ProviderUpdateCreate
+   * @name ProviderUpdatePost
    * @summary 更新 API 提供商
    * @request POST:/manage/provider/update
    * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
    */
-  providerUpdateCreate = (provider: ApiModelsProvider, params: RequestParams = {}) =>
+  providerUpdatePost = (provider: ApiModelsProvider, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/manage/provider/update`,
       method: 'POST',

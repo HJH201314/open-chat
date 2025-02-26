@@ -22,7 +22,7 @@ export const useModelStore = defineStore('model', () => {
 
   const getModelsOnServer = async () => {
     // 获取模型数据
-    const models = await genApi.Chat.configModelsList();
+    const models = await genApi.Chat.configModelsGet();
     if (models.data.data) {
       // 将扁平的模型数据分组
       const groupedModels = models.data.data.reduce((acc, curr) => {

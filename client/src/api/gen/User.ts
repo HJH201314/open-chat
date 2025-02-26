@@ -30,12 +30,12 @@ export class User<SecurityDataType = unknown> {
    * @description 用户登录
    *
    * @tags User
-   * @name LoginCreate
+   * @name LoginPost
    * @summary 用户登录
    * @request POST:/user/login
    * @response `200` `ApiEntityCommonResponseModelsUser` login successfully
    */
-  loginCreate = (req: ApiUserLoginLoginRequest, params: RequestParams = {}) =>
+  loginPost = (req: ApiUserLoginLoginRequest, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseModelsUser, any>({
       path: `/user/login`,
       method: 'POST',
@@ -48,13 +48,13 @@ export class User<SecurityDataType = unknown> {
    * @description 检测客户端登录态
    *
    * @tags User
-   * @name PingCreate
+   * @name PingPost
    * @summary 检测客户端登录态
    * @request POST:/user/ping
    * @response `200` `ApiEntityCommonResponseModelsUser` user is online
    * @response `404` `ApiEntityCommonResponseAny` user not found
    */
-  pingCreate = (params: RequestParams = {}) =>
+  pingPost = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseModelsUser, ApiEntityCommonResponseAny>({
       path: `/user/ping`,
       method: 'POST',
@@ -63,15 +63,30 @@ export class User<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description 刷新登录态
+   *
+   * @tags User
+   * @name RefreshGet
+   * @summary 刷新登录态
+   * @request GET:/user/refresh
+   * @response `200` `string` nothing
+   */
+  refreshGet = (params: RequestParams = {}) =>
+    this.http.request<string, any>({
+      path: `/user/refresh`,
+      method: 'GET',
+      ...params,
+    });
+  /**
    * @description 用户注册
    *
    * @tags User
-   * @name RegisterCreate
+   * @name RegisterPost
    * @summary 用户注册
    * @request POST:/user/register
    * @response `200` `ApiEntityCommonResponseBool` register successfully
    */
-  registerCreate = (req: ApiUserRegisterRegisterRequest, params: RequestParams = {}) =>
+  registerPost = (req: ApiUserRegisterRegisterRequest, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/user/register`,
       method: 'POST',

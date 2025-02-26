@@ -29,11 +29,11 @@ export class Chat<SecurityDataType = unknown> {
    * @description 流式输出聊天
    *
    * @tags Chat
-   * @name CompletionStreamCreate
+   * @name CompletionStreamPost
    * @summary 流式输出聊天
    * @request POST:/chat/completion/stream/{session_id}
    */
-  completionStreamCreate = (sessionId: string, request: ApiChatCompletionStreamUserInput, params: RequestParams = {}) =>
+  completionStreamPost = (sessionId: string, request: ApiChatCompletionStreamUserInput, params: RequestParams = {}) =>
     this.http.request<any, any>({
       path: `/chat/completion/stream/${sessionId}`,
       method: 'POST',
@@ -45,12 +45,12 @@ export class Chat<SecurityDataType = unknown> {
    * @description 获取所有模型
    *
    * @tags config
-   * @name ConfigModelsList
+   * @name ConfigModelsGet
    * @summary 获取所有模型
    * @request GET:/chat/config/models
    * @response `200` `ApiEntityCommonResponseArrayModelsModelCache` OK
    */
-  configModelsList = (params: RequestParams = {}) =>
+  configModelsGet = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseArrayModelsModelCache, any>({
       path: `/chat/config/models`,
       method: 'GET',
@@ -62,12 +62,12 @@ export class Chat<SecurityDataType = unknown> {
    * @description 删除会话
    *
    * @tags Session
-   * @name SessionDelCreate
+   * @name SessionDelPost
    * @summary 删除会话
    * @request POST:/chat/session/del/{session_id}
    * @response `200` `ApiEntityCommonResponseBool` OK
    */
-  sessionDelCreate = (sessionId: string, params: RequestParams = {}) =>
+  sessionDelPost = (sessionId: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/chat/session/del/${sessionId}`,
       method: 'POST',
@@ -79,12 +79,12 @@ export class Chat<SecurityDataType = unknown> {
    * @description 创建会话
    *
    * @tags Session
-   * @name SessionNewCreate
+   * @name SessionNewPost
    * @summary 创建会话
    * @request POST:/chat/session/new
    * @response `200` `ApiEntityCommonResponseString` OK
    */
-  sessionNewCreate = (params: RequestParams = {}) =>
+  sessionNewPost = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseString, any>({
       path: `/chat/session/new`,
       method: 'POST',
