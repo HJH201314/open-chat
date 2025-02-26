@@ -1,11 +1,13 @@
 import api from '@/api';
-import { useIntervalFn, useSessionStorage } from '@vueuse/core';
+import { useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
+import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 
 /* 用户相关 */
 export const useUserStore = defineStore('user', () => {
-  const token = ref(localStorage.getItem('token'));
+  const accessToken = useLocalStorage(USER_ACCESS_TOKEN_KEY, '');
+  const refreshToken = useLocalStorage(USER_REFRESH_TOKEN_KEY, '');
   const avatar = ref('/favicon.ico');
   const currentUser = useSessionStorage<API.UserLoginResult>('current-user', {});
   const loginStatus = ref<'login' | 'logout' | 'offline'>('logout');
@@ -54,7 +56,6 @@ export const useUserStore = defineStore('user', () => {
         loginStatus.value = 'login';
         permission.value = 0; // TODO
         currentUser.value = res.data.data;
-        localStorage.setItem('token', res.headers['oc-auth-token'] || '');
         resumePing();
         return true;
       } else {
@@ -80,7 +81,6 @@ export const useUserStore = defineStore('user', () => {
   }
 
   return {
-    token,
     avatar,
     loginStatus,
     isLogin,
@@ -90,6 +90,8 @@ export const useUserStore = defineStore('user', () => {
     currentUser,
     login,
     logout,
+    refreshToken,
+    token: accessToken,
   };
 });
 

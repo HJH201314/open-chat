@@ -1,5 +1,5 @@
 import ToastManager from '@/components/toast/ToastManager';
-import { SERVER_NEXT_API_URL } from '@/constants';
+import { SERVER_NEXT_API_URL, USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 import router from '@/plugins/router';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
@@ -28,6 +28,13 @@ axiosInstance.interceptors.response.use(
 
 export const successHandler = (resp: any) => {
   if (resp.status === 200) {
+    // 处理 header 中的 token
+    if (resp.headers['oc-auth-token']) {
+      localStorage.setItem(USER_ACCESS_TOKEN_KEY, resp.headers['oc-auth-token']);
+    }
+    if (resp.headers['oc-refresh-token']) {
+      localStorage.setItem(USER_REFRESH_TOKEN_KEY, resp.headers['oc-refresh-token']);
+    }
     if (getActivePinia()) {
       const userStore = useUserStore();
       if (userStore.loginStatus == 'offline') {
@@ -53,7 +60,7 @@ export const errorHandler = (error: any) => {
 
 /* 创建自定义请求 */
 export const createRequest = <TRes>(path: string, args: AxiosRequestConfig = {}): Promise<AxiosResponse<TRes>> => {
-  const token = localStorage.getItem('token') ?? '';
+  const token = localStorage.getItem(USER_ACCESS_TOKEN_KEY) ?? '';
   const config: AxiosRequestConfig = {
     url: path,
     ...args,
@@ -88,8 +95,8 @@ genApiClient.instance.interceptors.response.use(
 // 添加 header
 genApiClient.instance.interceptors.request.use(
   (req) => {
-    req.headers['Authorization'] = localStorage.getItem('token')
-      ? `Bearer ${localStorage.getItem('token')}`
+    req.headers['Authorization'] = localStorage.getItem(USER_ACCESS_TOKEN_KEY)
+      ? `Bearer ${localStorage.getItem(USER_ACCESS_TOKEN_KEY)}`
       : '';
     return req;
   },
