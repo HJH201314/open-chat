@@ -186,42 +186,6 @@ function forceReloadPage() {
         </div>
         <div class="setting-list-section">
           <div class="setting-list-item">
-            <span class="setting-list-item__title">语音输入</span>
-            <span class="setting-list-item__value">
-              <CusToggle v-model="editingValue.enableVoiceToText"/>
-            </span>
-          </div>
-          <!--        <div class="setting-list-item">-->
-          <!--          <span class="setting-list-item__title">语音输出</span>-->
-          <!--          <span class="setting-list-item__value">-->
-          <!--            <CusToggle v-model="editingValue.enableTextToVoice" />-->
-          <!--          </span>-->
-          <!--        </div>-->
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">语音服务APPID</span>
-            <span class="setting-list-item__value">
-              <CusInput v-model="editingValue.voiceCloudAppId" placeholder="APPID"/>
-            </span>
-          </div>
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">语音服务SECRET_ID</span>
-            <span class="setting-list-item__value">
-              <CusInput v-model="editingValue.voiceCloudSecretId" placeholder="SECRET_ID"/>
-            </span>
-          </div>
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">语音服务SECRET_KEY</span>
-            <span class="setting-list-item__value">
-              <CusInput
-                v-model="editingValue.voiceCloudSecretKey"
-                :input-attrs="{ type: 'password' }"
-                placeholder="SECRET_KEY"
-              />
-            </span>
-          </div>
-        </div>
-        <div class="setting-list-section">
-          <div class="setting-list-item">
             <span class="setting-list-item__title">清除缓存</span>
             <span class="setting-list-item__value">
               <DiliButton

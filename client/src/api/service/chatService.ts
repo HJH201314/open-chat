@@ -1,5 +1,5 @@
 import { createRequest, errorHandler, successHandler } from '@/api/base';
-import { SERVER_NEXT_API_URL } from '@/constants';
+import { SERVER_NEXT_API_URL, USER_ACCESS_TOKEN_KEY } from '@/constants';
 import { type EventSourceMessage, EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source';
 
 /* 创建对话，返回一个 session_id 作为对话的唯一标识 */
@@ -29,7 +29,7 @@ export const completionStream = async (
   return fetchEventSource(`${SERVER_NEXT_API_URL}/chat/completion/stream/${sessionId}`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      Authorization: `Bearer ${localStorage.getItem(USER_ACCESS_TOKEN_KEY)}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({

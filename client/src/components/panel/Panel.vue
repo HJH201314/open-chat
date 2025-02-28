@@ -24,9 +24,9 @@
   overflow: hidden;
   // border: 2px solid $color-grey;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.01);
-  border-radius: .5rem;
+  border-radius: 12px;
   // padding: .5rem;
-  max-width: 1240px;
+  // max-width: 1240px;
   margin: 0 auto;
 }
 

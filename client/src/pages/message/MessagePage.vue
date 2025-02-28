@@ -50,8 +50,8 @@ watchEffect(() => {
   }
 });
 
-// 通过Transition的事件控制showEmptyTip，避免应用动画时刷新空空如也和消息列表挤压
-const showEmptyTip = ref(true);
+// 通过Transition的事件控制 isEmptyTipAvailable，避免应用动画时刷新空空如也和消息列表挤压
+const isEmptyTipAvailable = ref(true);
 </script>
 
 <template>
@@ -64,31 +64,30 @@ const showEmptyTip = ref(true);
       />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <Transition
-      :name="isLargeScreen ? 'slide-fade' : 'show'"
-      @before-enter="showEmptyTip = false"
-      @after-leave="showEmptyTip = true"
-    >
-      <DialogDetail
-        v-if="showDialogView && currentRecord.id"
-        id="dialog-detail-view"
-        :class="{
-          'message-page-dialog-detail-absolute': !isLargeScreen,
-        }"
-        :dialog-id="currentRecord.id"
-        class="message-page-dialog-detail transition-all-circ"
-        @back="() => router.back()"
-      />
-    </Transition>
-    <Transition name="ease-in">
-      <div
-        v-if="showDialogView && !currentRecord.id && showEmptyTip"
-        id="dialog-detail-empty-tip"
-        class="message-page-dialog-detail message-page-empty-tip"
+    <section v-show="showDialogView" class="session-right" :class="{'session-right-absolute': !isLargeScreen}">
+      <Transition
+        :name="isLargeScreen ? 'slide-fade' : ''"
+        @before-enter="isEmptyTipAvailable = false"
+        @after-leave="isEmptyTipAvailable = true"
       >
-        ╮(￣▽￣)╭<br />这里空空如也<br />
-      </div>
-    </Transition>
+        <DialogDetail
+          v-if="showDialogView && currentRecord.id"
+          id="dialog-detail-view"
+          :dialog-id="currentRecord.id"
+          class="message-page-dialog-detail transition-all-circ"
+          @back="() => router.back()"
+        />
+      </Transition>
+      <Transition name="ease-in">
+        <div
+          v-if="showDialogView && !currentRecord.id && isEmptyTipAvailable"
+          id="dialog-detail-empty-tip"
+          class="message-page-empty-tip"
+        >
+          ╮(￣▽￣)╭<br />这里空空如也<br />
+        </div>
+      </Transition>
+    </section>
   </div>
 </template>
 
@@ -117,8 +116,8 @@ const showEmptyTip = ref(true);
     height: 100%;
 
     &:not(&-absolute) {
-      min-width: calc(30% - 1px); // 防止右侧消息列表关闭时被挤压
-      max-width: calc(30% - 1px); // 防止右侧消息列表关闭时被挤压
+      width: 30%;
+      max-width: 20rem; // 防止右侧消息列表关闭时被挤压
     }
 
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
@@ -130,31 +129,34 @@ const showEmptyTip = ref(true);
   }
 
   &-dialog-detail {
-    height: 100%;
-    flex-shrink: 0;
-
-    &:not(&-absolute) {
-      max-width: calc(70% - 1px);
-      min-width: calc(70% - 1px);
-    }
-
-    // 在移动端使用absolute便于展示切换动画，否则会被挤压
-    &-absolute {
-      position: absolute;
-      left: 0;
-      right: 0;
-      background-color: white;
-    }
+    position: absolute;
+    inset: 0;
   }
 
   &-empty-tip {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
     color: $color-primary;
-    font-size: 24px;
+    font-size: 2rem;
     font-weight: bold;
+  }
+}
+
+.session-right {
+  position: relative;
+  height: 100%;
+  flex: 1;
+  flex-shrink: 0;
+
+  // 在移动端使用absolute便于展示切换动画，否则会被挤压
+  &-absolute {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: white;
   }
 }
 

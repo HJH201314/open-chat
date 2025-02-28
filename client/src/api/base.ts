@@ -3,7 +3,7 @@ import { SERVER_NEXT_API_URL, USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } fr
 import router from '@/plugins/router';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosRequestHeaders, type AxiosResponse } from 'axios';
 import { getActivePinia } from 'pinia';
 import { HttpClient } from '@/api/gen/http-client.ts';
 
@@ -66,7 +66,6 @@ export const createRequest = <TRes>(path: string, args: AxiosRequestConfig = {})
     ...args,
     headers: {
       ...args.headers,
-      token,
       Authorization: `Bearer ${token}`,
     },
   };

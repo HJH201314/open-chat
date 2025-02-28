@@ -26,9 +26,14 @@ export default typescriptEslint.config(
     },
     rules: {
       // 允许 any
-      "@typescript-eslint/no-explicit-any": "off",
+      '@typescript-eslint/no-explicit-any': 'off',
       // 明确指定导入 type
-      "@typescript-eslint/consistent-type-imports": "error",
+      '@typescript-eslint/consistent-type-imports': 'error',
+      // 不允许未使用的表达式但允许短路计算
+      '@typescript-eslint/no-unused-expressions': ['error', {
+        allowShortCircuit: true,
+        allowTernary: true,
+      }],
     },
   },
   eslintConfigPrettier

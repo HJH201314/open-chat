@@ -35,7 +35,7 @@ noPaddingBus.on((v) => {
   flex: 1;
   box-sizing: border-box;
   padding: 12px 12px 12px 0;
-  transition: padding 0.1s ease-in-out;
+  transition: padding 0.1s $ease-out-cubic;
   @media screen and (max-width: $screen-sm) {
     padding: 8px 8px 8px 0;
   }

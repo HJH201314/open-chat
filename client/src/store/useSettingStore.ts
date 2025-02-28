@@ -15,14 +15,6 @@ export type ChatSetting = {
   timeDisplayInMessageList?: string;
   defaultProvider?: string; // 默认 API 提供商
   defaultModel?: [string, string]; // 默认模型，形如 ['OpenAI', 'gpt-4o']
-
-  /* 语音输入相关 */
-  enableVoiceToText?: boolean; // 是否启用语音输入
-  enableTextToVoice?: boolean; // 是否启用结果转语音
-  voiceCloudAppId?: string; // 云服务AppID
-  voiceCloudSecretId?: string; // 云服务SecretId
-  voiceCloudSecretKey?: string; // 云服务SecretKey
-
   // 添加索引签名，允许使用字符串索引
   [key: string]: any;
 };
@@ -35,16 +27,10 @@ const defaultSetting: ChatSetting = {
   roleEnabled: false,
   roleRemember: false,
   roleDefaultId: '1',
-  enableVoiceToText: false,
-  enableTextToVoice: false,
   timeDisplayInDialogList: 'yyyy-MM-dd hh:mm:ss',
   timeDisplayInMessageList: 'yyyy-MM-dd hh:mm:ss',
   defaultProvider: 'OpenAI',
   defaultModel: ['OpenAI', 'gpt-4o'],
-
-  voiceCloudAppId: import.meta.env.VITE_CLOUD_VOICE_APPID,
-  voiceCloudSecretId: import.meta.env.VITE_CLOUD_VOICE_SECRET_ID,
-  voiceCloudSecretKey: import.meta.env.VITE_CLOUD_VOICE_SECRET_KEY,
 };
 
 /* 设置相关 */

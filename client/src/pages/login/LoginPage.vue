@@ -259,6 +259,7 @@ function showUserAgreement() {
       transition: all 0.2s $ease-out-circ;
 
       &:focus {
+        background: $color-white;
         border: 2px solid $color-primary;
       }
     }

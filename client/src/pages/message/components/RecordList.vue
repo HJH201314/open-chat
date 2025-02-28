@@ -153,8 +153,6 @@ const displayList = computed(() => {
 .dialog-list {
   position: relative;
   flex: 1;
-  width: 100%;
-  height: 100%;
 
   &-container {
     padding-top: 3rem;
@@ -186,9 +184,12 @@ const displayList = computed(() => {
 
     &-search {
       flex: 1;
+      height: 2rem;
       border-radius: 0.5rem;
       padding: 0.25rem 0.5rem;
       background-color: $color-grey-200;
+      box-sizing: border-box;
+      border: 2px solid transparent;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -196,7 +197,9 @@ const displayList = computed(() => {
       opacity: 0.6;
 
       &:focus-within {
-        background-color: $color-grey-300;
+      opacity: 0.6;
+        background-color: white;
+        border: 2px solid $color-primary;
       }
 
       &-icon {
@@ -243,7 +246,7 @@ const displayList = computed(() => {
     border-radius: 0.5rem;
     background-color: #ffffff;
     cursor: pointer;
-    transition: background-color 0.2s $ease-out-circ;
+    transition: background-color 0.2s $ease-out-cubic;
     display: flex;
     flex-direction: row;
     gap: 0.5rem;

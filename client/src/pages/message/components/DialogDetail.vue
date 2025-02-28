@@ -18,6 +18,7 @@ import { until, useElementSize, useFocusWithin } from '@vueuse/core';
 import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { storeToRefs } from 'pinia';
+import { scrollToBottom } from '@/utils/element.ts';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -39,22 +40,14 @@ const { providerDropdown } = storeToRefs(useModelStore());
 const dialogInfo = ref<DialogInfo>({} as DialogInfo);
 const messageList = ref([] as MsgInfo[]);
 
+const isEmptySession = computed(() => messageList.value.length == 0);
+
 const form = reactive({
   sessionId: ref(''),
   withContext: ref(false),
   providerModel: ref<[string, string]>(['DeepSeek', 'deepseek-v3-241226']),
   inputValue: ref(''),
 });
-
-function scrollToBottom() {
-  nextTick(() => {
-    document.querySelector(`#bottom-line`)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'end',
-      inline: 'nearest',
-    });
-  });
-}
 
 onMounted(() => {
   watch(
@@ -68,11 +61,11 @@ onMounted(() => {
         messageList.value = dataStore.getMessageList(v);
         // 等待到 panelHeight 被成功计算、插入占位高度并 nextTick 渲染完成后
         await until(panelHeight).toMatch((v) => v > 0);
-        await nextTick(() => {
+        setTimeout(() => {
           // 滚动到列表底部并默认聚焦输入框
-          scrollToBottom();
+          scrollDialogListToBottom();
           focusTextArea();
-        });
+        }, 50);
       }
     },
     { immediate: true },
@@ -108,6 +101,12 @@ useAutoScrollbar(dialogListRef);
 watchEffect(() => {
   if (inputFocused.value) smallInput.value = false;
 });
+
+function scrollDialogListToBottom() {
+  nextTick(() => {
+    dialogListRef.value && scrollToBottom(dialogListRef.value, 'smooth');
+  });
+}
 
 function focusTextArea() {
   textAreaRef.value?.focus();
@@ -170,11 +169,11 @@ async function handleSendMessage() {
       if (messageList.value.length < 3 && messageList.value[0] && !dataStore.getDialogInfo(form.sessionId).title) {
         dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
       }
-      scrollToBottom();
+      scrollDialogListToBottom();
     },
   });
   nextTick(() => {
-    scrollToBottom();
+    scrollDialogListToBottom();
   });
 }
 
@@ -236,72 +235,76 @@ const { isSmallScreen } = useGlobal();
         <Delete size="16"/>
       </IconButton>
     </div>
-    <div ref="dialog-list" class="dialog-detail-dialogs">
-      <!--   列表底部定位（此列表为 column-reverse）   -->
-      <div id="bottom-line"></div>
-      <!--   消息列表   -->
-      <DialogMessage
-        v-if="thinkMsg || answerMsg" id="bot-typing-box"
-        :thinking="thinkMsg" :html-message="answerMsg" role="bot"/>
-      <DialogMessage
-        v-if="!isReceivingMsg && form.inputValue"
-        id="user-typing-box"
-        :markdown-render="false"
-        :message="form.inputValue"
-        role="user"
-      />
-      <DialogMessage
-        v-for="item in messageList.toReversed()"
-        :id="item.time"
-        :key="item.id || item.time"
-        :html-message="item.htmlContent"
-        :message="item.content"
-        :thinking="item.reasoningContent"
-        :role="item.sender"
-        :time="item.time"
-      />
-      <!--   列表顶部定位   -->
-      <div id="top-line"></div>
-    </div>
-    <!-- 浮动输入面板 -->
-    <div
-      ref="input-panel"
-      :class="{ 'dialog-detail-inputs--first': messageList.length === 0, 'small-input': smallInput }"
-      class="dialog-detail-inputs"
-    >
-      <Transition name="slide-top-fade">
-        <div v-show="!smallInput" class="dialog-detail-inputs-bar">
-          <CusSelect
-            v-model="form.providerModel[1]"
-            :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
-            :options="providerDropdown"
-            :toggle-style="{ opacity: 0.75 }"
-            position="top"
-            style="font-size: 0.75rem"
-            @select="(v, o, path) => handleModelSelect(path)"
-          />
-          <CusToggle
-            v-model="form.withContext"
-            highlight
-            label="上下文"
-            style="font-size: 0.75rem; opacity: 0.75"
-          ></CusToggle>
-          <div class="dialog-detail-inputs-bar-expand" @click="smallInput = !smallInput">
-            <CollapseTextInput size="16"/>
+    <div class="dialog-detail-display-area">
+      <div ref="dialog-list" class="dialog-detail-dialogs">
+        <!--   列表底部定位（此列表为 column-reverse）   -->
+        <div id="bottom-line"></div>
+        <!--   消息列表   -->
+        <DialogMessage
+          v-if="thinkMsg || answerMsg" id="bot-typing-box"
+          :thinking="thinkMsg" :html-message="answerMsg" role="bot"/>
+        <DialogMessage
+          v-if="!isReceivingMsg && !isEmptySession && form.inputValue"
+          id="user-typing-box"
+          :markdown-render="false"
+          :message="form.inputValue"
+          role="user"
+        />
+        <DialogMessage
+          v-for="item in messageList.toReversed()"
+          :id="item.time"
+          :key="item.id || item.time"
+          :html-message="item.htmlContent"
+          :message="item.content"
+          :thinking="item.reasoningContent"
+          :role="item.sender"
+          :time="item.time"
+        />
+        <!--   列表顶部定位   -->
+        <div id="top-line"></div>
+      </div>
+      <!-- 空空提示 -->
+      <div v-if="isEmptySession" class="dialog-detail-empty">随便问点啥？</div>
+      <!-- 输入面板 -->
+      <div
+        ref="input-panel"
+        :class="{ 'dialog-detail-inputs--first': isEmptySession && !isSmallScreen, 'small-input': smallInput }"
+        class="dialog-detail-inputs"
+      >
+        <Transition name="slide-top-fade">
+          <div v-show="!smallInput" class="dialog-detail-inputs-bar">
+            <CusSelect
+              v-model="form.providerModel[1]"
+              :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
+              :options="providerDropdown"
+              :toggle-style="{ opacity: 0.75 }"
+              position="top"
+              style="font-size: 0.75rem"
+              @select="(v, o, path) => handleModelSelect(path)"
+            />
+            <CusToggle
+              v-model="form.withContext"
+              highlight
+              label="上下文"
+              style="font-size: 0.75rem; opacity: 0.75"
+            ></CusToggle>
+            <div class="dialog-detail-inputs-bar-expand" @click="smallInput = !smallInput">
+              <CollapseTextInput size="16"/>
+            </div>
           </div>
+        </Transition>
+        <textarea
+          id="message-input"
+          ref="input-textarea"
+          v-model="form.inputValue"
+          class="dialog-detail-inputs-textarea"
+          placeholder="随便问点啥(●'◡'●)"
+          @keydown="(e) => handleInputKeydown(e)"
+        />
+        <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
+          <ArrowUp v-if="!isReceivingMsg" fill="white" size="16"/>
+          <spinning v-else/>
         </div>
-      </Transition>
-      <textarea
-        id="message-input"
-        ref="input-textarea"
-        v-model="form.inputValue"
-        class="dialog-detail-inputs-textarea"
-        placeholder="随便问点啥(●'◡'●)"
-        @keydown="(e) => handleInputKeydown(e)"
-      />
-      <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
-        <ArrowUp v-if="!isReceivingMsg" fill="white" size="16"/>
-        <spinning v-else/>
       </div>
     </div>
   </div>
@@ -327,7 +330,7 @@ const { isSmallScreen } = useGlobal();
     padding: 0.5rem;
     background-color: rgba(255 255 255 / 80%);
     backdrop-filter: blur(10px);
-
+    z-index: 1;
 
     &-area-left {
       margin-right: auto;
@@ -358,6 +361,14 @@ const { isSmallScreen } = useGlobal();
     }
   }
 
+  &-display-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 48rem;
+    margin-inline: auto;
+  }
+
   &-dialogs {
     width: 100%;
     height: 100%;
@@ -371,10 +382,25 @@ const { isSmallScreen } = useGlobal();
       margin-bottom: 0.5rem;
     }
 
+    > :first-child {
+      margin-bottom: auto;
+    }
+
     // 最顶上的元素
     > :last-child {
       margin-top: 2.6rem;
     }
+  }
+
+  &-empty {
+    position: absolute;
+    width: 100%;
+    font-size: 2rem;
+    font-weight: bold;
+    color: $color-primary-darker;
+    text-align: center;
+    top: calc(50%);
+    transform: translateY(calc(-50% - 2.5em));
   }
 
   &-inputs {
@@ -390,23 +416,16 @@ const { isSmallScreen } = useGlobal();
     padding: 0.25rem;
     backdrop-filter: blur(10px);
 
-    .small-screen & {
-      position: fixed;
-      bottom: 0.25rem;
-      left: 0.25rem;
-      right: 0.25rem;
-    }
-
     &.small-input {
       gap: 0;
     }
 
     &--first {
-      margin-top: unset;
-      //position: absolute;
-      //width: 100%;
-      //top: 50%;
-      //transform: translateY(-50%);
+      top: 50%;
+      left: 0.25rem;
+      right: 0.25rem;
+      bottom: unset;
+      transform: translateY(calc(-50% + 2rem));
     }
 
     &-textarea {

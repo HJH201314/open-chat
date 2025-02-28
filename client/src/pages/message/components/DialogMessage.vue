@@ -74,7 +74,8 @@ const { isLargeScreen } = useGlobal();
         <div v-if="thinking" class="dialog-message-content-think">
           {{ thinking }}
         </div>
-        <div class="dialog-message-content-body" v-html="renderMessage" />
+        <div v-if="useOriginMessage" class="dialog-message-content-body" style="white-space: pre-wrap;" v-text="renderMessage" />
+        <div v-else class="dialog-message-content-body" v-html="renderMessage" />
       </div>
     </div>
     <div class="dialog-message-time">

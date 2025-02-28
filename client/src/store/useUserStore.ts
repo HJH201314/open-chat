@@ -76,7 +76,8 @@ export const useUserStore = defineStore('user', () => {
     loginStatus.value = 'logout';
     permission.value = 0;
     currentUser.value = {};
-    localStorage.removeItem('token');
+    accessToken.value = '';
+    refreshToken.value = '';
     pausePing();
   }
 
