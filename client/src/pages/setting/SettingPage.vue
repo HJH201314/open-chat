@@ -145,12 +145,12 @@ function forceReloadPage() {
             <span class="setting-list-item__title">默认 API 服务模型</span>
             <span class="setting-list-item__value">
               <CusSelect
-                v-model="editingValue.defaultProvider"
+                v-model="editingValue.defaultModel"
                 :options="addChildrenDropdownOptions(providerDropdown, () => ({
                   position: isLargeScreen ? 'right' : 'left'
                 }))"
                 :position="isLargeScreen ? 'bottom' : 'left'"
-                @select="(option, value, path) => (editingValue.defaultModel = [path[0], path[1]])"
+                @select="(option, value, path) => (editingValue.defaultProvider = path[0] || '')"
               />
             </span>
           </div>

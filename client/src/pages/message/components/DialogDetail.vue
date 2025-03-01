@@ -45,7 +45,8 @@ const isEmptySession = computed(() => messageList.value.length == 0);
 const form = reactive({
   sessionId: ref(''),
   withContext: ref(false),
-  providerModel: ref<[string, string]>(['DeepSeek', 'deepseek-v3-241226']),
+  providerName: ref(''),
+  modelName: ref(''),
   inputValue: ref(''),
 });
 
@@ -57,7 +58,8 @@ onMounted(() => {
         dialogInfo.value = dataStore.getDialogInfo(v);
         form.sessionId = v;
         form.withContext = dialogInfo.value.withContext ?? false;
-        form.providerModel = [dialogInfo.value.provider ?? 'DeepSeek', dialogInfo.value.model ?? 'deepseek-v3-241226'];
+        form.providerName = dialogInfo.value.provider || '';
+        form.modelName = dialogInfo.value.model || '';
         messageList.value = dataStore.getMessageList(v);
         // 等待到 panelHeight 被成功计算、插入占位高度并 nextTick 渲染完成后
         await until(panelHeight).toMatch((v) => v > 0);
@@ -82,9 +84,9 @@ watch(
 );
 
 watch(
-  () => form.providerModel,
+  () => [form.providerName, form.modelName],
   (newVal, oldVal) => {
-    if (newVal !== oldVal) {
+    if (newVal[0] !== oldVal[0] || newVal[1] !== oldVal[1]) {
       dataStore.changeDialogModel(form.sessionId, newVal[0], newVal[1]);
     }
   },
@@ -132,7 +134,8 @@ function handleSendClick() {
 
 function handleModelSelect(selectPath: string[]) {
   if (selectPath.length == 2) {
-    form.providerModel = [selectPath[0], selectPath[1]];
+    form.providerName = selectPath[0];
+    form.modelName = selectPath[1];
   }
   focusTextArea();
 }
@@ -274,7 +277,7 @@ const { isSmallScreen } = useGlobal();
         <Transition name="slide-top-fade">
           <div v-show="!smallInput" class="dialog-detail-inputs-bar">
             <CusSelect
-              v-model="form.providerModel[1]"
+              v-model="form.modelName"
               :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
               :options="providerDropdown"
               :toggle-style="{ opacity: 0.75 }"
@@ -460,6 +463,7 @@ const { isSmallScreen } = useGlobal();
     &-bar {
       display: flex;
       flex-direction: row;
+      align-items: center;
       gap: 0.5rem;
 
       &-icon {

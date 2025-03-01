@@ -74,8 +74,8 @@ export const useDataStore = defineStore('data', () => {
           storageKey: `dialog-${sessionId}`,
           createAt: new Date().toLocaleString(),
           withContext: true,
-          provider: settingStore.settings.defaultModel?.[0] ?? 'OpenAI',
-          model: settingStore.settings.defaultModel?.[1] ?? 'gpt-4o',
+          provider: settingStore.settings.defaultProvider ?? 'OpenAI',
+          model: settingStore.settings.defaultModel ?? 'gpt-4o',
         };
       }
       return sessionId;
