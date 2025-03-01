@@ -37,15 +37,18 @@ function handleInput(e: any) {
 .cus-input {
   outline: none;
   resize: none;
-  border: none;
+  border: 2px solid $color-grey-100;
   width: 100%;
+  height: 2rem;
   box-sizing: border-box;
   border-radius: .5rem;
   padding: .25rem .5rem;
-  transition: background-color .2s $ease-out-circ;
+  transition: background-color .2s $ease-out-circ, border .2s $ease-out-circ;
   background-color: $color-grey-100;
+
   &:focus {
-    background-color: $color-grey-300;
+    background-color: $color-white;
+    border: 2px solid $color-primary;
   }
 }
 </style>

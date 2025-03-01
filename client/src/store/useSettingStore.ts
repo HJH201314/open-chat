@@ -2,13 +2,14 @@ import useGlobal from '@/commands/useGlobal';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { computed, onMounted } from 'vue';
+import { SERVER_NEXT_API_URL } from '@/constants';
 
 // 聊天设置的配置版本号，用于实现自动升级
 const currentChatSettingVersion = 1;
 
 export type ChatSetting = {
   version?: number;
-  host?: string;
+  baseUrl?: string;
   localCache?: boolean; // 本地对话数据缓存
   markdownCache?: boolean; // 缓存 Markdown 渲染后的 HTML
   fastSendKey?: 'enter' | 'none'; // 快速发送按键
@@ -25,7 +26,7 @@ export type ChatSetting = {
 
 const defaultSetting: ChatSetting = {
   version: currentChatSettingVersion,
-  host: '/api',
+  baseUrl: SERVER_NEXT_API_URL,
   localCache: true,
   markdownCache: true,
   fastSendKey: useGlobal().isLargeScreen ? 'enter' : 'none', // 宽屏默认回车发送

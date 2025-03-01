@@ -157,7 +157,7 @@ function handleGithubClick() {
 const settingStore = useSettingStore();
 
 function handleApiClick() {
-  window.open(settingStore.settings.host + '/docs/api/');
+  window.open(settingStore.settings.baseUrl + '/docs/api/');
 }
 
 // 点击 Sidebar 外部隐藏

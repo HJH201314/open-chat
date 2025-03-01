@@ -98,7 +98,7 @@ function forceReloadPage() {
           <div class="setting-list-item">
             <span class="setting-list-item__title">API地址</span>
             <span class="setting-list-item__value">
-              <CusInput v-model="editingValue.host" placeholder="Cloud API"/>
+              <CusInput v-model="editingValue.baseUrl" placeholder="后端服务地址"/>
             </span>
           </div>
         </div>

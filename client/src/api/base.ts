@@ -3,7 +3,7 @@ import { SERVER_NEXT_API_URL, USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } fr
 import router from '@/plugins/router';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import axios, { type AxiosRequestConfig, type AxiosRequestHeaders, type AxiosResponse } from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { getActivePinia } from 'pinia';
 import { HttpClient } from '@/api/gen/http-client.ts';
 
@@ -71,7 +71,7 @@ export const createRequest = <TRes>(path: string, args: AxiosRequestConfig = {})
   };
 
   // Optionally update the base URL
-  const host = useSettingStore().settings.host;
+  const host = useSettingStore().settings.baseUrl;
   if (host) config.baseURL = `${host}/next`;
 
   return axiosInstance.request<TRes>(config);
@@ -97,6 +97,10 @@ genApiClient.instance.interceptors.request.use(
     req.headers['Authorization'] = localStorage.getItem(USER_ACCESS_TOKEN_KEY)
       ? `Bearer ${localStorage.getItem(USER_ACCESS_TOKEN_KEY)}`
       : '';
+    if (getActivePinia()) {
+      const baseUrl = useSettingStore().settings.baseUrl;
+      baseUrl && (req.baseURL = baseUrl);
+    }
     return req;
   },
 );
