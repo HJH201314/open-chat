@@ -20,6 +20,7 @@ import { storeToRefs } from 'pinia';
 import { scrollToBottom } from '@/utils/element.ts';
 import genApi from '@/api/gen-api.ts';
 import useSession from '@/store/data/useSession.ts';
+import ToastManager from '@/components/toast/ToastManager.ts';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -152,28 +153,34 @@ const {
 
 async function handleSendMessage() {
   if (!userStore.isLogin) {
-    showToast({ text: '请先登录！', type: 'warning' });
+    ToastManager.warning('请先登录！');
     return;
   }
   if (!form.sessionId || !form.inputValue) return;
   if (isReceivingMsg.value) {
-    showToast({ text: '不能同时回答多个问题哦！', type: 'warning' });
+    ToastManager.warning('不能同时回答多个问题哦！');
     return;
   }
   // 发送消息
-  startReceivingMsg(form.sessionId, form.inputValue, {
-    onSaveUserMsg() {
-      form.inputValue = '';
-    },
-    onFinish() {
-      clearReceivingMsg();
-      console.log(messageList.value);
-      if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
-        dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
-      }
-      scrollDialogListToBottom();
-    },
-  });
+  try {
+    await startReceivingMsg(form.sessionId, form.inputValue, {
+      onSaveUserMsg() {
+        form.inputValue = '';
+      },
+      onFinish() {
+        clearReceivingMsg();
+        console.log(messageList.value);
+        if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
+          dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
+        }
+        scrollDialogListToBottom();
+      },
+    });
+  } catch (e) {
+    if (typeof e == 'string') {
+      ToastManager.danger(e);
+    }
+  }
   nextTick(() => {
     scrollDialogListToBottom();
   });

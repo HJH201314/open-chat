@@ -51,14 +51,14 @@ export const useDataStore = defineStore('data', () => {
    * 创建一个对话，成功返回 sessionId，失败返回 ''
    * @param role 角色 ID
    */
-  async function addDialog(role?: number) {
+  async function addSession(role?: number) {
     try {
       // 获取session_id
       const { status, data } = await api.chat.createSession();
       const sessionId = data.data;
       console.log(data);
       if (status === 200 && data.data) {
-        db.sessions.add({
+        await db.sessions.add({
           id: sessionId,
           title: '',
           avatar: '',
@@ -80,26 +80,26 @@ export const useDataStore = defineStore('data', () => {
     return '';
   }
 
-  function editDialogTitle(sessionId: string, newTitle: string) {
+  function editSessionTitle(sessionId: string, newTitle: string) {
     db.sessions.where({ id: sessionId }).modify((session) => {
       session.title = newTitle;
     });
   }
 
-  function toggleDialogContext(sessionId: string, isOpen: boolean) {
+  function toggleSessionContext(sessionId: string, isOpen: boolean) {
     db.sessions.where({ id: sessionId }).modify((session) => {
       session.withContext = isOpen;
     });
   }
 
-  function changeDialogModel(sessionId: string, providerName: string, modelName: string) {
+  function changeSessionModel(sessionId: string, providerName: string, modelName: string) {
     db.sessions.where({ id: sessionId }).modify((session) => {
       session.provider = providerName;
       session.model = modelName;
     });
   }
 
-  async function delDialog(sessionId: string) {
+  async function delSession(sessionId: string) {
     // 本地删除
     await db.sessions.delete(sessionId);
     // 远程删除
@@ -114,7 +114,6 @@ export const useDataStore = defineStore('data', () => {
    * @param abort AbortController
    */
   const sendMessageText = async (sessionId: string, message: string, callback?: MessageCallback, abort?: AbortController) => {
-    console.log('1', message)
     if (message == '') return Promise.reject();
     const ctrl = abort || new AbortController();
     const rawData = reactive({
@@ -124,19 +123,18 @@ export const useDataStore = defineStore('data', () => {
     const { commands, commandMap } = useCommandParser(() => rawData.msg);
     const { result: renderedMsg } = useMarkdownIt(() => rawData.msg);
     const session = await getSessionInfo(sessionId);
-    console.log(session)
     if (!session) return;
+    if (!session.provider || !session.model) return Promise.reject('请先选择模型');
     let msgIds: [string | undefined, string | undefined] = [undefined, undefined];
 
     const userMsgIndex = await saveMessage(sessionId, message, 'user', 'text');
-    console.log('userMsgIndex: ', userMsgIndex)
     callback?.onSaveUserMsg?.();
 
     // 观测回答数据中的指令
     watchArray(commands, () => {
       const titleCmd = commandMap.value['title'];
       if (titleCmd) {
-        editDialogTitle(sessionId, titleCmd.values[0]);
+        editSessionTitle(sessionId, titleCmd.values[0]);
         // console.log('findTitle', titleCmd, rawMsg.value);
         rawData.msg = rawData.msg.replace(titleCmd.raw, '');
       }
@@ -193,10 +191,10 @@ export const useDataStore = defineStore('data', () => {
     let abortController = new AbortController();
     let timeout: number | undefined;
 
-    const startStreaming = (sessionId: string, message: string, customReceiver?: MessageCallback) => {
+    const startStreaming = async (sessionId: string, message: string, customReceiver?: MessageCallback) => {
       isStreaming.value = true;
       abortController = new AbortController();
-      sendMessageText(sessionId, message, {
+      return sendMessageText(sessionId, message, {
         ...customReceiver || {},
         onMessage(msg) {
           answerMessage.value = msg;
@@ -300,11 +298,11 @@ export const useDataStore = defineStore('data', () => {
 
   return {
     sessions,
-    addDialog,
-    editDialogTitle,
-    toggleDialogContext,
-    changeDialogModel,
-    delDialog,
+    addDialog: addSession,
+    editDialogTitle: editSessionTitle,
+    toggleDialogContext: toggleSessionContext,
+    changeDialogModel: changeSessionModel,
+    delDialog: delSession,
     sendMessageText,
     searchDialog,
     useSendMessageText,
