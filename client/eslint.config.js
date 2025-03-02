@@ -31,9 +31,22 @@ export default typescriptEslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
       // 不允许未使用的表达式但允许短路计算
       '@typescript-eslint/no-unused-expressions': ['error', {
-        allowShortCircuit: true,
-        allowTernary: true,
+        "allowShortCircuit": true,
+        "allowTernary": true,
       }],
+      // 不允许未使用的变量，但支持_
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "args": "all",
+          "argsIgnorePattern": "^_",
+          "caughtErrors": "all",
+          "caughtErrorsIgnorePattern": "^_",
+          "destructuredArrayIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "ignoreRestSiblings": true
+        }
+      ],
     },
   },
   eslintConfigPrettier
