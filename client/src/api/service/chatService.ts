@@ -19,8 +19,9 @@ export const deleteSession = (sessionId: string) =>
  * @param options
  * @param signal
  * @param onMessage
+ * @throws err 流式传输中途出问题时抛出异常
  */
-export const completionStream = async (
+export const completionStream = (
   options: API.ChatCompletionOption,
   signal: AbortSignal,
   onMessage: (e: EventSourceMessage) => void
@@ -40,7 +41,7 @@ export const completionStream = async (
       question: msg,
     }),
     signal: signal,
-    openWhenHidden: true,
+    openWhenHidden: true, // 页面隐藏时不中断
     async onopen(response) {
       if (response.ok && response.headers.get('Content-Type') === EventStreamContentType) {
         successHandler(response);
@@ -48,6 +49,9 @@ export const completionStream = async (
       } else {
         errorHandler(response);
       }
+    },
+    onerror(err) {
+      throw err;
     },
     // 接收流式消息
     onmessage: onMessage,

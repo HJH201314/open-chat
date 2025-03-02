@@ -20,7 +20,12 @@ export interface ApiChatCompletionStreamUserInput {
   system_prompt?: string;
 }
 
-export interface ApiEntityCommonResponseAny {
+export interface ApiChatGetMessagesResType {
+  messages?: ApiModelsMessage[];
+  next_page?: number;
+}
+
+export interface ApiEntitiesCommonResponseAny {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -29,7 +34,7 @@ export interface ApiEntityCommonResponseAny {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseArrayModelsModelCache {
+export interface ApiEntitiesCommonResponseArrayModelsModelCache {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -38,7 +43,7 @@ export interface ApiEntityCommonResponseArrayModelsModelCache {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseArrayModelsProvider {
+export interface ApiEntitiesCommonResponseArrayModelsProvider {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -47,7 +52,7 @@ export interface ApiEntityCommonResponseArrayModelsProvider {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseBool {
+export interface ApiEntitiesCommonResponseBool {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -56,7 +61,16 @@ export interface ApiEntityCommonResponseBool {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseModelsProvider {
+export interface ApiEntitiesCommonResponseChatGetMessagesResType {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiChatGetMessagesResType;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntitiesCommonResponseModelsProvider {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -65,7 +79,7 @@ export interface ApiEntityCommonResponseModelsProvider {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseModelsUser {
+export interface ApiEntitiesCommonResponseModelsUser {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -74,7 +88,7 @@ export interface ApiEntityCommonResponseModelsUser {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseString {
+export interface ApiEntitiesCommonResponseString {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -90,6 +104,17 @@ export interface ApiModelsAPIKey {
   key?: string;
   /** 外键，指向 Provider */
   provider_id?: number;
+}
+
+export interface ApiModelsMessage {
+  content?: string;
+  created_at?: string;
+  id?: number;
+  /** 回复所使用的模型 */
+  model_id?: number;
+  /** user/assistant/system */
+  role?: string;
+  session_id?: string;
 }
 
 export interface ApiModelsModel {

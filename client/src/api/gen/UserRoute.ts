@@ -10,8 +10,8 @@
  */
 
 import type {
-  ApiEntityCommonResponseBool,
-  ApiEntityCommonResponseModelsUser,
+  ApiEntitiesCommonResponseBool,
+  ApiEntitiesCommonResponseModelsUser,
   ApiUserLoginLoginRequest,
   ApiUserRegisterRegisterRequest,
 } from './data-contracts';
@@ -23,14 +23,14 @@ export namespace User {
    * @name LoginPost
    * @summary 用户登录
    * @request POST:/user/login
-   * @response `200` `ApiEntityCommonResponseModelsUser` login successfully
+   * @response `200` `ApiEntitiesCommonResponseModelsUser` login successfully
    */
   export namespace LoginPost {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = ApiUserLoginLoginRequest;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseModelsUser;
+    export type ResponseBody = ApiEntitiesCommonResponseModelsUser;
   }
 
   /**
@@ -39,15 +39,15 @@ export namespace User {
    * @name PingPost
    * @summary 检测客户端登录态
    * @request POST:/user/ping
-   * @response `200` `ApiEntityCommonResponseModelsUser` user is online
-   * @response `404` `ApiEntityCommonResponseAny` user not found
+   * @response `200` `ApiEntitiesCommonResponseModelsUser` user is online
+   * @response `404` `ApiEntitiesCommonResponseAny` user not found
    */
   export namespace PingPost {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseModelsUser;
+    export type ResponseBody = ApiEntitiesCommonResponseModelsUser;
   }
 
   /**
@@ -75,13 +75,13 @@ export namespace User {
    * @name RegisterPost
    * @summary 用户注册
    * @request POST:/user/register
-   * @response `200` `ApiEntityCommonResponseBool` register successfully
+   * @response `200` `ApiEntitiesCommonResponseBool` register successfully
    */
   export namespace RegisterPost {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = ApiUserRegisterRegisterRequest;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseBool;
+    export type ResponseBody = ApiEntitiesCommonResponseBool;
   }
 }

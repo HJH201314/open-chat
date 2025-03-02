@@ -36,3 +36,30 @@ export type MsgData = {
   messages?: MsgInfo[];
   version?: number;
 };
+
+/* 上方为旧版使用 localStorage 储存的数据，下方为 IndexedDB 数据结构 */
+
+export type SessionInfo = {
+  id: string; // session_id
+  title: string;
+  avatar: string;
+  botRole: string; // bot角色
+  createAt: string;
+  withContext: boolean; // 是否启用上下文
+  provider?: string; // 模型供应商
+  model?: string; // 模型名称
+}
+
+export type MessageInfo = {
+  id: number; // 本地ID
+  sessionId: string; // 关联 session_id
+  remoteId?: string; // 服务器消息 ID
+  time: string; // 消息发送/接收时间
+  sender: 'user' | 'bot'; // 消息发送者
+  type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other'; // 消息类型
+  content: string; // 消息原始内容
+  reasoningContent?: string; // 思考消息原始内容
+  htmlContent?: string; // 编译后的html 消息内容
+
+  [key: string]: any;
+}

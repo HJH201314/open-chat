@@ -72,7 +72,7 @@ export const createRequest = <TRes>(path: string, args: AxiosRequestConfig = {})
 
   // Optionally update the base URL
   const host = useSettingStore().settings.baseUrl;
-  if (host) config.baseURL = `${host}/next`;
+  if (host) config.baseURL = host;
 
   return axiosInstance.request<TRes>(config);
 };
