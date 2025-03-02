@@ -5,20 +5,21 @@ import useGlobal from '@/commands/useGlobal';
 import { DialogManager } from '@/components/dialog';
 import CusSelect from '@/components/dropdown/CusSelect.vue';
 import IconButton from '@/components/IconButton.vue';
-import Spinning from '@/components/spinning/Spinning.vue';
+import CusSpin from '@/components/spinning/CusSpin.vue';
 import showToast from '@/components/toast/toast';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import DialogMessage from '@/pages/message/components/DialogMessage.vue';
 import { useDataStore } from '@/store/useDataStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import type { DialogInfo, MsgInfo } from '@/types/data';
-import { ArrowUp, Back, CollapseTextInput, Delete, Edit } from '@icon-park/vue-next';
+import { ArrowUp, Back, CollapseTextInput, Delete, Edit, Refresh } from '@icon-park/vue-next';
 import { until, useElementSize, useFocusWithin } from '@vueuse/core';
 import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { storeToRefs } from 'pinia';
 import { scrollToBottom } from '@/utils/element.ts';
+import genApi from '@/api/gen-api.ts';
+import useSession from '@/store/data/useSession.ts';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -37,9 +38,6 @@ const userStore = useUserStore();
 const settingStore = useSettingStore();
 const { providerDropdown } = storeToRefs(useModelStore());
 
-const dialogInfo = ref<DialogInfo>({} as DialogInfo);
-const messageList = ref([] as MsgInfo[]);
-
 const isEmptySession = computed(() => messageList.value.length == 0);
 
 const form = reactive({
@@ -50,17 +48,14 @@ const form = reactive({
   inputValue: ref(''),
 });
 
+const { session: sessionInfo, messages: messageList } = useSession(() => form.sessionId);
+
 onMounted(() => {
   watch(
     () => props.dialogId,
     async (v) => {
       if (props.dialogId != '') {
-        dialogInfo.value = dataStore.getDialogInfo(v);
         form.sessionId = v;
-        form.withContext = dialogInfo.value.withContext ?? false;
-        form.providerName = dialogInfo.value.provider || '';
-        form.modelName = dialogInfo.value.model || '';
-        messageList.value = dataStore.getMessageList(v);
         // 等待到 panelHeight 被成功计算、插入占位高度并 nextTick 渲染完成后
         await until(panelHeight).toMatch((v) => v > 0);
         setTimeout(() => {
@@ -72,6 +67,12 @@ onMounted(() => {
     },
     { immediate: true },
   );
+});
+
+watchEffect(() => {
+  form.withContext = sessionInfo.value.withContext ?? false;
+  form.providerName = sessionInfo.value.provider || '';
+  form.modelName = sessionInfo.value.model || '';
 });
 
 watch(
@@ -163,13 +164,11 @@ async function handleSendMessage() {
   startReceivingMsg(form.sessionId, form.inputValue, {
     onSaveUserMsg() {
       form.inputValue = '';
-      messageList.value = dataStore.getMessageList(form.sessionId);
     },
     onFinish() {
       clearReceivingMsg();
-      messageList.value = dataStore.getMessageList(form.sessionId);
       console.log(messageList.value);
-      if (messageList.value.length < 3 && messageList.value[0] && !dataStore.getDialogInfo(form.sessionId).title) {
+      if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
         dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
       }
       scrollDialogListToBottom();
@@ -177,6 +176,38 @@ async function handleSendMessage() {
   });
   nextTick(() => {
     scrollDialogListToBottom();
+  });
+}
+
+// 从服务器同步数据
+const refreshing = ref(false);
+
+async function handleSyncDialog() {
+  await DialogManager.commonDialog({
+    title: '同步对话数据',
+    subtitleStyle: {
+      color: 'red',
+    },
+    content: '此举将会将本地数据与服务器数据同步<br/> 1. 删除本地可能存在的的多余数据<br /> 2. 保存远程新增数据<br/> 是否同步？',
+    async confirmHandler(controller) {
+      let nextPage = 1;
+      while (nextPage) {
+        try {
+          const res = await genApi.Chat.messageListGet(form.sessionId, {
+            page_num: nextPage,
+            page_size: 20,
+            sort_expr: 'id DESC',
+          }, {
+            signal: controller.signal,
+          });
+          // todo: handle messages
+          if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
+          else break;
+        } catch (_) {
+          break;
+        }
+      }
+    },
   });
 }
 
@@ -188,12 +219,12 @@ function handleEditDialog() {
     },
     {
       placeholder: '新对话名称',
-      value: dialogInfo.value.title,
+      value: sessionInfo.value.title,
     },
   ).then((res) => {
     if (res.status && res.value) {
       // 确认修改
-      dataStore.editDialogTitle(dialogInfo.value.id, res.value);
+      dataStore.editDialogTitle(form.sessionId, res.value);
     }
   });
 }
@@ -201,7 +232,7 @@ function handleEditDialog() {
 function handleDeleteDialog() {
   DialogManager.commonDialog({
     title: '删除对话',
-    content: `你将永久丢失与 ${dialogInfo.value.botRole} 的 对话 <${dialogInfo.value.title}> <br />这是不可逆的！`,
+    content: `你将永久丢失与 ${sessionInfo.value.botRole} 的 对话 <${sessionInfo.value.title}> <br />这是不可逆的！`,
     confirmButtonProps: {
       backgroundColor: variables.colorDanger,
     },
@@ -224,10 +255,15 @@ const { isSmallScreen } = useGlobal();
           <Back size="16"/>
         </IconButton>
         <span class="dialog-detail-actions-title">
-          {{ dialogInfo.title || '未命名对话' }}
+          {{ sessionInfo.title || '未命名对话' }}
         </span>
         <span class="dialog-detail-actions-subtitle"> {{ messageList.length }} 条消息 </span>
       </div>
+      <IconButton style="flex-shrink: 0" @click="handleSyncDialog">
+        <cus-spin :show="refreshing">
+          <Refresh size="16"/>
+        </cus-spin>
+      </IconButton>
       <IconButton style="flex-shrink: 0" @click="handleEditDialog">
         <Edit size="16"/>
       </IconButton>
@@ -306,7 +342,7 @@ const { isSmallScreen } = useGlobal();
         />
         <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
           <ArrowUp v-if="!isReceivingMsg" fill="white" size="16"/>
-          <spinning v-else/>
+          <cus-spin v-else/>
         </div>
       </div>
     </div>
@@ -368,7 +404,7 @@ const { isSmallScreen } = useGlobal();
     position: relative;
     width: 100%;
     height: 100%;
-    max-width: 48rem;
+    max-width: 54rem;
     margin-inline: auto;
   }
 

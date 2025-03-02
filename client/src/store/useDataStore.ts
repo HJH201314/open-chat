@@ -3,13 +3,17 @@ import useMarkdownIt from '@/commands/useMarkdownIt';
 import showToast from '@/components/toast/toast';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
-import type { DialogData, MsgData, MsgInfo } from '@/types/data';
+import type { MessageInfo, SessionInfo } from '@/types/data';
 import { useCommandParser } from '@/utils/command-parser';
-import { recordToMap } from '@/utils/typeUtils';
-import { useLocalStorage, useStorage, watchArray } from '@vueuse/core';
+import { watchArray } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, reactive, ref, shallowRef, type UnwrapNestedRefs, watch } from 'vue';
+import { reactive, shallowRef, watch } from 'vue';
 import { useUserStore } from '@/store/useUserStore.ts';
+import ToastManager from '@/components/toast/ToastManager.ts';
+import { from, useObservable } from '@vueuse/rxjs';
+import { liveQuery } from 'dexie';
+import { db } from '@/store/data/database.ts';
+import genApi from '@/api/gen-api.ts';
 
 interface MessageCallback {
   // 用户输入保存后的回调
@@ -29,29 +33,18 @@ interface MessageCallback {
 
 /* 数据相关 */
 export const useDataStore = defineStore('data', () => {
-  const DIALOG_DATA_VERSION = 1;
-
-  // 不能直接返回其它use获取的数据dialogData，需要将其转换为dialogList
-  const dialogData = useStorage<DialogData>(
-    'dialog-data',
-    {
-      dialogs: {},
-      version: DIALOG_DATA_VERSION,
-    },
-    localStorage,
-  );
-
-  const dialogList = computed(() => {
-    console.log(dialogData.value);
-    return Array.from(recordToMap(dialogData.value.dialogs!).values()).reverse();
+  const sessions = useObservable(from(
+    liveQuery(async () => db.sessions.reverse().toArray()),
+  ), {
+    initialValue: [],
   });
 
   const roleStore = useRoleStore();
   const userStore = useUserStore();
   const settingStore = useSettingStore();
 
-  function getDialogInfo(sessionId: string) {
-    return dialogData.value.dialogs![sessionId] ?? {};
+  async function getSessionInfo(sessionId: string) {
+    return db.sessions.where({ id: sessionId }).last();
   }
 
   /**
@@ -65,21 +58,19 @@ export const useDataStore = defineStore('data', () => {
       const sessionId = data.data;
       console.log(data);
       if (status === 200 && data.data) {
-        dialogData.value.dialogs![sessionId] = {
+        db.sessions.add({
           id: sessionId,
           title: '',
-          avatarPath: '',
-          digest: '',
+          avatar: '',
           botRole: roleStore.roles?.find((r) => r[0] === role)?.[1] || '未知',
-          storageKey: `dialog-${sessionId}`,
           createAt: new Date().toLocaleString(),
           withContext: true,
           provider: settingStore.settings.defaultProvider ?? 'OpenAI',
           model: settingStore.settings.defaultModel ?? 'gpt-4o',
-        };
+        });
       }
       return sessionId;
-    } catch (e) {
+    } catch (_) {
       if (!userStore.isLogin) {
         showToast({ text: '请先登录~', type: 'danger', position: 'top-left' });
       } else {
@@ -89,56 +80,30 @@ export const useDataStore = defineStore('data', () => {
     return '';
   }
 
-  function editDialogTitle(dialogId: string, newTitle: string) {
-    dialogData.value.dialogs![dialogId].title = newTitle;
-  }
-
-  function toggleDialogContext(dialogId: string, isOpen: boolean) {
-    dialogData.value.dialogs![dialogId].withContext = isOpen;
-  }
-
-  function changeDialogModel(dialogId: string, modelProvider: string, modelName: string) {
-    dialogData.value.dialogs![dialogId].provider = modelProvider;
-    dialogData.value.dialogs![dialogId].model = modelName;
-  }
-
-  async function delDialog(sessionId: string) {
-    return new Promise((resolve, reject) => {
-      // 本地删除
-      const storageKey = dialogData.value.dialogs![sessionId]?.storageKey;
-      if (storageKey) {
-        delete dialogData.value.dialogs![sessionId];
-        localStorage.removeItem(storageKey);
-        showToast({ text: '删除成功√' });
-        resolve('删除成功');
-      } else {
-        showToast({ text: '删除失败' });
-        reject('删除失败');
-      }
-      // 远程删除
-      api.chat.deleteSession(sessionId);
+  function editDialogTitle(sessionId: string, newTitle: string) {
+    db.sessions.where({ id: sessionId }).modify((session) => {
+      session.title = newTitle;
     });
   }
 
-  const messageStorage = ref<Record<string, UnwrapNestedRefs<MsgData>>>({});
-
-  function loadMessagesFromStorage(sessionId: string) {
-    const storageKey = `dialog-${sessionId}`;
-    messageStorage.value[storageKey] = reactive(
-      useLocalStorage<MsgData>(storageKey, {
-        messages: [],
-        version: 1,
-      }),
-    ) as UnwrapNestedRefs<MsgData>;
+  function toggleDialogContext(sessionId: string, isOpen: boolean) {
+    db.sessions.where({ id: sessionId }).modify((session) => {
+      session.withContext = isOpen;
+    });
   }
 
-  function getMessageList(sessionId: string) {
-    console.log(messageStorage.value);
-    const storageKey = `dialog-${sessionId}`;
-    if (!messageStorage.value[storageKey]) {
-      loadMessagesFromStorage(sessionId);
-    }
-    return messageStorage.value[storageKey].messages ?? [];
+  function changeDialogModel(sessionId: string, providerName: string, modelName: string) {
+    db.sessions.where({ id: sessionId }).modify((session) => {
+      session.provider = providerName;
+      session.model = modelName;
+    });
+  }
+
+  async function delDialog(sessionId: string) {
+    // 本地删除
+    await db.sessions.delete(sessionId);
+    // 远程删除
+    await genApi.Chat.sessionDelPost(sessionId);
   }
 
   /**
@@ -149,9 +114,8 @@ export const useDataStore = defineStore('data', () => {
    * @param abort AbortController
    */
   const sendMessageText = async (sessionId: string, message: string, callback?: MessageCallback, abort?: AbortController) => {
-    if (message == '') return;
-    const userMsgIndex = saveMessage(sessionId, message, 'user', 'text');
-    callback?.onSaveUserMsg?.();
+    console.log('1', message)
+    if (message == '') return Promise.reject();
     const ctrl = abort || new AbortController();
     const rawData = reactive({
       msg: '',
@@ -159,8 +123,14 @@ export const useDataStore = defineStore('data', () => {
     });
     const { commands, commandMap } = useCommandParser(() => rawData.msg);
     const { result: renderedMsg } = useMarkdownIt(() => rawData.msg);
-    const { withContext, provider, model: modelName } = getDialogInfo(sessionId);
+    const session = await getSessionInfo(sessionId);
+    console.log(session)
+    if (!session) return;
     let msgIds: [string | undefined, string | undefined] = [undefined, undefined];
+
+    const userMsgIndex = await saveMessage(sessionId, message, 'user', 'text');
+    console.log('userMsgIndex: ', userMsgIndex)
+    callback?.onSaveUserMsg?.();
 
     // 观测回答数据中的指令
     watchArray(commands, () => {
@@ -186,20 +156,20 @@ export const useDataStore = defineStore('data', () => {
       if (v == ov) return;
       callback?.onThinkMessage?.(v); // 消息接收回调
     });
-    return await api.chat.completionStream(
+    return api.chat.completionStream(
       {
-        provider: provider,
-        modelName: modelName,
+        provider: session.provider,
+        modelName: session.model,
         sessionId: sessionId,
         msg: message,
-        withContext: withContext,
+        withContext: session.withContext,
       },
       ctrl.signal,
       (event) => {
         if (event.event === 'done') {
           // 当接收到服务器端的结束标记时，保存消息
           saveMessage(sessionId, rawData.msg, 'bot', 'text', renderedMsg.value, rawData.think, msgIds[1]); // 保存消息
-          updateMessage(sessionId, userMsgIndex, { id: msgIds[0] });
+          updateMessage(sessionId, userMsgIndex, { remoteId: msgIds[0] });
           callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
         } else if (event.event === 'msg') {
           let data = JSON.parse(event.data)?.content;
@@ -221,6 +191,7 @@ export const useDataStore = defineStore('data', () => {
     const answerMessage = shallowRef('');
     const isStreaming = shallowRef(false);
     let abortController = new AbortController();
+    let timeout: number | undefined;
 
     const startStreaming = (sessionId: string, message: string, customReceiver?: MessageCallback) => {
       isStreaming.value = true;
@@ -229,24 +200,33 @@ export const useDataStore = defineStore('data', () => {
         ...customReceiver || {},
         onMessage(msg) {
           answerMessage.value = msg;
-          console.log('onMsg');
           customReceiver?.onMessage?.(msg);
+          startTimeout();
         },
         onThinkMessage(msg) {
           thinkMessage.value = msg;
-          console.log('onThink');
           customReceiver?.onThinkMessage?.(msg);
+          startTimeout();
         },
       }, abortController).finally(() => {
         isStreaming.value = false;
+        clearTimeout(timeout);
         clearMessage();
       });
+    };
+
+    const startTimeout = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        abortController.abort('no data for too long');
+        ToastManager.danger('服务端超时');
+      }, 30000);
     };
 
     const clearMessage = () => {
       answerMessage.value = '';
       thinkMessage.value = '';
-    }
+    };
 
     return {
       isStreaming,
@@ -261,7 +241,7 @@ export const useDataStore = defineStore('data', () => {
   /**
    * 保存消息数据到本地，返回消息在本地的编号
    */
-  function saveMessage(
+  async function saveMessage(
     sessionId: string,
     message: string,
     sender: 'user' | 'bot',
@@ -269,21 +249,18 @@ export const useDataStore = defineStore('data', () => {
     htmlMessage?: string,
     thinking?: string,
     remoteId?: string,
-  ): number {
+  ): Promise<number> {
     try {
-      const storageKey = `dialog-${sessionId}`;
-      console.log(messageStorage.value[storageKey]);
-      messageStorage.value[storageKey].messages?.push({
-        time: new Date().toLocaleString(),
+      return db.messages.add({
+        sessionId,
         sender,
         type,
+        remoteId,
         content: message,
         reasoningContent: thinking,
         htmlContent: htmlMessage,
-        id: remoteId,
+        time: new Date().toLocaleString(),
       });
-      localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
-      return (messageStorage.value[storageKey].messages?.length || 0) - 1;
     } catch (err) {
       console.error(err);
       return -1;
@@ -293,44 +270,41 @@ export const useDataStore = defineStore('data', () => {
   /**
    * 更新本地消息数据
    */
-  function updateMessage(sessionId: string, index: number, updateObj: Partial<MsgInfo>): boolean {
+  async function updateMessage(sessionId: string, index: number, updateObj: Partial<MessageInfo>): Promise<boolean> {
     try {
-      const storageKey = `dialog-${sessionId}`;
-      const msg = messageStorage.value[storageKey].messages?.[index];
-      if (msg) {
+      return await db.messages.where({ sessionId, id: index }).modify((obj) => {
         Object.entries(updateObj).forEach(([key, value]) => {
-          msg[key] = value;
+          obj[key] = value;
         });
-        localStorage.setItem(storageKey, JSON.stringify(messageStorage.value[storageKey]));
-      }
-      return true;
-    } catch (e) {
+      }) > 0;
+    } catch (_) {
       return false;
     }
   }
 
-  function searchDialog(text: string) {
-    return dialogList.value.filter((d) => {
-      const info = localStorage.getItem(d.storageKey);
-      return (
-        info &&
-        (d.storageKey.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
-          d.botRole.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
-          info.toLowerCase().indexOf(text.toLowerCase()) != -1)
-      );
-    });
+  async function searchDialog(text: string) {
+    const res: SessionInfo[] = [];
+    for (const session of sessions.value) {
+      const messages = JSON.stringify(await db.messages.where({ sessionId: session.id }).toArray());
+      if (
+        messages &&
+        (session.id.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
+          session.botRole.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
+          messages.toLowerCase().indexOf(text.toLowerCase()) != -1)
+      ) {
+        res.push(session);
+      }
+    }
+    return res;
   }
 
   return {
-    dialogList,
-    messageStorage,
-    getDialogInfo,
+    sessions,
     addDialog,
     editDialogTitle,
     toggleDialogContext,
     changeDialogModel,
     delDialog,
-    getMessageList,
     sendMessageText,
     searchDialog,
     useSendMessageText,

@@ -5,7 +5,7 @@ import Toggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/useDataStore.ts';
 import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
-import type { DialogInfo } from '@/types/data.ts';
+import type { SessionInfo } from '@/types/data.ts';
 import { CloseOne, Plus, Search } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
 import { computed, reactive, ref, watch } from 'vue';
@@ -27,8 +27,8 @@ async function handleAddRecord(roleId?: number) {
     dataStore.sendMessageText(
       sessionId,
       (await roleStore.getRoleSentence(roleId)) +
-        `当前时间: ${new Date().toLocaleString()}. ` +
-        `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`
+      `当前时间: ${new Date().toLocaleString()}. ` +
+      `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`,
     );
   }
   handleListItemClick(sessionId);
@@ -63,23 +63,23 @@ const searchForm = reactive({
   searchVal: '',
 });
 
-const searchList = ref<DialogInfo[]>([]);
+const searchList = ref<SessionInfo[]>([]);
 watch(
   () => searchForm.searchVal,
-  (newVal) => {
+  async (newVal) => {
     if (newVal != '') {
-      searchList.value = dataStore.searchDialog(newVal);
+      searchList.value = await dataStore.searchDialog(newVal);
     } else {
       searchList.value = [];
     }
-  }
+  },
 );
 
 const displayList = computed(() => {
   if (searchForm.searchVal) {
     return searchList.value;
   } else {
-    return dataStore.dialogList;
+    return dataStore.sessions;
   }
 });
 </script>
@@ -88,15 +88,15 @@ const displayList = computed(() => {
   <div class="dialog-list">
     <div class="dialog-list-bar">
       <div class="dialog-list-bar-search">
-        <span class="dialog-list-bar-search-icon"><Search /></span>
-        <input v-model="searchForm.searchVal" placeholder="搜索对话内容" />
+        <span class="dialog-list-bar-search-icon"><Search/></span>
+        <input v-model="searchForm.searchVal" placeholder="搜索对话内容"/>
         <span v-if="searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
-          <CloseOne theme="filled" />
+          <CloseOne theme="filled"/>
         </span>
       </div>
       <div>
         <div class="dialog-list-add" @click="handleListAddClick">
-          <Plus size="24" theme="outline" />
+          <Plus size="24" theme="outline"/>
         </div>
         <CommonModal v-model:visible="roleForm.modalVisible">
           <div class="select-role">
@@ -112,8 +112,8 @@ const displayList = computed(() => {
               </div>
             </div>
             <div style="display: flex; align-items: center">
-              <Toggle v-model="roleForm.remember" label="记住本次选择" style="margin-top: 1rem" />
-              <DiliButton style="margin-left: auto" text="直接开始→" type="primary" @click="handleAddRecord" />
+              <Toggle v-model="roleForm.remember" label="记住本次选择" style="margin-top: 1rem"/>
+              <DiliButton style="margin-left: auto" text="直接开始→" type="primary" @click="handleAddRecord"/>
             </div>
           </div>
         </CommonModal>
@@ -127,7 +127,7 @@ const displayList = computed(() => {
         class="dialog-list-item"
         @click="handleListItemClick(item.id)"
       >
-        <img :src="item.avatarPath ? item.avatarPath : '/chatgpt3.svg'" alt="avatar" />
+        <img :src="item.avatar ? item.avatar : '/chatgpt3.svg'" alt="avatar"/>
         <div class="dialog-list-item-center">
           <div class="title">
             {{ item.title || '未命名对话' }}
@@ -197,7 +197,7 @@ const displayList = computed(() => {
       opacity: 0.6;
 
       &:focus-within {
-      opacity: 0.6;
+        opacity: 0.6;
         background-color: white;
         border: 2px solid $color-primary;
       }
