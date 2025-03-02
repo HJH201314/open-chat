@@ -4,10 +4,14 @@ import DiliButton from '@/components/button/DiliButton.vue';
 import type { CommonDialogEmits, CommonDialogExpose, CommonDialogProps } from '@/components/dialog/CommonDialog';
 import type { CommonModalFunc } from '@/components/modal/CommonModal';
 import CommonModal from '@/components/modal/CommonModal.vue';
-import { ref } from 'vue';
+import { ref, shallowRef } from 'vue';
+import CusSpin from '@/components/spinning/CusSpin.vue';
 
 const props = withDefaults(defineProps<CommonDialogProps>(), {
   title: '',
+  subtitle: '',
+  showCancel: true,
+  showConfirm: true,
 });
 
 const emits = defineEmits<CommonDialogEmits>();
@@ -26,12 +30,33 @@ function afterClose() {
   emits('after-close');
 }
 
-function handleConfirm() {
+const confirming = shallowRef(false);
+let abortController: AbortController = new AbortController();
+async function handleConfirm() {
+  if (confirming.value) return;
+  if (props.confirmHandler) {
+    confirming.value = true;
+    abortController = new AbortController();
+    // 向 handler 传递信号
+    const res = props.confirmHandler({
+      signal: abortController.signal,
+      abort() {
+        abortController.abort('handler abort');
+        confirming.value = false;
+      },
+    });
+    if (res instanceof Promise) {
+      await res;
+    }
+    confirming.value = false;
+  }
   emits('confirm'); // 传递关闭回调函数
   close(); // 不存在回调函数时默认自动关闭
 }
 
 function handleCancel() {
+  // 取消时中断确认的处理
+  if (confirming.value) abortController.abort('cancel');
   emits('cancel'); // 传递关闭回调函数
   close(); // 不存在回调函数时默认自动关闭
 }
@@ -51,17 +76,20 @@ defineExpose<CommonDialogExpose>({
   >
     <div class="dialog">
       <header>
-        <div class="dialog-title">{{ title }}</div>
+        <div v-if="title" class="dialog-title" :style="titleStyle">{{ title }}</div>
+        <div v-if="subtitle" class="dialog-sub-title" :style="subtitleStyle">{{ subtitle }}</div>
       </header>
-      <hr />
+      <hr v-if="title || subtitle && content" />
       <main>
-        <div v-html="props.content"></div>
+        <div v-html="content"></div>
         <slot></slot>
       </main>
-      <hr />
+      <hr v-if="showCancel || showConfirm && content" />
       <footer>
-        <DiliButton text="取消" type="normal" v-bind="props.cancelButtonProps" @click="handleCancel" />
-        <DiliButton text="确认" type="primary" v-bind="props.confirmButtonProps" @click="handleConfirm" />
+        <DiliButton v-if="showCancel" text="取消" type="normal" v-bind="cancelButtonProps" @click="handleCancel"></DiliButton>
+        <DiliButton v-if="showConfirm" text="确认" type="primary" v-bind="confirmButtonProps" @click="handleConfirm">
+          <cus-spin :show="confirming" />
+        </DiliButton>
       </footer>
     </div>
   </CommonModal>
@@ -92,6 +120,12 @@ defineExpose<CommonDialogExpose>({
   &-title {
     font-weight: bold;
     font-size: 1.25rem;
+    padding-left: 0.5rem;
+  }
+
+  &-sub-title {
+    font-weight: normal;
+    font-size: 0.75rem;
     padding-left: 0.5rem;
   }
 }

@@ -83,7 +83,7 @@ function handleClick() {
   > button {
     outline: none;
     border-radius: .5rem;
-    transition: background-color .2s $ease-out-circ, color .2s $ease-out-circ;
+    transition: all .2s $ease-out-circ;
     background-color: v-bind(backgroundColor);
     border: 1px solid v-bind(backgroundColor);
     color: v-bind(fontColor);
