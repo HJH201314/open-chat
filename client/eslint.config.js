@@ -25,6 +25,7 @@ export default typescriptEslint.config(
       },
     },
     rules: {
+      '@typescript-eslint/no-empty-object-type': 'off',
       // 允许 any
       '@typescript-eslint/no-explicit-any': 'off',
       // 明确指定导入 type
