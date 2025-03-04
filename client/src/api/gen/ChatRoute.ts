@@ -11,10 +11,11 @@
 
 import type {
   ApiChatCompletionStreamUserInput,
-  ApiEntitiesCommonResponseArrayModelsModelCache,
-  ApiEntitiesCommonResponseBool,
-  ApiEntitiesCommonResponseChatGetMessagesResType,
-  ApiEntitiesCommonResponseString,
+  ApiEntityCommonResponseArraySchemaModelCache,
+  ApiEntityCommonResponseBool,
+  ApiEntityCommonResponseEntityPagingResponseSchemaMessage,
+  ApiEntityCommonResponseEntityPagingResponseSchemaSession,
+  ApiEntityCommonResponseString,
 } from './data-contracts';
 
 export namespace Chat {
@@ -39,17 +40,17 @@ export namespace Chat {
   /**
    * @description 获取所有模型
    * @tags config
-   * @name ConfigModelsGet
+   * @name ConfigSchemaGet
    * @summary 获取所有模型
-   * @request GET:/chat/config/models
-   * @response `200` `ApiEntitiesCommonResponseArrayModelsModelCache` OK
+   * @request GET:/chat/config/schema
+   * @response `200` `ApiEntityCommonResponseArraySchemaModelCache` OK
    */
-  export namespace ConfigModelsGet {
+  export namespace ConfigSchemaGet {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntitiesCommonResponseArrayModelsModelCache;
+    export type ResponseBody = ApiEntityCommonResponseArraySchemaModelCache;
   }
 
   /**
@@ -58,7 +59,7 @@ export namespace Chat {
    * @name MessageListGet
    * @summary 获取消息
    * @request GET:/chat/message/list/{session_id}
-   * @response `200` `ApiEntitiesCommonResponseChatGetMessagesResType` 返回数据
+   * @response `200` `ApiEntityCommonResponseEntityPagingResponseSchemaMessage` 返回数据
    */
   export namespace MessageListGet {
     export type RequestParams = {
@@ -72,7 +73,7 @@ export namespace Chat {
     };
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntitiesCommonResponseChatGetMessagesResType;
+    export type ResponseBody = ApiEntityCommonResponseEntityPagingResponseSchemaMessage;
   }
 
   /**
@@ -81,7 +82,7 @@ export namespace Chat {
    * @name SessionDelPost
    * @summary 删除会话
    * @request POST:/chat/session/del/{session_id}
-   * @response `200` `ApiEntitiesCommonResponseBool` OK
+   * @response `200` `ApiEntityCommonResponseBool` OK
    */
   export namespace SessionDelPost {
     export type RequestParams = {
@@ -91,7 +92,27 @@ export namespace Chat {
     export type RequestQuery = {};
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntitiesCommonResponseBool;
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
+   * @description 获取会话列表
+   * @tags Session
+   * @name SessionListGet
+   * @summary 获取会话列表
+   * @request GET:/chat/session/list
+   * @response `200` `ApiEntityCommonResponseEntityPagingResponseSchemaSession` 返回数据
+   */
+  export namespace SessionListGet {
+    export type RequestParams = {};
+    export type RequestQuery = {
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPagingResponseSchemaSession;
   }
 
   /**
@@ -100,13 +121,13 @@ export namespace Chat {
    * @name SessionNewPost
    * @summary 创建会话
    * @request POST:/chat/session/new
-   * @response `200` `ApiEntitiesCommonResponseString` OK
+   * @response `200` `ApiEntityCommonResponseString` OK
    */
   export namespace SessionNewPost {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntitiesCommonResponseString;
+    export type ResponseBody = ApiEntityCommonResponseString;
   }
 }

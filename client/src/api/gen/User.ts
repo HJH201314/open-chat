@@ -10,9 +10,9 @@
  */
 
 import type {
-  ApiEntitiesCommonResponseAny,
-  ApiEntitiesCommonResponseBool,
-  ApiEntitiesCommonResponseModelsUser,
+  ApiEntityCommonResponseAny,
+  ApiEntityCommonResponseBool,
+  ApiEntityCommonResponseSchemaUser,
   ApiUserLoginLoginRequest,
   ApiUserRegisterRegisterRequest,
 } from './data-contracts';
@@ -33,10 +33,10 @@ export class User<SecurityDataType = unknown> {
    * @name LoginPost
    * @summary 用户登录
    * @request POST:/user/login
-   * @response `200` `ApiEntitiesCommonResponseModelsUser` login successfully
+   * @response `200` `ApiEntityCommonResponseSchemaUser` login successfully
    */
   loginPost = (req: ApiUserLoginLoginRequest, params: RequestParams = {}) =>
-    this.http.request<ApiEntitiesCommonResponseModelsUser, any>({
+    this.http.request<ApiEntityCommonResponseSchemaUser, any>({
       path: `/user/login`,
       method: 'POST',
       body: req,
@@ -51,11 +51,11 @@ export class User<SecurityDataType = unknown> {
    * @name PingPost
    * @summary 检测客户端登录态
    * @request POST:/user/ping
-   * @response `200` `ApiEntitiesCommonResponseModelsUser` user is online
-   * @response `404` `ApiEntitiesCommonResponseAny` user not found
+   * @response `200` `ApiEntityCommonResponseSchemaUser` user is online
+   * @response `404` `ApiEntityCommonResponseAny` user not found
    */
   pingPost = (params: RequestParams = {}) =>
-    this.http.request<ApiEntitiesCommonResponseModelsUser, ApiEntitiesCommonResponseAny>({
+    this.http.request<ApiEntityCommonResponseSchemaUser, ApiEntityCommonResponseAny>({
       path: `/user/ping`,
       method: 'POST',
       type: ContentType.Json,
@@ -84,10 +84,10 @@ export class User<SecurityDataType = unknown> {
    * @name RegisterPost
    * @summary 用户注册
    * @request POST:/user/register
-   * @response `200` `ApiEntitiesCommonResponseBool` register successfully
+   * @response `200` `ApiEntityCommonResponseBool` register successfully
    */
   registerPost = (req: ApiUserRegisterRegisterRequest, params: RequestParams = {}) =>
-    this.http.request<ApiEntitiesCommonResponseBool, any>({
+    this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/user/register`,
       method: 'POST',
       body: req,

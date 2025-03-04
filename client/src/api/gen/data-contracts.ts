@@ -20,12 +20,7 @@ export interface ApiChatCompletionStreamUserInput {
   system_prompt?: string;
 }
 
-export interface ApiChatGetMessagesResType {
-  messages?: ApiModelsMessage[];
-  next_page?: number;
-}
-
-export interface ApiEntitiesCommonResponseAny {
+export interface ApiEntityCommonResponseAny {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -34,25 +29,25 @@ export interface ApiEntitiesCommonResponseAny {
   msg?: string;
 }
 
-export interface ApiEntitiesCommonResponseArrayModelsModelCache {
+export interface ApiEntityCommonResponseArraySchemaModelCache {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiModelsModelCache[];
+  data?: ApiSchemaModelCache[];
   /** 消息 */
   msg?: string;
 }
 
-export interface ApiEntitiesCommonResponseArrayModelsProvider {
+export interface ApiEntityCommonResponseArraySchemaProvider {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiModelsProvider[];
+  data?: ApiSchemaProvider[];
   /** 消息 */
   msg?: string;
 }
 
-export interface ApiEntitiesCommonResponseBool {
+export interface ApiEntityCommonResponseBool {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -61,34 +56,43 @@ export interface ApiEntitiesCommonResponseBool {
   msg?: string;
 }
 
-export interface ApiEntitiesCommonResponseChatGetMessagesResType {
+export interface ApiEntityCommonResponseEntityPagingResponseSchemaMessage {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiChatGetMessagesResType;
+  data?: ApiEntityPagingResponseSchemaMessage;
   /** 消息 */
   msg?: string;
 }
 
-export interface ApiEntitiesCommonResponseModelsProvider {
+export interface ApiEntityCommonResponseEntityPagingResponseSchemaSession {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiModelsProvider;
+  data?: ApiEntityPagingResponseSchemaSession;
   /** 消息 */
   msg?: string;
 }
 
-export interface ApiEntitiesCommonResponseModelsUser {
+export interface ApiEntityCommonResponseSchemaProvider {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiModelsUser;
+  data?: ApiSchemaProvider;
   /** 消息 */
   msg?: string;
 }
 
-export interface ApiEntitiesCommonResponseString {
+export interface ApiEntityCommonResponseSchemaUser {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaUser;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseString {
   /** 代码 */
   code?: number;
   /** 数据 */
@@ -97,7 +101,17 @@ export interface ApiEntitiesCommonResponseString {
   msg?: string;
 }
 
-export interface ApiModelsAPIKey {
+export interface ApiEntityPagingResponseSchemaMessage {
+  list?: ApiSchemaMessage[];
+  next_page?: number;
+}
+
+export interface ApiEntityPagingResponseSchemaSession {
+  list?: ApiSchemaSession[];
+  next_page?: number;
+}
+
+export interface ApiSchemaAPIKey {
   created_at?: string;
   id?: number;
   /** API 密钥 */
@@ -106,20 +120,21 @@ export interface ApiModelsAPIKey {
   provider_id?: number;
 }
 
-export interface ApiModelsMessage {
+export interface ApiSchemaMessage {
   content?: string;
   created_at?: string;
   id?: number;
   /** 回复所使用的模型 */
   model_id?: number;
+  reasoning_content?: string;
   /** user/assistant/system */
   role?: string;
   session_id?: string;
 }
 
-export interface ApiModelsModel {
+export interface ApiSchemaModel {
   /** 使用 JSON 储存配置 */
-  config?: ApiModelsModelConfig;
+  config?: ApiSchemaModelConfig;
   created_at?: string;
   /** 额外模型描述 */
   description?: string;
@@ -133,9 +148,9 @@ export interface ApiModelsModel {
   updated_at?: string;
 }
 
-export interface ApiModelsModelCache {
+export interface ApiSchemaModelCache {
   /** 使用 JSON 储存配置 */
-  config?: ApiModelsModelConfig;
+  config?: ApiSchemaModelConfig;
   created_at?: string;
   /** 额外模型描述 */
   description?: string;
@@ -153,7 +168,7 @@ export interface ApiModelsModelCache {
   updated_at?: string;
 }
 
-export interface ApiModelsModelConfig {
+export interface ApiSchemaModelConfig {
   /** 是否允许用户自行修改系统提示 */
   allow_system_prompt?: boolean;
   /** 默认温度 */
@@ -166,7 +181,13 @@ export interface ApiModelsModelConfig {
   top_p?: number;
 }
 
-export interface ApiModelsPermission {
+export interface ApiSchemaModelParams {
+  max_tokens?: number;
+  schema?: string;
+  temperature?: number;
+}
+
+export interface ApiSchemaPermission {
   created_at?: string;
   /** 权限描述 */
   description?: string;
@@ -178,9 +199,9 @@ export interface ApiModelsPermission {
   updated_at?: string;
 }
 
-export interface ApiModelsProvider {
+export interface ApiSchemaProvider {
   /** 一对多关系，与 APIKey 模型关联 */
-  api_keys?: ApiModelsAPIKey[];
+  api_keys?: ApiSchemaAPIKey[];
   /** API 的基本 URL */
   base_url?: string;
   created_at?: string;
@@ -189,14 +210,14 @@ export interface ApiModelsProvider {
   /** 对外展示提供商名称 */
   display_name?: string;
   id?: number;
-  /** 一对多关系，与 Model 模型关联 */
-  models?: ApiModelsModel[];
   /** 提供商名称 */
   name?: string;
+  /** 一对多关系，与 Model 模型关联 */
+  schema?: ApiSchemaModel[];
   updated_at?: string;
 }
 
-export interface ApiModelsRole {
+export interface ApiSchemaRole {
   created_at?: string;
   /** 角色描述 */
   description?: string;
@@ -204,15 +225,26 @@ export interface ApiModelsRole {
   /** 角色名称 */
   name?: string;
   /** 多对多关联 */
-  permissions?: ApiModelsPermission[];
+  permissions?: ApiSchemaPermission[];
   updated_at?: string;
 }
 
-export interface ApiModelsUser {
+export interface ApiSchemaSession {
+  created_at?: string;
+  /** 上下文开关 */
+  enable_context?: boolean;
+  id?: string;
+  last_active?: string;
+  /** 模型参数 */
+  model_params?: ApiSchemaModelParams;
+  user_id?: number;
+}
+
+export interface ApiSchemaUser {
   created_at?: string;
   id?: number;
   /** 用户与角色之间的多对多关系 */
-  roles?: ApiModelsRole[];
+  roles?: ApiSchemaRole[];
   updated_at?: string;
   username?: string;
 }

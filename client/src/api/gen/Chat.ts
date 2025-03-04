@@ -11,10 +11,11 @@
 
 import type {
   ApiChatCompletionStreamUserInput,
-  ApiEntitiesCommonResponseArrayModelsModelCache,
-  ApiEntitiesCommonResponseBool,
-  ApiEntitiesCommonResponseChatGetMessagesResType,
-  ApiEntitiesCommonResponseString,
+  ApiEntityCommonResponseArraySchemaModelCache,
+  ApiEntityCommonResponseBool,
+  ApiEntityCommonResponseEntityPagingResponseSchemaMessage,
+  ApiEntityCommonResponseEntityPagingResponseSchemaSession,
+  ApiEntityCommonResponseString,
 } from './data-contracts';
 import type { HttpClient, RequestParams } from './http-client';
 import { ContentType } from './http-client';
@@ -46,14 +47,14 @@ export class Chat<SecurityDataType = unknown> {
    * @description 获取所有模型
    *
    * @tags config
-   * @name ConfigModelsGet
+   * @name ConfigSchemaGet
    * @summary 获取所有模型
-   * @request GET:/chat/config/models
-   * @response `200` `ApiEntitiesCommonResponseArrayModelsModelCache` OK
+   * @request GET:/chat/config/schema
+   * @response `200` `ApiEntityCommonResponseArraySchemaModelCache` OK
    */
-  configModelsGet = (params: RequestParams = {}) =>
-    this.http.request<ApiEntitiesCommonResponseArrayModelsModelCache, any>({
-      path: `/chat/config/models`,
+  configSchemaGet = (params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseArraySchemaModelCache, any>({
+      path: `/chat/config/schema`,
       method: 'GET',
       type: ContentType.Json,
       format: 'json',
@@ -66,7 +67,7 @@ export class Chat<SecurityDataType = unknown> {
    * @name MessageListGet
    * @summary 获取消息
    * @request GET:/chat/message/list/{session_id}
-   * @response `200` `ApiEntitiesCommonResponseChatGetMessagesResType` 返回数据
+   * @response `200` `ApiEntityCommonResponseEntityPagingResponseSchemaMessage` 返回数据
    */
   messageListGet = (
     sessionId: string,
@@ -77,7 +78,7 @@ export class Chat<SecurityDataType = unknown> {
     },
     params: RequestParams = {},
   ) =>
-    this.http.request<ApiEntitiesCommonResponseChatGetMessagesResType, any>({
+    this.http.request<ApiEntityCommonResponseEntityPagingResponseSchemaMessage, any>({
       path: `/chat/message/list/${sessionId}`,
       method: 'GET',
       query: query,
@@ -92,12 +93,37 @@ export class Chat<SecurityDataType = unknown> {
    * @name SessionDelPost
    * @summary 删除会话
    * @request POST:/chat/session/del/{session_id}
-   * @response `200` `ApiEntitiesCommonResponseBool` OK
+   * @response `200` `ApiEntityCommonResponseBool` OK
    */
   sessionDelPost = (sessionId: string, params: RequestParams = {}) =>
-    this.http.request<ApiEntitiesCommonResponseBool, any>({
+    this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/chat/session/del/${sessionId}`,
       method: 'POST',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 获取会话列表
+   *
+   * @tags Session
+   * @name SessionListGet
+   * @summary 获取会话列表
+   * @request GET:/chat/session/list
+   * @response `200` `ApiEntityCommonResponseEntityPagingResponseSchemaSession` 返回数据
+   */
+  sessionListGet = (
+    query: {
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPagingResponseSchemaSession, any>({
+      path: `/chat/session/list`,
+      method: 'GET',
+      query: query,
       type: ContentType.Json,
       format: 'json',
       ...params,
@@ -109,10 +135,10 @@ export class Chat<SecurityDataType = unknown> {
    * @name SessionNewPost
    * @summary 创建会话
    * @request POST:/chat/session/new
-   * @response `200` `ApiEntitiesCommonResponseString` OK
+   * @response `200` `ApiEntityCommonResponseString` OK
    */
   sessionNewPost = (params: RequestParams = {}) =>
-    this.http.request<ApiEntitiesCommonResponseString, any>({
+    this.http.request<ApiEntityCommonResponseString, any>({
       path: `/chat/session/new`,
       method: 'POST',
       type: ContentType.Json,
