@@ -10,7 +10,7 @@ type CusSpinProps = {
 
 const props = withDefaults(defineProps<CusSpinProps>(), {
   show: true,
-  size: '1rem',
+  size: '1em',
   thickness: '2px',
   color: '#fff',
 });
@@ -25,9 +25,11 @@ const slotSpinning = computed(() => props.show && slots.default);
 </script>
 
 <template>
-  <div v-if="showDefaultSpinning" class="spinning damping-circle"></div>
-  <div v-if="slots.default" :class="{ spinning: slotSpinning }">
-    <slot></slot>
+  <div>
+    <div v-if="showDefaultSpinning" class="spinning damping-circle"></div>
+    <div v-if="slots.default" :class="{ spinning: slotSpinning }">
+      <slot></slot>
+    </div>
   </div>
 </template>
 

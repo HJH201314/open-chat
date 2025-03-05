@@ -36,16 +36,19 @@ markdownIt.renderer.rules.fence = function (tokens, idx, options, env, slf) {
           </div>`;
 };
 
+export const renderMarkdown = (text?: string) => {
+  if (!text) return '';
+
+  // console.log(value)
+  text = text.replace(/<br>/g, '\n');
+  // console.log(value)
+  let res = markdownIt.render(text);
+  res = res.substring(0, res.length - 1); // 删除最后一个莫名其妙的字符
+  return res;
+};
+
 function useMarkdownIt(text: MaybeRefOrGetter<string>) {
-  const result = computed(() => {
-    let value = <string>toValue(text);
-    // console.log(value)
-    value = value.replace(/<br>/g, '\n');
-    // console.log(value)
-    let res = markdownIt.render(value);
-    res = res.substring(0, res.length - 1); // 删除最后一个莫名其妙的字符
-    return res;
-  });
+  const result = computed(() => renderMarkdown(<string>toValue(text)));
 
   return {
     result,

@@ -9,7 +9,7 @@ import api from '@/api';
 import ToastManager from '@/components/toast/ToastManager';
 import CusInput from '@/components/input/CusInput.vue';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
-import type { CommonDialogExpose } from '@/components/dialog/CommonDialog';
+import type { CommonDialogExpose } from '@/components/dialog/types.ts';
 import { DialogManager } from '@/components/dialog';
 
 onMounted(() => {

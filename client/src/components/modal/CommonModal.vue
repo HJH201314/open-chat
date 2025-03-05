@@ -1,25 +1,21 @@
 <script lang="ts" setup>
-import type { CommonModalFunc } from '@/components/modal/CommonModal';
-import { useCommonModalStore } from '@/components/modal/useCommonModalStore';
-
 /**
  * CommonModal - 通用模态框
- * 作为Vue使用
- * @author HJH201314
- *
- * */
+ **/
+import type { CommonModalFunc, CommonModalProps } from '@/components/modal/types.ts';
+import { useCommonModalStore } from '@/components/modal/store.ts';
 import { Close } from '@icon-park/vue-next';
-import { computed, type CSSProperties, nextTick, ref, toRef, watch } from 'vue';
+import { computed, nextTick, ref, toRef, watch } from 'vue';
 
-interface CommonModalProps {
-  showClose?: boolean;
-  visible?: boolean; // 默认不展示
-  modalStyle?: CSSProperties;
-}
+defineOptions({
+  // CommonModal 通过 teleport 传递到 body 上，不继承父级的属性
+  inheritAttrs: false,
+});
 
 const props = withDefaults(defineProps<CommonModalProps>(), {
   showClose: true,
   visible: false,
+  modalStyle: () => ({}),
 });
 
 const emit = defineEmits<{
@@ -46,7 +42,7 @@ watch(
       else close();
     });
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 /* 展示模态框（暴露的方法，配合ref使用） */
@@ -58,22 +54,15 @@ function open() {
   emit('open');
 }
 
-/**
- *  关闭模态框（暴露的方法，配合ref使用）
- *  @param callbackFn 动画执行完毕后执行回调
- */
-function close(callbackFn?: () => void) {
+/* 关闭模态框（暴露的方法，配合ref使用） */
+function close() {
   if (!showModal.value) return;
 
   showModal.value = false;
   store.closeModal();
-  closeCallback = callbackFn;
 }
 
-let closeCallback: Function | undefined;
-
 function afterClose() {
-  closeCallback?.();
   emit('after-close');
 }
 
@@ -83,13 +72,17 @@ watch(
     if (newVal != oldVal) {
       emit('update:visible', newVal);
     }
-  }
+  },
 );
 
 function handleClose() {
   close();
   emit('close');
 }
+
+defineSlots<{
+  default(props: { close: typeof close; isShown: boolean; }): any;
+}>();
 
 /* 暴露接口 */
 defineExpose<CommonModalFunc>({
@@ -104,7 +97,7 @@ defineExpose<CommonModalFunc>({
     <Transition name="show" @after-leave="afterClose">
       <div v-if="showModal" :style="{ 'z-index': zIndex }" class="modal-mask">
         <div :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }" class="modal-body">
-          <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose" />
+          <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose"/>
           <div class="modal-body-content">
             <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
             <slot :close="close" :is-shown="showModal"></slot>

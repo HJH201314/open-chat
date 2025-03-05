@@ -36,10 +36,10 @@ const useRoleStore = defineStore('bot-roles', () => {
   }
 
   async function refreshRoles() {
-    const res = await api.gpt.getAllRoles();
-    if (res.data) {
-      roleStorage.value = res.data;
-    }
+    // const res = await api.gpt.getAllRoles();
+    // if (res.data) {
+    //   roleStorage.value = res.data;
+    // }
   }
 
   async function getRoleSentence(roleId?: number) {
@@ -53,7 +53,7 @@ const useRoleStore = defineStore('bot-roles', () => {
           roleSentenceStorage.value[roleId] = res.data.roleSentence;
           return res.data.roleSentence;
         }
-      } catch (ignore) {}
+      } catch (_) {}
     }
   }
 

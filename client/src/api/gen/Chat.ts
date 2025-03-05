@@ -47,14 +47,14 @@ export class Chat<SecurityDataType = unknown> {
    * @description 获取所有模型
    *
    * @tags config
-   * @name ConfigSchemaGet
+   * @name ConfigModelsGet
    * @summary 获取所有模型
-   * @request GET:/chat/config/schema
+   * @request GET:/chat/config/models
    * @response `200` `ApiEntityCommonResponseArraySchemaModelCache` OK
    */
-  configSchemaGet = (params: RequestParams = {}) =>
+  configModelsGet = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseArraySchemaModelCache, any>({
-      path: `/chat/config/schema`,
+      path: `/chat/config/models`,
       method: 'GET',
       type: ContentType.Json,
       format: 'json',

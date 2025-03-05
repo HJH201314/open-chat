@@ -6,7 +6,6 @@ import { DialogManager } from '@/components/dialog';
 import CusSelect from '@/components/dropdown/CusSelect.vue';
 import IconButton from '@/components/IconButton.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import showToast from '@/components/toast/toast';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import DialogMessage from '@/pages/message/components/DialogMessage.vue';
 import { useDataStore } from '@/store/useDataStore';
@@ -21,6 +20,11 @@ import { scrollToBottom } from '@/utils/element.ts';
 import genApi from '@/api/gen-api.ts';
 import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
+import type { ApiSchemaMessage } from '@/api/gen/data-contracts.ts';
+import type { MessageInfo } from '@/types/data.ts';
+import { renderMarkdown } from '@/commands/useMarkdownIt';
+import { db } from '@/store/data/database.ts';
+import router from '@/plugins/router.ts';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -66,32 +70,56 @@ onMounted(() => {
         }, 50);
       }
     },
-    { immediate: true },
+    { immediate: true }
   );
 });
 
+// session 变化成功，进行同步
+watch(
+  () => sessionInfo.value,
+  (newSession, _, onCleanup) => {
+    // 如果信息不存在，route 返回
+    if (!newSession.id) router.replace('/chat/message');
+
+    const abortController = new AbortController();
+    onCleanup(() => {
+      abortController.abort('session changed');
+    });
+    if (newSession.flags?.needSync && !messageList.value.length) {
+      const newSessionId = newSession.id;
+      syncDialog(newSessionId, abortController).then(() => {
+        dataStore.updateSessionFlags(newSessionId, { needSync: false });
+      });
+    }
+  },
+  { deep: false }
+);
+
+// 加载 session 信息到 form
 watchEffect(() => {
   form.withContext = sessionInfo.value.withContext ?? false;
   form.providerName = sessionInfo.value.provider || '';
   form.modelName = sessionInfo.value.model || '';
 });
 
+// 保存上下文开关
 watch(
   () => form.withContext,
   (newVal, oldVal) => {
     if (newVal !== oldVal) {
       dataStore.toggleDialogContext(form.sessionId, newVal);
     }
-  },
+  }
 );
 
+// 保存使用的模型
 watch(
   () => [form.providerName, form.modelName],
   (newVal, oldVal) => {
     if (newVal[0] !== oldVal[0] || newVal[1] !== oldVal[1]) {
       dataStore.changeDialogModel(form.sessionId, newVal[0], newVal[1]);
     }
-  },
+  }
 );
 
 const smallInput = ref(false);
@@ -186,36 +214,77 @@ async function handleSendMessage() {
   });
 }
 
+/**
+ * 同步会话消息
+ * @param sessionId 会话 ID
+ * @param controller AbortController
+ */
+async function syncDialog(sessionId: string, controller?: AbortController) {
+  const abortController = controller || new AbortController();
+  const remoteMessages: ApiSchemaMessage[] = [];
+  // 获取所有远程数据
+  let nextPage = 1;
+  while (nextPage) {
+    try {
+      const res = await genApi.Chat.messageListGet(
+        sessionId,
+        {
+          page_num: nextPage,
+          page_size: 20,
+          sort_expr: 'id ASC',
+        },
+        {
+          signal: abortController.signal,
+        }
+      );
+      remoteMessages.push(...(res.data.data?.list || []));
+      if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
+      else break;
+    } catch (_) {
+      ToastManager.danger('获取数据异常，请稍后重试～');
+      return;
+    }
+  }
+  const newMessages = remoteMessages.map(
+    (v) =>
+      ({
+        sessionId,
+        remoteId: v.id,
+        time: new Date(v.created_at!).toLocaleString(),
+        sender: v.role === 'user' ? 'user' : 'bot',
+        type: 'text',
+        content: v.content,
+        reasoningContent: v.reasoning_content?.replaceAll('\\n', '\n'),
+        htmlContent: renderMarkdown(v.content?.replaceAll('\\n', '\n')),
+      }) as MessageInfo
+  );
+  try {
+    // 删除旧数据
+    await db.messages.where({ sessionId }).delete();
+    // 插入新数据
+    await db.messages.bulkAdd(newMessages);
+  } catch (_) {
+    ToastManager.warning('保存数据失败，请稍后重试');
+  }
+}
+
 // 从服务器同步数据
 const refreshing = ref(false);
 
 async function handleSyncDialog() {
-  await DialogManager.commonDialog({
+  const currentSessionId = form.sessionId;
+  const dialog = DialogManager.createDialog({
     title: '同步对话数据',
-    subtitleStyle: {
-      color: 'red',
-    },
-    content: '此举将会将本地数据与服务器数据同步<br/> 1. 删除本地可能存在的的多余数据<br /> 2. 保存远程新增数据<br/> 是否同步？',
+    content:
+      '此操作将会将本地缓存数据与服务器数据同步：<br/>&nbsp;&nbsp;1. 数据以服务器数据为准<br />&nbsp;&nbsp;2. 重新渲染并缓存消息<br/>',
+    subtitle: '此操作不可逆，确认继续吗？',
     async confirmHandler(controller) {
-      let nextPage = 1;
-      while (nextPage) {
-        try {
-          const res = await genApi.Chat.messageListGet(form.sessionId, {
-            page_num: nextPage,
-            page_size: 20,
-            sort_expr: 'id DESC',
-          }, {
-            signal: controller.signal,
-          });
-          // todo: handle messages
-          if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
-          else break;
-        } catch (_) {
-          break;
-        }
-      }
+      await syncDialog(currentSessionId, controller);
     },
   });
+  if (!messageList.value.length) {
+    dialog.confirm();
+  }
 }
 
 function handleEditDialog() {
@@ -227,7 +296,7 @@ function handleEditDialog() {
     {
       placeholder: '新对话名称',
       value: sessionInfo.value.title,
-    },
+    }
   ).then((res) => {
     if (res.status && res.value) {
       // 确认修改
@@ -239,7 +308,8 @@ function handleEditDialog() {
 function handleDeleteDialog() {
   DialogManager.commonDialog({
     title: '删除对话',
-    content: `你将永久丢失与 ${sessionInfo.value.botRole} 的 对话 <${sessionInfo.value.title}> <br />这是不可逆的！`,
+    subtitle: '这是不可逆的！',
+    content: `确认删除与 ${sessionInfo.value.botRole} 的 对话 <${sessionInfo.value.title}> <br />`,
     confirmButtonProps: {
       backgroundColor: variables.colorDanger,
     },
@@ -259,7 +329,7 @@ const { isSmallScreen } = useGlobal();
     <div class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton style="flex-shrink: 0" @click="$emit('back')">
-          <Back size="16"/>
+          <Back size="16" />
         </IconButton>
         <span class="dialog-detail-actions-title">
           {{ sessionInfo.title || '未命名对话' }}
@@ -268,17 +338,17 @@ const { isSmallScreen } = useGlobal();
       </div>
       <IconButton style="flex-shrink: 0" @click="handleSyncDialog">
         <cus-spin :show="refreshing">
-          <Refresh size="16"/>
+          <Refresh size="16" />
         </cus-spin>
       </IconButton>
       <IconButton style="flex-shrink: 0" @click="handleEditDialog">
-        <Edit size="16"/>
+        <Edit size="16" />
       </IconButton>
       <!--      <IconButton>-->
       <!--        <Share size="16" />-->
       <!--      </IconButton>-->
       <IconButton style="flex-shrink: 0" @click="handleDeleteDialog">
-        <Delete size="16"/>
+        <Delete size="16" />
       </IconButton>
     </div>
     <div class="dialog-detail-display-area">
@@ -287,8 +357,12 @@ const { isSmallScreen } = useGlobal();
         <div id="bottom-line"></div>
         <!--   消息列表   -->
         <DialogMessage
-          v-if="thinkMsg || answerMsg" id="bot-typing-box"
-          :thinking="thinkMsg" :html-message="answerMsg" role="bot"/>
+          v-if="thinkMsg || answerMsg"
+          id="bot-typing-box"
+          :thinking="thinkMsg"
+          :html-message="answerMsg"
+          role="bot"
+        />
         <DialogMessage
           v-if="!isReceivingMsg && !isEmptySession && form.inputValue"
           id="user-typing-box"
@@ -297,7 +371,7 @@ const { isSmallScreen } = useGlobal();
           role="user"
         />
         <DialogMessage
-          v-for="item in messageList.toReversed()"
+          v-for="item in messageList"
           :id="item.time"
           :key="item.id || item.time"
           :html-message="item.htmlContent"
@@ -335,7 +409,7 @@ const { isSmallScreen } = useGlobal();
               style="font-size: 0.75rem; opacity: 0.75"
             ></CusToggle>
             <div class="dialog-detail-inputs-bar-expand" @click="smallInput = !smallInput">
-              <CollapseTextInput size="16"/>
+              <CollapseTextInput size="16" />
             </div>
           </div>
         </Transition>
@@ -348,8 +422,8 @@ const { isSmallScreen } = useGlobal();
           @keydown="(e) => handleInputKeydown(e)"
         />
         <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
-          <ArrowUp v-if="!isReceivingMsg" fill="white" size="16"/>
-          <cus-spin v-else/>
+          <ArrowUp v-if="!isReceivingMsg" fill="white" size="16" />
+          <cus-spin v-else />
         </div>
       </div>
     </div>

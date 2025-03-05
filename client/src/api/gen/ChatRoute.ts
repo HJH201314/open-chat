@@ -40,12 +40,12 @@ export namespace Chat {
   /**
    * @description 获取所有模型
    * @tags config
-   * @name ConfigSchemaGet
+   * @name ConfigModelsGet
    * @summary 获取所有模型
-   * @request GET:/chat/config/schema
+   * @request GET:/chat/config/models
    * @response `200` `ApiEntityCommonResponseArraySchemaModelCache` OK
    */
-  export namespace ConfigSchemaGet {
+  export namespace ConfigModelsGet {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = never;

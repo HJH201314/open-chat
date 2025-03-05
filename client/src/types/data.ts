@@ -48,6 +48,11 @@ export type SessionInfo = {
   withContext: boolean; // 是否启用上下文
   provider?: string; // 模型供应商
   model?: string; // 模型名称
+  flags?: SessionFlags;
+}
+
+export type SessionFlags = {
+  needSync?: boolean;
 }
 
 export type MessageInfo = {

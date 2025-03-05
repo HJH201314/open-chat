@@ -48,13 +48,19 @@ export const errorHandler = (error: any) => {
   if (error.status === 401) {
     // 后端返回登录失败，前端配合清除登录态
     if (getActivePinia()) {
+      const userStore = useUserStore();
+      if (userStore.isLogin) {
+        // 之前是登录状态，现在鉴权失败，则提示登录态过期
+        ToastManager.danger('登录态已过期，请登录后重试~', {
+          onClick() {
+            router.push('/login');
+          },
+        });
+      }
       useUserStore().logout();
-      ToastManager.danger('登录态已过期，请登录后重试~', {
-        onClick() {
-          router.push('/login');
-        },
-      });
     }
+  } else if (error.status !== 200) {
+    ToastManager.danger('请求失败，请登录后重试~');
   }
 };
 

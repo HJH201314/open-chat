@@ -1,13 +1,13 @@
 <!-- 基于Modal的基础对话框组件 -->
 <script lang="ts" setup>
 import DiliButton from '@/components/button/DiliButton.vue';
-import type { CommonDialogEmits, CommonDialogExpose, CommonDialogProps } from '@/components/dialog/CommonDialog';
-import type { CommonModalFunc } from '@/components/modal/CommonModal';
+import type { CommonDialogEmits, CommonDialogExpose, CommonDialogProps } from '@/components/dialog/types.ts';
 import CommonModal from '@/components/modal/CommonModal.vue';
-import { ref, shallowRef } from 'vue';
+import { ref, shallowRef, watch } from 'vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 
 const props = withDefaults(defineProps<CommonDialogProps>(), {
+  visible: false,
   title: '',
   subtitle: '',
   showCancel: true,
@@ -15,15 +15,21 @@ const props = withDefaults(defineProps<CommonDialogProps>(), {
 });
 
 const emits = defineEmits<CommonDialogEmits>();
+const modalVisible = ref(false);
 
-const modalRef = ref<CommonModalFunc>();
+watch(() => props.visible, (newVisible) => {
+  if (newVisible) show();
+  else close();
+}, { immediate: true });
 
+// 展示模态框
 function show() {
-  modalRef.value?.open();
+  modalVisible.value = true;
 }
 
+// 关闭模态框
 function close() {
-  modalRef.value?.close();
+  modalVisible.value = false;
 }
 
 function afterClose() {
@@ -32,6 +38,7 @@ function afterClose() {
 
 const confirming = shallowRef(false);
 let abortController: AbortController = new AbortController();
+
 async function handleConfirm() {
   if (confirming.value) return;
   if (props.confirmHandler) {
@@ -64,14 +71,15 @@ function handleCancel() {
 defineExpose<CommonDialogExpose>({
   show,
   close,
+  confirm: handleConfirm,
 });
 </script>
 
 <template>
   <CommonModal
-    ref="modalRef"
     :modal-style="{ 'background-color': 'white', ...props.modalStyle }"
     :show-close="false"
+    :visible="modalVisible"
     @after-close="afterClose"
   >
     <div class="dialog">
@@ -79,16 +87,18 @@ defineExpose<CommonDialogExpose>({
         <div v-if="title" class="dialog-title" :style="titleStyle">{{ title }}</div>
         <div v-if="subtitle" class="dialog-sub-title" :style="subtitleStyle">{{ subtitle }}</div>
       </header>
-      <hr v-if="title || subtitle && content" />
+      <hr v-if="title || subtitle && content"/>
       <main>
-        <div v-html="content"></div>
+        <div class="dialog-content" v-html="content"></div>
         <slot></slot>
       </main>
-      <hr v-if="showCancel || showConfirm && content" />
+      <hr v-if="showCancel || showConfirm && content"/>
       <footer>
-        <DiliButton v-if="showCancel" text="取消" type="normal" v-bind="cancelButtonProps" @click="handleCancel"></DiliButton>
+        <slot name="action"></slot>
+        <DiliButton style="margin-left: auto;" v-if="showCancel" text="取消" type="normal" v-bind="cancelButtonProps"
+                    @click="handleCancel"></DiliButton>
         <DiliButton v-if="showConfirm" text="确认" type="primary" v-bind="confirmButtonProps" @click="handleConfirm">
-          <cus-spin :show="confirming" />
+          <cus-spin v-if="confirming" :show="true"/>
         </DiliButton>
       </footer>
     </div>
@@ -114,6 +124,7 @@ defineExpose<CommonDialogExpose>({
     width: 100%;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 0.5rem;
   }
 
@@ -127,6 +138,10 @@ defineExpose<CommonDialogExpose>({
     font-weight: normal;
     font-size: 0.75rem;
     padding-left: 0.5rem;
+  }
+
+  &-content {
+    white-space: preserve;
   }
 }
 </style>

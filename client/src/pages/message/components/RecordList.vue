@@ -2,14 +2,21 @@
 import DiliButton from '@/components/button/DiliButton.vue';
 import CommonModal from '@/components/modal/CommonModal.vue';
 import Toggle from '@/components/toggle/CusToggle.vue';
+import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/useDataStore.ts';
 import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
-import { CloseOne, Plus, Search } from '@icon-park/vue-next';
+import { CloseOne, Plus, Refresh, Search } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, h, reactive, ref, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
+import { DialogManager } from '@/components/dialog';
+import type { ApiSchemaSession } from '@/api/gen/data-contracts.ts';
+import genApi from '@/api/gen-api.ts';
+import ToastManager from '@/components/toast/ToastManager.ts';
+import { db } from '@/store/data/database.ts';
+import { useModelStore } from '@/store/useModelStore.ts';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -17,6 +24,7 @@ const emit = defineEmits<{
 const dataStore = useDataStore();
 const roleStore = useRoleStore();
 const settingStore = useSettingStore();
+const modelStore = useModelStore();
 const currentSessionId = useRouteParams<string>('sessionId');
 
 async function handleAddRecord(roleId?: number) {
@@ -27,8 +35,8 @@ async function handleAddRecord(roleId?: number) {
     dataStore.sendMessageText(
       sessionId,
       (await roleStore.getRoleSentence(roleId)) +
-      `当前时间: ${new Date().toLocaleString()}. ` +
-      `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`,
+        `当前时间: ${new Date().toLocaleString()}. ` +
+        `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`
     );
   }
   handleListItemClick(sessionId);
@@ -46,6 +54,90 @@ function handleListAddClick() {
   else roleForm.modalVisible = true;
 }
 
+const handleSessionRefresh = async () => {
+  const softMode = ref(true);
+  const dialog = DialogManager.createDialog(
+    {
+      title: '同步对话数据',
+      subtitle: '此操作不可逆，确认继续吗？',
+      async confirmHandler(controller) {
+        if (!softMode.value) {
+          ToastManager.danger('暂未支持');
+          return;
+        }
+        try {
+          const remoteSessions: ApiSchemaSession[] = [];
+          // 获取所有远程数据
+          let nextPage = 1;
+          while (nextPage) {
+            try {
+              const res = await genApi.Chat.sessionListGet(
+                {
+                  page_num: nextPage,
+                  page_size: 20,
+                  sort_expr: 'id DESC',
+                },
+                {
+                  signal: controller.signal,
+                }
+              );
+              remoteSessions.push(...(res.data.data?.list || []));
+              if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
+              else break;
+            } catch (_) {
+              ToastManager.danger('获取数据异常，请稍后重试～');
+              return;
+            }
+          }
+          for (const remoteSession of remoteSessions) {
+            const session = await db.sessions.where({ id: remoteSession.id }).last();
+            if (!session) {
+              // 获取 session
+              await db.sessions.add({
+                id: remoteSession.id,
+                title: '未知', // TODO
+                avatar: '',
+                botRole: '未知',
+                createAt: new Date(remoteSession.created_at!).toLocaleString(),
+                withContext: !!remoteSession.enable_context,
+                provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
+                model: settingStore.settings.defaultModel  || modelStore.defaultModel?.modelName,
+                flags: {
+                  needSync: true,
+                },
+              });
+            }
+          }
+        } catch (_) {
+          ToastManager.danger('同步异常，请稍后重试～');
+        }
+      },
+    },
+    {
+      action: () =>
+        h(CusToggle, {
+          modelValue: softMode.value,
+          label: '保留本地数据',
+          onChange(t) {
+            softMode.value = t;
+          },
+        }),
+    }
+  );
+  // 根据开关软拉取模式，改变模态框的内容
+  watchEffect(() => {
+    const content = softMode.value
+      ? '此操作将会从服务器拉取对话数据：<br/>  1. 拉取服务器对比本地的增量对话<br/>  2. 不会删除本地的冗余对话'
+      : '此操作将会从服务器拉取对话数据：<br/>  1. 拉取服务器对比本地的增量对话<br/>  2. <strong style="color: var(--color-danger);">删除</strong>本地的冗余对话';
+    dialog.update({
+      content,
+      confirmButtonProps: {
+        backgroundColor: softMode.value ? '' : 'var(--color-danger)',
+      },
+    });
+  });
+};
+
 const router = useRouter();
 
 // 点击对话列表项
@@ -60,6 +152,7 @@ const roleForm = reactive({
 });
 
 const searchForm = reactive({
+  inputting: false,
   searchVal: '',
 });
 
@@ -72,7 +165,7 @@ watch(
     } else {
       searchList.value = [];
     }
-  },
+  }
 );
 
 const displayList = computed(() => {
@@ -87,16 +180,23 @@ const displayList = computed(() => {
   <!-- 角色列表 -->
   <div class="dialog-list">
     <div class="dialog-list-bar">
-      <div class="dialog-list-bar-search">
-        <span class="dialog-list-bar-search-icon"><Search/></span>
-        <input v-model="searchForm.searchVal" placeholder="搜索对话内容"/>
+      <div
+        class="dialog-list-bar-search"
+        @focusin="searchForm.inputting = true"
+        @focusout="searchForm.inputting = false"
+      >
+        <span class="dialog-list-bar-search-icon"><Search /></span>
+        <input v-model="searchForm.searchVal" placeholder="搜索对话内容" />
         <span v-if="searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
-          <CloseOne theme="filled"/>
+          <CloseOne theme="filled" />
         </span>
       </div>
+      <div v-show="!searchForm.inputting" class="dialog-list-action-button" @click="handleSessionRefresh">
+        <Refresh size="18" theme="outline" />
+      </div>
       <div>
-        <div class="dialog-list-add" @click="handleListAddClick">
-          <Plus size="24" theme="outline"/>
+        <div v-show="!searchForm.inputting" class="dialog-list-action-button" @click="handleListAddClick">
+          <Plus size="24" theme="outline" />
         </div>
         <CommonModal v-model:visible="roleForm.modalVisible">
           <div class="select-role">
@@ -112,8 +212,8 @@ const displayList = computed(() => {
               </div>
             </div>
             <div style="display: flex; align-items: center">
-              <Toggle v-model="roleForm.remember" label="记住本次选择" style="margin-top: 1rem"/>
-              <DiliButton style="margin-left: auto" text="直接开始→" type="primary" @click="handleAddRecord"/>
+              <Toggle v-model="roleForm.remember" label="记住本次选择" style="margin-top: 1rem" />
+              <DiliButton style="margin-left: auto" text="直接开始→" type="primary" @click="handleAddRecord" />
             </div>
           </div>
         </CommonModal>
@@ -127,7 +227,7 @@ const displayList = computed(() => {
         class="dialog-list-item"
         @click="handleListItemClick(item.id)"
       >
-        <img :src="item.avatar ? item.avatar : '/chatgpt3.svg'" alt="avatar"/>
+        <img :src="item.avatar ? item.avatar : '/chatgpt3.svg'" alt="avatar" />
         <div class="dialog-list-item-center">
           <div class="title">
             {{ item.title || '未命名对话' }}
@@ -224,7 +324,7 @@ const displayList = computed(() => {
     }
   }
 
-  &-add {
+  &-action-button {
     height: 2rem;
     aspect-ratio: 1;
     background-color: $color-grey-200;

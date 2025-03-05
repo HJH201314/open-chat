@@ -66,7 +66,7 @@ const isEmptyTipAvailable = ref(true);
     <div v-if="showListView && showDialogView" class="split"></div>
     <section v-show="showDialogView" class="session-right" :class="{'session-right-absolute': !isLargeScreen}">
       <Transition
-        :name="isLargeScreen ? 'slide-fade' : ''"
+        :name="isLargeScreen ? 'slide-fade-right' : 'slide-fade-right'"
         @before-enter="isEmptyTipAvailable = false"
         @after-leave="isEmptyTipAvailable = true"
       >

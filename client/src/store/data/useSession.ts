@@ -20,9 +20,9 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
       return await db.sessions.where({ id: resolvedSessionId.value }).last() || ({} as SessionInfo);
     }).subscribe(toObserver(session)));
 
-    // 定于 message
+    // 订阅 message
     useSubscription(liveQuery(async () => {
-      return db.messages.where({ sessionId: newSessionId }).toArray();
+      return db.messages.where({ sessionId: newSessionId }).reverse().toArray();
     }).subscribe(toObserver(messages)));
   });
 

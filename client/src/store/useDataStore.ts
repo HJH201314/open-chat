@@ -14,6 +14,7 @@ import { from, useObservable } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
 import { db } from '@/store/data/database.ts';
 import genApi from '@/api/gen-api.ts';
+import { useModelStore } from '@/store/useModelStore.ts';
 
 interface MessageCallback {
   // 用户输入保存后的回调
@@ -34,13 +35,14 @@ interface MessageCallback {
 /* 数据相关 */
 export const useDataStore = defineStore('data', () => {
   const sessions = useObservable(from(
-    liveQuery(async () => db.sessions.reverse().toArray()),
+    liveQuery(async () => db.sessions.orderBy('createAt').reverse().toArray()),
   ), {
     initialValue: [],
   });
 
   const roleStore = useRoleStore();
   const userStore = useUserStore();
+  const modelStore = useModelStore();
   const settingStore = useSettingStore();
 
   async function getSessionInfo(sessionId: string) {
@@ -65,8 +67,9 @@ export const useDataStore = defineStore('data', () => {
           botRole: roleStore.roles?.find((r) => r[0] === role)?.[1] || '未知',
           createAt: new Date().toLocaleString(),
           withContext: true,
-          provider: settingStore.settings.defaultProvider ?? 'OpenAI',
-          model: settingStore.settings.defaultModel ?? 'gpt-4o',
+          provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
+          model: settingStore.settings.defaultModel || modelStore.defaultModel?.modelName,
+          flags: {},
         });
       }
       return sessionId;
@@ -99,9 +102,20 @@ export const useDataStore = defineStore('data', () => {
     });
   }
 
+  function updateSessionFlags(sessionId: string, flags: SessionInfo['flags']) {
+    db.sessions.where({ id: sessionId }).modify((session) => {
+      session.flags = {
+        ...(session.flags || {}),
+        ...flags,
+      };
+    });
+  }
+
   async function delSession(sessionId: string) {
-    // 本地删除
-    await db.sessions.delete(sessionId);
+    // 本地删除消息
+    await db.messages.where({ sessionId }).delete();
+    // 本地删除会话
+    await db.sessions.where({ id: sessionId }).delete();
     // 远程删除
     await genApi.Chat.sessionDelPost(sessionId);
   }
@@ -298,6 +312,7 @@ export const useDataStore = defineStore('data', () => {
 
   return {
     sessions,
+    updateSessionFlags,
     addDialog: addSession,
     editDialogTitle: editSessionTitle,
     toggleDialogContext: toggleSessionContext,

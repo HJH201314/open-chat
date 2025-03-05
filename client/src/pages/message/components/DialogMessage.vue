@@ -2,7 +2,9 @@
 import useGlobal from '@/commands/useGlobal';
 import useMarkdownIt from '@/commands/useMarkdownIt';
 import { useUserStore } from '@/store/useUserStore';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { Down } from '@icon-park/vue-next';
+import CusSpin from '@/components/spinning/CusSpin.vue';
 
 type DialogMessageProps = {
   message?: string;
@@ -57,11 +59,13 @@ const avatarPath = computed(() => {
 });
 
 const useCachedHtmlMessage = computed(() => !!props.htmlMessage);
-const useOriginMessage = computed(() => !useCachedHtmlMessage.value && !props.markdownRender);
+const useOriginMessage = computed(() => props.role == 'user' || !useCachedHtmlMessage.value && !props.markdownRender);
 const markdownIt = useMarkdownIt(() => (useCachedHtmlMessage.value || useOriginMessage.value ? '' : props.message));
 const renderMessage = computed(() =>
   useCachedHtmlMessage.value ? props.htmlMessage : useOriginMessage.value ? props.message : markdownIt.result.value
 );
+
+const thinkingCollapsed = ref(false);
 
 const { isLargeScreen } = useGlobal();
 </script>
@@ -72,10 +76,20 @@ const { isLargeScreen } = useGlobal();
       <span v-if="isLargeScreen" class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
         <div v-if="thinking" class="dialog-message-content-think">
-          {{ thinking }}
+          <div class="dialog-message-content-think-collapse" :class="{ collapsed: thinkingCollapsed }" @click="thinkingCollapsed = !thinkingCollapsed">
+            <CusSpin v-if="thinking && !renderMessage" style="margin-right: 0.5em;" color="var(--color-grey-500)" />
+            <span style="margin-right: auto;">{{ thinking && !renderMessage ? '思考中' : '思考完成' }}</span>
+            <span>{{ thinkingCollapsed ? '展开' : '收起' }}</span>
+            <Down size="16" :style="{ transform: thinkingCollapsed ? '' : 'rotate(180deg)' }" />
+          </div>
+          <transition name="grid-expand">
+            <div v-if="!thinkingCollapsed" class="content-wrapper">
+              <div class="content">{{ thinking }}</div>
+            </div>
+          </transition>
         </div>
         <div v-if="useOriginMessage" class="dialog-message-content-body" style="white-space: pre-wrap;" v-text="renderMessage" />
-        <div v-else class="dialog-message-content-body" v-html="renderMessage" />
+        <div v-else class="dialog-message-content-body rendered" v-html="renderMessage" />
       </div>
     </div>
     <div class="dialog-message-time">
@@ -85,6 +99,7 @@ const { isLargeScreen } = useGlobal();
 </template>
 
 <style lang="scss" scoped>
+@use '@/assets/animations' as *;
 @use '@/assets/variables' as *;
 
 .dialog-message {
@@ -133,21 +148,22 @@ const { isLargeScreen } = useGlobal();
   }
 
   &-content {
-    padding: 0.25em 0.5em;
     user-select: text;
     white-space: pre-wrap;
     word-break: break-word;
+    border-radius: 0.5rem;
     overflow-x: auto; // 此处让代码内容超出时可以滚动查看
+
     &__user {
+      padding: 0.5em 0.8em;
       background-color: $color-teal-500;
       color: $color-white;
-      border-radius: 0.5rem 0.5rem 0 0.5rem;
     }
 
     &__bot {
-      background-color: $color-grey-200;
+      padding: 0;
+      background-color: transparent;
       color: $color-black;
-      border-radius: 0.5rem 0.5rem 0.5rem 0;
     }
 
     &-body {
@@ -163,8 +179,27 @@ const { isLargeScreen } = useGlobal();
     &-think {
       border-radius: 8px;
       padding: 0.25em 0.5em;
-      margin: 0.25em 0;
-      background-color: $color-grey-300;
+      margin-bottom: 0.5em;
+      background-color: $color-grey-200;
+
+      .content-wrapper {
+        display: grid;
+        padding-top: 0.25em;
+      }
+
+      .content {
+        overflow: hidden;
+      }
+
+      &-collapse {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        color: $color-grey-500;
+        font-size: 0.75em;
+        cursor: pointer;
+        text-align: right;
+      }
     }
   }
 
@@ -178,7 +213,7 @@ const { isLargeScreen } = useGlobal();
 <style lang="scss">
 @use '@/assets/variables' as *;
 // 无 scoped 解决 v-html 中的展示问题
-.dialog-message-content-body {
+.dialog-message-content-body.rendered {
   ol,
   ul {
     white-space: normal;
@@ -201,7 +236,16 @@ const { isLargeScreen } = useGlobal();
   }
 
   p {
+    margin: 0.25em 0;
     white-space: pre-line;
+
+    &:first-child {
+      margin-top: 0 !important;
+    }
+
+    &:last-child {
+      margin-bottom: 0 !important;
+    }
   }
 
   h3 {
@@ -209,6 +253,20 @@ const { isLargeScreen } = useGlobal();
     // 用户代理样式表默认值
     font-size: 1.17em;
     font-weight: 700;
+  }
+
+  table {
+    border-collapse: collapse;
+
+    tr {
+      border: 1px solid $color-grey-300;
+      border-left: none;
+      border-right: none;
+    }
+    td {
+      padding: 0.25em 0;
+      text-align: center;
+    }
   }
 
   .cus-code-container {

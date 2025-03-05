@@ -16,6 +16,7 @@
   opacity: 0;
   transform: translateX(50px)
 }
+
 // 进入
 .slide-fade-enter-from {
   opacity: 0;
@@ -28,16 +29,45 @@
   opacity: 0;
   transform: translateX(-50px)
 }
+
 // 进入
 .slide-fade-rev-enter-from {
   opacity: 0;
   transform: translateX(50px)
 }
 
+/* 定义 右方划入 动画 */
+.slide-fade-right {
+  &-enter-from, &-leave-to {
+    opacity: 0;
+    transform: translateX(50px)
+  }
+
+  &-enter-active, &-leave-active {
+    transition: all 0.2s variables.$ease-out-circ;
+  }
+}
+
+/* 定义 使用 gird 布局的过渡动画 */
+.grid-expand {
+  &-enter-active, &-leave-active {
+    transition: grid-template-rows 0.3s variables.$ease-out-circ;
+  }
+
+  &-enter-to, &-leave-from {
+    grid-template-rows: 1fr;
+  }
+
+  &-enter-from, &-leave-to {
+    grid-template-rows: 0fr;
+  }
+}
+
 /* 定义 渐变出现、立即消失 */
 .ease-in-enter-active {
   transition: opacity 0.2s variables.$ease-out-circ;
 }
+
 .ease-in-leave-active {
   opacity: 0; // 立即隐身效果
 }

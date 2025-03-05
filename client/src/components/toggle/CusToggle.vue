@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, type CSSProperties, ref, watch } from 'vue';
 import CusToggleSwitch from '@/components/toggle/CusToggleSwitch.vue';
 
 type ToggleProps = {
@@ -9,16 +9,19 @@ type ToggleProps = {
   highlight?: boolean; // 选中时是否高亮文字
   label?: string;
   labelPosition?: 'top' | 'bottom' | 'left' | 'right';
+  labelStyles?: CSSProperties;
 };
 
 const props = withDefaults(defineProps<ToggleProps>(), {
   toggleType: 'switch',
   label: '',
   labelPosition: 'right',
+  labelStyles: () => ({}),
 });
 
 const emit = defineEmits<{
   (event: 'update:modelValue', active: boolean): void;
+  (event: 'change', active: boolean): void;
 }>();
 
 const active = ref(props.modelValue);
@@ -40,6 +43,7 @@ watch(
 function toggle() {
   active.value = !active.value;
   emit('update:modelValue', active.value);
+  emit('change', active.value);
 }
 </script>
 
@@ -48,7 +52,7 @@ function toggle() {
     <input v-show="false" type="checkbox" :value="active"/>
     <slot name="before"></slot>
     <CusToggleSwitch v-if="toggleType == 'switch'" :is-active="active" @click="toggle"/>
-    <label v-if="label" class="toggle-label" :class="labelClasses" @click="toggle">{{ label }}</label>
+    <label v-if="label" class="toggle-label" :class="labelClasses" :style="labelStyles" @click="toggle">{{ label }}</label>
     <slot name="after"></slot>
   </div>
 </template>

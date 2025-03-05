@@ -233,8 +233,11 @@ export interface ApiSchemaSession {
   created_at?: string;
   /** 上下文开关 */
   enable_context?: boolean;
+  /** 原始数据 */
   id?: string;
   last_active?: string;
+  /** 组装数据 */
+  messages?: ApiSchemaMessage[];
   /** 模型参数 */
   model_params?: ApiSchemaModelParams;
   user_id?: number;
