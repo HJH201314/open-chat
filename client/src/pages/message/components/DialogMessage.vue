@@ -24,6 +24,10 @@ const props = withDefaults(defineProps<DialogMessageProps>(), {
   markdownRender: true,
 });
 
+const emits = defineEmits<{
+  (event: 'think-expand', expanded: boolean): void;
+}>();
+
 // 处理消息内容框内的点击
 async function handleClick(event: MouseEvent) {
   if (event.target instanceof HTMLElement) {
@@ -50,6 +54,11 @@ async function handleClick(event: MouseEvent) {
   }
 }
 
+function handleThinkExpand() {
+  emits('think-expand', !thinkingCollapsed.value);
+  thinkingCollapsed.value = !thinkingCollapsed.value;
+}
+
 const userStore = useUserStore();
 
 const avatarPath = computed(() => {
@@ -59,7 +68,7 @@ const avatarPath = computed(() => {
 });
 
 const useCachedHtmlMessage = computed(() => !!props.htmlMessage);
-const useOriginMessage = computed(() => props.role == 'user' || !useCachedHtmlMessage.value && !props.markdownRender);
+const useOriginMessage = computed(() => props.role == 'user' || (!useCachedHtmlMessage.value && !props.markdownRender));
 const markdownIt = useMarkdownIt(() => (useCachedHtmlMessage.value || useOriginMessage.value ? '' : props.message));
 const renderMessage = computed(() =>
   useCachedHtmlMessage.value ? props.htmlMessage : useOriginMessage.value ? props.message : markdownIt.result.value
@@ -75,21 +84,29 @@ const { isLargeScreen } = useGlobal();
     <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
       <span v-if="isLargeScreen" class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
-        <div v-if="thinking" class="dialog-message-content-think">
-          <div class="dialog-message-content-think-collapse" :class="{ collapsed: thinkingCollapsed }" @click="thinkingCollapsed = !thinkingCollapsed">
-            <CusSpin v-if="thinking && !renderMessage" style="margin-right: 0.5em;" color="var(--color-grey-500)" />
-            <span style="margin-right: auto;">{{ thinking && !renderMessage ? '思考中' : '思考完成' }}</span>
-            <span>{{ thinkingCollapsed ? '展开' : '收起' }}</span>
-            <Down size="16" :style="{ transform: thinkingCollapsed ? '' : 'rotate(180deg)' }" />
-          </div>
-          <transition name="grid-expand">
-            <div v-if="!thinkingCollapsed" class="content-wrapper">
-              <div class="content">{{ thinking }}</div>
-            </div>
-          </transition>
+        <div
+          v-if="thinking"
+          class="dialog-message-content-think-toggle"
+          :class="{ collapsed: thinkingCollapsed }"
+          @click="handleThinkExpand"
+        >
+          <CusSpin v-if="thinking && !renderMessage" style="margin-right: 0.5em" color="var(--color-black)" />
+          <span style="margin-right: 2em;">{{ thinking && !renderMessage ? '思考中' : '思考完成' }}</span>
+          <span>{{ thinkingCollapsed ? '展开' : '收起' }}</span>
+          <Down size="16" :style="{ transform: thinkingCollapsed ? '' : 'rotate(180deg)' }" />
         </div>
-        <div v-if="useOriginMessage" class="dialog-message-content-body" style="white-space: pre-wrap;" v-text="renderMessage" />
-        <div v-else class="dialog-message-content-body rendered" v-html="renderMessage" />
+        <transition name="grid-expand">
+          <div v-if="thinking && !thinkingCollapsed" class="dialog-message-content-think">
+            <div class="content">{{ thinking }}</div>
+          </div>
+        </transition>
+        <div
+          v-if="useOriginMessage"
+          class="dialog-message-content-body"
+          style="white-space: pre-wrap"
+          v-text="renderMessage"
+        />
+        <div v-else class="dialog-message-content-body rendered" :class="{ think: thinking }" v-html="renderMessage" />
       </div>
     </div>
     <div class="dialog-message-time">
@@ -151,11 +168,11 @@ const { isLargeScreen } = useGlobal();
     user-select: text;
     white-space: pre-wrap;
     word-break: break-word;
-    border-radius: 0.5rem;
     overflow-x: auto; // 此处让代码内容超出时可以滚动查看
 
     &__user {
       padding: 0.5em 0.8em;
+      border-radius: 0.5rem;
       background-color: $color-teal-500;
       color: $color-white;
     }
@@ -174,31 +191,39 @@ const { isLargeScreen } = useGlobal();
       line-height: 1.5;
       -ms-text-size-adjust: 100%;
       -webkit-text-size-adjust: 100%;
+
+      &.think {
+        margin-top: 0.5rem;
+      }
     }
 
     &-think {
-      border-radius: 8px;
-      padding: 0.25em 0.5em;
-      margin-bottom: 0.5em;
+      display: grid;
+      border-radius: 0 0.5rem 0.5rem 0.5rem;
+      padding: 0.5rem 0.75rem;
       background-color: $color-grey-200;
-
-      .content-wrapper {
-        display: grid;
-        padding-top: 0.25em;
-      }
 
       .content {
         overflow: hidden;
+        font-size: 0.9em;
       }
 
-      &-collapse {
+      &-toggle {
+        width: fit-content;
         display: flex;
-        justify-content: flex-end;
+        justify-content: flex-start;
         align-items: center;
-        color: $color-grey-500;
+        background-color: $color-grey-200;
         font-size: 0.75em;
         cursor: pointer;
         text-align: right;
+        padding: 0.5em 1em;
+        border-radius: 0.5rem 0.5rem 0 0;
+        transition: all 0.3s $ease-out-circ;
+
+        &.collapsed {
+          border-radius: 0.5rem;
+        }
       }
     }
   }
@@ -230,6 +255,7 @@ const { isLargeScreen } = useGlobal();
     &::marker {
       color: $color-grey-500;
     }
+
     p {
       display: inline;
     }
@@ -263,6 +289,7 @@ const { isLargeScreen } = useGlobal();
       border-left: none;
       border-right: none;
     }
+
     td {
       padding: 0.25em 0;
       text-align: center;
@@ -272,6 +299,23 @@ const { isLargeScreen } = useGlobal();
   .cus-code-container {
     margin-top: 0.1em;
     margin-bottom: 0.6em;
+  }
+}
+
+/* 定义 使用 gird 布局的过渡动画 */
+.grid-expand {
+  &-enter-active, &-leave-active {
+    transition: grid-template-rows 0.25s $ease-out-circ, padding-top 0.25s $ease-out-circ;
+  }
+
+  &-enter-to, &-leave-from {
+    padding: 0.5rem 0.75rem !important;
+    grid-template-rows: 1fr;
+  }
+
+  &-enter-from, &-leave-to {
+    padding: 0 0.75rem !important;
+    grid-template-rows: 0fr;
   }
 }
 </style>

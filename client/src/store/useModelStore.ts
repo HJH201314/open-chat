@@ -5,6 +5,7 @@ import genApi from '@/api/gen-api.ts';
 import type { ApiSchemaModelCache } from '@/api/gen/data-contracts.ts';
 import type { DropdownOption } from '@/components/dropdown/types.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
+import { useSettingStore } from '@/store/useSettingStore.ts';
 
 type ProviderModel = {
   internalName: string;
@@ -24,16 +25,16 @@ type ModelAccurateInfo = {
 
 export const useModelStore = defineStore('model', () => {
   // 供应商及模型数据
-  const models = useLocalStorage<ApiSchemaModelCache[]>('models-raw', []);
+  const rawModels = useLocalStorage<ApiSchemaModelCache[]>('models-raw', []);
   const providerModels = useLocalStorage<ProviderModel[]>('provider-model', []);
   // 转换为下拉菜单结果fix
   const providerDropdown = useArrayMap(providerModels, convertProviderToDropdown);
   // 计算出一个默认的模型
   const defaultModel = computed<ModelAccurateInfo | undefined>(() =>
-    models.value.length
+    rawModels.value.length
       ? {
-          providerName: models.value[0].provider_name || '',
-          modelName: models.value[0].name || '',
+          providerName: rawModels.value[0].provider_name || '',
+          modelName: rawModels.value[0].name || '',
         }
       : undefined
   );
@@ -42,6 +43,7 @@ export const useModelStore = defineStore('model', () => {
     // 获取模型数据
     const models = await genApi.Chat.configModelsGet();
     if (models.data.data) {
+      rawModels.value = models.data.data;
       // 将扁平的模型数据分组
       const groupedModels = models.data.data.reduce(
         (acc, curr) => {
@@ -74,6 +76,7 @@ export const useModelStore = defineStore('model', () => {
     getModelsOnServer();
   });
 
+  // 登录后获取模型数据
   const userStore = useUserStore();
   watch(
     () => userStore.isLogin,
@@ -82,6 +85,24 @@ export const useModelStore = defineStore('model', () => {
         getModelsOnServer();
       }
     }
+  );
+
+  // 监听默认模型的变化，若设置中的默认模型为空，则将设置中默认模型设置为本仓库中的默认模型
+  const settingStore = useSettingStore();
+  watch(
+    () => defaultModel.value,
+    async (provider) => {
+      if (
+        (!settingStore.settings.defaultProvider || !settingStore.settings.defaultModel) &&
+        provider?.providerName &&
+        provider?.modelName
+      ) {
+        settingStore.saveSettings({
+          defaultProvider: provider.providerName,
+          defaultModel: provider.modelName,
+        });
+      }
+    },
   );
 
   return {

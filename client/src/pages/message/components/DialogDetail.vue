@@ -76,17 +76,17 @@ onMounted(() => {
 
 // session 变化成功，进行同步
 watch(
-  () => sessionInfo.value,
-  (newSession, _, onCleanup) => {
+  () => sessionInfo.value.id,
+  (newSessionId, _, onCleanup) => {
     // 如果信息不存在，route 返回
-    if (!newSession.id) router.replace('/chat/message');
+    if (!newSessionId) router.replace('/chat/message');
 
     const abortController = new AbortController();
     onCleanup(() => {
       abortController.abort('session changed');
     });
-    if (newSession.flags?.needSync && !messageList.value.length) {
-      const newSessionId = newSession.id;
+    console.log(JSON.stringify(newSessionId));
+    if (sessionInfo.value.flags?.needSync && !messageList.value.length) {
       syncDialog(newSessionId, abortController).then(() => {
         dataStore.updateSessionFlags(newSessionId, { needSync: false });
       });
@@ -255,7 +255,10 @@ async function syncDialog(sessionId: string, controller?: AbortController) {
         type: 'text',
         content: v.content,
         reasoningContent: v.reasoning_content?.replaceAll('\\n', '\n'),
-        htmlContent: renderMarkdown(v.content?.replaceAll('\\n', '\n')),
+        htmlContent:
+          v.role == 'assistant'
+            ? renderMarkdown(v.content?.replaceAll('\\n', '\n'))
+            : v.content?.replaceAll('\\n', '\n'),
       }) as MessageInfo
   );
   try {
@@ -321,6 +324,15 @@ function handleDeleteDialog() {
   });
 }
 
+function handleMessageThinkExpand(expand: boolean) {
+  if (expand) {
+    dialogListRef.value?.style.setProperty('overflow-y', 'hidden');
+    setTimeout(() => {
+      dialogListRef.value?.style.setProperty('overflow-y', 'auto');
+    }, 250);
+  }
+}
+
 const { isSmallScreen } = useGlobal();
 </script>
 
@@ -379,6 +391,7 @@ const { isSmallScreen } = useGlobal();
           :thinking="item.reasoningContent"
           :role="item.sender"
           :time="item.time"
+          @think-expand="handleMessageThinkExpand"
         />
         <!--   列表顶部定位   -->
         <div id="top-line"></div>
@@ -497,6 +510,7 @@ const { isSmallScreen } = useGlobal();
     display: flex;
     flex-direction: column-reverse;
     padding-bottom: v-bind(panelPlaceholderPx);
+    scrollbar-gutter: stable;
 
     > :not(:first-child) {
       margin-bottom: 0.5rem;

@@ -95,7 +95,7 @@ const handleSessionRefresh = async () => {
               // 获取 session
               await db.sessions.add({
                 id: remoteSession.id,
-                title: '未知', // TODO
+                title: remoteSession.messages?.[0]?.content || '', // TODO: 目前以第一条消息为标题
                 avatar: '',
                 botRole: '未知',
                 createAt: new Date(remoteSession.created_at!).toLocaleString(),
