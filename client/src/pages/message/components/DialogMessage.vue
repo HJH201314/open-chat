@@ -173,7 +173,7 @@ const { isLargeScreen } = useGlobal();
     overflow-x: auto; // 此处让代码内容超出时可以滚动查看
 
     &__user {
-      padding: 0.5em 0.8em;
+      padding: 0.4em 0.8em;
       border-radius: 0.5rem;
       background-color: $color-teal-500;
       color: $color-white;

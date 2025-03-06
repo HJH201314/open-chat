@@ -8,6 +8,7 @@ const props = withDefaults(defineProps<ToastProps>(), {
   position: 'top-center',
   duration: 'normal',
   type: 'normal',
+  showIcon: true,
 });
 
 const emits = defineEmits<{
@@ -55,12 +56,15 @@ const wrapperColor = computed(() => {
       return variables.colorPrimary;
   }
 });
+
+const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.type.slice(1)}`);
 </script>
 
 <template>
   <Teleport to="body">
     <div ref="myself" :class="toastClass" @click="$emit('click')">
       <div class="toast-wrapper">
+        <component :is="icon" v-if="showIcon" class="toast-icon" />
         <span v-if="text" class="toast-text">{{ props.text }}</span>
         <slot v-if="$slots.default"></slot>
       </div>
@@ -83,8 +87,8 @@ const wrapperColor = computed(() => {
     gap: .5rem;
     color: $color-white;
     background-color: v-bind(wrapperColor);
-    box-shadow: 0 0 4px v-bind(wrapperColor);
-    opacity: 0.9;
+    box-shadow: $box-shadow;
+    backdrop-filter: opacity(50%) blur(10px);
   }
 
   &-top-center {

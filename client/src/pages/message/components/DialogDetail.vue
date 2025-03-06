@@ -225,7 +225,7 @@ async function handleSyncDialog() {
     },
   });
   if (!messageList.value.length) {
-    dialog.confirm();
+    await dialog.confirm();
   }
 }
 
