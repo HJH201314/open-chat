@@ -88,7 +88,7 @@ defineExpose<CommonDialogExpose>({
         <div v-if="subtitle" class="dialog-sub-title" :style="subtitleStyle">{{ subtitle }}</div>
       </header>
       <hr v-if="title || subtitle && content"/>
-      <main>
+      <main style="display: flex; flex-direction: column; gap: 0.25rem">
         <div class="dialog-content" v-html="content"></div>
         <slot></slot>
       </main>
