@@ -17,13 +17,8 @@ import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, wa
 import { useModelStore } from '@/store/useModelStore.ts';
 import { storeToRefs } from 'pinia';
 import { scrollToBottom } from '@/utils/element.ts';
-import genApi from '@/api/gen-api.ts';
 import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import type { ApiSchemaMessage } from '@/api/gen/data-contracts.ts';
-import type { MessageInfo } from '@/types/data.ts';
-import { renderMarkdown } from '@/commands/useMarkdownIt';
-import { db } from '@/store/data/database.ts';
 import router from '@/plugins/router.ts';
 
 interface DialogDetailProps {
@@ -53,7 +48,7 @@ const form = reactive({
   inputValue: ref(''),
 });
 
-const { session: sessionInfo, messages: messageList } = useSession(() => form.sessionId);
+const { session: sessionInfo, messages: messageList, syncMessages } = useSession(() => form.sessionId);
 
 onMounted(() => {
   watch(
@@ -66,7 +61,6 @@ onMounted(() => {
         setTimeout(() => {
           // 滚动到列表底部并默认聚焦输入框
           scrollDialogListToBottom();
-          focusTextArea();
         }, 50);
       }
     },
@@ -87,7 +81,9 @@ watch(
     });
     console.log(JSON.stringify(newSessionId));
     if (sessionInfo.value.flags?.needSync && !messageList.value.length) {
-      syncDialog(newSessionId, abortController).then(() => {
+      messageSyncing.value = true;
+      syncMessages(newSessionId, abortController).then(() => {
+        messageSyncing.value = false;
         dataStore.updateSessionFlags(newSessionId, { needSync: false });
       });
     }
@@ -214,65 +210,8 @@ async function handleSendMessage() {
   });
 }
 
-/**
- * 同步会话消息
- * @param sessionId 会话 ID
- * @param controller AbortController
- */
-async function syncDialog(sessionId: string, controller?: AbortController) {
-  const abortController = controller || new AbortController();
-  const remoteMessages: ApiSchemaMessage[] = [];
-  // 获取所有远程数据
-  let nextPage = 1;
-  while (nextPage) {
-    try {
-      const res = await genApi.Chat.messageListGet(
-        sessionId,
-        {
-          page_num: nextPage,
-          page_size: 20,
-          sort_expr: 'id ASC',
-        },
-        {
-          signal: abortController.signal,
-        }
-      );
-      remoteMessages.push(...(res.data.data?.list || []));
-      if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
-      else break;
-    } catch (_) {
-      ToastManager.danger('获取数据异常，请稍后重试～');
-      return;
-    }
-  }
-  const newMessages = remoteMessages.map(
-    (v) =>
-      ({
-        sessionId,
-        remoteId: v.id,
-        time: new Date(v.created_at!).toLocaleString(),
-        sender: v.role === 'user' ? 'user' : 'bot',
-        type: 'text',
-        content: v.content,
-        reasoningContent: v.reasoning_content?.replaceAll('\\n', '\n'),
-        htmlContent:
-          v.role == 'assistant'
-            ? renderMarkdown(v.content?.replaceAll('\\n', '\n'))
-            : v.content?.replaceAll('\\n', '\n'),
-      }) as MessageInfo
-  );
-  try {
-    // 删除旧数据
-    await db.messages.where({ sessionId }).delete();
-    // 插入新数据
-    await db.messages.bulkAdd(newMessages);
-  } catch (_) {
-    ToastManager.warning('保存数据失败，请稍后重试');
-  }
-}
-
 // 从服务器同步数据
-const refreshing = ref(false);
+const messageSyncing = ref(false);
 
 async function handleSyncDialog() {
   const currentSessionId = form.sessionId;
@@ -282,7 +221,7 @@ async function handleSyncDialog() {
       '此操作将会将本地缓存数据与服务器数据同步：<br/>&nbsp;&nbsp;1. 数据以服务器数据为准<br />&nbsp;&nbsp;2. 重新渲染并缓存消息<br/>',
     subtitle: '此操作不可逆，确认继续吗？',
     async confirmHandler(controller) {
-      await syncDialog(currentSessionId, controller);
+      await syncMessages(currentSessionId, controller);
     },
   });
   if (!messageList.value.length) {
@@ -337,7 +276,7 @@ const { isSmallScreen } = useGlobal();
 </script>
 
 <template>
-  <div :class="{ 'small-screen': isSmallScreen }" class="dialog-detail">
+  <div ref="dialog-detail" :class="{ 'small-screen': isSmallScreen }" class="dialog-detail">
     <div class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton style="flex-shrink: 0" @click="$emit('back')">
@@ -349,7 +288,7 @@ const { isSmallScreen } = useGlobal();
         <span class="dialog-detail-actions-subtitle"> {{ messageList.length }} 条消息 </span>
       </div>
       <IconButton style="flex-shrink: 0" @click="handleSyncDialog">
-        <cus-spin :show="refreshing">
+        <cus-spin :show="messageSyncing">
           <Refresh size="16" />
         </cus-spin>
       </IconButton>
@@ -363,7 +302,11 @@ const { isSmallScreen } = useGlobal();
         <Delete size="16" />
       </IconButton>
     </div>
+    <!-- 空空提示 -->
+    <div v-if="isEmptySession" class="dialog-detail-empty">随便问点啥？</div>
+    <!-- 对话区域 -->
     <div class="dialog-detail-display-area">
+      <!-- 对话列表固定中间 -->
       <div ref="dialog-list" class="dialog-detail-dialogs">
         <!--   列表底部定位（此列表为 column-reverse）   -->
         <div id="bottom-line"></div>
@@ -385,7 +328,7 @@ const { isSmallScreen } = useGlobal();
         <DialogMessage
           v-for="item in messageList"
           :id="item.time"
-          :key="item.id || item.time"
+          :key="item.id"
           :html-message="item.htmlContent"
           :message="item.content"
           :thinking="item.reasoningContent"
@@ -396,8 +339,6 @@ const { isSmallScreen } = useGlobal();
         <!--   列表顶部定位   -->
         <div id="top-line"></div>
       </div>
-      <!-- 空空提示 -->
-      <div v-if="isEmptySession" class="dialog-detail-empty">随便问点啥？</div>
       <!-- 输入面板 -->
       <div
         ref="input-panel"
@@ -447,6 +388,8 @@ const { isSmallScreen } = useGlobal();
 @use 'sass:color';
 @use '@/assets/variables' as *;
 
+$dialog-max-width: 54rem;
+
 .dialog-detail {
   position: relative;
 
@@ -495,22 +438,20 @@ const { isSmallScreen } = useGlobal();
   }
 
   &-display-area {
-    position: relative;
     width: 100%;
     height: 100%;
-    max-width: 54rem;
-    margin-inline: auto;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 
   &-dialogs {
     width: 100%;
-    height: 100%;
+    max-width: $dialog-max-width;
+    margin-inline: auto;
     padding-inline: 0.25rem;
-    overflow-y: auto;
     display: flex;
     flex-direction: column-reverse;
-    padding-bottom: v-bind(panelPlaceholderPx);
-    scrollbar-gutter: stable;
+    margin-bottom: v-bind(panelPlaceholderPx);
 
     > :not(:first-child) {
       margin-bottom: 0.5rem;
@@ -539,14 +480,16 @@ const { isSmallScreen } = useGlobal();
 
   &-inputs {
     position: absolute;
-    left: 0.25rem;
-    right: 0.25rem;
-    bottom: 0.25rem;
+    left: 50%;
+    bottom: 0;
+    width: 100%;
+    max-width: $dialog-max-width;
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     background-color: color.scale($color-grey-100, $alpha: -20%);
-    border-radius: 0.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
     padding: 0.25rem;
     backdrop-filter: blur(10px);
 
@@ -556,10 +499,10 @@ const { isSmallScreen } = useGlobal();
 
     &--first {
       top: 50%;
-      left: 0.25rem;
-      right: 0.25rem;
+      left: 50%;
+      width: 100%;
       bottom: unset;
-      transform: translateY(calc(-50% + 2rem));
+      transform: translate(-50%, calc(-50% + 2rem));
     }
 
     &-textarea {

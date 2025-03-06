@@ -9,23 +9,33 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { CloseOne, Plus, Refresh, Search } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, h, reactive, ref, watch, watchEffect } from 'vue';
+import { computed, h, onMounted, reactive, ref, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
-import type { ApiSchemaSession } from '@/api/gen/data-contracts.ts';
-import genApi from '@/api/gen-api.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import { db } from '@/store/data/database.ts';
-import { useModelStore } from '@/store/useModelStore.ts';
+import { useUserStore } from '@/store/useUserStore.ts';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
 }>();
 const dataStore = useDataStore();
 const roleStore = useRoleStore();
+const userStore = useUserStore();
 const settingStore = useSettingStore();
-const modelStore = useModelStore();
 const currentSessionId = useRouteParams<string>('sessionId');
+
+onMounted(() => {
+  dataStore.$subscribe((_, state) => {
+    // 挂载时，如果没有对话数据，需要尝试刷新对话
+    if (!state.sessions.length) {
+      if (userStore.isLogin) {
+        dataStore.fetchSessions();
+      } else {
+        router.replace('/login');
+      }
+    }
+  });
+});
 
 async function handleAddRecord(roleId?: number) {
   const sessionId = await dataStore.addDialog(roleId ?? 1);
@@ -66,48 +76,7 @@ const handleSessionRefresh = async () => {
           return;
         }
         try {
-          const remoteSessions: ApiSchemaSession[] = [];
-          // 获取所有远程数据
-          let nextPage = 1;
-          while (nextPage) {
-            try {
-              const res = await genApi.Chat.sessionListGet(
-                {
-                  page_num: nextPage,
-                  page_size: 20,
-                  sort_expr: 'id DESC',
-                },
-                {
-                  signal: controller.signal,
-                }
-              );
-              remoteSessions.push(...(res.data.data?.list || []));
-              if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
-              else break;
-            } catch (_) {
-              ToastManager.danger('获取数据异常，请稍后重试～');
-              return;
-            }
-          }
-          for (const remoteSession of remoteSessions) {
-            const session = await db.sessions.where({ id: remoteSession.id }).last();
-            if (!session) {
-              // 获取 session
-              await db.sessions.add({
-                id: remoteSession.id,
-                title: remoteSession.messages?.[0]?.content || '', // TODO: 目前以第一条消息为标题
-                avatar: '',
-                botRole: '未知',
-                createAt: new Date(remoteSession.created_at!).toLocaleString(),
-                withContext: !!remoteSession.enable_context,
-                provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
-                model: settingStore.settings.defaultModel  || modelStore.defaultModel?.modelName,
-                flags: {
-                  needSync: true,
-                },
-              });
-            }
-          }
+          await dataStore.fetchSessions(controller);
         } catch (_) {
           ToastManager.danger('同步异常，请稍后重试～');
         }

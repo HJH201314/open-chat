@@ -15,6 +15,7 @@ import { liveQuery } from 'dexie';
 import { db } from '@/store/data/database.ts';
 import genApi from '@/api/gen-api.ts';
 import { useModelStore } from '@/store/useModelStore.ts';
+import type { ApiSchemaSession } from '@/api/gen/data-contracts.ts';
 
 interface MessageCallback {
   // 用户输入保存后的回调
@@ -37,7 +38,7 @@ export const useDataStore = defineStore('data', () => {
   const sessions = useObservable(from(
     liveQuery(async () => db.sessions.orderBy('createAt').reverse().toArray()),
   ), {
-    initialValue: [],
+    initialValue: [] as SessionInfo[],
   });
 
   const roleStore = useRoleStore();
@@ -118,6 +119,61 @@ export const useDataStore = defineStore('data', () => {
     await db.sessions.where({ id: sessionId }).delete();
     // 远程删除
     await genApi.Chat.sessionDelPost(sessionId);
+  }
+
+  /**
+   * 从服务器拉取会话
+   */
+  async function fetchSessions(abortController?: AbortController) {
+    const controller = abortController || new AbortController();
+    const remoteSessions: ApiSchemaSession[] = [];
+    // 获取所有远程数据
+    let nextPage = 1;
+    while (nextPage) {
+      try {
+        const res = await genApi.Chat.sessionListGet(
+          {
+            page_num: nextPage,
+            page_size: 20,
+            sort_expr: 'id DESC',
+          },
+          {
+            signal: controller.signal,
+          }
+        );
+        remoteSessions.push(...(res.data.data?.list || []));
+        if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
+        else break;
+      } catch (_) {
+        ToastManager.danger('获取数据异常，请稍后重试～');
+        return false;
+      }
+    }
+    try {
+      for (const remoteSession of remoteSessions) {
+        const session = await db.sessions.where({ id: remoteSession.id }).last();
+        if (!session) {
+          // 获取 session
+          await db.sessions.add({
+            id: remoteSession.id,
+            title: remoteSession.messages?.[0]?.content || '', // TODO: 目前以第一条消息为标题
+            avatar: '',
+            botRole: '未知',
+            createAt: new Date(remoteSession.created_at!).toLocaleString(),
+            withContext: !!remoteSession.enable_context,
+            provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
+            model: settingStore.settings.defaultModel  || modelStore.defaultModel?.modelName,
+            flags: {
+              needSync: true,
+            },
+          });
+        }
+      }
+    } catch (_) {
+      ToastManager.danger('写入数据异常，请稍后重试～');
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -312,6 +368,7 @@ export const useDataStore = defineStore('data', () => {
 
   return {
     sessions,
+    fetchSessions,
     updateSessionFlags,
     addDialog: addSession,
     editDialogTitle: editSessionTitle,

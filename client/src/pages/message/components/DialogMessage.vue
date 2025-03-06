@@ -74,7 +74,8 @@ const renderMessage = computed(() =>
   useCachedHtmlMessage.value ? props.htmlMessage : useOriginMessage.value ? props.message : markdownIt.result.value
 );
 
-const thinkingCollapsed = ref(false);
+const thinkingCollapsed = ref(false); // 思考内容是否收起（即时、不等待动画的状态）
+const thinkingCollapsing = ref(false); // 正在收起思考内容（动画过程中）
 
 const { isLargeScreen } = useGlobal();
 </script>
@@ -84,10 +85,11 @@ const { isLargeScreen } = useGlobal();
     <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
       <span v-if="isLargeScreen" class="dialog-message-avatar"><img :src="avatarPath" alt="avatar" /></span>
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
+        <!-- 收起/展开思考内容 -->
         <div
           v-if="thinking"
           class="dialog-message-content-think-toggle"
-          :class="{ collapsed: thinkingCollapsed }"
+          :class="{ collapsed: thinkingCollapsed && !thinkingCollapsing }"
           @click="handleThinkExpand"
         >
           <CusSpin v-if="thinking && !renderMessage" style="margin-right: 0.5em" color="var(--color-black)" />
@@ -95,7 +97,7 @@ const { isLargeScreen } = useGlobal();
           <span>{{ thinkingCollapsed ? '展开' : '收起' }}</span>
           <Down size="16" :style="{ transform: thinkingCollapsed ? '' : 'rotate(180deg)' }" />
         </div>
-        <transition name="grid-expand">
+        <transition name="grid-expand" @before-leave="thinkingCollapsing = true" @after-leave="thinkingCollapsing = false">
           <div v-if="thinking && !thinkingCollapsed" class="dialog-message-content-think">
             <div class="content">{{ thinking }}</div>
           </div>
@@ -209,6 +211,7 @@ const { isLargeScreen } = useGlobal();
       }
 
       &-toggle {
+        user-select: none;
         width: fit-content;
         display: flex;
         justify-content: flex-start;
@@ -219,7 +222,7 @@ const { isLargeScreen } = useGlobal();
         text-align: right;
         padding: 0.5em 1em;
         border-radius: 0.5rem 0.5rem 0 0;
-        transition: all 0.3s $ease-out-circ;
+        transition: all 0.2s $ease-out-circ;
 
         &.collapsed {
           border-radius: 0.5rem;

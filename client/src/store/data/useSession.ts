@@ -3,6 +3,10 @@ import { toObserver, useSubscription } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
 import { db } from '@/store/data/database.ts';
 import type { MessageInfo, SessionInfo } from '@/types/data.ts';
+import type { ApiSchemaMessage } from '@/api/gen/data-contracts.ts';
+import genApi from '@/api/gen-api.ts';
+import ToastManager from '@/components/toast/ToastManager.ts';
+import { renderMarkdown } from '@/commands/useMarkdownIt';
 
 /**
  * 响应式读取本地对话缓存
@@ -34,11 +38,69 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
     return db.messages.delete(msgId);
   }
 
+  /**
+   * 同步会话消息
+   * @param sessionId 会话 ID
+   * @param controller AbortController
+   */
+  async function syncMessages(sessionId: string, controller?: AbortController) {
+    const abortController = controller || new AbortController();
+    const remoteMessages: ApiSchemaMessage[] = [];
+    // 获取所有远程数据
+    let nextPage = 1;
+    while (nextPage) {
+      try {
+        const res = await genApi.Chat.messageListGet(
+          sessionId,
+          {
+            page_num: nextPage,
+            page_size: 20,
+            sort_expr: 'id ASC',
+          },
+          {
+            signal: abortController.signal,
+          }
+        );
+        remoteMessages.push(...(res.data.data?.list || []));
+        if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
+        else break;
+      } catch (_) {
+        ToastManager.danger('获取数据异常，请稍后重试～');
+        return;
+      }
+    }
+    const newMessages = remoteMessages.map(
+      (v) =>
+        ({
+          sessionId,
+          remoteId: v.id,
+          time: new Date(v.created_at!).toLocaleString(),
+          sender: v.role === 'user' ? 'user' : 'bot',
+          type: 'text',
+          content: v.content,
+          reasoningContent: v.reasoning_content?.replaceAll('\\n', '\n'),
+          htmlContent:
+            v.role == 'assistant'
+              ? renderMarkdown(v.content?.replaceAll('\\n', '\n'))
+              : v.content?.replaceAll('\\n', '\n'),
+        }) as MessageInfo
+    );
+    try {
+      // 删除旧数据
+      await db.messages.where({ sessionId }).delete();
+      // 插入新数据
+      await db.messages.bulkAdd(newMessages);
+    } catch (_) {
+      ToastManager.warning('保存数据失败，请稍后重试');
+    }
+  }
+
   return {
     session,
     messages,
     addMessage,
     deleteMessage,
+    syncMessages,
   };
 };
 
