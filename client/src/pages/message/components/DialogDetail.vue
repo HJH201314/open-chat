@@ -20,6 +20,7 @@ import { scrollToBottom } from '@/utils/element.ts';
 import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import router from '@/plugins/router.ts';
+import CusTextarea from '@/components/textarea/CusTextarea.vue';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -79,7 +80,6 @@ watch(
     onCleanup(() => {
       abortController.abort('session changed');
     });
-    console.log(JSON.stringify(newSessionId));
     if (sessionInfo.value.flags?.needSync && !messageList.value.length) {
       messageSyncing.value = true;
       syncMessages(newSessionId, abortController).then(() => {
@@ -193,7 +193,6 @@ async function handleSendMessage() {
       },
       onFinish() {
         clearReceivingMsg();
-        console.log(messageList.value);
         if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
           dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
         }
@@ -367,12 +366,11 @@ const { isSmallScreen } = useGlobal();
             </div>
           </div>
         </Transition>
-        <textarea
-          id="message-input"
+        <CusTextarea
           ref="input-textarea"
           v-model="form.inputValue"
           class="dialog-detail-inputs-textarea"
-          placeholder="随便问点啥(●'◡'●)"
+          :textarea-attr="{ placeholder: '随便问点啥(●\'◡\'●)' }"
           @keydown="(e) => handleInputKeydown(e)"
         />
         <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
@@ -449,6 +447,7 @@ $dialog-max-width: 54rem;
     max-width: $dialog-max-width;
     margin-inline: auto;
     padding-inline: 0.25rem;
+    padding-top: 2.6rem;
     display: flex;
     flex-direction: column-reverse;
     margin-bottom: v-bind(panelPlaceholderPx);
@@ -459,11 +458,6 @@ $dialog-max-width: 54rem;
 
     > :first-child {
       margin-bottom: auto;
-    }
-
-    // 最顶上的元素
-    > :last-child {
-      margin-top: 2.6rem;
     }
   }
 
@@ -482,7 +476,7 @@ $dialog-max-width: 54rem;
     position: absolute;
     left: 50%;
     bottom: 0;
-    width: 100%;
+    width: calc(100% - 0.5rem);
     max-width: $dialog-max-width;
     transform: translateX(-50%);
     display: flex;
@@ -492,6 +486,14 @@ $dialog-max-width: 54rem;
     border-radius: 0.5rem 0.5rem 0 0;
     padding: 0.25rem;
     backdrop-filter: blur(10px);
+    border: 2px solid color.scale($color-grey-100, $alpha: -20%);
+    transition: all 0.2s $ease-out-circ;
+
+    &:focus-within {
+      bottom: 0.25rem;
+      border-radius: 0.75rem;
+      border: 2px solid $color-primary;
+    }
 
     &.small-input {
       gap: 0;
@@ -501,36 +503,23 @@ $dialog-max-width: 54rem;
       top: 50%;
       left: 50%;
       width: 100%;
-      bottom: unset;
+      bottom: unset !important;
+      border-radius: 0.75rem;
       transform: translate(-50%, calc(-50% + 2rem));
     }
 
     &-textarea {
       margin-inline: 0.25rem;
-      background-color: transparent;
-      width: calc(100% - 2rem);
-      box-sizing: border-box;
-      overflow: auto;
-      outline: none;
-      font-size: 16px;
-      resize: none;
+      width: calc(100% - 2.5rem);
       height: 5rem;
+      box-sizing: border-box;
       transition: all 0.2s $ease-out-circ;
 
       .small-input & {
+        width: calc(100% - 2.25rem);
         height: 2rem;
-
-        &::placeholder {
-          top: 50%;
-          transform: translateY(-50%);
-        }
-      }
-
-      &::placeholder {
-        text-align: center;
-        position: absolute;
-        left: 0.25rem;
-        transition: all 0.2s $ease-in-out-circ;
+        display: flex;
+        align-items: center;
       }
     }
 

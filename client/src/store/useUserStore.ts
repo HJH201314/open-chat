@@ -3,6 +3,7 @@ import { useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
+import genApi from '@/api/gen-api.ts';
 
 /* 用户相关 */
 export const useUserStore = defineStore('user', () => {
@@ -36,13 +37,15 @@ export const useUserStore = defineStore('user', () => {
   });
 
   const ping = async () => {
-    const res = await api.user.ping();
-    if (res === false) {
-      // 切换到 offline 表明登录态可能存在问题
-      loginStatus.value = 'offline';
-    } else {
+    const res = await genApi.User.pingPost();
+    if (res.data.data) {
       loginStatus.value = 'login';
-      currentUser.value = res;
+      currentUser.value = res.data.data;
+    } else {
+      // 切换到 offline，表明登录态可能存在问题
+      if (loginStatus.value === 'login') {
+        loginStatus.value = 'offline';
+      }
     }
   };
 
@@ -62,7 +65,7 @@ export const useUserStore = defineStore('user', () => {
         pausePing();
         return false;
       }
-    } catch (e) {
+    } catch (_) {
       pausePing();
       logout();
       return false;

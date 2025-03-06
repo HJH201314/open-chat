@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, h, ref, watchEffect } from 'vue';
 import type { ToastProps } from './types';
 import variables from '@/assets/variables.module.scss';
+import { Alarm, Caution, Info, Remind, Success } from '@icon-park/vue-next';
 
 const props = withDefaults(defineProps<ToastProps>(), {
   text: '',
@@ -13,7 +14,7 @@ const props = withDefaults(defineProps<ToastProps>(), {
 
 const emits = defineEmits<{
   (evt: 'click'): void;
-}>()
+}>();
 
 const myself = ref<HTMLElement>();
 const durationTimeMs = computed(() => {
@@ -24,16 +25,24 @@ const durationTimeMs = computed(() => {
       return 1000;
     case 'short':
       return 500;
+    case 'forever':
+      return -1;
     default:
       return props.duration;
   }
-})
+});
 
-onMounted(() => {
-  setTimeout(() => {
+watchEffect(() => {
+  if (durationTimeMs.value > 0) {
+    setTimeout(() => {
+      myself.value?.remove();
+    }, durationTimeMs.value);
+  } else if (durationTimeMs.value === 0) {
     myself.value?.remove();
-  }, durationTimeMs.value);
-})
+  }
+});
+
+const teleportedTo = ref(props.teleportTo || 'body');
 
 const toastClass = computed(() => {
   let className: string = props.position;
@@ -57,15 +66,28 @@ const wrapperColor = computed(() => {
   }
 });
 
-const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.type.slice(1)}`);
+const iconElement = computed(() => {
+  switch (props.type) {
+    case 'success':
+      return h(Success);
+    case 'warning':
+      return h(Caution);
+    case 'danger':
+      return h(Alarm);
+    case 'info':
+      return h(Info);
+    default:
+      return h(Remind);
+  }
+});
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport :to="teleportedTo">
     <div ref="myself" :class="toastClass" @click="$emit('click')">
       <div class="toast-wrapper">
-        <component :is="icon" v-if="showIcon" class="toast-icon" />
-        <span v-if="text" class="toast-text">{{ props.text }}</span>
+        <component :is="iconElement" v-if="showIcon" class="toast-icon" />
+        <div v-if="text" class="toast-text" v-text="props.text"></div>
         <slot v-if="$slots.default"></slot>
       </div>
     </div>
@@ -74,17 +96,28 @@ const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.ty
 
 <style scoped lang="scss">
 @use '@/assets/variables' as *;
+
 .toast {
   position: absolute;
   z-index: 10000;
+  max-width: calc(100vw - 1.5rem);
+  width: max-content;
+  margin: 0.75rem;
+
+  &-text {
+    white-space: pre-line;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    flex-grow: 1;
+  }
 
   &-wrapper {
-    border-radius: .5rem;
-    padding: .25rem .5rem;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: .5rem;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
     color: $color-white;
     background-color: v-bind(wrapperColor);
     box-shadow: $box-shadow;
@@ -92,13 +125,10 @@ const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.ty
   }
 
   &-top-center {
-    margin-top: .75rem;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    -webkit-animation: top-center-in .25s $ease-out-circ;
-    -o-animation: top-center-in .25s $ease-out-circ;
-    animation: top-center-in .25s $ease-out-circ;
+    animation: top-center-in 0.25s $ease-out-circ;
 
     @keyframes top-center-in {
       0% {
@@ -109,14 +139,11 @@ const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.ty
       }
     }
   }
+
   &-top-left {
-    margin-top: .75rem;
-    margin-left: .75rem;
     top: 0;
     left: 0;
-    -webkit-animation: top-left-in .25s $ease-out-circ;;
-    -o-animation: top-left-in .25s $ease-out-circ;;
-    animation: top-left-in .25s $ease-out-circ;;
+    animation: top-left-in 0.25s $ease-out-circ;
     @keyframes top-left-in {
       0% {
         transform: translateX(-100%);
@@ -126,14 +153,11 @@ const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.ty
       }
     }
   }
+
   &-top-right {
-    margin-top: .75rem;
-    margin-right: .75rem;
     top: 0;
     right: 0;
-    -webkit-animation: top-right-in .25s $ease-out-circ;
-    -o-animation: top-right-in .25s $ease-out-circ;
-    animation: top-right-in .25s $ease-out-circ;
+    animation: top-right-in 0.25s $ease-out-circ;
     @keyframes top-right-in {
       0% {
         transform: translateX(100%);
@@ -143,14 +167,12 @@ const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.ty
       }
     }
   }
+
   &-bottom-center {
-    margin-bottom: .75rem;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    -webkit-animation: bottom-center-in .25s $ease-out-circ;
-    -o-animation: bottom-center-in .25s $ease-out-circ;
-    animation: bottom-center-in .25s $ease-out-circ;
+    animation: bottom-center-in 0.25s $ease-out-circ;
     @keyframes bottom-center-in {
       0% {
         transform: translate(-50%, 100%);
@@ -160,14 +182,11 @@ const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.ty
       }
     }
   }
+
   &-bottom-left {
-    margin-bottom: .75rem;
-    margin-left: .75rem;
     bottom: 0;
     left: 0;
-    -webkit-animation: bottom-left-in .25s $ease-out-circ;
-    -o-animation: bottom-left-in .25s $ease-out-circ;
-    animation: bottom-left-in .25s $ease-out-circ;
+    animation: bottom-left-in 0.25s $ease-out-circ;
     @keyframes bottom-left-in {
       0% {
         transform: translateX(100%);
@@ -177,14 +196,11 @@ const icon = computed(() => `Icon${props.type.charAt(0).toUpperCase()}${props.ty
       }
     }
   }
+
   &-bottom-right {
-    margin-bottom: .75rem;
-    margin-right: .75rem;
     bottom: 0;
     right: 0;
-    -webkit-animation: bottom-right-in .25s $ease-out-circ;
-    -o-animation: bottom-right-in .25s $ease-out-circ;
-    animation: bottom-right-in .25s $ease-out-circ;
+    animation: bottom-right-in 0.25s $ease-out-circ;
     @keyframes bottom-right-in {
       0% {
         transform: translateX(-100%);
