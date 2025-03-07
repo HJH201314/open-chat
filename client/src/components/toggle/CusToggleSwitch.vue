@@ -10,7 +10,9 @@ const props = withDefaults(defineProps<{
 const toggleClasses = computed(() => {
   const classes = [];
   if (props.isActive) {
-    classes.push('active');
+    classes.push('on');
+  } else {
+    classes.push('off');
   }
   return classes;
 });
@@ -28,34 +30,45 @@ const toggleClasses = computed(() => {
 
 .toggle {
   &-container {
+    position: relative;
     border-radius: 0.5em;
     cursor: pointer;
     width: 2.5em;
     height: 1.5em;
     background-color: $color-grey-400;
-    position: relative;
     transition: background-color 0.2s $ease-out-circ;
     display: flex;
     align-items: center;
 
-    &.active {
+    &.off {
+      justify-content: flex-start;
+    }
+    &.on {
+      justify-content: flex-end;
       background-color: $color-primary;
     }
   }
 
   &-front {
     margin-inline: 0.25em;
-    width: 1em;
     height: 1em;
+    width: 1em;
     border-radius: 0.25em;
     background-color: $color-grey-200;
-    transition:
-      background-color 0.2s $ease-out-circ,
-      transform 0.2s $ease-out-circ;
+    transition: all 0.2s $ease-out-circ;
 
-    &.active {
-      transform: translateX(100%);
+    &.off {
+      .toggle-container:active & {
+        width: 1.5em;
+      }
+    }
+
+    &.on {
       background-color: $color-primary-lighter;
+
+      .toggle-container:active & {
+        width: 1.5em;
+      }
     }
   }
 }
