@@ -7,6 +7,10 @@ import { Close, Right } from '@icon-park/vue-next';
 import EasyTyper from 'easy-typer-js';
 import { onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
+import CusRadioButton from '@/components/radio/CusRadioButton.vue';
+import genApi from '@/api/gen-api.ts';
+import ToastManager from '@/components/toast/ToastManager.ts';
 
 const props = withDefaults(
   defineProps<{
@@ -45,8 +49,10 @@ const typerObj = reactive({
 });
 
 const loginForm = reactive({
+  type: ref<'login' | 'register'>('login'),
   username: ref(''),
   password: ref(''),
+  repeatPassword: ref(''),
   shake: ref(0),
 });
 const emoji = ref('🚀');
@@ -68,6 +74,44 @@ function closePage() {
   }
 }
 
+async function handleLogin() {
+  try {
+    submitDisabled.value = true;
+    await userStore.login(loginForm.username, loginForm.password);
+  } catch (e) {
+    console.error(e);
+    loginForm.shake += 1;
+    ToastManager.danger('点火失败', { position: 'bottom' });
+    return;
+  } finally {
+    submitDisabled.value = false;
+  }
+}
+
+async function handleRegister() {
+  try {
+    submitDisabled.value = true;
+    const res = await genApi.User.registerPost({
+      username: loginForm.username,
+      password: loginForm.password,
+    });
+    if (res.status === 200 && res.data.data === true) {
+      ToastManager.success('注册成功', { position: 'bottom' });
+      await userStore.login(loginForm.username, loginForm.password);
+    } else {
+      loginForm.shake += 1;
+      ToastManager.danger('注册失败，请重试！', { position: 'bottom' });
+    }
+  } catch (e) {
+    console.error(e);
+    loginForm.shake += 1;
+    ToastManager.danger('网络异常请稍后重试！', { position: 'bottom' });
+    return;
+  } finally {
+    submitDisabled.value = false;
+  }
+}
+
 async function handleLoginSubmit() {
   if (!loginForm.username) {
     loginForm.shake += 1;
@@ -77,18 +121,18 @@ async function handleLoginSubmit() {
     loginForm.shake += 1;
     showToast({ text: '请输入密码！', position: 'bottom', type: 'warning' });
     return;
-  } else {
-    try {
-      submitDisabled.value = true;
-      await userStore.login(loginForm.username, loginForm.password);
-    } catch (e) {
-      console.error(e);
-      loginForm.shake += 1;
-      showToast({ text: '点火失败', position: 'bottom', type: 'danger' });
-      return;
-    } finally {
-      submitDisabled.value = false;
-    }
+  } else if (loginForm.type === 'register' && loginForm.password !== loginForm.repeatPassword) {
+    loginForm.shake += 1;
+    showToast({ text: '请正确重复密码！', position: 'bottom', type: 'warning' });
+    return;
+  }
+  switch (loginForm.type) {
+    case 'login':
+      await handleLogin();
+      break;
+    case 'register':
+      await handleRegister();
+      break;
   }
 }
 
@@ -117,6 +161,10 @@ function showUserAgreement() {
 
 <template>
   <div :class="{ 'in-page': !isModal }" class="login">
+    <CusRadioGroup v-model="loginForm.type" class="login-type" name="loginType">
+      <CusRadioButton value="login" label="登录"></CusRadioButton>
+      <CusRadioButton value="register" label="注册"></CusRadioButton>
+    </CusRadioGroup>
     <Close
       v-if="isModal"
       class="login-close transition-all-circ enable-hover enable-active"
@@ -149,6 +197,15 @@ function showUserAgreement() {
             placeholder="请输入密码"
             type="password"
           />
+          <input
+            v-if="loginForm.type == 'register'"
+            v-model="loginForm.repeatPassword"
+            autocomplete="none"
+            class="login-form-input"
+            name="repeat-password"
+            placeholder="请再次输入密码"
+            type="password"
+          />
         </div>
         <button
           v-shake="loginForm.shake"
@@ -173,11 +230,18 @@ function showUserAgreement() {
   padding: 0.25rem 1rem 1rem 1rem;
   position: relative;
 
+  &-type {
+    position: absolute;
+    top: 0.5rem;
+    right: 3rem;
+  }
+
   &-close {
     position: absolute;
     top: 0;
     right: 0;
     margin-top: 0.5rem;
+    margin-right: 0.5rem;
     padding: 0.5rem;
     cursor: pointer;
     border-radius: 0.5rem;
