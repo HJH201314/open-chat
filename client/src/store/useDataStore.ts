@@ -113,12 +113,22 @@ export const useDataStore = defineStore('data', () => {
   }
 
   async function delSession(sessionId: string) {
-    // 本地删除消息
-    await db.messages.where({ sessionId }).delete();
-    // 本地删除会话
-    await db.sessions.where({ id: sessionId }).delete();
-    // 远程删除
-    await genApi.Chat.sessionDelPost(sessionId);
+    try {
+      // 本地删除消息
+      await db.messages.where({ sessionId }).delete();
+      // 本地删除会话
+      await db.sessions.where({ id: sessionId }).delete();
+    } catch (_) {
+      ToastManager.danger('删除本地数据异常，请稍后重试～');
+      return;
+    }
+    try {
+      // 远程删除
+      await genApi.Chat.sessionDelPost(sessionId);
+    } catch (_) {
+      ToastManager.danger('未能删除服务器数据，可刷新重新拉取对话～');
+      return;
+    }
   }
 
   /**

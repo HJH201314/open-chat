@@ -161,16 +161,18 @@ function showUserAgreement() {
 
 <template>
   <div :class="{ 'in-page': !isModal }" class="login">
-    <CusRadioGroup v-model="loginForm.type" class="login-type" name="loginType">
-      <CusRadioButton value="login" label="登录"></CusRadioButton>
-      <CusRadioButton value="register" label="注册"></CusRadioButton>
-    </CusRadioGroup>
-    <Close
-      v-if="isModal"
-      class="login-close transition-all-circ enable-hover enable-active"
-      size="20"
-      @click="closePage"
-    />
+    <div class="login-right-top">
+      <CusRadioGroup v-model="loginForm.type" class="login-type" name="loginType">
+        <CusRadioButton value="login" label="登录"></CusRadioButton>
+        <CusRadioButton value="register" label="注册"></CusRadioButton>
+      </CusRadioGroup>
+      <Close
+        v-if="isModal"
+        class="login-close transition-all-circ enable-hover enable-active"
+        size="20"
+        @click="closePage"
+      />
+    </div>
     <div class="sidebar-logo sidebar-logo-animation" style="font-size: 32px">OpenChat</div>
     <div class="login-top">
       <span class="login-top-emoji transition-all-circ">{{ emoji }}</span>
@@ -200,7 +202,7 @@ function showUserAgreement() {
           <input
             v-if="loginForm.type == 'register'"
             v-model="loginForm.repeatPassword"
-            autocomplete="none"
+            autocomplete="off"
             class="login-form-input"
             name="repeat-password"
             placeholder="请再次输入密码"
@@ -230,18 +232,15 @@ function showUserAgreement() {
   padding: 0.25rem 1rem 1rem 1rem;
   position: relative;
 
-  &-type {
+  &-right-top {
     position: absolute;
     top: 0.5rem;
-    right: 3rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
   }
 
   &-close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin-top: 0.5rem;
-    margin-right: 0.5rem;
     padding: 0.5rem;
     cursor: pointer;
     border-radius: 0.5rem;

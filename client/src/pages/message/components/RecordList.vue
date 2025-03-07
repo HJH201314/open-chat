@@ -9,11 +9,12 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { CloseOne, Plus, Refresh, Search } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, h, onMounted, reactive, ref, watch, watchEffect } from 'vue';
+import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
+import { onClickOutside, until } from '@vueuse/core';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -125,6 +126,16 @@ const searchForm = reactive({
   searchVal: '',
 });
 
+const searchInputRef = useTemplateRef('search-input');
+async function handleSearchIconClick() {
+  searchForm.inputting = true;
+  await until(() => searchInputRef.value).not.toBeNull();
+  searchInputRef.value?.focus();
+}
+onClickOutside(useTemplateRef('search-bar'), () => {
+  searchForm.inputting = false;
+});
+
 const searchList = ref<SessionInfo[]>([]);
 watch(
   () => searchForm.searchVal,
@@ -150,23 +161,22 @@ const displayList = computed(() => {
   <div class="dialog-list">
     <div class="dialog-list-bar">
       <div
-        class="dialog-list-bar-search"
-        @focusin="searchForm.inputting = true"
-        @focusout="searchForm.inputting = false"
+        ref="search-bar"
+        :class="{ 'dialog-list-bar-search': searchForm.inputting, 'dialog-list-action-button': !searchForm.inputting }"
+        @click="handleSearchIconClick"
       >
-        <span class="dialog-list-bar-search-icon"><Search /></span>
-        <input v-model="searchForm.searchVal" placeholder="搜索对话内容" />
-        <span v-if="searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
+        <Search size="1.2rem" />
+        <input v-show="searchForm.inputting" ref="search-input" v-model="searchForm.searchVal" placeholder="搜索对话内容" />
+        <span v-if="searchForm.inputting && searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
           <CloseOne theme="filled" />
         </span>
       </div>
       <div v-show="!searchForm.inputting" class="dialog-list-action-button" @click="handleSessionRefresh">
-        <Refresh size="18" theme="outline" />
+        <Refresh size="1.2rem" theme="outline" />
       </div>
-      <div>
-        <div v-show="!searchForm.inputting" class="dialog-list-action-button" @click="handleListAddClick">
-          <Plus size="24" theme="outline" />
-        </div>
+      <div v-show="!searchForm.inputting" class="dialog-list-add" @click="handleListAddClick">
+        <span>开始新对话</span>
+        <Plus size="1.2rem" theme="outline" />
         <CommonModal v-model:visible="roleForm.modalVisible">
           <div class="select-role">
             <div class="select-role-title">选择角色</div>
@@ -255,25 +265,16 @@ const displayList = computed(() => {
       flex: 1;
       height: 2rem;
       border-radius: 0.5rem;
-      padding: 0.25rem 0.5rem;
-      background-color: $color-grey-200;
+      // 此处 padding 让搜索图标位置不变
+      padding-inline: calc(0.4rem - 2px);
+      color: color.scale($color-primary, $alpha: -5%);
+      border: 2px solid $color-primary;
       box-sizing: border-box;
-      border: 2px solid transparent;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      transition: all 0.2s $ease-out-circ;
+      transition: flex 0.2s $ease-out-circ;
       opacity: 0.6;
-
-      &:focus-within {
-        opacity: 0.6;
-        background-color: white;
-        border: 2px solid $color-primary;
-      }
-
-      &-icon {
-        color: $color-grey-500;
-      }
 
       &-reset {
         cursor: pointer;
@@ -293,20 +294,50 @@ const displayList = computed(() => {
     }
   }
 
+  &-add {
+    box-sizing: border-box;
+    cursor: pointer;
+    flex: 1;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: $color-primary;
+    background-color: color.scale($color-primary, $alpha: -90%);
+    border-radius: 0.5rem;
+    transition: color, background-color 0.2s $ease-out-circ;
+
+    &:hover {
+      background-color: color.scale($color-primary, $alpha: -85%);
+      color: color.scale($color-primary, $blackness: 5%);
+    }
+
+    &:active {
+      background-color: color.scale($color-primary, $alpha: -80%);
+      color: color.scale($color-primary, $blackness: 10%);
+    }
+  }
+
   &-action-button {
     height: 2rem;
-    aspect-ratio: 1;
-    background-color: $color-grey-200;
+    width: 2rem;
+    color: color.scale($color-primary, $alpha: -5%);
+    background-color: color.scale($color-primary, $alpha: -90%);
     border-radius: 0.5rem;
-    color: $color-grey-400;
     display: grid;
-    place-items: center;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    transition: all 0.2s $ease-out-circ;
+    transition: color, background-color 0.2s $ease-out-circ;
     opacity: 0.6;
 
     &:hover {
-      background-color: $color-grey-300;
+      background-color: color.scale($color-primary, $alpha: -85%);
+    }
+
+    &:active {
+      background-color: color.scale($color-primary, $alpha: -80%);
     }
   }
 
