@@ -183,7 +183,7 @@ function showUserAgreement() {
         <div class="login-form">
           <input
             v-model="loginForm.username"
-            :autocomplete="loginForm.type === 'login' ? 'username' : 'none'"
+            :autocomplete="loginForm.type === 'login' ? 'username' : 'off'"
             class="login-form-input"
             name="username"
             placeholder="请输入用户名"
@@ -191,7 +191,7 @@ function showUserAgreement() {
           />
           <input
             v-model="loginForm.password"
-            :autocomplete="loginForm.type === 'login' ? 'password' : 'none'"
+            :autocomplete="loginForm.type === 'login' ? 'password' : 'off'"
             class="login-form-input"
             name="password"
             placeholder="请输入密码"
