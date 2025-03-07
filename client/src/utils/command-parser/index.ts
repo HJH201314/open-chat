@@ -1,5 +1,10 @@
 import { type MaybeRefOrGetter, ref, toValue, watchEffect } from 'vue';
 
+type JSONCommand = {
+  name: string;
+  data: { [key: string]: any };
+};
+
 type Command = {
   raw: string;
   name: string;
@@ -8,17 +13,23 @@ type Command = {
 };
 
 export class CommandParser {
+  private readonly mayBeJSON: boolean;
   input: string;
   commands: Command[];
   commandMap: { [name: string]: Command };
 
-  constructor(input: string) {
+  constructor(input: string, mayBeJSON = true) {
     this.input = input;
     this.commands = [];
     this.commandMap = {};
+    this.mayBeJSON = mayBeJSON;
     this.parse();
   }
 
+  /**
+   * 解析字符串格式的指令
+   * @param input
+   */
   parse(input?: string) {
     if (input) this.input = input;
     this.commands = [];
@@ -49,6 +60,33 @@ export class CommandParser {
     }
   }
 
+  /**
+   * 解析 JSON 格式的指令
+   * @param input
+   */
+  parseJSON(input?: string): CommandParser {
+    if (!this.mayBeJSON) return this;
+    if (input) this.input = input;
+
+    this.commands = [];
+    this.commandMap = {};
+    try {
+      const cmd = JSON.parse(this.input) as JSONCommand;
+      if (cmd.name) {
+        const command: Command = { name: cmd.name, raw: this.input, values: [], data: cmd.data };
+        for (const key in cmd.data) {
+          command.values.push(cmd.data[key]);
+        }
+        this.commands.push(command);
+        this.commandMap[cmd.name] = command;
+      }
+      return this;
+    } catch (_) {
+      // parse json error
+      return this;
+    }
+  }
+
   getCommands() {
     return this.commands;
   }
@@ -62,13 +100,18 @@ export class CommandParser {
   }
 }
 
-export const useCommandParser = (input: MaybeRefOrGetter<string>) => {
-  const parser = new CommandParser('');
+export const useCommandParser = (input: MaybeRefOrGetter<string>, mayBeJSON: boolean = false) => {
+  const parser = new CommandParser('', mayBeJSON);
   const commands = ref<Command[]>([]);
   const commandMap = ref<{ [name: string]: Command }>({});
 
   watchEffect(() => {
-    parser.parse(toValue(input));
+    const value = toValue(input);
+    if (value.startsWith('{')) {
+      parser.parseJSON(value);
+    } else {
+      parser.parse(value);
+    }
     commands.value = parser.getCommands();
     commandMap.value = parser.getCommandMap();
   });
@@ -76,5 +119,5 @@ export const useCommandParser = (input: MaybeRefOrGetter<string>) => {
   return {
     commands,
     commandMap,
-  }
+  };
 };

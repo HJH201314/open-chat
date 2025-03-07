@@ -17,6 +17,15 @@ useTextareaAutosize({
   element: textareaRef,
   input: modelValue,
 });
+
+defineExpose({
+  focus: () => {
+    textareaRef.value?.focus();
+  },
+  blur: () => {
+    textareaRef.value?.blur();
+  },
+})
 </script>
 
 <template>

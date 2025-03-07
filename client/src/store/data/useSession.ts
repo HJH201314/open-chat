@@ -43,7 +43,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
    * @param sessionId 会话 ID
    * @param controller AbortController
    */
-  async function syncMessages(sessionId: string, controller?: AbortController) {
+  async function syncMessages(sessionId: string, controller?: AbortController): Promise<boolean> {
     const abortController = controller || new AbortController();
     const remoteMessages: ApiSchemaMessage[] = [];
     // 获取所有远程数据
@@ -66,7 +66,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
         else break;
       } catch (_) {
         ToastManager.danger('获取数据异常，请稍后重试～');
-        return;
+        return false;
       }
     }
     const newMessages = remoteMessages.map(
@@ -92,7 +92,9 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
       await db.messages.bulkAdd(newMessages);
     } catch (_) {
       ToastManager.warning('保存数据失败，请稍后重试');
+      return false;
     }
+    return true;
   }
 
   return {

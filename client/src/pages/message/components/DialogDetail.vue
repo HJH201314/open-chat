@@ -71,18 +71,15 @@ onMounted(() => {
 
 // session 变化成功，进行同步
 watch(
-  () => sessionInfo.value.id,
-  (newSessionId, _, onCleanup) => {
+  () => sessionInfo.value,
+  (newSession) => {
+    const { id: newSessionId, flags } = newSession;
     // 如果信息不存在，route 返回
     if (!newSessionId) router.replace('/chat/message');
 
-    const abortController = new AbortController();
-    onCleanup(() => {
-      abortController.abort('session changed');
-    });
-    if (sessionInfo.value.flags?.needSync && !messageList.value.length) {
+    if (flags?.needSync) {
       messageSyncing.value = true;
-      syncMessages(newSessionId, abortController).then(() => {
+      syncMessages(newSessionId).then(() => {
         messageSyncing.value = false;
         dataStore.updateSessionFlags(newSessionId, { needSync: false });
       });
@@ -371,7 +368,7 @@ const { isSmallScreen } = useGlobal();
           v-model="form.inputValue"
           class="dialog-detail-inputs-textarea"
           :textarea-attr="{ placeholder: '随便问点啥(●\'◡\'●)' }"
-          @keydown="(e) => handleInputKeydown(e)"
+          @keydown="handleInputKeydown"
         />
         <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
           <ArrowUp v-if="!isReceivingMsg" fill="white" size="16" />

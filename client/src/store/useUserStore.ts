@@ -37,15 +37,17 @@ export const useUserStore = defineStore('user', () => {
   });
 
   const ping = async () => {
-    const res = await genApi.User.pingPost();
-    if (res.data.data) {
-      loginStatus.value = 'login';
-      currentUser.value = res.data.data;
-    } else {
-      // 切换到 offline，表明登录态可能存在问题
-      if (loginStatus.value === 'login') {
-        loginStatus.value = 'offline';
+    try {
+      const res = await genApi.User.pingPost();
+      if (res.data?.data?.id) {
+        loginStatus.value = 'login';
+        currentUser.value = res.data.data;
+      } else {
+        // 切换到 offline，表明登录态可能存在问题
+        loginStatus.value === 'login' && (loginStatus.value = 'offline');
       }
+    } catch (_) {
+      loginStatus.value === 'login' && (loginStatus.value = 'offline');
     }
   };
 

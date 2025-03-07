@@ -4,7 +4,7 @@ import showToast from '@/components/toast/toast';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import type { MessageInfo, SessionInfo } from '@/types/data';
-import { useCommandParser } from '@/utils/command-parser';
+import { CommandParser, useCommandParser } from '@/utils/command-parser';
 import { watchArray } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, shallowRef, watch } from 'vue';
@@ -190,7 +190,7 @@ export const useDataStore = defineStore('data', () => {
       msg: '',
       think: '',
     });
-    const { commands, commandMap } = useCommandParser(() => rawData.msg);
+    const { commands, commandMap } = useCommandParser(() => rawData.msg, false);
     const { result: renderedMsg } = useMarkdownIt(() => rawData.msg);
     const session = await getSessionInfo(sessionId);
     if (!session) return;
@@ -208,11 +208,6 @@ export const useDataStore = defineStore('data', () => {
         // console.log('findTitle', titleCmd, rawMsg.value);
         rawData.msg = rawData.msg.replace(titleCmd.raw, '');
       }
-      const idCmd = commandMap.value['ID'];
-      if (idCmd) {
-        msgIds = [idCmd.values[0], idCmd.values[1]];
-        rawData.msg = rawData.msg.replace(idCmd.raw, '');
-      }
     });
     // 观测回答的变化
     watch(() => renderedMsg.value, (v, ov) => {
@@ -224,6 +219,16 @@ export const useDataStore = defineStore('data', () => {
       if (v == ov) return;
       callback?.onThinkMessage?.(v); // 消息接收回调
     });
+
+    // 处理指令
+    const handleCommand = (cp: CommandParser) => {
+      const idCmd = cp.getCommandByName('ID');
+      if (idCmd) {
+        msgIds = [idCmd.data['q'], idCmd.data['a']];
+        rawData.msg = rawData.msg.replace(idCmd.raw, '');
+      }
+    }
+
     return api.chat.completionStream(
       {
         provider: session.provider,
@@ -249,6 +254,8 @@ export const useDataStore = defineStore('data', () => {
           data = data.replaceAll('\\n', '\n');
           console.log('[think]', event.data, `'${data}'`);
           rawData.think += data;
+        } else if (event.event === 'cmd') {
+          handleCommand(new CommandParser(event.data, true).parseJSON());
         }
       },
     );

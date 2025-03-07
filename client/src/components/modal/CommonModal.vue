@@ -95,7 +95,8 @@ defineExpose<CommonModalFunc>({
 <template>
   <Teleport to="body">
     <Transition name="show" @after-leave="afterClose">
-      <div v-if="showModal" :style="{ 'z-index': zIndex }" class="modal-mask">
+      <div v-if="showModal">
+        <div :style="{ 'z-index': zIndex }" class="modal-mask"></div>
         <div :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }" class="modal-body">
           <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose"/>
           <div class="modal-body-content">
@@ -120,13 +121,13 @@ defineExpose<CommonModalFunc>({
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   &-body {
-    position: relative;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     width: 512px; // 加个默认宽度不然组件有没有生效都不知道
     max-width: calc(100% - 2rem);
     max-height: calc(100% - 2rem);
@@ -150,7 +151,7 @@ defineExpose<CommonModalFunc>({
 
     &-content {
       flex: 1;
-      overflow: visible;
+      overflow: auto;
     }
   }
 }
