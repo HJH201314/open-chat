@@ -483,13 +483,13 @@ $dialog-max-width: 54rem;
     border-radius: 0.5rem 0.5rem 0 0;
     padding: 0.25rem;
     backdrop-filter: blur(10px);
-    border: 2px solid color.scale($color-grey-100, $alpha: -20%);
+    box-shadow: $box-shadow;
     transition: all 0.2s $ease-out-circ;
 
     &:focus-within {
       bottom: 0.25rem;
       border-radius: 0.75rem;
-      border: 2px solid $color-primary;
+      box-shadow: $box-shadow-deeper;
     }
 
     &.small-input {

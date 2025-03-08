@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { CommonModalFunc } from '@/components/modal/CommonModal';
+import type { CommonModalFunc } from '@/components/modal/types.ts';
 import CommonModal from '@/components/modal/CommonModal.vue';
 import showToast from '@/components/toast/toast';
 import ToastManager from '@/components/toast/ToastManager';
@@ -96,7 +96,7 @@ const entries = computed<Entry[]>(() => {
 const mouseEnterTimeout = ref<number>();
 const mouseLeaveTimeout = ref<number>();
 
-function handleMouseEnter(e: MouseEvent) {
+function handleMouseEnter() {
   clearTimeout(mouseLeaveTimeout.value);
   clearTimeout(mouseEnterTimeout.value);
   if (!expandBar.value && isLargeScreen.value) {
@@ -108,7 +108,7 @@ function handleMouseEnter(e: MouseEvent) {
   }
 }
 
-function handleMouseLeave(e: MouseEvent | TouchEvent) {
+function handleMouseLeave() {
   clearTimeout(mouseEnterTimeout.value);
   clearTimeout(mouseLeaveTimeout.value);
   if (expandBar.value && isAutoExpand.value) {
@@ -122,7 +122,7 @@ function handleMouseLeave(e: MouseEvent | TouchEvent) {
 
 const router = useRouter();
 
-function handleEntryClick(e: Event, entry: Entry) {
+function handleEntryClick(_: Event, entry: Entry) {
   showToast({ text: entry.name, position: 'top' });
   if (entry.onClick) {
     entry.onClick();

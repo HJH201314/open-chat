@@ -1,7 +1,3 @@
-import LoginPage from '@/pages/login/LoginPage.vue';
-import ManageUserPage from '@/pages/manage/user/ManageUserPage.vue';
-import MessagePage from '@/pages/message/MessagePage.vue';
-import SettingPage from '@/pages/setting/SettingPage.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -14,27 +10,27 @@ const router = createRouter({
     {
       path: '/chat/message',
       name: 'messageList',
-      component: MessagePage,
+      component: () => import('@/pages/message/MessagePage.vue'),
     },
     {
       path: '/chat/message/:sessionId',
       name: 'messageDetail',
-      component: MessagePage,
+      component: () => import('@/pages/message/MessagePage.vue'),
     },
     {
       path: '/login',
       name: 'login',
-      component: LoginPage,
+      component: () => import('@/pages/login/LoginPage.vue'),
     },
     {
       path: '/manage/user',
       name: 'manage-user',
-      component: ManageUserPage,
+      component: () => import('@/pages/manage/user/ManageUserPage.vue'),
     },
     {
       path: '/chat/setting',
       name: 'setting',
-      component: SettingPage,
+      component: () => import('@/pages/setting/SettingPage.vue'),
     },
   ],
 });
