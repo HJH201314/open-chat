@@ -175,8 +175,14 @@ const { isLargeScreen } = useGlobal();
     &__user {
       padding: 0.4em 0.8em;
       border-radius: 0.5rem;
-      background-color: $color-teal-500;
-      color: $color-white;
+      background-color: $color-teal-100;
+      color: $color-teal-900;
+
+      & div::selection {
+        background-color: $color-teal-300 !important;
+        color: $color-teal-50;
+        border-radius: 0.5rem;
+      }
     }
 
     &__bot {

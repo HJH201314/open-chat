@@ -160,12 +160,12 @@ export const useDataStore = defineStore('data', () => {
       }
     }
     try {
-      for (const remoteSession of remoteSessions) {
+      // 组装所有需要缓存的数据
+      const newSessions = await remoteSessions.reduce(async (sessionInfos, remoteSession) => {
         const session = await db.sessions.where({ id: remoteSession.id }).last();
         if (!session) {
-          // 获取 session
-          await db.sessions.add({
-            id: remoteSession.id,
+          (await sessionInfos).push({
+            id: remoteSession.id!,
             title: remoteSession.messages?.[0]?.content || '', // TODO: 目前以第一条消息为标题
             avatar: '',
             botRole: '未知',
@@ -176,9 +176,12 @@ export const useDataStore = defineStore('data', () => {
             flags: {
               needSync: true,
             },
-          });
+          })
         }
-      }
+        return sessionInfos;
+      }, Promise.resolve([] as SessionInfo[]));
+      // 写入 db
+      db.sessions.bulkAdd(newSessions);
     } catch (_) {
       ToastManager.danger('写入数据异常，请稍后重试～');
       return false;
