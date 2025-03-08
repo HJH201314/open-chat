@@ -12,7 +12,7 @@ import { useDataStore } from '@/store/useDataStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import { ArrowUp, Back, CollapseTextInput, Delete, Edit, Refresh } from '@icon-park/vue-next';
-import { until, useElementSize, useFocusWithin } from '@vueuse/core';
+import { until, useElementSize, useFocusWithin, useScroll } from '@vueuse/core';
 import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { storeToRefs } from 'pinia';
@@ -122,6 +122,7 @@ const { focused: inputFocused } = useFocusWithin(inputPanelRef);
 const { height: panelHeight } = useElementSize(inputPanelRef);
 const panelPlaceholderPx = computed(() => `${panelHeight.value + 8}px`);
 const dialogListRef = useTemplateRef('dialog-list');
+const { arrivedState } = useScroll(dialogListRef);
 useAutoScrollbar(dialogListRef);
 watchEffect(() => {
   if (inputFocused.value) smallInput.value = false;
@@ -273,7 +274,7 @@ const { isSmallScreen } = useGlobal();
 
 <template>
   <div ref="dialog-detail" :class="{ 'small-screen': isSmallScreen }" class="dialog-detail">
-    <div class="dialog-detail-actions">
+    <div class="dialog-detail-actions" :class="{ shadow: !arrivedState.top }">
       <div class="dialog-detail-actions-area-left">
         <IconButton style="flex-shrink: 0" @click="$emit('back')">
           <Back size="16" />
@@ -301,9 +302,9 @@ const { isSmallScreen } = useGlobal();
     <!-- 空空提示 -->
     <div v-if="isEmptySession" class="dialog-detail-empty">随便问点啥？</div>
     <!-- 对话区域 -->
-    <div class="dialog-detail-display-area">
+    <div ref="dialog-list" class="dialog-detail-display-area">
       <!-- 对话列表固定中间 -->
-      <div ref="dialog-list" class="dialog-detail-dialogs">
+      <div class="dialog-detail-dialogs">
         <!--   列表底部定位（此列表为 column-reverse）   -->
         <div id="bottom-line"></div>
         <!--   消息列表   -->
@@ -402,6 +403,10 @@ $dialog-max-width: 54rem;
     background-color: rgba(255 255 255 / 80%);
     backdrop-filter: blur(10px);
     z-index: 1;
+
+    &.shadow {
+      box-shadow: $box-shadow-shallower;
+    }
 
     &-area-left {
       margin-right: auto;

@@ -9,9 +9,9 @@ import { showLoginDialog } from '@/pages/login';
 import SettingPage from '@/pages/setting/SettingPage.vue';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { Api, Github, Login, Logout, MenuFold, MenuUnfold } from '@icon-park/vue-next';
+import { Api, Github, Home, Login, Logout, MenuFold, MenuUnfold, Message, SettingTwo, User } from '@icon-park/vue-next';
 import { onClickOutside, useEventBus, useMediaQuery } from '@vueuse/core';
-import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import { computed, h, onMounted, ref, useTemplateRef, type VNode } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const userStore = useUserStore();
@@ -35,7 +35,7 @@ const isLargeScreen = useMediaQuery('(min-width: 768px)');
 type Entry = {
   key: string;
   name: string;
-  icon: string;
+  icon: string | VNode;
   href?: string;
   onClick?: () => void;
 };
@@ -43,9 +43,15 @@ type Entry = {
 const entries = computed<Entry[]>(() => {
   let data = [
     {
+      key: 'home',
+      name: '首页',
+      icon: h(Home),
+      href: '/home',
+    },
+    {
       key: 'dialog',
       name: '对话',
-      icon: 'message',
+      icon: h(Message),
       href: '/chat/message',
     },
     // {
@@ -57,7 +63,7 @@ const entries = computed<Entry[]>(() => {
     {
       key: 'user',
       name: '用户',
-      icon: 'user',
+      icon: h(User),
       href: '/manage/user',
       onClick() {
         if (userStore.permission == 2) {
@@ -71,7 +77,7 @@ const entries = computed<Entry[]>(() => {
     {
       key: 'setting',
       name: '设置',
-      icon: 'setting-two',
+      icon: h(SettingTwo),
       href: '/chat/setting',
       onClick() {
         if (isLargeScreen.value) {
@@ -195,15 +201,8 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
           >
             <component
               :is="entry.icon"
-              v-if="!entry.href || entry.href != route.path"
               class="sidebar-entry-icon"
-              size="24"
-              theme="outline"
-            ></component>
-            <component
-              :is="entry.icon"
-              v-else
-              class="sidebar-entry-icon sidebar-entry-icon--active"
+              :class="{ 'sidebar-entry-icon--active': entry.href && route.path.startsWith(entry.href) }"
               size="24"
               theme="outline"
             ></component>

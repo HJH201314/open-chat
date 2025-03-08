@@ -14,7 +14,7 @@ import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { onClickOutside, until } from '@vueuse/core';
+import { onClickOutside, until, useScroll } from '@vueuse/core';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -155,11 +155,14 @@ const displayList = computed(() => {
     return dataStore.sessions;
   }
 });
+
+const dialogListRef = useTemplateRef('dialog-list');
+const { arrivedState } = useScroll(dialogListRef);
 </script>
 <template>
   <!-- 角色列表 -->
   <div class="dialog-list">
-    <div class="dialog-list-bar">
+    <div class="dialog-list-bar" :class="{ 'shadow': !arrivedState.top }">
       <div
         ref="search-bar"
         :class="{ 'dialog-list-bar-search': searchForm.inputting, 'dialog-list-action-button': !searchForm.inputting }"
@@ -198,7 +201,7 @@ const displayList = computed(() => {
         </CommonModal>
       </div>
     </div>
-    <div class="dialog-list-container">
+    <div ref="dialog-list" class="dialog-list-container">
       <div
         v-for="item in displayList"
         :key="item.id"
@@ -260,6 +263,11 @@ const displayList = computed(() => {
     padding: 0.5rem;
     background-color: rgba(255 255 255 / 75%);
     backdrop-filter: blur(10px);
+    transition: box-shadow 0.2s $ease-out-circ;
+
+    &.shadow {
+      box-shadow: $box-shadow-shallower;
+    }
 
     &-search {
       flex: 1;

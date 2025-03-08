@@ -59,7 +59,7 @@ const toggleClasses = computed(() => {
 
     &.off {
       .toggle-container:active & {
-        width: 1.5em;
+        width: 1.25em;
       }
     }
 
@@ -67,7 +67,7 @@ const toggleClasses = computed(() => {
       background-color: $color-primary-lighter;
 
       .toggle-container:active & {
-        width: 1.5em;
+        width: 1.25em;
       }
     }
   }

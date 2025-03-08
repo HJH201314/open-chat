@@ -2,8 +2,6 @@ import shake from '@/commands/shake';
 import pinia from '@/plugins/pinia';
 import router from '@/plugins/router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { MenuFold, MenuUnfold, Message, SettingTwo, Star, User } from '@icon-park/vue-next';
-import { createPinia } from 'pinia';
 import type { App } from 'vue';
 
 /**
@@ -20,10 +18,4 @@ export default (app: App) => {
   });
 
   app.component('FontAwesomeIcon', FontAwesomeIcon);
-  app.component('SettingTwo', SettingTwo);
-  app.component('Message', Message);
-  app.component('MenuUnfold', MenuUnfold);
-  app.component('MenuFold', MenuFold);
-  app.component('Star', Star);
-  app.component('User', User);
 };

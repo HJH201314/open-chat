@@ -4,9 +4,11 @@ import { useTextareaAutosize } from '@vueuse/core';
 
 const props = withDefaults(
   defineProps<{
-    textareaAttr: TextareaHTMLAttributes;
+    textareaAttr?: TextareaHTMLAttributes;
   }>(),
-  {}
+  {
+    textareaAttr: () => ({}),
+  }
 );
 
 const modelValue = defineModel<string>('modelValue', { default: '' });
