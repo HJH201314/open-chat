@@ -21,6 +21,7 @@ import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import router from '@/plugins/router.ts';
 import CusTextarea from '@/components/textarea/CusTextarea.vue';
+import LoadingModal from '@/components/modal/LoadingModal.vue';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -121,6 +122,7 @@ const textAreaRef = useTemplateRef('input-textarea');
 const { focused: inputFocused } = useFocusWithin(inputPanelRef);
 const { height: panelHeight } = useElementSize(inputPanelRef);
 const panelPlaceholderPx = computed(() => `${panelHeight.value + 8}px`);
+const dialogDetailRef = useTemplateRef('dialog-detail');
 const dialogListRef = useTemplateRef('dialog-list');
 const { arrivedState } = useScroll(dialogListRef);
 useAutoScrollbar(dialogListRef);
@@ -274,6 +276,7 @@ const { isSmallScreen } = useGlobal();
 
 <template>
   <div ref="dialog-detail" :class="{ small: isSmallScreen }" class="dialog-detail">
+    <LoadingModal :visible="messageSyncing" :teleport-to="dialogDetailRef" color="var(--color-primary)"></LoadingModal>
     <div :class="{ shadow: !arrivedState.top }" class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton style="flex-shrink: 0" @click="$emit('back')">

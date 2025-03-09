@@ -370,6 +370,19 @@ export const useDataStore = defineStore('data', () => {
     }
   }
 
+  /**
+   * 清除所有会话和消息缓存
+   */
+  async function clearAllData(): Promise<boolean> {
+    try {
+      await db.sessions.clear();
+      await db.messages.clear();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   async function searchDialog(text: string) {
     const res: SessionInfo[] = [];
     for (const session of sessions.value) {
@@ -396,6 +409,7 @@ export const useDataStore = defineStore('data', () => {
     changeDialogModel: changeSessionModel,
     delDialog: delSession,
     sendMessageText,
+    clearAllData,
     searchDialog,
     useSendMessageText,
   };

@@ -245,7 +245,7 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
           <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
         </div>
       </div>
-      <CommonModal ref="refSettingModal" v-slot="{ close: closeSetting }">
+      <CommonModal ref="refSettingModal" v-slot="{ close: closeSetting }" preset-body>
         <SettingPage v-if="settingModalVisible" is-modal @cancel="closeSetting" />
       </CommonModal>
     </div>

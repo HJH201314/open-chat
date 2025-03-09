@@ -13,8 +13,11 @@ defineOptions({
 });
 
 const props = withDefaults(defineProps<CommonModalProps>(), {
+  teleportTo: 'body',
   showClose: true,
   visible: false,
+  presetBody: false,
+  maskStyle: () => ({}),
   modalStyle: () => ({}),
 });
 
@@ -42,7 +45,7 @@ watch(
       else close();
     });
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 /* 展示模态框（暴露的方法，配合ref使用） */
@@ -72,7 +75,7 @@ watch(
     if (newVal != oldVal) {
       emit('update:visible', newVal);
     }
-  },
+  }
 );
 
 function handleClose() {
@@ -81,7 +84,7 @@ function handleClose() {
 }
 
 defineSlots<{
-  default(props: { close: typeof close; isShown: boolean; }): any;
+  default(props: { close: typeof close; isShown: boolean }): any;
 }>();
 
 /* 暴露接口 */
@@ -93,15 +96,13 @@ defineExpose<CommonModalFunc>({
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport :to="teleportTo" :disabled="!teleportTo">
     <Transition name="show" @after-leave="afterClose">
-      <div v-if="showModal" :style="{ 'z-index': zIndex }" class="modal-mask">
-        <div :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }" class="modal-body">
-          <Close v-if="showClose" class="modal-body-close" size="20" @click="handleClose"/>
-          <div class="modal-body-content">
-            <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
-            <slot :close="close" :is-shown="showModal"></slot>
-          </div>
+      <div v-if="showModal" :style="{ ...props.maskStyle, 'z-index': zIndex }" class="modal-mask">
+        <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
+        <div :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }" class="modal-body" :class="{ preset: presetBody }">
+          <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
+          <slot :close="close" :is-shown="showModal"></slot>
         </div>
       </div>
     </Transition>
@@ -114,7 +115,7 @@ defineExpose<CommonModalFunc>({
 
 .modal {
   &-mask {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -125,32 +126,33 @@ defineExpose<CommonModalFunc>({
     justify-content: center;
   }
 
+  &-close {
+    @include click-able;
+    @include transition-all-circ;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.25rem;
+    cursor: pointer;
+    border-radius: 0 0.5rem 0 0.5rem;
+  }
+
   &-body {
     position: relative;
-    width: 512px; // 加个默认宽度不然组件有没有生效都不知道
-    max-width: calc(100% - 2rem);
-    max-height: calc(100% - 2rem);
-    background-color: $color-white;
-    border-radius: 0.5rem;
-    box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.1);
-    display: flex; // 由于&-content是由内容撑起来的，这里设置为flex，能够让子元素撑起并占满&-body
+    display: flex; // 居中
     flex-direction: column;
-    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
 
-    &-close {
-      @include click-able;
-      @include transition-all-circ;
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 0.25rem;
-      cursor: pointer;
-      border-radius: 0 0.5rem 0 0.5rem;
-    }
-
-    &-content {
-      flex: 1;
-      overflow: auto;
+    &.preset {
+      // 加个默认宽高
+      width: 512px;
+      max-width: calc(100% - 2rem);
+      max-height: calc(100% - 2rem);
+      background-color: $color-white;
+      border-radius: 0.5rem;
+      box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.1);
     }
   }
 }

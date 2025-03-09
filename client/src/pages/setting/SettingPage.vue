@@ -13,6 +13,8 @@ import { computed, ref, toValue, watch } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { addChildrenDropdownOptions } from '@/components/dropdown/utils.ts';
 import { storeToRefs } from 'pinia';
+import { useDataStore } from '@/store/useDataStore.ts';
+import ToastManager from '@/components/toast/ToastManager.ts';
 
 const { isModal = false } = defineProps<{
   isModal?: boolean;
@@ -82,6 +84,26 @@ const roleSelectorOptions = computed(() =>
     };
   }),
 );
+
+// 对话相关
+async function handleClearMessageCache() {
+  const confirmRes = await DialogManager.commonDialog({
+    title: '清除对话缓存',
+    content: '此操作不可逆，清除后需要重新获取数据，是否继续？',
+    confirmButtonProps: {
+      backgroundColor: variables.colorDanger,
+    },
+  })
+  if (confirmRes) {
+    const dataStore = useDataStore();
+    const clearRes = await dataStore.clearAllData();
+    if (clearRes) {
+      ToastManager.success('清除成功');
+    } else {
+      ToastManager.danger('清除失败');
+    }
+  }
+}
 
 function forceReloadPage() {
   // @ts-ignore lib 类型标注错误
@@ -193,6 +215,12 @@ function forceReloadPage() {
                 text="清除角色缓存"
                 type="primary"
                 @click="handleClearRoleCache"
+              />
+              <DiliButton
+                :background-color="variables.colorDanger"
+                text="清除对话缓存"
+                type="primary"
+                @click="handleClearMessageCache"
               />
             </span>
           </div>

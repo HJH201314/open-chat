@@ -77,7 +77,7 @@ defineExpose<CommonDialogExpose>({
 
 <template>
   <CommonModal
-    :modal-style="{ 'background-color': 'white', ...props.modalStyle }"
+    :modal-style="{ ...props.modalStyle }"
     :show-close="false"
     :visible="modalVisible"
     @after-close="afterClose"
@@ -106,8 +106,15 @@ defineExpose<CommonDialogExpose>({
 </template>
 
 <style lang="scss" scoped>
+@import "@/assets/variables.scss";
+
 .dialog {
-  width: 100%;
+  width: 512px; // 默认宽度
+  max-width: calc(100% - 2rem);
+  max-height: calc(100% - 2rem);
+  background-color: $color-white;
+  border-radius: 0.5rem;
+  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.1);
   padding: 0.5rem 0.5rem 0.5rem 0.5rem;
   display: flex;
   flex-direction: column;
