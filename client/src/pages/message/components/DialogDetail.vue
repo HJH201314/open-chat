@@ -503,7 +503,7 @@ $dialog-max-width: 54rem;
     transition: all 0.2s $ease-out-circ;
 
     &:focus-within {
-      bottom: 0.25rem;
+      bottom: 0.35rem;
       border-radius: 0.75rem;
       box-shadow: $box-shadow-deeper;
     }
