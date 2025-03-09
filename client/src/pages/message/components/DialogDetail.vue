@@ -453,7 +453,8 @@ $dialog-max-width: 54rem;
   }
 
   &-dialogs {
-    width: clamp(100%, 100%, 54rem);
+    width: 100%;
+    max-width: $dialog-max-width;
     margin-inline: auto;
     padding-inline: 0.25rem;
     padding-top: 2.6rem;
