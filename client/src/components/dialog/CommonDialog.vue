@@ -106,7 +106,7 @@ defineExpose<CommonDialogExpose>({
 </template>
 
 <style lang="scss" scoped>
-@import "@/assets/variables.scss";
+@use "@/assets/variables.scss" as *;
 
 .dialog {
   width: 512px; // 默认宽度
