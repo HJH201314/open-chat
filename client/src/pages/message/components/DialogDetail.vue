@@ -279,7 +279,7 @@ const { isSmallScreen } = useGlobal();
     <LoadingModal :visible="messageSyncing" :teleport-to="dialogDetailRef" color="var(--color-primary)"></LoadingModal>
     <div :class="{ shadow: !arrivedState.top }" class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
-        <IconButton style="flex-shrink: 0" @click="$emit('back')">
+        <IconButton type="secondary" style="flex-shrink: 0" @click="$emit('back')">
           <Back size="16" />
         </IconButton>
         <span class="dialog-detail-actions-title">
@@ -287,18 +287,18 @@ const { isSmallScreen } = useGlobal();
         </span>
         <span class="dialog-detail-actions-subtitle"> {{ messageList.length }} 条消息 </span>
       </div>
-      <IconButton style="flex-shrink: 0" @click="handleSyncDialog">
+      <IconButton type="secondary" style="flex-shrink: 0" @click="handleSyncDialog">
         <cus-spin :show="messageSyncing">
           <Refresh size="16" />
         </cus-spin>
       </IconButton>
-      <IconButton style="flex-shrink: 0" @click="handleEditDialog">
+      <IconButton type="secondary" style="flex-shrink: 0" @click="handleEditDialog">
         <Edit size="16" />
       </IconButton>
       <!--      <IconButton>-->
       <!--        <Share size="16" />-->
       <!--      </IconButton>-->
-      <IconButton style="flex-shrink: 0" @click="handleDeleteDialog">
+      <IconButton type="secondary" style="flex-shrink: 0" @click="handleDeleteDialog">
         <Delete size="16" />
       </IconButton>
     </div>
@@ -407,7 +407,7 @@ $dialog-max-width: 54rem;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem;
-    background-color: rgba(255 255 255 / 80%);
+    background-color: rgba(255 255 255 / 75%);
     backdrop-filter: blur(10px);
     z-index: 1;
 
