@@ -138,7 +138,7 @@ const { isLargeScreen } = useGlobal();
   }
 
   &-body {
-    max-width: 100%; // 此处是消息盒子宽度的关键限制
+    max-width: 100%; // 限制消息盒子宽度
     display: flex;
     gap: 0.5rem;
 
@@ -152,10 +152,10 @@ const { isLargeScreen } = useGlobal();
   }
 
   &-avatar {
-    min-width: 32px;
-    max-width: 32px;
-    min-height: 32px;
-    max-height: 32px;
+    min-width: 2rem;
+    max-width: 2rem;
+    min-height: 2rem;
+    max-height: 2rem;
     border-radius: 0.5rem;
     overflow: hidden;
 
@@ -170,7 +170,8 @@ const { isLargeScreen } = useGlobal();
     user-select: text;
     white-space: pre-wrap;
     word-break: break-word;
-    overflow-x: auto; // 此处让代码内容超出时可以滚动查看
+    overflow-x: auto; // 让代码块不会撑大容器
+    overflow-y: hidden; // 隐藏意外溢出的部分
 
     &__user {
       padding: 0.4em 0.8em;

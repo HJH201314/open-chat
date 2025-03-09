@@ -273,8 +273,8 @@ const { isSmallScreen } = useGlobal();
 </script>
 
 <template>
-  <div ref="dialog-detail" :class="{ 'small-screen': isSmallScreen }" class="dialog-detail">
-    <div class="dialog-detail-actions" :class="{ shadow: !arrivedState.top }">
+  <div ref="dialog-detail" :class="{ small: isSmallScreen }" class="dialog-detail">
+    <div :class="{ shadow: !arrivedState.top }" class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton style="flex-shrink: 0" @click="$emit('back')">
           <Back size="16" />
@@ -311,8 +311,8 @@ const { isSmallScreen } = useGlobal();
         <DialogMessage
           v-if="thinkMsg || answerMsg"
           id="bot-typing-box"
-          :thinking="thinkMsg"
           :html-message="answerMsg"
+          :thinking="thinkMsg"
           role="bot"
         />
         <DialogMessage
@@ -328,8 +328,8 @@ const { isSmallScreen } = useGlobal();
           :key="item.id"
           :html-message="item.htmlContent"
           :message="item.content"
-          :thinking="item.reasoningContent"
           :role="item.sender"
+          :thinking="item.reasoningContent"
           :time="item.time"
           @think-expand="handleMessageThinkExpand"
         />
@@ -339,7 +339,11 @@ const { isSmallScreen } = useGlobal();
       <!-- 输入面板 -->
       <div
         ref="input-panel"
-        :class="{ 'dialog-detail-inputs--first': isEmptySession && !isSmallScreen, 'small-input': smallInput }"
+        :class="{
+          'dialog-detail-inputs--first': isEmptySession && !isSmallScreen,
+          'small-input': smallInput,
+          hide: messageSyncing,
+        }"
         class="dialog-detail-inputs"
       >
         <Transition name="slide-top-fade">
@@ -367,8 +371,8 @@ const { isSmallScreen } = useGlobal();
         <CusTextarea
           ref="input-textarea"
           v-model="form.inputValue"
-          class="dialog-detail-inputs-textarea"
           :textarea-attr="{ placeholder: '随便问点啥(●\'◡\'●)' }"
+          class="dialog-detail-inputs-textarea"
           @keydown="handleInputKeydown"
         />
         <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
@@ -442,11 +446,14 @@ $dialog-max-width: 54rem;
     height: 100%;
     overflow-y: auto;
     scrollbar-gutter: stable;
+
+    .small & {
+      padding-inline: 0.5rem;
+    }
   }
 
   &-dialogs {
-    width: 100%;
-    max-width: $dialog-max-width;
+    width: clamp(100%, 100%, 54rem);
     margin-inline: auto;
     padding-inline: 0.25rem;
     padding-top: 2.6rem;
@@ -495,6 +502,10 @@ $dialog-max-width: 54rem;
       bottom: 0.25rem;
       border-radius: 0.75rem;
       box-shadow: $box-shadow-deeper;
+    }
+
+    &.hide {
+      height: 0;
     }
 
     &.small-input {
