@@ -23,7 +23,7 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     errorHandler(error);
-  },
+  }
 );
 
 export const successHandler = (resp: any) => {
@@ -46,7 +46,7 @@ export const successHandler = (resp: any) => {
 
 export const errorHandler = (error: any) => {
   if (error.status === 401) {
-    // 后端返回登录失败，前端配合清除登录态
+    // 后端返回登录失效，登出并提示登录态过期
     if (getActivePinia()) {
       const userStore = useUserStore();
       if (userStore.isLogin) {
@@ -95,18 +95,16 @@ genApiClient.instance.interceptors.response.use(
   },
   (error) => {
     errorHandler(error);
-  },
+  }
 );
 // 添加 header
-genApiClient.instance.interceptors.request.use(
-  (req) => {
-    req.headers['Authorization'] = localStorage.getItem(USER_ACCESS_TOKEN_KEY)
-      ? `Bearer ${localStorage.getItem(USER_ACCESS_TOKEN_KEY)}`
-      : '';
-    if (getActivePinia()) {
-      const baseUrl = useSettingStore().settings.baseUrl;
-      baseUrl && (req.baseURL = baseUrl);
-    }
-    return req;
-  },
-);
+genApiClient.instance.interceptors.request.use((req) => {
+  req.headers['Authorization'] = localStorage.getItem(USER_ACCESS_TOKEN_KEY)
+    ? `Bearer ${localStorage.getItem(USER_ACCESS_TOKEN_KEY)}`
+    : '';
+  if (getActivePinia()) {
+    const baseUrl = useSettingStore().settings.baseUrl;
+    baseUrl && (req.baseURL = baseUrl);
+  }
+  return req;
+});

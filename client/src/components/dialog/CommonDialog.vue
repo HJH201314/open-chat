@@ -17,10 +17,14 @@ const props = withDefaults(defineProps<CommonDialogProps>(), {
 const emits = defineEmits<CommonDialogEmits>();
 const modalVisible = ref(false);
 
-watch(() => props.visible, (newVisible) => {
-  if (newVisible) show();
-  else close();
-}, { immediate: true });
+watch(
+  () => props.visible,
+  (newVisible) => {
+    if (newVisible) show();
+    else close();
+  },
+  { immediate: true }
+);
 
 // 展示模态框
 function show() {
@@ -87,18 +91,24 @@ defineExpose<CommonDialogExpose>({
         <div v-if="title" class="dialog-title" :style="titleStyle">{{ title }}</div>
         <div v-if="subtitle" class="dialog-sub-title" :style="subtitleStyle">{{ subtitle }}</div>
       </header>
-      <hr v-if="title || subtitle && content"/>
-      <main style="display: flex; flex-direction: column; gap: 0.25rem;">
+      <hr v-if="title || (subtitle && content)" />
+      <main>
         <div class="dialog-content" v-html="content"></div>
         <slot></slot>
       </main>
-      <hr v-if="showCancel || showConfirm && content"/>
+      <hr v-if="showCancel || (showConfirm && content)" />
       <footer>
         <slot name="action"></slot>
-        <DiliButton style="margin-left: auto;" v-if="showCancel" text="取消" type="normal" v-bind="cancelButtonProps"
-                    @click="handleCancel"></DiliButton>
+        <DiliButton
+          v-if="showCancel"
+          style="margin-left: auto"
+          text="取消"
+          type="normal"
+          v-bind="cancelButtonProps"
+          @click="handleCancel"
+        ></DiliButton>
         <DiliButton v-if="showConfirm" text="确认" type="primary" v-bind="confirmButtonProps" @click="handleConfirm">
-          <cus-spin v-if="confirming" :show="true"/>
+          <cus-spin v-if="confirming" :show="true" />
         </DiliButton>
       </footer>
     </div>
@@ -106,7 +116,7 @@ defineExpose<CommonDialogExpose>({
 </template>
 
 <style lang="scss" scoped>
-@use "@/assets/variables.scss" as *;
+@use '@/assets/variables.scss' as *;
 
 .dialog {
   width: 512px; // 默认宽度
@@ -119,12 +129,20 @@ defineExpose<CommonDialogExpose>({
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  overflow: hidden;
 
   > header {
   }
 
   > main {
+    flex: 1;
     padding: 0 0.5rem;
+    min-height: 0;
+    overflow-y: auto;
+
+    > &:not(:last-child) {
+      margin-bottom: 0.5rem;
+    }
   }
 
   > footer {

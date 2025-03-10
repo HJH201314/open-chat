@@ -35,7 +35,7 @@ watch(
   () => settingStore.settings,
   () => {
     editingValue.value = { ...toValue(settingStore.settings) };
-  },
+  }
 );
 
 function handleSave() {
@@ -82,7 +82,7 @@ const roleSelectorOptions = computed(() =>
       value: v[0].toString(),
       label: v[1],
     };
-  }),
+  })
 );
 
 // 对话相关
@@ -93,7 +93,7 @@ async function handleClearMessageCache() {
     confirmButtonProps: {
       backgroundColor: variables.colorDanger,
     },
-  })
+  });
   if (confirmRes) {
     const dataStore = useDataStore();
     const clearRes = await dataStore.clearAllData();
@@ -113,142 +113,144 @@ function forceReloadPage() {
 
 <template>
   <div :class="{ large: !isModal && isLargeScreen, modal: isModal }" class="setting-page">
-    <div class="setting-page-title">设置 | Setting</div>
-    <div class="setting-list">
-      <div class="setting-list-container">
-        <div class="setting-list-section">
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">API地址</span>
-            <span class="setting-list-item__value">
-              <CusInput v-model="editingValue.baseUrl" placeholder="后端服务地址"/>
-            </span>
+    <div class="setting-page-wrapper">
+      <div class="setting-page-title">对话设置</div>
+      <div class="setting-list">
+        <div class="setting-list-container">
+          <div class="setting-list-section">
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">API地址</span>
+              <span class="setting-list-item__value">
+                <CusInput v-model="editingValue.baseUrl" placeholder="后端服务地址" />
+              </span>
+            </div>
           </div>
+          <div class="setting-list-section">
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">对话缓存</span>
+              <span class="setting-list-item__subtitle"> 将对话数据缓存在本地，不进行联网查询 </span>
+              <span class="setting-list-item__value">
+                <CusToggle v-model="editingValue.localCache" />
+              </span>
+            </div>
+            <div class="setting-list-item">
+              <span class="setting-list-item__title"> Markdown 缓存结果渲染 </span>
+              <span class="setting-list-item__subtitle"> 使用缓存结果渲染对话，提升长对话加载效率 </span>
+              <span class="setting-list-item__value">
+                <CusToggle v-model="editingValue.markdownCache" />
+              </span>
+            </div>
+          </div>
+          <div class="setting-list-section">
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">默认发送方式</span>
+              <span class="setting-list-item__value">
+                <CusSelect
+                  v-model="editingValue.fastSendKey"
+                  :options="[
+                    {
+                      value: 'enter',
+                      label: 'Enter',
+                    },
+                    {
+                      value: 'none',
+                      label: 'None',
+                    },
+                  ]"
+                />
+              </span>
+            </div>
+          </div>
+          <div class="setting-list-section">
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">默认 API 服务模型</span>
+              <span class="setting-list-item__value">
+                <CusSelect
+                  v-model="editingValue.defaultModel"
+                  :options="
+                    addChildrenDropdownOptions(providerDropdown, () => ({
+                      position: isLargeScreen ? 'right' : 'left',
+                    }))
+                  "
+                  :position="isLargeScreen ? 'bottom' : 'left'"
+                  @select="(option, value, path) => (editingValue.defaultProvider = path[0] || '')"
+                />
+              </span>
+            </div>
+          </div>
+          <div class="setting-list-section">
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">显示日期/时间</span>
+              <span class="setting-list-item__value">
+                <CusSelect
+                  v-model="editingValue.timeDisplayInDialogList"
+                  :options="[
+                    { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
+                    { value: 'yyyy-MM-dd hh:mm:ss', label: 'yyyy-MM-dd hh:mm:ss' },
+                  ]"
+                />
+              </span>
+            </div>
+          </div>
+          <div class="setting-list-section">
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">启用角色功能</span>
+              <span class="setting-list-item__value">
+                <CusToggle v-model="editingValue.roleEnabled" />
+              </span>
+            </div>
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">默认角色</span>
+              <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
+                <CusToggle v-model="editingValue.roleRemember" />
+                <CusSelect v-model="editingValue.roleDefaultId" :options="roleSelectorOptions" />
+              </span>
+            </div>
+          </div>
+          <div class="setting-list-section">
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">清除缓存</span>
+              <span class="setting-list-item__value">
+                <DiliButton
+                  :background-color="variables.colorDanger"
+                  text="清除角色缓存"
+                  type="primary"
+                  @click="handleClearRoleCache"
+                />
+                <DiliButton
+                  :background-color="variables.colorDanger"
+                  text="清除对话缓存"
+                  type="primary"
+                  @click="handleClearMessageCache"
+                />
+              </span>
+            </div>
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">强制刷新页面</span>
+              <span class="setting-list-item__value">
+                <DiliButton
+                  :background-color="variables.colorDanger"
+                  text="立即重启"
+                  type="primary"
+                  @click="forceReloadPage"
+                />
+              </span>
+            </div>
+          </div>
+          <div class="setting-actions-placeholder"></div>
         </div>
-        <div class="setting-list-section">
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">对话缓存</span>
-            <span class="setting-list-item__subtitle">
-              将对话数据缓存在本地，不进行联网查询
-            </span>
-            <span class="setting-list-item__value">
-              <CusToggle v-model="editingValue.localCache"/>
-            </span>
-          </div>
-          <div class="setting-list-item">
-            <span class="setting-list-item__title"> Markdown 缓存结果渲染 </span>
-            <span class="setting-list-item__subtitle"> 使用缓存结果渲染对话，提升长对话加载效率 </span>
-            <span class="setting-list-item__value">
-              <CusToggle v-model="editingValue.markdownCache"/>
-            </span>
-          </div>
+        <div :class="{ 'setting-actions--large': isLargeScreen }" class="setting-actions">
+          <DiliButton
+            :background-color="variables.colorPrimary"
+            :button-style="{ width: '100%', 'text-align': 'center' }"
+            style="flex: 1"
+            text="保存"
+            type="primary"
+            @click="handleSave"
+          />
+          <DiliButton v-if="isModal" shadow text="关闭" type="normal" @click="$emit('cancel')" />
+          <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset" />
         </div>
-        <div class="setting-list-section">
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">默认发送方式</span>
-            <span class="setting-list-item__value">
-              <CusSelect
-                v-model="editingValue.fastSendKey"
-                :options="[
-                  {
-                    value: 'enter',
-                    label: 'Enter',
-                  },
-                  {
-                    value: 'none',
-                    label: 'None',
-                  },
-                ]"
-              />
-            </span>
-          </div>
-        </div>
-        <div class="setting-list-section">
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">默认 API 服务模型</span>
-            <span class="setting-list-item__value">
-              <CusSelect
-                v-model="editingValue.defaultModel"
-                :options="addChildrenDropdownOptions(providerDropdown, () => ({
-                  position: isLargeScreen ? 'right' : 'left'
-                }))"
-                :position="isLargeScreen ? 'bottom' : 'left'"
-                @select="(option, value, path) => (editingValue.defaultProvider = path[0] || '')"
-              />
-            </span>
-          </div>
-        </div>
-        <div class="setting-list-section">
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">显示日期/时间</span>
-            <span class="setting-list-item__value">
-              <CusSelect
-                v-model="editingValue.timeDisplayInDialogList"
-                :options="[
-                  { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
-                  { value: 'yyyy-MM-dd hh:mm:ss', label: 'yyyy-MM-dd hh:mm:ss' },
-                ]"
-              />
-            </span>
-          </div>
-        </div>
-        <div class="setting-list-section">
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">启用角色功能</span>
-            <span class="setting-list-item__value">
-              <CusToggle v-model="editingValue.roleEnabled"/>
-            </span>
-          </div>
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">默认角色</span>
-            <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
-              <CusToggle v-model="editingValue.roleRemember"/>
-              <CusSelect v-model="editingValue.roleDefaultId" :options="roleSelectorOptions"/>
-            </span>
-          </div>
-        </div>
-        <div class="setting-list-section">
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">清除缓存</span>
-            <span class="setting-list-item__value">
-              <DiliButton
-                :background-color="variables.colorDanger"
-                text="清除角色缓存"
-                type="primary"
-                @click="handleClearRoleCache"
-              />
-              <DiliButton
-                :background-color="variables.colorDanger"
-                text="清除对话缓存"
-                type="primary"
-                @click="handleClearMessageCache"
-              />
-            </span>
-          </div>
-          <div class="setting-list-item">
-            <span class="setting-list-item__title">强制刷新页面</span>
-            <span class="setting-list-item__value">
-              <DiliButton
-                :background-color="variables.colorDanger"
-                text="立即重启"
-                type="primary"
-                @click="forceReloadPage"
-              />
-            </span>
-          </div>
-        </div>
-        <div class="setting-actions-placeholder"></div>
-      </div>
-      <div :class="{ 'setting-actions--large': isLargeScreen }" class="setting-actions">
-        <DiliButton
-          :background-color="variables.colorPrimary"
-          :button-style="{ width: '100%', 'text-align': 'center' }"
-          style="flex: 1"
-          text="保存"
-          type="primary"
-          @click="handleSave"
-        />
-        <DiliButton v-if="isModal" shadow text="关闭" type="normal" @click="$emit('cancel')"/>
-        <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset"/>
       </div>
     </div>
   </div>
@@ -259,21 +261,32 @@ function forceReloadPage() {
 @use '@/assets/extension' as *;
 
 .setting-page {
+  position: relative;
   height: 100%;
   width: 100%;
   box-sizing: border-box;
   padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+
+  &-wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .large & {
+      max-width: 48rem;
+      margin-inline: auto;
+    }
+  }
 
   &.large,
   &.modal {
-    padding: 1rem;
+    padding: 0.75rem;
   }
 
   &-title {
     @include page-title;
+    text-align: center;
     margin-bottom: 0.5rem;
   }
 }
@@ -389,17 +402,10 @@ function forceReloadPage() {
   background-color: rgba(255 255 255 / 85%);
   backdrop-filter: blur(10px);
   box-shadow: $box-shadow;
-
-  &--large {
-    padding: 0.5rem 0.75rem 0.75rem 0.75rem;
-  }
+  border-radius: 0.5rem;
 
   &-placeholder {
-    height: 2rem;
-    // 使用 :not 来排除 .setting-actions--large 的上下文
-    &:not(.setting-actions--large) {
-      height: 2.5rem;
-    }
+    height: 2.5rem;
   }
 }
 </style>

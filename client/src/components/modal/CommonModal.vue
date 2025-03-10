@@ -162,19 +162,18 @@ defineExpose<CommonModalFunc>({
   }
 
   &-body {
-    position: relative;
+    width: 100%;
+    height: 100%;
     display: flex; // 居中
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    overflow: auto;
     outline: none;
 
     &.preset {
-      // 加个默认宽高
+      // preset 情况下，高度由内容撑起，加个默认宽度
       width: 512px;
-      max-width: calc(100% - 2rem);
-      max-height: calc(100% - 2rem);
+      height: unset;
       background-color: $color-white;
       border-radius: 0.5rem;
       box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.1);
