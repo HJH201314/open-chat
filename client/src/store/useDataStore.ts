@@ -42,7 +42,6 @@ export const useDataStore = defineStore('data', () => {
   });
 
   const roleStore = useRoleStore();
-  const userStore = useUserStore();
   const modelStore = useModelStore();
   const settingStore = useSettingStore();
 
@@ -75,11 +74,7 @@ export const useDataStore = defineStore('data', () => {
       }
       return sessionId;
     } catch (_) {
-      if (!userStore.isLogin) {
-        showToast({ text: '请先登录~', type: 'danger', position: 'top-left' });
-      } else {
-        showToast({ text: '请求失败，请稍候重试 TAT', type: 'danger', position: 'top-left' });
-      }
+      showToast({ text: '请求失败，请稍候重试 TAT', type: 'danger', position: 'top-left' });
     }
     return '';
   }

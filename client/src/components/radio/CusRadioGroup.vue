@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { type CusRadioGroupProps, RadioGroupInjectionKey } from '@/components/radio/types.ts';
 import { getRandomString } from '@/utils/string.ts';
-import { type CSSProperties, provide, reactive, ref, toRefs, unref, watchEffect } from 'vue';
+import { computed, type CSSProperties, provide, reactive, ref, toRefs, watchEffect } from 'vue';
 
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
   modelValue: '',
   name: getRandomString(5),
+  type: 'highlight',
 });
 const emits = defineEmits<{
   (event: 'change', value: string): void;
@@ -31,16 +32,19 @@ watchEffect(() => {
   emits('update:modelValue', selectedValue.value);
 });
 
-const { name } = toRefs(props);
+const { name, type } = toRefs(props);
 provide(
   RadioGroupInjectionKey,
   reactive({
     name,
+    type,
     value: selectedValue,
     setValue: setSelectedValue,
     setElement: setSelectedElement,
   })
 );
+
+const typeClassName = computed(() => `type-${props.type}`);
 
 // 选中框样式
 const barStyle = ref<CSSProperties>({
@@ -68,14 +72,14 @@ watchEffect(() => {
       width: '1em',
       height: 'calc(100% - 0.5em)',
     };
-    console.log(JSON.stringify(barStyle.value));
+    console.log(JSON.stringify(barStyle.value), typeClassName);
   }
 });
 </script>
 
 <template>
   <fieldset class="cus-radio-group">
-    <div class="cus-radio-group-bar" :style="barStyle"></div>
+    <div class="cus-radio-group-bar" :class="{ [typeClassName]: !!typeClassName }" :style="barStyle"></div>
     <slot></slot>
   </fieldset>
 </template>
@@ -94,13 +98,21 @@ watchEffect(() => {
   &-bar {
     position: absolute;
     z-index: 0;
-    background-color: $color-primary;
     border-radius: 0.5rem;
+    box-shadow: $next-box-shadow-small;
     transition:
       left 0.2s $ease-out-circ,
       top 0.2s $ease-out-circ,
       width 0.2s $ease-out-circ,
       height 0.2s $ease-out-circ;
+
+    &.type-normal {
+      background-color: white;
+    }
+
+    &.type-highlight {
+      background-color: $color-primary;
+    }
   }
 }
 </style>

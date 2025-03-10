@@ -237,18 +237,18 @@ function forceReloadPage() {
           </div>
         </div>
         <div class="setting-actions-placeholder"></div>
-        <div :class="{ 'setting-actions--large': isLargeScreen }" class="setting-actions">
-          <DiliButton
-            :background-color="variables.colorPrimary"
-            :button-style="{ width: '100%', 'text-align': 'center' }"
-            style="flex: 1"
-            text="保存"
-            type="primary"
-            @click="handleSave"
-          />
-          <DiliButton v-if="isModal" shadow text="关闭" type="normal" @click="$emit('cancel')"/>
-          <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset"/>
-        </div>
+      </div>
+      <div :class="{ 'setting-actions--large': isLargeScreen }" class="setting-actions">
+        <DiliButton
+          :background-color="variables.colorPrimary"
+          :button-style="{ width: '100%', 'text-align': 'center' }"
+          style="flex: 1"
+          text="保存"
+          type="primary"
+          @click="handleSave"
+        />
+        <DiliButton v-if="isModal" shadow text="关闭" type="normal" @click="$emit('cancel')"/>
+        <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset"/>
       </div>
     </div>
   </div>
@@ -262,10 +262,10 @@ function forceReloadPage() {
   height: 100%;
   width: 100%;
   box-sizing: border-box;
-  border-radius: 0.5rem;
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 
   &.large,
   &.modal {
@@ -303,7 +303,11 @@ function forceReloadPage() {
     gap: calc(var(--gap) / 2) var(--gap);
     box-sizing: border-box;
     padding-bottom: 0.25rem;
-    border-bottom: 1px solid $color-grey-100;
+
+    // 除了最后一个 section，都添加下边框
+    &:not(:nth-last-child(2)) {
+      border-bottom: 1px solid $color-grey-100;
+    }
 
     .large & {
       border-bottom: none;
@@ -379,14 +383,15 @@ function forceReloadPage() {
   left: 0;
   right: 0;
   padding: 0.5rem;
-  opacity: 0.95;
-  background-color: white;
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
+  background-color: rgba(255 255 255 / 85%);
+  backdrop-filter: blur(10px);
+  box-shadow: $box-shadow;
 
   &--large {
-    padding: 0.5rem 1rem 1rem 1rem;
+    padding: 0.5rem 0.75rem 0.75rem 0.75rem;
   }
 
   &-placeholder {

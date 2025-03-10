@@ -7,9 +7,8 @@ import Tooltip from '@/components/tooltip/CusTooltip.vue';
 import { toggleSidebarKey } from '@/constants/eventBusKeys';
 import { showLoginDialog } from '@/pages/login';
 import SettingPage from '@/pages/setting/SettingPage.vue';
-import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { Api, Github, Home, Login, Logout, MenuFold, MenuUnfold, Message, SettingTwo, User } from '@icon-park/vue-next';
+import { Github, Home, Login, Logout, MenuFold, MenuUnfold, Message, SettingTwo, User } from '@icon-park/vue-next';
 import { onClickOutside, useEventBus, useMediaQuery } from '@vueuse/core';
 import { computed, h, onMounted, ref, useTemplateRef, type VNode } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -110,7 +109,7 @@ function handleMouseEnter() {
     mouseEnterTimeout.value = window.setTimeout(() => {
       isAutoExpand.value = true;
       expandBar.value = true;
-    }, 200);
+    }, 750);
   }
 }
 
@@ -158,12 +157,6 @@ function handleLogin() {
 
 function handleGithubClick() {
   window.open('https://github.com/HJH201314/openai-front');
-}
-
-const settingStore = useSettingStore();
-
-function handleApiClick() {
-  window.open(settingStore.settings.baseUrl + '/docs/api/');
 }
 
 // 点击 Sidebar 外部隐藏
@@ -222,11 +215,6 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
           <Tooltip :enabled="expandBar" position="bottom" text="开源地址">
             <div class="sidebar-entry sidebar-footer-item">
               <Github class="sidebar-entry-icon" size="1.5rem" @click="handleGithubClick"></Github>
-            </div>
-          </Tooltip>
-          <Tooltip :enabled="expandBar" position="bottom" text="查看接口">
-            <div class="sidebar-entry sidebar-footer-item">
-              <Api class="sidebar-entry-icon" size="1.5rem" @click="handleApiClick"></Api>
             </div>
           </Tooltip>
         </div>

@@ -59,6 +59,10 @@ async function handleAddRecord(roleId?: number) {
 }
 
 function handleListAddClick() {
+  if (!userStore.isLogin) {
+    ToastManager.danger('请先登录');
+    return;
+  }
   if (settingStore.settings.roleEnabled && settingStore.settings.roleRemember && settingStore.settings.roleDefaultId)
     handleAddRecord(parseInt(settingStore.settings.roleDefaultId ?? '1'));
   else if (!settingStore.settings.roleEnabled) handleAddRecord();
@@ -66,6 +70,10 @@ function handleListAddClick() {
 }
 
 const handleSessionRefresh = async () => {
+  if (!userStore.isLogin) {
+    ToastManager.danger('请先登录');
+    return;
+  }
   const softMode = ref(true);
   const dialog = DialogManager.createDialog(
     {
@@ -234,7 +242,6 @@ const { arrivedState } = useScroll(dialogListRef);
 
 .dialog-list {
   position: relative;
-  flex: 1;
 
   &-container {
     padding-top: 3rem;

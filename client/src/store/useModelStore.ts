@@ -40,35 +40,39 @@ export const useModelStore = defineStore('model', () => {
   );
 
   const getModelsOnServer = async () => {
-    // 获取模型数据
-    const models = await genApi.Chat.configModelsGet();
-    if (models.data.data) {
-      rawModels.value = models.data.data;
-      // 将扁平的模型数据分组
-      const groupedModels = models.data.data.reduce(
-        (acc, curr) => {
-          const providerName = curr.provider_name || '';
-          (acc[providerName] = acc[providerName] || []).push(curr);
-          return acc;
-        },
-        {} as Record<string, ApiSchemaModelCache[]>
-      );
-      // 将分组数据转换为标准形式
-      providerModels.value = [];
-      Object.entries(groupedModels).forEach((group) => {
-        providerModels.value.push({
-          internalName: group[0],
-          displayName: group[1][0]?.provider_display_name || '',
-          order: 1,
-          models: group[1].map((m) => {
-            return {
-              internalName: m.name || '',
-              displayName: m.display_name || m.name || '',
-              order: 1,
-            };
-          }),
+    try {
+      // 获取模型数据
+      const models = await genApi.Chat.configModelsGet();
+      if (models.data.data) {
+        rawModels.value = models.data.data;
+        // 将扁平的模型数据分组
+        const groupedModels = models.data.data.reduce(
+          (acc, curr) => {
+            const providerName = curr.provider_name || '';
+            (acc[providerName] = acc[providerName] || []).push(curr);
+            return acc;
+          },
+          {} as Record<string, ApiSchemaModelCache[]>
+        );
+        // 将分组数据转换为标准形式
+        providerModels.value = [];
+        Object.entries(groupedModels).forEach((group) => {
+          providerModels.value.push({
+            internalName: group[0],
+            displayName: group[1][0]?.provider_display_name || '',
+            order: 1,
+            models: group[1].map((m) => {
+              return {
+                internalName: m.name || '',
+                displayName: m.display_name || m.name || '',
+                order: 1,
+              };
+            }),
+          });
         });
-      });
+      }
+    } catch (_) {
+      console.error('获取模型数据失败');
     }
   };
 

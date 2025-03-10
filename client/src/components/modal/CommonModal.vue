@@ -5,7 +5,7 @@
 import type { CommonModalFunc, CommonModalProps } from '@/components/modal/types.ts';
 import { useCommonModalStore } from '@/components/modal/store.ts';
 import { Close } from '@icon-park/vue-next';
-import { computed, nextTick, ref, toRef, watch } from 'vue';
+import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
 
 defineOptions({
   // CommonModal 通过 teleport 传递到 body 上，不继承父级的属性
@@ -15,6 +15,7 @@ defineOptions({
 const props = withDefaults(defineProps<CommonModalProps>(), {
   teleportTo: 'body',
   showClose: true,
+  closeOnESC: false,
   visible: false,
   presetBody: false,
   maskStyle: () => ({}),
@@ -78,9 +79,25 @@ watch(
   }
 );
 
+const modalBodyRef = useTemplateRef('modal-body');
+watch(modalBodyRef, (modalBodyRef) => {
+  // 模态框展示时，自动 focus 到 modal-body，可以通过键盘 ESC 关闭
+  if (modalBodyRef) {
+    modalBodyRef.focus();
+  }
+});
+
 function handleClose() {
   close();
   emit('close');
+}
+
+function handleKeydown(e: KeyboardEvent) {
+  console.log(e);
+  if (!props.closeOnESC) return;
+  if (e.key === 'Escape') {
+    handleClose();
+  }
 }
 
 defineSlots<{
@@ -100,7 +117,14 @@ defineExpose<CommonModalFunc>({
     <Transition name="show" @after-leave="afterClose">
       <div v-if="showModal" :style="{ ...props.maskStyle, 'z-index': zIndex }" class="modal-mask">
         <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
-        <div :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }" class="modal-body" :class="{ preset: presetBody }">
+        <div
+          ref="modal-body"
+          :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }"
+          class="modal-body"
+          :class="{ preset: presetBody }"
+          tabindex="-1"
+          @keydown="handleKeydown"
+        >
           <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
           <slot :close="close" :is-shown="showModal"></slot>
         </div>
@@ -144,6 +168,7 @@ defineExpose<CommonModalFunc>({
     justify-content: center;
     align-items: center;
     overflow: auto;
+    outline: none;
 
     &.preset {
       // 加个默认宽高

@@ -13,6 +13,7 @@ const radioValue = computed(() => props.value);
 const radioChecked = computed(() => (groupInject ? groupInject?.value === radioValue.value : innerChecked.value));
 
 const radioButtonRef = ref<HTMLElement | undefined>(undefined);
+const typeClassName = computed(() => `type-${groupInject?.type || 'highlight'}`);
 
 function handleClick() {
   groupInject?.setValue(radioValue.value || '');
@@ -29,7 +30,7 @@ watchEffect(() => {
   <label
     ref="radioButtonRef"
     class="cus-ratio-button"
-    :class="{ checked: radioChecked, [CheckedClassName]: radioChecked }"
+    :class="{ checked: radioChecked, [CheckedClassName]: radioChecked, [typeClassName]: !!typeClassName }"
     @click="handleClick"
   >
     <input :value="radioValue" :name="radioName" type="radio" />
@@ -49,6 +50,18 @@ watchEffect(() => {
   line-height: 1;
   transition: color 0.2s $ease-out-circ;
 
+  &.type-normal {
+    &.checked {
+      color: black;
+    }
+  }
+
+  &.type-highlight {
+    &.checked {
+      color: white;
+    }
+  }
+
   &:not(:last-child):before {
     content: '';
     position: absolute;
@@ -61,8 +74,6 @@ watchEffect(() => {
   }
 
   &.checked {
-    color: white;
-
     &:not(:last-child):before {
       opacity: 0;
     }

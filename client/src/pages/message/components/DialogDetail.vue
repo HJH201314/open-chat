@@ -12,8 +12,8 @@ import { useDataStore } from '@/store/useDataStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import { ArrowUp, Back, CollapseTextInput, Delete, Edit, Refresh } from '@icon-park/vue-next';
-import { until, useElementSize, useFocusWithin, useScroll } from '@vueuse/core';
-import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { until, useElementSize, useFocusWithin, useScroll, watchArray } from '@vueuse/core';
+import { computed, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { storeToRefs } from 'pinia';
 import { scrollToBottom } from '@/utils/element.ts';
@@ -51,6 +51,12 @@ const form = reactive({
 });
 
 const { session: sessionInfo, messages: messageList, syncMessages } = useSession(() => form.sessionId);
+watchArray(messageList, (newVal, oldVal) => {
+  // 消息列表变化时，滚动到底部（消息增加 1 时平滑，增加多条时立即）
+  if (newVal.length) {
+    scrollDialogListToBottom(newVal.length == oldVal.length + 1 ? 'smooth' : 'instant');
+  }
+});
 
 onMounted(() => {
   watch(
@@ -62,7 +68,7 @@ onMounted(() => {
         await until(panelHeight).toMatch((v) => v > 0);
         setTimeout(() => {
           // 滚动到列表底部并默认聚焦输入框
-          scrollDialogListToBottom();
+          scrollDialogListToBottom('instant');
         }, 50);
       }
     },
@@ -79,10 +85,16 @@ watch(
     if (!newSessionId) router.replace('/chat/message');
 
     if (flags?.needSync) {
+      if (!userStore.isLogin) {
+        ToastManager.danger('未登录，无法执行同步~');
+        return;
+      }
       messageSyncing.value = true;
-      syncMessages(newSessionId).then(() => {
-        messageSyncing.value = false;
-        dataStore.updateSessionFlags(newSessionId, { needSync: false });
+      syncMessages(newSessionId).then((res) => {
+        if (res) {
+          messageSyncing.value = false;
+          dataStore.updateSessionFlags(newSessionId, { needSync: false });
+        }
       });
     }
   },
@@ -130,10 +142,8 @@ watchEffect(() => {
   if (inputFocused.value) smallInput.value = false;
 });
 
-function scrollDialogListToBottom() {
-  nextTick(() => {
-    dialogListRef.value && scrollToBottom(dialogListRef.value, 'smooth');
-  });
+function scrollDialogListToBottom(behavior: ScrollBehavior = 'smooth') {
+  dialogListRef.value && scrollToBottom(dialogListRef.value, behavior);
 }
 
 function focusTextArea() {
@@ -190,13 +200,13 @@ async function handleSendMessage() {
     await startReceivingMsg(form.sessionId, form.inputValue, {
       onSaveUserMsg() {
         form.inputValue = '';
+        return;
       },
       onFinish() {
         clearReceivingMsg();
         if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
           dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
         }
-        scrollDialogListToBottom();
       },
     });
   } catch (e) {
@@ -204,15 +214,16 @@ async function handleSendMessage() {
       ToastManager.danger(e);
     }
   }
-  nextTick(() => {
-    scrollDialogListToBottom();
-  });
 }
 
 // 从服务器同步数据
 const messageSyncing = ref(false);
 
 async function handleSyncDialog() {
+  if (!userStore.isLogin) {
+    ToastManager.danger('请先登录~');
+    return;
+  }
   const currentSessionId = form.sessionId;
   const dialog = DialogManager.createDialog({
     title: '同步对话数据',
@@ -298,7 +309,7 @@ const { isSmallScreen } = useGlobal();
       <!--      <IconButton>-->
       <!--        <Share size="16" />-->
       <!--      </IconButton>-->
-      <IconButton type="secondary" style="flex-shrink: 0" @click="handleDeleteDialog">
+      <IconButton type="secondary" color="danger" style="flex-shrink: 0" @click="handleDeleteDialog">
         <Delete size="16" />
       </IconButton>
     </div>
@@ -308,18 +319,16 @@ const { isSmallScreen } = useGlobal();
     <div ref="dialog-list" class="dialog-detail-display-area">
       <!-- 对话列表固定中间 -->
       <div class="dialog-detail-dialogs">
-        <!--   列表底部定位（此列表为 column-reverse）   -->
-        <div id="bottom-line"></div>
         <!--   消息列表   -->
         <DialogMessage
-          v-if="thinkMsg || answerMsg"
+          v-show="thinkMsg || answerMsg"
           id="bot-typing-box"
           :html-message="answerMsg"
           :thinking="thinkMsg"
           role="bot"
         />
         <DialogMessage
-          v-if="!isReceivingMsg && !isEmptySession && form.inputValue"
+          v-show="!isReceivingMsg && !isEmptySession && form.inputValue"
           id="user-typing-box"
           :markdown-render="false"
           :message="form.inputValue"
@@ -336,8 +345,6 @@ const { isSmallScreen } = useGlobal();
           :time="item.time"
           @think-expand="handleMessageThinkExpand"
         />
-        <!--   列表顶部定位   -->
-        <div id="top-line"></div>
       </div>
       <!-- 输入面板 -->
       <div
@@ -460,7 +467,7 @@ $dialog-max-width: 54rem;
     max-width: $dialog-max-width;
     margin-inline: auto;
     padding-inline: 0.25rem;
-    padding-top: 2.6rem;
+    padding-top: 3rem;
     display: flex;
     flex-direction: column-reverse;
     margin-bottom: v-bind(panelPlaceholderPx);
@@ -505,7 +512,7 @@ $dialog-max-width: 54rem;
     &:focus-within {
       bottom: 0.35rem;
       border-radius: 0.75rem;
-      box-shadow: $box-shadow-deeper;
+      box-shadow: $next-box-shadow-medium;
     }
 
     &.hide {

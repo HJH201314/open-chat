@@ -59,6 +59,12 @@ $color-primary-darker: $color-teal-500;
 $color-secondary-lighter: $color-pink-200;
 $color-secondary: $color-pink-400;
 $color-secondary-darker: $color-pink-500;
+:root {
+  --color-primary: #{$color-primary};
+  --color-primary-darker: #{$color-primary-darker};
+  --color-secondary: #{$color-secondary};
+  --color-secondary-darker: #{$color-secondary-darker};
+}
 
 $linear-gradient-primary: linear-gradient(180deg, $color-teal-300, $color-primary-darker);
 $linear-gradient-primary-2: linear-gradient(150deg, $color-teal-300, $color-primary-darker);
@@ -75,3 +81,6 @@ $screen-sm: 768px;
 $box-shadow-shallower: 0px 0px 5px 0 rgba(0, 0, 0, 0.05);
 $box-shadow: 0px 0px 5px 0 rgba(0, 0, 0, 0.1);
 $box-shadow-deeper: 0px 0px 6px 0 rgba(0, 0, 0, 0.3);
+$next-box-shadow-small: 0px 0px 5px 0px rgba(0, 0, 0, .02), 0px 2px 10px 0px rgba(0, 0, 0, .06), 0px 0px 1px 0px rgba(0, 0, 0, .3);
+$next-box-shadow-medium: 0px 0px 15px 0px rgba(0, 0, 0, .03), 0px 2px 30px 0px rgba(0, 0, 0, .08), 0px 0px 1px 0px rgba(0, 0, 0, .3);
+$next-box-shadow-large: 0px 0px 30px 0px rgba(0, 0, 0, .04), 0px 30px 60px 0px rgba(0, 0, 0, .12), 0px 0px 1px 0px rgba(0, 0, 0, .3);

@@ -229,6 +229,7 @@ function showUserAgreement() {
 
 .login {
   width: 100%;
+  height: 100%; // 避免动画过渡时的布局问题
   padding: 0.25rem 1rem 1rem 1rem;
   position: relative;
 

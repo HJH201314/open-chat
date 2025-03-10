@@ -20,11 +20,11 @@ const myself = ref<HTMLElement>();
 const durationTimeMs = computed(() => {
   switch (props.duration) {
     case 'long':
-      return 1500;
+      return 2000;
     case 'normal':
-      return 1000;
+      return 1250;
     case 'short':
-      return 500;
+      return 750;
     case 'forever':
       return -1;
     default:

@@ -68,16 +68,18 @@ const secondaryColorForeground = computed(() => `color-mix(in srgb, ${color.valu
     }
   }
 
+  &-normal {
+    &:hover {
+      background: $color-grey-200;
+    }
+  }
+
   &-slot {
     position: absolute;
     display: inline-block;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
-
-  &:hover {
-    background: $color-grey-200;
   }
 }
 </style>

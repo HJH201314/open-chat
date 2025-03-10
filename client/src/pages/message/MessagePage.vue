@@ -96,6 +96,7 @@ const isEmptyTipAvailable = ref(true);
 @use '@/assets/animations';
 
 .message-page {
+  position: relative;
   height: 100%;
   display: flex;
   flex-direction: row;
@@ -116,8 +117,8 @@ const isEmptyTipAvailable = ref(true);
     height: 100%;
 
     &:not(&-absolute) {
-      width: 30%;
-      max-width: 20rem; // 防止右侧消息列表关闭时被挤压
+      flex-grow: 0;
+      width: clamp(13.375rem, 30%, 20rem);
     }
 
     // 在移动端使用absolute便于展示切换动画，否则会被挤压

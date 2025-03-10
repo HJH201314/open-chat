@@ -108,6 +108,7 @@ function handleClick() {
     }
 
     &:not(&.disabled):active {
+      transform: scale(0.99);
       background-color: v-bind(activeBackgroundColor);
       color: v-bind(activeFontColor);
       border: 1px solid v-bind(activeBackgroundColor);

@@ -23,6 +23,8 @@ export const showLoginDialog = async () => {
           ref: dialogRef,
           visible: show.value,
           showClose: false,
+          presetBody: true,
+          closeOnESC: true,
           onAfterClose() {
             app.unmount();
             mountDiv.remove();
