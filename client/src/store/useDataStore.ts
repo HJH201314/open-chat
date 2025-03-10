@@ -63,7 +63,7 @@ export const useDataStore = defineStore('data', () => {
           title: '',
           avatar: '',
           botRole: roleStore.roles?.find((r) => r[0] === role)?.[1] || '未知',
-          createAt: new Date().toLocaleString(),
+          createAt: Date.now(),
           withContext: true,
           provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
           model: settingStore.settings.defaultModel || modelStore.defaultModel?.modelName,
@@ -163,7 +163,7 @@ export const useDataStore = defineStore('data', () => {
               title: remoteSession.messages?.[0]?.content || '', // TODO: 目前以第一条消息为标题
               avatar: '',
               botRole: '未知',
-              createAt: new Date(remoteSession.created_at!).toLocaleString(),
+              createAt: new Date(remoteSession.created_at!).getTime(),
               withContext: !!remoteSession.enable_context,
               provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
               model: settingStore.settings.defaultModel || modelStore.defaultModel?.modelName,
@@ -253,6 +253,17 @@ export const useDataStore = defineStore('data', () => {
       }
     };
 
+    // 中断时保存数据
+    ctrl.signal.onabort = () => {
+      botMsgIndex &&
+        updateMessage(sessionId, botMsgIndex, {
+          content: rawData.msg,
+          reasoningContent: rawData.think,
+          htmlContent: renderedMsg.value,
+        });
+      callback?.onFinish?.(renderedMsg.value);
+    };
+
     return api.chat.completionStream(
       {
         provider: session.provider,
@@ -262,11 +273,11 @@ export const useDataStore = defineStore('data', () => {
         withContext: session.withContext,
       },
       ctrl.signal,
-      (event) => {
+      async (event) => {
         if (event.event === 'done') {
           // 当接收到服务器端的结束标记时，数据库保存消息
           botMsgIndex &&
-            updateMessage(sessionId, botMsgIndex, {
+            await updateMessage(sessionId, botMsgIndex, {
               content: rawData.msg,
               reasoningContent: rawData.think,
               htmlContent: renderedMsg.value,
@@ -283,7 +294,7 @@ export const useDataStore = defineStore('data', () => {
           console.log('[think]', event.data, `'${data}'`);
           rawData.think += data;
         } else if (event.event === 'cmd') {
-          handleCommand(new CommandParser(event.data, true).parseJSON());
+          await handleCommand(new CommandParser(event.data, true).parseJSON());
         }
       }
     );
@@ -333,7 +344,7 @@ export const useDataStore = defineStore('data', () => {
       timeout = setTimeout(() => {
         abortController.abort('no data for too long');
         ToastManager.danger('服务端超时');
-      }, 30000);
+      }, 60000);
     };
 
     const clearMessage = () => {
@@ -374,7 +385,7 @@ export const useDataStore = defineStore('data', () => {
         content: message,
         reasoningContent: thinking,
         htmlContent: htmlMessage,
-        time: new Date().toLocaleString(),
+        time: Date.now(),
       });
     } catch (err) {
       console.error(err);

@@ -367,13 +367,12 @@ const { isSmallScreen } = useGlobal();
         />
         <DialogMessage
           v-for="item in messageList"
-          :id="item.time"
           :key="item.id"
-          :html-message="getHtmlMessage(item)"
           :message="getContent(item)"
-          :role="item.sender"
           :thinking="getThinking(item)"
-          :time="item.time"
+          :html-message="getHtmlMessage(item)"
+          :role="item.sender"
+          :time="new Date(item.time).toLocaleString()"
           @think-expand="handleMessageThinkExpand"
         />
       </div>

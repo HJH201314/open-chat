@@ -74,7 +74,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
         ({
           sessionId,
           remoteId: v.id,
-          time: new Date(v.created_at!).toLocaleString(),
+          time: new Date(v.created_at!).getTime(),
           sender: v.role === 'user' ? 'user' : 'bot',
           type: 'text',
           content: v.content,

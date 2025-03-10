@@ -228,7 +228,7 @@ const { arrivedState } = useScroll(dialogListRef);
         </div>
         <div class="dialog-list-item-right">
           <div class="datetime">
-            {{ item.createAt ?? '' }}
+            {{ new Date(item.createAt ?? '').toLocaleString() }}
           </div>
         </div>
       </div>
