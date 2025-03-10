@@ -7,8 +7,7 @@ import type { MessageInfo, SessionInfo } from '@/types/data';
 import { CommandParser, useCommandParser } from '@/utils/command-parser';
 import { watchArray } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, shallowRef, watch } from 'vue';
-import { useUserStore } from '@/store/useUserStore.ts';
+import { reactive, ref, shallowRef, watch } from 'vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { from, useObservable } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
@@ -18,13 +17,14 @@ import { useModelStore } from '@/store/useModelStore.ts';
 import type { ApiSchemaSession } from '@/api/gen/data-contracts.ts';
 
 interface MessageCallback {
-  // 用户输入保存后的回调
-  onSaveUserMsg?: () => void;
+  // 预保存数据后的回调
+  onPreSaveMsg?: (userMsgId: number, botMsgId: number) => void;
   /**
    * 收到数据回调
    * @param renderedMsg 编译后的 html 完整数据
+   * @param originMsg 原始消息数据
    */
-  onMessage?: (renderedMsg: string) => void;
+  onMessage?: (renderedMsg: string, originMsg: string) => void;
   /**
    * 收到思考数据回调
    * @param thinkMsg 当前完整思考数据
@@ -35,9 +35,7 @@ interface MessageCallback {
 
 /* 数据相关 */
 export const useDataStore = defineStore('data', () => {
-  const sessions = useObservable(from(
-    liveQuery(async () => db.sessions.orderBy('createAt').reverse().toArray()),
-  ), {
+  const sessions = useObservable(from(liveQuery(async () => db.sessions.orderBy('createAt').reverse().toArray())), {
     initialValue: [] as SessionInfo[],
   });
 
@@ -156,25 +154,28 @@ export const useDataStore = defineStore('data', () => {
     }
     try {
       // 组装所有需要缓存的数据
-      const newSessions = await remoteSessions.reduce(async (sessionInfos, remoteSession) => {
-        const session = await db.sessions.where({ id: remoteSession.id }).last();
-        if (!session) {
-          (await sessionInfos).push({
-            id: remoteSession.id!,
-            title: remoteSession.messages?.[0]?.content || '', // TODO: 目前以第一条消息为标题
-            avatar: '',
-            botRole: '未知',
-            createAt: new Date(remoteSession.created_at!).toLocaleString(),
-            withContext: !!remoteSession.enable_context,
-            provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
-            model: settingStore.settings.defaultModel  || modelStore.defaultModel?.modelName,
-            flags: {
-              needSync: true,
-            },
-          })
-        }
-        return sessionInfos;
-      }, Promise.resolve([] as SessionInfo[]));
+      const newSessions = await remoteSessions.reduce(
+        async (sessionInfos, remoteSession) => {
+          const session = await db.sessions.where({ id: remoteSession.id }).last();
+          if (!session) {
+            (await sessionInfos).push({
+              id: remoteSession.id!,
+              title: remoteSession.messages?.[0]?.content || '', // TODO: 目前以第一条消息为标题
+              avatar: '',
+              botRole: '未知',
+              createAt: new Date(remoteSession.created_at!).toLocaleString(),
+              withContext: !!remoteSession.enable_context,
+              provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
+              model: settingStore.settings.defaultModel || modelStore.defaultModel?.modelName,
+              flags: {
+                needSync: true,
+              },
+            });
+          }
+          return sessionInfos;
+        },
+        Promise.resolve([] as SessionInfo[])
+      );
       // 写入 db
       db.sessions.bulkAdd(newSessions);
     } catch (_) {
@@ -191,7 +192,12 @@ export const useDataStore = defineStore('data', () => {
    * @param  callback 回调
    * @param abort AbortController
    */
-  const sendMessageText = async (sessionId: string, message: string, callback?: MessageCallback, abort?: AbortController) => {
+  const sendMessageText = async (
+    sessionId: string,
+    message: string,
+    callback?: MessageCallback,
+    abort?: AbortController
+  ) => {
     if (message == '') return Promise.reject();
     const ctrl = abort || new AbortController();
     const rawData = reactive({
@@ -203,11 +209,12 @@ export const useDataStore = defineStore('data', () => {
     const session = await getSessionInfo(sessionId);
     if (!session) return;
     if (!session.provider || !session.model) return Promise.reject('请先选择模型');
-    let msgIds: [string | undefined, string | undefined] = [undefined, undefined];
 
-    const userMsgIndex = await saveMessage(sessionId, message, 'user', 'text');
-    callback?.onSaveUserMsg?.();
-
+    let userMsgIndex: number | undefined = undefined;
+    let botMsgIndex: number | undefined = undefined;
+    userMsgIndex = await saveMessage(sessionId, message, 'user', 'text', message, '', undefined);
+    botMsgIndex = await saveMessage(sessionId, message, 'bot', 'text', '', '', undefined);
+    callback?.onPreSaveMsg?.(userMsgIndex, botMsgIndex);
     // 观测回答数据中的指令
     watchArray(commands, () => {
       const titleCmd = commandMap.value['title'];
@@ -218,24 +225,33 @@ export const useDataStore = defineStore('data', () => {
       }
     });
     // 观测回答的变化
-    watch(() => renderedMsg.value, (v, ov) => {
-      if (v == ov) return;
-      callback?.onMessage?.(v); // 消息接收回调
-    });
+    watch(
+      () => renderedMsg.value,
+      (v, ov) => {
+        if (v == ov) return;
+        callback?.onMessage?.(v, rawData.msg); // 消息接收回调
+      }
+    );
     // 观测思考的变化
-    watch(() => rawData.think, (v, ov) => {
-      if (v == ov) return;
-      callback?.onThinkMessage?.(v); // 消息接收回调
-    });
+    watch(
+      () => rawData.think,
+      (v, ov) => {
+        if (v == ov) return;
+        callback?.onThinkMessage?.(v); // 消息接收回调
+      }
+    );
 
     // 处理指令
-    const handleCommand = (cp: CommandParser) => {
+    const handleCommand = async (cp: CommandParser) => {
       const idCmd = cp.getCommandByName('ID');
       if (idCmd) {
-        msgIds = [idCmd.data['q'], idCmd.data['a']];
+        // 保存远程消息 ID
+        const msgIds = [idCmd.data['q'], idCmd.data['a']];
         rawData.msg = rawData.msg.replace(idCmd.raw, '');
+        await updateMessage(sessionId, userMsgIndex, { remoteId: msgIds[0] });
+        await updateMessage(sessionId, botMsgIndex, { remoteId: msgIds[1] });
       }
-    }
+    };
 
     return api.chat.completionStream(
       {
@@ -248,9 +264,13 @@ export const useDataStore = defineStore('data', () => {
       ctrl.signal,
       (event) => {
         if (event.event === 'done') {
-          // 当接收到服务器端的结束标记时，保存消息
-          saveMessage(sessionId, rawData.msg, 'bot', 'text', renderedMsg.value, rawData.think, msgIds[1]); // 保存消息
-          updateMessage(sessionId, userMsgIndex, { remoteId: msgIds[0] });
+          // 当接收到服务器端的结束标记时，数据库保存消息
+          botMsgIndex &&
+            updateMessage(sessionId, botMsgIndex, {
+              content: rawData.msg,
+              reasoningContent: rawData.think,
+              htmlContent: renderedMsg.value,
+            });
           callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
         } else if (event.event === 'msg') {
           let data = JSON.parse(event.data)?.content;
@@ -265,7 +285,7 @@ export const useDataStore = defineStore('data', () => {
         } else if (event.event === 'cmd') {
           handleCommand(new CommandParser(event.data, true).parseJSON());
         }
-      },
+      }
     );
   };
 
@@ -273,25 +293,35 @@ export const useDataStore = defineStore('data', () => {
     const thinkMessage = shallowRef('');
     const answerMessage = shallowRef('');
     const isStreaming = shallowRef(false);
+    const msgId = shallowRef<number>();
     let abortController = new AbortController();
     let timeout: number | undefined;
 
     const startStreaming = async (sessionId: string, message: string, customReceiver?: MessageCallback) => {
       isStreaming.value = true;
       abortController = new AbortController();
-      return sendMessageText(sessionId, message, {
-        ...customReceiver || {},
-        onMessage(msg) {
-          answerMessage.value = msg;
-          customReceiver?.onMessage?.(msg);
-          startTimeout();
+      return sendMessageText(
+        sessionId,
+        message,
+        {
+          ...(customReceiver || {}),
+          onPreSaveMsg(userMsgId, botMsgId) {
+            msgId.value = botMsgId
+            customReceiver?.onPreSaveMsg?.(userMsgId, botMsgId);
+          },
+          onMessage(msg, originMsg) {
+            answerMessage.value = msg;
+            customReceiver?.onMessage?.(msg, originMsg);
+            startTimeout();
+          },
+          onThinkMessage(msg) {
+            thinkMessage.value = msg;
+            customReceiver?.onThinkMessage?.(msg);
+            startTimeout();
+          },
         },
-        onThinkMessage(msg) {
-          thinkMessage.value = msg;
-          customReceiver?.onThinkMessage?.(msg);
-          startTimeout();
-        },
-      }, abortController).finally(() => {
+        abortController
+      ).finally(() => {
         isStreaming.value = false;
         clearTimeout(timeout);
         clearMessage();
@@ -309,10 +339,12 @@ export const useDataStore = defineStore('data', () => {
     const clearMessage = () => {
       answerMessage.value = '';
       thinkMessage.value = '';
+      msgId.value = undefined;
     };
 
     return {
       isStreaming,
+      msgId,
       think: thinkMessage,
       answer: answerMessage,
       start: startStreaming,
@@ -331,7 +363,7 @@ export const useDataStore = defineStore('data', () => {
     type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other',
     htmlMessage?: string,
     thinking?: string,
-    remoteId?: string,
+    remoteId?: string
   ): Promise<number> {
     try {
       return db.messages.add({
@@ -355,11 +387,13 @@ export const useDataStore = defineStore('data', () => {
    */
   async function updateMessage(sessionId: string, index: number, updateObj: Partial<MessageInfo>): Promise<boolean> {
     try {
-      return await db.messages.where({ sessionId, id: index }).modify((obj) => {
-        Object.entries(updateObj).forEach(([key, value]) => {
-          obj[key] = value;
-        });
-      }) > 0;
+      return (
+        (await db.messages.where({ sessionId, id: index }).modify((obj) => {
+          Object.entries(updateObj).forEach(([key, value]) => {
+            obj[key] = value;
+          });
+        })) > 0
+      );
     } catch (_) {
       return false;
     }

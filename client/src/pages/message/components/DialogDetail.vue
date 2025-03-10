@@ -11,7 +11,7 @@ import DialogMessage from '@/pages/message/components/DialogMessage.vue';
 import { useDataStore } from '@/store/useDataStore';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { ArrowUp, Back, CollapseTextInput, Delete, Edit, Refresh } from '@icon-park/vue-next';
+import { ArrowUp, Back, CollapseTextInput, Delete, DoubleDown, Edit, Refresh } from '@icon-park/vue-next';
 import { until, useElementSize, useFocusWithin, useScroll, watchArray } from '@vueuse/core';
 import { computed, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
@@ -22,6 +22,7 @@ import ToastManager from '@/components/toast/ToastManager.ts';
 import router from '@/plugins/router.ts';
 import CusTextarea from '@/components/textarea/CusTextarea.vue';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
+import type { MessageInfo } from '@/types/data.ts';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -134,9 +135,16 @@ const textAreaRef = useTemplateRef('input-textarea');
 const { focused: inputFocused } = useFocusWithin(inputPanelRef);
 const { height: panelHeight } = useElementSize(inputPanelRef);
 const panelPlaceholderPx = computed(() => `${panelHeight.value + 8}px`);
+const fixDialogToBottomPx = computed(() => `${panelHeight.value + 12}px`);
 const dialogDetailRef = useTemplateRef('dialog-detail');
 const dialogListRef = useTemplateRef('dialog-list');
-const { arrivedState } = useScroll(dialogListRef);
+const { arrivedState, directions: scrollDirections } = useScroll(dialogListRef, {
+  onScroll() {
+    if (scrollDirections.top) {
+      dialogFixedToBottom.value = false;
+    }
+  },
+});
 useAutoScrollbar(dialogListRef);
 watchEffect(() => {
   if (inputFocused.value) smallInput.value = false;
@@ -177,6 +185,7 @@ function handleModelSelect(selectPath: string[]) {
 }
 
 const {
+  msgId: answerMsgId,
   start: startReceivingMsg,
   stop: stopReceivingMsg,
   answer: answerMsg,
@@ -198,9 +207,16 @@ async function handleSendMessage() {
   // 发送消息
   try {
     await startReceivingMsg(form.sessionId, form.inputValue, {
-      onSaveUserMsg() {
+      onPreSaveMsg() {
         form.inputValue = '';
+        dialogFixedToBottom.value = true;
         return;
+      },
+      onThinkMessage() {
+        dialogFixedToBottom.value && scrollDialogListToBottom('smooth');
+      },
+      onMessage() {
+        dialogFixedToBottom.value && scrollDialogListToBottom('smooth');
       },
       onFinish() {
         clearReceivingMsg();
@@ -214,6 +230,21 @@ async function handleSendMessage() {
       ToastManager.danger(e);
     }
   }
+}
+
+function getHtmlMessage(item: MessageInfo) {
+  if (item.id == answerMsgId.value) return answerMsg.value;
+  return item.htmlContent || '';
+}
+
+function getContent(item: MessageInfo) {
+  if (item.id == answerMsgId.value) return answerMsg.value;
+  return item.content || '';
+}
+
+function getThinking(item: MessageInfo) {
+  if (item.id == answerMsgId.value) return thinkMsg.value;
+  return item.reasoningContent || '';
 }
 
 // 从服务器同步数据
@@ -282,6 +313,13 @@ function handleMessageThinkExpand(expand: boolean) {
   }
 }
 
+const dialogFixedToBottom = ref(false);
+
+function handleFixDialogToBottom() {
+  dialogFixedToBottom.value = true;
+  scrollDialogListToBottom('smooth');
+}
+
 const { isSmallScreen } = useGlobal();
 </script>
 
@@ -321,13 +359,6 @@ const { isSmallScreen } = useGlobal();
       <div class="dialog-detail-dialogs">
         <!--   消息列表   -->
         <DialogMessage
-          v-show="thinkMsg || answerMsg"
-          id="bot-typing-box"
-          :html-message="answerMsg"
-          :thinking="thinkMsg"
-          role="bot"
-        />
-        <DialogMessage
           v-show="!isReceivingMsg && !isEmptySession && form.inputValue"
           id="user-typing-box"
           :markdown-render="false"
@@ -338,14 +369,22 @@ const { isSmallScreen } = useGlobal();
           v-for="item in messageList"
           :id="item.time"
           :key="item.id"
-          :html-message="item.htmlContent"
-          :message="item.content"
+          :html-message="getHtmlMessage(item)"
+          :message="getContent(item)"
           :role="item.sender"
-          :thinking="item.reasoningContent"
+          :thinking="getThinking(item)"
           :time="item.time"
           @think-expand="handleMessageThinkExpand"
         />
       </div>
+      <IconButton
+        v-if="!dialogFixedToBottom && !arrivedState.bottom"
+        class="dialog-detail-scroll-to-bottom"
+        type="secondary"
+        @click="handleFixDialogToBottom"
+      >
+        <DoubleDown size="16" />
+      </IconButton>
       <!-- 输入面板 -->
       <div
         ref="input-panel"
@@ -490,6 +529,13 @@ $dialog-max-width: 54rem;
     text-align: center;
     top: calc(50%);
     transform: translateY(calc(-50% - 2.5em));
+  }
+
+  &-scroll-to-bottom {
+    position: absolute;
+    left: 50%;
+    bottom: v-bind(fixDialogToBottomPx);
+    transform: scale(0.9) translateX(-50%);
   }
 
   &-inputs {
