@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 
 type CusSpinProps = {
-  show?: boolean;
+  show?: boolean; // 使用默认旋转组件时，决定是否展示；使用插槽时，决定是否执行旋转
   size?: string; // 大小，需要单位
   thickness?: string; // 厚度，需要单位
   color?: string | string[];

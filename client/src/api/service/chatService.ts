@@ -24,7 +24,7 @@ export const deleteSession = (sessionId: string) =>
 export const completionStream = (
   options: API.ChatCompletionOption,
   signal: AbortSignal,
-  onMessage: (e: EventSourceMessage) => void
+  onMessage: (e: EventSourceMessage) => void,
 ) => {
   const { sessionId, withContext, msg, provider, modelName, systemPrompt } = options;
   return fetchEventSource(`${SERVER_NEXT_API_URL}/chat/completion/stream/${sessionId}`, {

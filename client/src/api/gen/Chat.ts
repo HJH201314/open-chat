@@ -15,7 +15,9 @@ import type {
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPagingResponseSchemaMessage,
   ApiEntityCommonResponseEntityPagingResponseSchemaSession,
+  ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseString,
+  ApiSchemaSession,
 } from './data-contracts';
 import type { HttpClient, RequestParams } from './http-client';
 import { ContentType } from './http-client';
@@ -72,9 +74,11 @@ export class Chat<SecurityDataType = unknown> {
   messageListGet = (
     sessionId: string,
     query: {
+      end_time?: number;
       page_num: number;
       page_size?: number;
       sort_expr?: string;
+      start_time?: number;
     },
     params: RequestParams = {},
   ) =>
@@ -104,6 +108,23 @@ export class Chat<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description 获取会话
+   *
+   * @tags Session
+   * @name SessionGet
+   * @summary 获取会话
+   * @request GET:/chat/session/{session_id}
+   * @response `200` `ApiEntityCommonResponseSchemaSession` 返回数据
+   */
+  sessionGet = (sessionId: string, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaSession, any>({
+      path: `/chat/session/${sessionId}`,
+      method: 'GET',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
    * @description 获取会话列表
    *
    * @tags Session
@@ -114,9 +135,11 @@ export class Chat<SecurityDataType = unknown> {
    */
   sessionListGet = (
     query: {
+      end_time?: number;
       page_num: number;
       page_size?: number;
       sort_expr?: string;
+      start_time?: number;
     },
     params: RequestParams = {},
   ) =>
@@ -141,6 +164,24 @@ export class Chat<SecurityDataType = unknown> {
     this.http.request<ApiEntityCommonResponseString, any>({
       path: `/chat/session/new`,
       method: 'POST',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 更新会话
+   *
+   * @tags Session
+   * @name SessionUpdatePost
+   * @summary 更新会话
+   * @request POST:/chat/session/update/{session_id}
+   * @response `200` `ApiEntityCommonResponseBool` OK
+   */
+  sessionUpdatePost = (sessionId: string, req: ApiSchemaSession, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/chat/session/update/${sessionId}`,
+      method: 'POST',
+      body: req,
       type: ContentType.Json,
       format: 'json',
       ...params,

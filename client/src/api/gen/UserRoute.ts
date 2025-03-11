@@ -34,6 +34,21 @@ export namespace User {
   }
 
   /**
+   * @description 用户登出
+   * @tags User
+   * @name LogoutPost
+   * @summary 用户登出
+   * @request POST:/user/logout
+   */
+  export namespace LogoutPost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = any;
+  }
+
+  /**
    * @description 检测客户端登录态
    * @tags User
    * @name PingPost

@@ -26,7 +26,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
 
     // 订阅 message
     useSubscription(liveQuery(async () => {
-      return db.messages.where({ sessionId: newSessionId }).reverse().toArray();
+      return db.messages.where({ sessionId: newSessionId }).reverse().sortBy('time');
     }).subscribe(toObserver(messages)));
   });
 
@@ -78,11 +78,11 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
           sender: v.role === 'user' ? 'user' : 'bot',
           type: 'text',
           content: v.content,
-          reasoningContent: v.reasoning_content?.replaceAll('\\n', '\n'),
+          reasoningContent: JSON.parse(`"${v.reasoning_content}"`),
           htmlContent:
             v.role == 'assistant'
-              ? renderMarkdown(v.content?.replaceAll('\\n', '\n'))
-              : v.content?.replaceAll('\\n', '\n'),
+              ? renderMarkdown(v.content)
+              : v.content,
         }) as MessageInfo
     );
     try {

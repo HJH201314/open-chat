@@ -83,6 +83,15 @@ export interface ApiEntityCommonResponseSchemaProvider {
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseSchemaSession {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaSession;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseSchemaUser {
   /** 代码 */
   code?: number;
@@ -123,13 +132,17 @@ export interface ApiSchemaAPIKey {
 export interface ApiSchemaMessage {
   content?: string;
   created_at?: string;
+  /** 默认结构 */
   id?: number;
+  /** 组装结构 */
+  model?: ApiSchemaModel;
   /** 回复所使用的模型 */
   model_id?: number;
   reasoning_content?: string;
   /** user/assistant/system */
   role?: string;
   session_id?: string;
+  token_usage?: number;
 }
 
 export interface ApiSchemaModel {
@@ -181,12 +194,6 @@ export interface ApiSchemaModelConfig {
   top_p?: number;
 }
 
-export interface ApiSchemaModelParams {
-  max_tokens?: number;
-  schema?: string;
-  temperature?: number;
-}
-
 export interface ApiSchemaPermission {
   created_at?: string;
   /** 权限描述 */
@@ -233,14 +240,14 @@ export interface ApiSchemaSession {
   created_at?: string;
   /** 上下文开关 */
   enable_context?: boolean;
-  /** 原始数据 */
+  /** 原始数据g */
   id?: string;
   last_active?: string;
   /** 组装数据 */
   messages?: ApiSchemaMessage[];
-  /** 模型参数 */
-  model_params?: ApiSchemaModelParams;
-  user_id?: number;
+  name?: string;
+  /** 系统提示词 */
+  system_prompt?: string;
 }
 
 export interface ApiSchemaUser {

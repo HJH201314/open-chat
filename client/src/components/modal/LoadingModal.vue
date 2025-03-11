@@ -2,17 +2,16 @@
 import CommonModal from '@/components/modal/CommonModal.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import type { CommonModalProps } from '@/components/modal/types.ts';
-import { computed } from 'vue';
 
 const props = withDefaults(
   defineProps<
     CommonModalProps & {
-      placeholder?: string;
+      tip?: string;
       color?: string;
     }
   >(),
   {
-    placeholder: '加载中...',
+    tip: '加载中...',
     color: '#000',
   }
 );
@@ -34,7 +33,7 @@ defineOptions({
       <div class="loading-modal-spin">
         <CusSpin :color="color" size="2rem" thickness="3px" />
       </div>
-      <div class="loading-modal-text" :style="{ 'color': color }">{{ placeholder }}</div>
+      <div class="loading-modal-text" :style="{ color: color }">{{ tip }}</div>
     </div>
   </CommonModal>
 </template>

@@ -1,13 +1,13 @@
 import api from '@/api';
 import useMarkdownIt from '@/commands/useMarkdownIt';
-import showToast from '@/components/toast/toast';
-import useRoleStore from '@/store/useRoleStore';
-import { useSettingStore } from '@/store/useSettingStore';
-import type { MessageInfo, SessionInfo } from '@/types/data';
+import showToast from '@/components/toast/toast.ts';
+import useRoleStore from '@/store/useRoleStore.ts';
+import { useSettingStore } from '@/store/useSettingStore.ts';
+import type { MessageInfo, SessionInfo } from '@/types/data.ts';
 import { CommandParser, useCommandParser } from '@/utils/command-parser';
-import { watchArray } from '@vueuse/core';
+import { watchArray, watchThrottled } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, ref, shallowRef, watch } from 'vue';
+import { reactive, shallowRef } from 'vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { from, useObservable } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
@@ -33,7 +33,7 @@ interface MessageCallback {
   onFinish?: (renderedMsg: string) => void;
 }
 
-/* 数据相关 */
+/* 数据相关 TODO: 迁移与单个 session 相关的操作到 useSession */
 export const useDataStore = defineStore('data', () => {
   const sessions = useObservable(from(liveQuery(async () => db.sessions.orderBy('createAt').reverse().toArray())), {
     initialValue: [] as SessionInfo[],
@@ -77,10 +77,28 @@ export const useDataStore = defineStore('data', () => {
     return '';
   }
 
-  function editSessionTitle(sessionId: string, newTitle: string) {
-    db.sessions.where({ id: sessionId }).modify((session) => {
+  async function editSessionTitle(sessionId: string, newTitle: string) {
+    // 本地修改
+    await db.sessions.where({ id: sessionId }).modify((session) => {
       session.title = newTitle;
     });
+    // 远程修改
+    try {
+      await genApi.Chat.sessionUpdatePost(sessionId, { name: newTitle });
+    } catch (_) {
+      ToastManager.danger('未能成功修改服务器数据');
+    }
+  }
+
+  async function editSessionSystemPrompt(sessionId: string, newSystemPrompt: string) {
+    // 远程修改
+    try {
+      const res = await genApi.Chat.sessionUpdatePost(sessionId, { system_prompt: newSystemPrompt });
+      return !!res.data.data;
+    } catch (_) {
+      ToastManager.danger('修改失败，请稍后再试~');
+      return false;
+    }
   }
 
   function toggleSessionContext(sessionId: string, isOpen: boolean) {
@@ -160,7 +178,8 @@ export const useDataStore = defineStore('data', () => {
           if (!session) {
             (await sessionInfos).push({
               id: remoteSession.id!,
-              title: remoteSession.messages?.[0]?.content || '', // TODO: 目前以第一条消息为标题
+              // 若有，标题使用远程的名称，否则使用第一条消息的内容
+              title: remoteSession.name || remoteSession.messages?.[0]?.content || '',
               avatar: '',
               botRole: '未知',
               createAt: new Date(remoteSession.created_at!).getTime(),
@@ -225,20 +244,22 @@ export const useDataStore = defineStore('data', () => {
       }
     });
     // 观测回答的变化
-    watch(
+    watchThrottled(
       () => renderedMsg.value,
       (v, ov) => {
         if (v == ov) return;
         callback?.onMessage?.(v, rawData.msg); // 消息接收回调
-      }
+      },
+      { throttle: 150 }
     );
     // 观测思考的变化
-    watch(
+    watchThrottled(
       () => rawData.think,
       (v, ov) => {
         if (v == ov) return;
-        callback?.onThinkMessage?.(v); // 消息接收回调
-      }
+        callback?.onThinkMessage?.(JSON.parse(`"${v}"`)); // 消息接收回调
+      },
+      { throttle: 150 }
     );
 
     // 处理指令
@@ -253,18 +274,22 @@ export const useDataStore = defineStore('data', () => {
       }
     };
 
-    // 中断时保存数据
-    ctrl.signal.onabort = () => {
+    const saveBotMessage = async () => {
       botMsgIndex &&
-        updateMessage(sessionId, botMsgIndex, {
+        (await updateMessage(sessionId, botMsgIndex, {
           content: rawData.msg,
-          reasoningContent: rawData.think,
+          reasoningContent: JSON.parse(`"${rawData.think}"`),
           htmlContent: renderedMsg.value,
-        });
-      callback?.onFinish?.(renderedMsg.value);
+        }));
     };
 
-    return api.chat.completionStream(
+    abort?.signal.addEventListener('abort', async () => {
+      // 中断时保存消息
+      await saveBotMessage();
+      callback?.onFinish?.(renderedMsg.value);
+    });
+
+    await api.chat.completionStream(
       {
         provider: session.provider,
         modelName: session.model,
@@ -276,27 +301,20 @@ export const useDataStore = defineStore('data', () => {
       async (event) => {
         if (event.event === 'done') {
           // 当接收到服务器端的结束标记时，数据库保存消息
-          botMsgIndex &&
-            await updateMessage(sessionId, botMsgIndex, {
-              content: rawData.msg,
-              reasoningContent: rawData.think,
-              htmlContent: renderedMsg.value,
-            });
+          await saveBotMessage();
           callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
         } else if (event.event === 'msg') {
-          let data = JSON.parse(event.data)?.content;
-          data = data.replaceAll('\\n', '\n');
+          const data = JSON.parse(event.data)?.content;
           console.log('[msg]', event.data, `'${data}'`);
           rawData.msg += data; // 记录已接收的消息
         } else if (event.event === 'think') {
-          let data = JSON.parse(event.data)?.content;
-          data = data.replaceAll('\\n', '\n');
+          const data = JSON.parse(event.data)?.content;
           console.log('[think]', event.data, `'${data}'`);
           rawData.think += data;
         } else if (event.event === 'cmd') {
           await handleCommand(new CommandParser(event.data, true).parseJSON());
         }
-      }
+      },
     );
   };
 
@@ -317,7 +335,7 @@ export const useDataStore = defineStore('data', () => {
         {
           ...(customReceiver || {}),
           onPreSaveMsg(userMsgId, botMsgId) {
-            msgId.value = botMsgId
+            msgId.value = botMsgId;
             customReceiver?.onPreSaveMsg?.(userMsgId, botMsgId);
           },
           onMessage(msg, originMsg) {
@@ -359,7 +377,7 @@ export const useDataStore = defineStore('data', () => {
       think: thinkMessage,
       answer: answerMessage,
       start: startStreaming,
-      stop: () => abortController.abort(),
+      stop: () => abortController.abort('user stop'),
       clear: clearMessage,
     };
   };
@@ -445,6 +463,7 @@ export const useDataStore = defineStore('data', () => {
     updateSessionFlags,
     addDialog: addSession,
     editDialogTitle: editSessionTitle,
+    editDialogSystemPrompt: editSessionSystemPrompt,
     toggleDialogContext: toggleSessionContext,
     changeDialogModel: changeSessionModel,
     delDialog: delSession,

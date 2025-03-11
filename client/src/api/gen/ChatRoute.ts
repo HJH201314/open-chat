@@ -15,7 +15,9 @@ import type {
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPagingResponseSchemaMessage,
   ApiEntityCommonResponseEntityPagingResponseSchemaSession,
+  ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseString,
+  ApiSchemaSession,
 } from './data-contracts';
 
 export namespace Chat {
@@ -67,9 +69,11 @@ export namespace Chat {
       sessionId: string;
     };
     export type RequestQuery = {
+      end_time?: number;
       page_num: number;
       page_size?: number;
       sort_expr?: string;
+      start_time?: number;
     };
     export type RequestBody = never;
     export type RequestHeaders = {};
@@ -96,6 +100,25 @@ export namespace Chat {
   }
 
   /**
+   * @description 获取会话
+   * @tags Session
+   * @name SessionGet
+   * @summary 获取会话
+   * @request GET:/chat/session/{session_id}
+   * @response `200` `ApiEntityCommonResponseSchemaSession` 返回数据
+   */
+  export namespace SessionGet {
+    export type RequestParams = {
+      /** 会话 ID */
+      sessionId: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaSession;
+  }
+
+  /**
    * @description 获取会话列表
    * @tags Session
    * @name SessionListGet
@@ -106,9 +129,11 @@ export namespace Chat {
   export namespace SessionListGet {
     export type RequestParams = {};
     export type RequestQuery = {
+      end_time?: number;
       page_num: number;
       page_size?: number;
       sort_expr?: string;
+      start_time?: number;
     };
     export type RequestBody = never;
     export type RequestHeaders = {};
@@ -129,5 +154,24 @@ export namespace Chat {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseString;
+  }
+
+  /**
+   * @description 更新会话
+   * @tags Session
+   * @name SessionUpdatePost
+   * @summary 更新会话
+   * @request POST:/chat/session/update/{session_id}
+   * @response `200` `ApiEntityCommonResponseBool` OK
+   */
+  export namespace SessionUpdatePost {
+    export type RequestParams = {
+      /** 会话 ID */
+      sessionId: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiSchemaSession;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
   }
 }

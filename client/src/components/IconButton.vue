@@ -56,6 +56,7 @@ const secondaryColorForeground = computed(() => `color-mix(in srgb, ${color.valu
   background: $color-grey-50;
 
   &-secondary {
+    box-shadow: $box-shadow-shallower;
     color: v-bind(secondaryColorForeground);
     background: v-bind(secondaryColorBackground);
 

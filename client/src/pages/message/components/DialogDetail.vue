@@ -8,10 +8,10 @@ import IconButton from '@/components/IconButton.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import DialogMessage from '@/pages/message/components/DialogMessage.vue';
-import { useDataStore } from '@/store/useDataStore';
+import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { ArrowUp, Back, CollapseTextInput, Delete, DoubleDown, Edit, Refresh } from '@icon-park/vue-next';
+import { ArrowUp, Back, CollapseTextInput, Control, Delete, DoubleDown, Edit, Refresh } from '@icon-park/vue-next';
 import { until, useElementSize, useFocusWithin, useScroll, watchArray } from '@vueuse/core';
 import { computed, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
@@ -23,6 +23,8 @@ import router from '@/plugins/router.ts';
 import CusTextarea from '@/components/textarea/CusTextarea.vue';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import type { MessageInfo } from '@/types/data.ts';
+import genApi from '@/api/gen-api.ts';
+import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -256,7 +258,14 @@ async function handleSyncDialog() {
     return;
   }
   const currentSessionId = form.sessionId;
-  const dialog = DialogManager.createDialog({
+  // 消息列表为空，直接进行同步
+  if (!messageList.value.length) {
+    messageSyncing.value = true;
+    await syncMessages(currentSessionId);
+    messageSyncing.value = false;
+    return;
+  }
+  DialogManager.createDialog({
     title: '同步对话数据',
     content:
       '此操作将会将本地缓存数据与服务器数据同步：<br/>&nbsp;&nbsp;1. 数据以服务器数据为准<br />&nbsp;&nbsp;2. 重新渲染并缓存消息<br/>',
@@ -265,9 +274,6 @@ async function handleSyncDialog() {
       await syncMessages(currentSessionId, controller);
     },
   });
-  if (!messageList.value.length) {
-    await dialog.confirm();
-  }
 }
 
 function handleEditDialog() {
@@ -286,6 +292,32 @@ function handleEditDialog() {
       dataStore.editDialogTitle(form.sessionId, res.value);
     }
   });
+}
+
+async function handleEditSystemPrompt() {
+  // 请求远程 system_prompt
+  try {
+    const remoteSessionInfo = await genApi.Chat.sessionGet(form.sessionId);
+    const res = await DialogManager.inputDialog(
+      {
+        title: '编辑系统提示词',
+        subtitle: '注意：部分模型可能对系统提示词不敏感',
+        content: '修改系统提示词为',
+      },
+      {
+        placeholder: '系统提示词',
+        value: remoteSessionInfo.data.data?.system_prompt || '',
+      }
+    );
+    if (res.status && res.value) {
+      // 确认修改
+      const editResp = await dataStore.editDialogSystemPrompt(form.sessionId, res.value);
+      if (editResp) ToastManager.success('修改成功！');
+      else ToastManager.danger('修改失败！');
+    }
+  } catch (_) {
+    ToastManager.danger('请求失败，请稍后重试！');
+  }
 }
 
 function handleDeleteDialog() {
@@ -325,7 +357,7 @@ const { isSmallScreen } = useGlobal();
 
 <template>
   <div ref="dialog-detail" :class="{ small: isSmallScreen }" class="dialog-detail">
-    <LoadingModal :visible="messageSyncing" :teleport-to="dialogDetailRef" color="var(--color-primary)"></LoadingModal>
+    <LoadingModal :visible="messageSyncing" :teleport-to="dialogDetailRef" color="var(--color-primary)" tip="努力加载中..."></LoadingModal>
     <div :class="{ shadow: !arrivedState.top }" class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton type="secondary" style="flex-shrink: 0" @click="$emit('back')">
@@ -336,13 +368,18 @@ const { isSmallScreen } = useGlobal();
         </span>
         <span class="dialog-detail-actions-subtitle"> {{ messageList.length }} 条消息 </span>
       </div>
-      <IconButton type="secondary" style="flex-shrink: 0" @click="handleSyncDialog">
-        <cus-spin :show="messageSyncing">
-          <Refresh size="16" />
-        </cus-spin>
-      </IconButton>
-      <IconButton type="secondary" style="flex-shrink: 0" @click="handleEditDialog">
+      <CusTooltip text="刷新对话列表" position="bottom">
+        <IconButton type="secondary" color="warning" style="flex-shrink: 0" @click="handleSyncDialog">
+          <cus-spin :show="messageSyncing">
+            <Refresh size="16" />
+          </cus-spin>
+        </IconButton>
+      </CusTooltip>
+      <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="handleEditDialog">
         <Edit size="16" />
+      </IconButton>
+      <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="handleEditSystemPrompt">
+        <Control size="16" />
       </IconButton>
       <!--      <IconButton>-->
       <!--        <Share size="16" />-->
@@ -377,7 +414,7 @@ const { isSmallScreen } = useGlobal();
         />
       </div>
       <IconButton
-        v-if="!dialogFixedToBottom && !arrivedState.bottom"
+        v-if="!dialogFixedToBottom && !arrivedState.bottom && messageList.length"
         class="dialog-detail-scroll-to-bottom"
         type="secondary"
         @click="handleFixDialogToBottom"

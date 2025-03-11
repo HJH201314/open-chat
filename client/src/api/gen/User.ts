@@ -45,6 +45,21 @@ export class User<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description 用户登出
+   *
+   * @tags User
+   * @name LogoutPost
+   * @summary 用户登出
+   * @request POST:/user/logout
+   */
+  logoutPost = (params: RequestParams = {}) =>
+    this.http.request<any, any>({
+      path: `/user/logout`,
+      method: 'POST',
+      type: ContentType.Json,
+      ...params,
+    });
+  /**
    * @description 检测客户端登录态
    *
    * @tags User

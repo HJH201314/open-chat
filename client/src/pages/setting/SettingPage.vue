@@ -13,7 +13,7 @@ import { computed, ref, toValue, watch } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { addChildrenDropdownOptions } from '@/components/dropdown/utils.ts';
 import { storeToRefs } from 'pinia';
-import { useDataStore } from '@/store/useDataStore.ts';
+import { useDataStore } from '@/store/data/useDataStore.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 
 const { isModal = false } = defineProps<{

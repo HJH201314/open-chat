@@ -3,7 +3,7 @@ import DiliButton from '@/components/button/DiliButton.vue';
 import CommonModal from '@/components/modal/CommonModal.vue';
 import Toggle from '@/components/toggle/CusToggle.vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
-import { useDataStore } from '@/store/useDataStore.ts';
+import { useDataStore } from '@/store/data/useDataStore.ts';
 import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
@@ -311,6 +311,7 @@ const { arrivedState } = useScroll(dialogListRef);
 
   &-add {
     box-sizing: border-box;
+    box-shadow: $box-shadow-shallower;
     cursor: pointer;
     flex: 1;
     height: 2rem;
@@ -346,6 +347,7 @@ const { arrivedState } = useScroll(dialogListRef);
     cursor: pointer;
     transition: color, background-color 0.2s $ease-out-circ;
     opacity: 0.6;
+    box-shadow: $box-shadow-shallower;
 
     &:hover {
       background-color: color.scale($color-primary, $alpha: -85%);
