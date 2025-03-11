@@ -320,17 +320,17 @@ const { arrivedState } = useScroll(dialogListRef);
     justify-content: center;
     gap: 0.5rem;
     color: $color-primary;
-    background-color: color.scale($color-primary, $alpha: -90%);
+    background-color: color.scale($color-primary, $alpha: -85%);
     border-radius: 0.5rem;
     transition: color, background-color 0.2s $ease-out-circ;
 
     &:hover {
-      background-color: color.scale($color-primary, $alpha: -85%);
+      background-color: color.scale($color-primary, $alpha: -80%);
       color: color.scale($color-primary, $blackness: 5%);
     }
 
     &:active {
-      background-color: color.scale($color-primary, $alpha: -80%);
+      background-color: color.scale($color-primary, $alpha: -75%);
       color: color.scale($color-primary, $blackness: 10%);
     }
   }
@@ -339,7 +339,7 @@ const { arrivedState } = useScroll(dialogListRef);
     height: 2rem;
     width: 2rem;
     color: color.scale($color-primary, $alpha: -5%);
-    background-color: color.scale($color-primary, $alpha: -90%);
+    background-color: color.scale($color-primary, $alpha: -85%);
     border-radius: 0.5rem;
     display: grid;
     justify-content: center;
@@ -350,11 +350,11 @@ const { arrivedState } = useScroll(dialogListRef);
     box-shadow: $box-shadow-shallower;
 
     &:hover {
-      background-color: color.scale($color-primary, $alpha: -85%);
+      background-color: color.scale($color-primary, $alpha: -80%);
     }
 
     &:active {
-      background-color: color.scale($color-primary, $alpha: -80%);
+      background-color: color.scale($color-primary, $alpha: -75%);
     }
   }
 

@@ -25,9 +25,9 @@ const color = computed(() => {
 });
 
 // 注意 color-mix 兼容性
-const secondaryColorBackground = computed(() => `color-mix(in srgb, ${color.value}, transparent 90%)`);
-const secondaryColorBackgroundHover = computed(() => `color-mix(in srgb, ${color.value}, transparent 85%)`);
-const secondaryColorBackgroundActive = computed(() => `color-mix(in srgb, ${color.value}, transparent 80%)`);
+const secondaryColorBackground = computed(() => `color-mix(in srgb, ${color.value}, transparent 85%)`);
+const secondaryColorBackgroundHover = computed(() => `color-mix(in srgb, ${color.value}, transparent 80%)`);
+const secondaryColorBackgroundActive = computed(() => `color-mix(in srgb, ${color.value}, transparent 75%)`);
 const secondaryColorForeground = computed(() => `color-mix(in srgb, ${color.value}, transparent 5%)`);
 </script>
 
