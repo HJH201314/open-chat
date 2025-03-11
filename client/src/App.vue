@@ -1,10 +1,20 @@
 <script lang="ts" setup>
 import Panel from '@/components/panel/Panel.vue';
 import SideBar from '@/components/sidebar/SideBar.vue';
-import { noPaddingKey } from '@/constants/eventBusKeys';
+import { noPaddingKey, siteLoadingKey } from '@/constants/eventBusKeys';
 import { useEventBus } from '@vueuse/core';
-import { ref } from 'vue';
+import { ref, useTemplateRef } from 'vue';
+import CusFullSiteProgress from '@/components/progress/CusFullSiteProgress.vue';
 
+const siteProgressRef = useTemplateRef('site-progress');
+const siteProgressBus = useEventBus(siteLoadingKey);
+siteProgressBus.on((evt) => {
+  if (evt == 'start') {
+    siteProgressRef.value?.start();
+  } else if (evt == 'finish') {
+    siteProgressRef.value?.finish();
+  }
+});
 const showPadding = ref(true);
 const noPaddingBus = useEventBus(noPaddingKey);
 noPaddingBus.on((v) => {
@@ -14,6 +24,7 @@ noPaddingBus.on((v) => {
 
 <template>
   <div class="app-base">
+    <CusFullSiteProgress ref="site-progress" />
     <SideBar />
     <div :class="{ 'no-padding': !showPadding }" class="app-base-panel">
       <Panel />

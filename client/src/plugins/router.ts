@@ -1,8 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useEventBus } from '@vueuse/core';
+import { siteLoadingKey } from '@/constants/eventBusKeys.ts';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/home',
+      name: 'homePage',
+      component: () => import('@/pages/home/HomePage.vue'),
+    },
     {
       path: '/',
       redirect: '/chat/message',
@@ -36,3 +43,15 @@ const router = createRouter({
 });
 
 export default router;
+
+const siteLoadingBus = useEventBus(siteLoadingKey);
+
+router.beforeEach((_, __, next) => {
+  siteLoadingBus.emit('start');
+  next();
+});
+
+router.afterEach(() => {
+  // 关闭加载动画
+  siteLoadingBus.emit('finish');
+});
