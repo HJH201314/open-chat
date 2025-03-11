@@ -166,7 +166,7 @@ export const useDataStore = defineStore('data', () => {
         if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
         else break;
       } catch (_) {
-        ToastManager.danger('获取数据异常，请稍后重试～');
+        ToastManager.danger('刷新数据异常，请稍后重试~');
         return false;
       }
     }
@@ -198,7 +198,7 @@ export const useDataStore = defineStore('data', () => {
       // 写入 db
       db.sessions.bulkAdd(newSessions);
     } catch (_) {
-      ToastManager.danger('写入数据异常，请稍后重试～');
+      ToastManager.danger('刷新数据异常，请稍后重试~');
       return false;
     }
     return true;

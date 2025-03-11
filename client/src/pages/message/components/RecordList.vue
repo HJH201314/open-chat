@@ -74,21 +74,21 @@ const handleSessionRefresh = async () => {
     ToastManager.danger('请先登录');
     return;
   }
+  if (!dataStore.sessions.length) {
+    await dataStore.fetchSessions();
+    return;
+  }
   const softMode = ref(true);
   const dialog = DialogManager.createDialog(
     {
-      title: '同步对话数据',
+      title: '同步对话列表',
       subtitle: '此操作不可逆，确认继续吗？',
       async confirmHandler(controller) {
         if (!softMode.value) {
           ToastManager.danger('暂未支持');
           return;
         }
-        try {
-          await dataStore.fetchSessions(controller);
-        } catch (_) {
-          ToastManager.danger('同步异常，请稍后重试～');
-        }
+        await dataStore.fetchSessions(controller);
       },
     },
     {
