@@ -20,6 +20,9 @@ importers:
       lint-staged:
         specifier: ^15.2.2
         version: 15.2.2
+      liquidjs:
+        specifier: ^10.21.0
+        version: 10.21.0
       swagger-typescript-api:
         specifier: ^13.0.23
         version: 13.0.23
@@ -2928,6 +2931,11 @@ packages:
   lint-staged@15.2.2:
     resolution: {integrity: sha512-TiTt93OPh1OZOsb5B7k96A/ATl2AjIZo+vnzFZ6oHK5FuTk63ByDtxGQpHm+kFETjEWqgkF95M8FRXKR/LEBcw==}
     engines: {node: '>=18.12.0'}
+    hasBin: true
+
+  liquidjs@10.21.0:
+    resolution: {integrity: sha512-DouqxNU2jfoZzb1LinVjOc/f6ssitGIxiDJT+kEKyYqPSSSd+WmGOAhtWbVm1/n75svu4aQ+FyQ3ctd3wh1bbw==}
+    engines: {node: '>=14'}
     hasBin: true
 
   listr2@8.0.1:
@@ -7435,6 +7443,10 @@ snapshots:
       yaml: 2.3.4
     transitivePeerDependencies:
       - supports-color
+
+  liquidjs@10.21.0:
+    dependencies:
+      commander: 10.0.1
 
   listr2@8.0.1:
     dependencies:

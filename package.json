@@ -8,6 +8,7 @@
     "dev:client": "cd client && pnpm run dev",
     "dev:server": "cd server && pnpm run start:dev",
     "gen:swagger-typescript-api": "ts-node scripts/gen-swagger-typescript-api.ts",
+    "gen:biz-error-code": "ts-node scripts/biz_error_code/generator.ts",
     "build": "ts-node scripts/build.ts",
     "build:client": "cd client && pnpm run build",
     "build:server": "cd server && go build",
@@ -28,6 +29,7 @@
     "concurrently": "^8.2.2",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
+    "liquidjs": "^10.21.0",
     "swagger-typescript-api": "^13.0.23",
     "ts-node": "^10.9.1",
     "typescript": "^5.7.3"

@@ -1,0 +1,6 @@
+{
+  "ErrNoPermission": {
+    "Code": 10001,
+    "Msg": "no permission"
+  }
+}

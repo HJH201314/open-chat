@@ -1,0 +1,12 @@
+package constants
+
+type BizError struct {
+	Code int
+	Msg  string
+}
+
+var (
+    {% for entry in entries -%}
+	    {{ entry.name }} = BizError{Code: {{ entry.code }}, Msg: "{{ entry.msg }}"}{% unless forloop.last %}
+    {% endunless %}{% endfor %}
+)
