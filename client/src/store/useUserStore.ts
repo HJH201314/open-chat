@@ -78,6 +78,7 @@ export const useUserStore = defineStore('user', () => {
    * 登出，清除本地登录信息
    */
   function logout() {
+    genApi.User.logoutPost();
     loginStatus.value = 'logout';
     permission.value = 0;
     currentUser.value = {};

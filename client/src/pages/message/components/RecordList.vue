@@ -225,8 +225,6 @@ const { arrivedState } = useScroll(dialogListRef);
           <div class="digest">
             {{ item.botRole }}
           </div>
-        </div>
-        <div class="dialog-list-item-right">
           <div class="datetime">
             {{ new Date(item.createAt ?? '').toLocaleString() }}
           </div>
@@ -385,12 +383,15 @@ const { arrivedState } = useScroll(dialogListRef);
 
     &-center {
       flex: 1;
-      display: flex;
+      display: grid;
+      grid-template-areas: "title title"
+                           "digest datetime";
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
 
       .title {
+        grid-area: title;
         font-weight: bold;
         font-size: 1.1rem;
 
@@ -404,17 +405,16 @@ const { arrivedState } = useScroll(dialogListRef);
       }
 
       .digest {
+        grid-area: digest;
         color: $color-grey-500;
         font-size: 0.8rem;
         // 超过长度显示省略号
         text-overflow: ellipsis;
       }
-    }
-
-    &-right {
-      width: 4rem;
 
       .datetime {
+        grid-area: datetime;
+        color: $color-grey-500;
         font-size: 0.7rem;
         text-align: right;
       }

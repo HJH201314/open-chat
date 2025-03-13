@@ -7,6 +7,7 @@ import { Down } from '@icon-park/vue-next';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 
 type DialogMessageProps = {
+  streaming?: boolean; // 是否正在输出
   message?: string;
   htmlMessage?: string;
   thinking?: string;
@@ -16,6 +17,7 @@ type DialogMessageProps = {
 };
 
 const props = withDefaults(defineProps<DialogMessageProps>(), {
+  streaming: false,
   role: 'user',
   message: '',
   htmlMessage: '',
@@ -76,6 +78,15 @@ const renderMessage = computed(() =>
 
 const thinkingCollapsed = ref(false); // 思考内容是否收起（即时、不等待动画的状态）
 const thinkingCollapsing = ref(false); // 正在收起思考内容（动画过程中）
+const statusText = computed(() => {
+  // 思考中/思考中断/思考完成
+  if (props.thinking && !renderMessage.value) {
+    return props.streaming ? '思考中' : '思考中断';
+  } else if (!props.streaming) {
+    return props.thinking ? '思考完成' : '回答完成';
+  }
+  return '';
+})
 
 const { isLargeScreen } = useGlobal();
 </script>
@@ -92,8 +103,8 @@ const { isLargeScreen } = useGlobal();
           :class="{ collapsed: thinkingCollapsed && !thinkingCollapsing }"
           @click="handleThinkExpand"
         >
-          <CusSpin v-if="thinking && !renderMessage" style="margin-right: 0.5em" color="var(--color-black)" />
-          <span style="margin-right: 2em;">{{ thinking && !renderMessage ? '思考中' : '思考完成' }}</span>
+          <CusSpin v-if="streaming" style="margin-right: 0.5em" color="var(--color-black)" />
+          <span style="margin-right: 2em;">{{ statusText }}</span>
           <span>{{ thinkingCollapsed ? '展开' : '收起' }}</span>
           <Down size="16" :style="{ transform: thinkingCollapsed ? '' : 'rotate(180deg)' }" />
         </div>

@@ -95,9 +95,10 @@ watch(
       messageSyncing.value = true;
       syncMessages(newSessionId).then((res) => {
         if (res) {
-          messageSyncing.value = false;
           dataStore.updateSessionFlags(newSessionId, { needSync: false });
         }
+      }).finally(() => {
+        messageSyncing.value = false;
       });
     }
   },
@@ -234,19 +235,23 @@ async function handleSendMessage() {
   }
 }
 
-function getHtmlMessage(item: MessageInfo) {
+function getMsgAnswerRendered(item: MessageInfo) {
   if (item.id == answerMsgId.value) return answerMsg.value;
   return item.htmlContent || '';
 }
 
-function getContent(item: MessageInfo) {
+function getMsgAnswer(item: MessageInfo) {
   if (item.id == answerMsgId.value) return answerMsg.value;
   return item.content || '';
 }
 
-function getThinking(item: MessageInfo) {
+function getMsgThinking(item: MessageInfo) {
   if (item.id == answerMsgId.value) return thinkMsg.value;
   return item.reasoningContent || '';
+}
+
+function getMsgStreaming(item: MessageInfo) {
+  return item.id == answerMsgId.value && isReceivingMsg.value;
 }
 
 // 从服务器同步数据
@@ -261,8 +266,11 @@ async function handleSyncDialog() {
   // 消息列表为空，直接进行同步
   if (!messageList.value.length) {
     messageSyncing.value = true;
-    await syncMessages(currentSessionId);
-    messageSyncing.value = false;
+    try {
+      await syncMessages(currentSessionId);
+    } finally {
+      messageSyncing.value = false;
+    }
     return;
   }
   DialogManager.createDialog({
@@ -405,9 +413,10 @@ const { isSmallScreen } = useGlobal();
         <DialogMessage
           v-for="item in messageList"
           :key="item.id"
-          :message="getContent(item)"
-          :thinking="getThinking(item)"
-          :html-message="getHtmlMessage(item)"
+          :message="getMsgAnswer(item)"
+          :thinking="getMsgThinking(item)"
+          :html-message="getMsgAnswerRendered(item)"
+          :streaming="getMsgStreaming(item)"
           :role="item.sender"
           :time="new Date(item.time).toLocaleString()"
           @think-expand="handleMessageThinkExpand"

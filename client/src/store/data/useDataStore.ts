@@ -232,7 +232,7 @@ export const useDataStore = defineStore('data', () => {
     let userMsgIndex: number | undefined = undefined;
     let botMsgIndex: number | undefined = undefined;
     userMsgIndex = await saveMessage(sessionId, message, 'user', 'text', message, '', undefined);
-    botMsgIndex = await saveMessage(sessionId, message, 'bot', 'text', '', '', undefined);
+    botMsgIndex = await saveMessage(sessionId, '', 'bot', 'text', '', '', undefined);
     callback?.onPreSaveMsg?.(userMsgIndex, botMsgIndex);
     // 观测回答数据中的指令
     watchArray(commands, () => {
@@ -289,7 +289,7 @@ export const useDataStore = defineStore('data', () => {
       callback?.onFinish?.(renderedMsg.value);
     });
 
-    await api.chat.completionStream(
+    return await api.chat.completionStream(
       {
         provider: session.provider,
         modelName: session.model,
