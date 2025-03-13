@@ -6,8 +6,9 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import { VitePWA } from 'vite-plugin-pwa';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import sassDts from 'vite-plugin-sass-dts';
-import basicSsl from '@vitejs/plugin-basic-ssl';
+import mkcert from 'vite-plugin-mkcert';
 import path from 'path';
+import * as fs from 'node:fs';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }): UserConfig => {
@@ -17,11 +18,13 @@ export default defineConfig(({ mode }): UserConfig => {
     esbuildOptions.pure = ['console.log'];
   }
   return {
+    clearScreen: false,
+    envPrefix: ['VITE_', 'TAURI_ENV_*'], // 环境变量前缀
     plugins: [
       vue(),
       vueJsx(),
       vueDevTools({
-        launchEditor: 'webstorm',
+        launchEditor: 'goland',
       }),
       sassDts({
         enabledMode: ['development', 'production'],
@@ -32,8 +35,10 @@ export default defineConfig(({ mode }): UserConfig => {
         sourceDir: path.resolve(__dirname, './src'),
         outputDir: path.resolve(__dirname, './dist'),
       }),
-      basicSsl(),
       VitePWA(),
+      mkcert({
+        force: false,
+      }),
     ],
     esbuild: esbuildOptions,
     css: {
@@ -52,8 +57,9 @@ export default defineConfig(({ mode }): UserConfig => {
       },
     },
     server: {
+      https: {},
       port: 9035,
-      // https: true,
+      strictPort: true,
       proxy: {
         '/api/cloud': {
           target: 'http://127.0.0.1:3000/',
