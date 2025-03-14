@@ -55,9 +55,9 @@ const form = reactive({
 
 const { session: sessionInfo, messages: messageList, syncMessages } = useSession(() => form.sessionId);
 watchArray(messageList, (newVal, oldVal) => {
-  // 消息列表变化时，滚动到底部（消息增加 1 时平滑，增加多条时立即）
+  // 消息列表变化时，滚动到底部（消息增加 1/2 时平滑，增加多条时立即）
   if (newVal.length) {
-    scrollDialogListToBottom(newVal.length == oldVal.length + 1 ? 'smooth' : 'instant');
+    scrollDialogListToBottom(newVal.length - oldVal.length <= 2 ? 'smooth' : 'instant');
   }
 });
 
@@ -88,18 +88,20 @@ watch(
     if (!newSessionId) router.replace('/chat/message');
 
     if (flags?.needSync) {
-      if (!userStore.isLogin) {
-        ToastManager.danger('未登录，无法执行同步~');
+      if (!userStore.isLogin || (newSession.userId && newSession.userId != userStore.userId)) {
+        ToastManager.danger('无权限，无法执行同步~');
         return;
       }
       messageSyncing.value = true;
-      syncMessages(newSessionId).then((res) => {
-        if (res) {
-          dataStore.updateSessionFlags(newSessionId, { needSync: false });
-        }
-      }).finally(() => {
-        messageSyncing.value = false;
-      });
+      syncMessages(newSessionId)
+        .then((res) => {
+          if (res) {
+            dataStore.updateSessionFlags(newSessionId, { needSync: false });
+          }
+        })
+        .finally(() => {
+          messageSyncing.value = false;
+        });
     }
   },
   { deep: false }
@@ -137,7 +139,7 @@ const inputPanelRef = useTemplateRef('input-panel');
 const textAreaRef = useTemplateRef('input-textarea');
 const { focused: inputFocused } = useFocusWithin(inputPanelRef);
 const { height: panelHeight } = useElementSize(inputPanelRef);
-const panelPlaceholderPx = computed(() => `${panelHeight.value + 8}px`);
+const panelPlaceholderPx = computed(() => `${panelHeight.value + 12}px`);
 const fixDialogToBottomPx = computed(() => `${panelHeight.value + 12}px`);
 const dialogDetailRef = useTemplateRef('dialog-detail');
 const dialogListRef = useTemplateRef('dialog-list');
@@ -193,7 +195,6 @@ const {
   stop: stopReceivingMsg,
   answer: answerMsg,
   think: thinkMsg,
-  clear: clearReceivingMsg,
   isStreaming: isReceivingMsg,
 } = dataStore.useSendMessageText();
 
@@ -222,7 +223,6 @@ async function handleSendMessage() {
         dialogFixedToBottom.value && scrollDialogListToBottom('smooth');
       },
       onFinish() {
-        clearReceivingMsg();
         if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
           dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
         }
@@ -365,7 +365,12 @@ const { isSmallScreen } = useGlobal();
 
 <template>
   <div ref="dialog-detail" :class="{ small: isSmallScreen }" class="dialog-detail">
-    <LoadingModal :visible="messageSyncing" :teleport-to="dialogDetailRef" color="var(--color-primary)" tip="努力加载中..."></LoadingModal>
+    <LoadingModal
+      :visible="messageSyncing"
+      :teleport-to="dialogDetailRef"
+      color="var(--color-primary)"
+      tip="努力加载中..."
+    ></LoadingModal>
     <div :class="{ shadow: !arrivedState.top }" class="dialog-detail-actions">
       <div class="dialog-detail-actions-area-left">
         <IconButton type="secondary" style="flex-shrink: 0" @click="$emit('back')">
@@ -377,7 +382,7 @@ const { isSmallScreen } = useGlobal();
         <span class="dialog-detail-actions-subtitle"> {{ messageList.length }} 条消息 </span>
       </div>
       <CusTooltip text="刷新对话列表" position="bottom">
-        <IconButton type="secondary" color="warning" style="flex-shrink: 0" @click="handleSyncDialog">
+        <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="handleSyncDialog">
           <cus-spin :show="messageSyncing">
             <Refresh size="16" />
           </cus-spin>
@@ -470,7 +475,7 @@ const { isSmallScreen } = useGlobal();
           @keydown="handleInputKeydown"
         />
         <div class="dialog-detail-inputs-bar-send" @click="handleSendClick">
-          <ArrowUp v-if="!isReceivingMsg" fill="white" size="16" />
+          <ArrowUp class="sending" v-if="!isReceivingMsg" fill="white" size="16" />
           <cus-spin v-else />
         </div>
       </div>
@@ -587,7 +592,7 @@ $dialog-max-width: 54rem;
     position: absolute;
     left: 50%;
     bottom: 0;
-    width: calc(100% - 0.5rem);
+    width: calc(100% - 2rem);
     max-width: $dialog-max-width;
     transform: translateX(-50%);
     display: flex;
@@ -617,7 +622,6 @@ $dialog-max-width: 54rem;
     &--first {
       top: 50%;
       left: 50%;
-      width: 100%;
       bottom: unset !important;
       border-radius: 0.75rem;
       transform: translate(-50%, calc(-50% + 2rem));
@@ -677,101 +681,35 @@ $dialog-max-width: 54rem;
         gap: 0.5rem;
         cursor: pointer;
         transition: all 0.2s $ease-out-circ;
+        overflow: hidden;
 
         .small-input & {
           transform: scale(0.875);
         }
 
-        &:hover {
+        &:hover, &:active {
           background: $color-primary-darker;
+          box-shadow: $box-shadow-deeper;
+
+          > .sending {
+            animation: send 1.5s infinite;
+            @keyframes send {
+              0% {
+                transform: translateY(150%);
+              }
+              30%, 70% {
+                transform: translateY(0%);
+              }
+              100% {
+                transform: translateY(-200%);
+              }
+            }
+          }
         }
-      }
-    }
-  }
 
-  .audio-input {
-    border-radius: 0.5rem;
-    box-shadow: $box-shadow;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 2.5rem;
-    height: 10rem;
-    background-color: white;
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    &-speak {
-      background-color: $color-primary;
-      border-radius: 50%;
-      cursor: pointer;
-      position: relative;
-
-      &:before {
-        content: '';
-        border-radius: 50%;
-        position: absolute;
-        inset: 0;
-        background-color: color.scale($color-primary, $alpha: -20%);
-        animation: recording 5s infinite;
-      }
-    }
-
-    @keyframes recording {
-      0% {
-        scale: 1.1;
-      }
-      30% {
-        scale: 1.2;
-      }
-      100% {
-        scale: 1.1;
-      }
-    }
-
-    &-status {
-      position: absolute;
-      left: 0.5rem;
-      top: 0.5rem;
-      border-radius: 0.25rem;
-      padding: 0.125rem 0.35rem;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      transition: all 0.25s $ease-out-circ;
-
-      > .signal {
-        border-radius: 50%;
-        width: 1rem;
-        height: 1rem;
-      }
-
-      &--error {
-        color: $color-danger;
-        background-color: color.scale($color-danger, $alpha: -75%);
-
-        > .signal {
-          background-color: $color-danger;
-        }
-      }
-
-      &--handling {
-        color: $color-warning;
-        background-color: color.scale($color-warning, $alpha: -75%);
-
-        > .signal {
-          background-color: $color-warning;
-        }
-      }
-
-      &--ready {
-        color: $color-primary;
-        background-color: color.scale($color-primary, $alpha: -75%);
-
-        > .signal {
-          background-color: $color-primary;
+        &:active {
+          box-shadow: $box-shadow-shallower;
+          transform: scale(0.95);
         }
       }
     }

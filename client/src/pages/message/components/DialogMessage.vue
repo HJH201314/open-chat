@@ -88,11 +88,12 @@ const thinkingCollapsing = ref(false); // 正在收起思考内容（动画过�
 const statusText = computed(() => {
   // 思考中/思考中断/思考完成
   if (props.thinking && !renderMessage.value) {
-    return props.streaming ? '思考中' : '思考中断';
+    return props.streaming ? '奋力思考中(๑•̀ㅂ•́)و' : '思考中断(´;ω;`)';
   } else if (!props.streaming) {
-    return props.thinking ? '思考完成' : '回答完成';
+    return props.thinking ? '思考完成ヽ(•̀ω•́ )ゝ' : '回答完成✧(•̀ω•́)✧';
+  } else {
+    return '输出中(ง •̀_•́)ง';
   }
-  return '';
 })
 
 const { isLargeScreen } = useGlobal();

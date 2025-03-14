@@ -185,7 +185,7 @@ const { arrivedState } = useScroll(dialogListRef);
       <div v-show="!searchForm.inputting" class="dialog-list-action-button" @click="handleSessionRefresh">
         <Refresh size="1.2rem" theme="outline" />
       </div>
-      <div v-show="!searchForm.inputting" class="dialog-list-add" @click="handleListAddClick">
+      <div v-show="!searchForm.inputting" class="dialog-list-new-dialog" @click="handleListAddClick">
         <span>开始新对话</span>
         <Plus size="1.2rem" theme="outline" />
         <CommonModal v-model:visible="roleForm.modalVisible">
@@ -307,9 +307,9 @@ const { arrivedState } = useScroll(dialogListRef);
     }
   }
 
-  &-add {
+  &-new-dialog {
     box-sizing: border-box;
-    box-shadow: $box-shadow-shallower;
+    box-shadow: $box-shadow;
     cursor: pointer;
     flex: 1;
     height: 2rem;
@@ -317,19 +317,19 @@ const { arrivedState } = useScroll(dialogListRef);
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    color: $color-primary;
-    background-color: color.scale($color-primary, $alpha: -85%);
+    color: $color-white;
+    background-color: color.scale($color-primary, $alpha: -10%);
     border-radius: 0.5rem;
-    transition: color, background-color 0.2s $ease-out-circ;
+    transition: all 0.2s $ease-out-circ;
 
     &:hover {
-      background-color: color.scale($color-primary, $alpha: -80%);
-      color: color.scale($color-primary, $blackness: 5%);
+      box-shadow: $box-shadow-deeper-right-bottom;
+      transform: translate(-1px, -1px);
     }
 
     &:active {
-      background-color: color.scale($color-primary, $alpha: -75%);
-      color: color.scale($color-primary, $blackness: 10%);
+      box-shadow: $box-shadow-shallower;
+      transform: translate(1px, 1px);
     }
   }
 

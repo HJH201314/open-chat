@@ -1,6 +1,6 @@
 import api from '@/api';
 import useMarkdownIt from '@/commands/useMarkdownIt';
-import showToast from '@/components/toast/toast.ts';
+import showToast, { quickToast } from '@/components/toast/toast.ts';
 import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { MessageInfo, SessionInfo } from '@/types/data.ts';
@@ -14,7 +14,7 @@ import { liveQuery } from 'dexie';
 import { db } from '@/store/data/database.ts';
 import genApi from '@/api/gen-api.ts';
 import { useModelStore } from '@/store/useModelStore.ts';
-import type { ApiSchemaSession } from '@/api/gen/data-contracts.ts';
+import type { ApiSchemaSession, ApiSchemaUserSession } from '@/api/gen/data-contracts.ts';
 
 interface MessageCallback {
   // 预保存数据后的回调
@@ -54,7 +54,7 @@ export const useDataStore = defineStore('data', () => {
   async function addSession(role?: number) {
     try {
       // 获取session_id
-      const { status, data } = await api.chat.createSession();
+      const { status, data } = await genApi.Chat.sessionNewPost();
       const sessionId = data.data;
       console.log(data);
       if (status === 200 && data.data) {
@@ -147,7 +147,7 @@ export const useDataStore = defineStore('data', () => {
    */
   async function fetchSessions(abortController?: AbortController) {
     const controller = abortController || new AbortController();
-    const remoteSessions: ApiSchemaSession[] = [];
+    const remoteSessions: ApiSchemaUserSession[] = [];
     // 获取所有远程数据
     let nextPage = 1;
     while (nextPage) {
@@ -173,9 +173,10 @@ export const useDataStore = defineStore('data', () => {
     try {
       // 组装所有需要缓存的数据
       const newSessions = await remoteSessions.reduce(
-        async (sessionInfos, remoteSession) => {
-          const session = await db.sessions.where({ id: remoteSession.id }).last();
-          if (!session) {
+        async (sessionInfos, remoteUserSession) => {
+          const remoteSession = remoteUserSession.session;
+          const session = await db.sessions.where({ id: remoteSession?.id }).last();
+          if (!session && remoteSession) {
             (await sessionInfos).push({
               id: remoteSession.id!,
               // 若有，标题使用远程的名称，否则使用第一条消息的内容
@@ -184,6 +185,7 @@ export const useDataStore = defineStore('data', () => {
               botRole: '未知',
               createAt: new Date(remoteSession.created_at!).getTime(),
               withContext: !!remoteSession.enable_context,
+              userId: remoteUserSession.user_id,
               provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
               model: settingStore.settings.defaultModel || modelStore.defaultModel?.modelName,
               flags: {
@@ -289,7 +291,7 @@ export const useDataStore = defineStore('data', () => {
       callback?.onFinish?.(renderedMsg.value);
     });
 
-    return await api.chat.completionStream(
+    return api.chat.completionStream(
       {
         provider: session.provider,
         modelName: session.model,
@@ -329,6 +331,7 @@ export const useDataStore = defineStore('data', () => {
     const startStreaming = async (sessionId: string, message: string, customReceiver?: MessageCallback) => {
       isStreaming.value = true;
       abortController = new AbortController();
+      clearMessage();
       return sendMessageText(
         sessionId,
         message,
@@ -353,7 +356,6 @@ export const useDataStore = defineStore('data', () => {
       ).finally(() => {
         isStreaming.value = false;
         clearTimeout(timeout);
-        clearMessage();
       });
     };
 
@@ -362,7 +364,7 @@ export const useDataStore = defineStore('data', () => {
       timeout = setTimeout(() => {
         abortController.abort('no data for too long');
         ToastManager.danger('服务端超时');
-      }, 60000);
+      }, 10000);
     };
 
     const clearMessage = () => {
