@@ -5,16 +5,15 @@ import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { getActivePinia } from 'pinia';
-import { HttpClient } from '@/api/gen/http-client.ts';
 
-const axiosConfig: AxiosRequestConfig = {
+export const defaultAxiosConfig: AxiosRequestConfig = {
   baseURL: SERVER_NEXT_API_URL,
   timeout: 10000,
   withCredentials: false,
 };
 
 /* 创建axios实例 */
-const axiosInstance = axios.create(axiosConfig);
+const axiosInstance = axios.create(defaultAxiosConfig);
 
 axiosInstance.interceptors.response.use(
   (resp) => {
@@ -23,6 +22,7 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     errorHandler(error);
+    return Promise.reject(error);
   }
 );
 
@@ -45,6 +45,7 @@ export const successHandler = (resp: any) => {
 };
 
 export const errorHandler = (error: any) => {
+  console.log(error);
   if (error.status === 401) {
     // 后端返回登录失效，登出并提示登录态过期
     if (getActivePinia()) {
@@ -59,8 +60,6 @@ export const errorHandler = (error: any) => {
       }
       useUserStore().logout();
     }
-  } else if (error.status !== 200) {
-    ToastManager.danger('请求失败，请登录后重试~');
   }
 };
 
@@ -82,29 +81,3 @@ export const createRequest = <TRes>(path: string, args: AxiosRequestConfig = {})
 
   return axiosInstance.request<TRes>(config);
 };
-
-/* 生成的 API 客户端 */
-export const genApiClient = new HttpClient({
-  ...axiosConfig,
-});
-// 添加拦截器
-genApiClient.instance.interceptors.response.use(
-  (resp) => {
-    successHandler(resp);
-    return resp;
-  },
-  (error) => {
-    errorHandler(error);
-  }
-);
-// 添加 header
-genApiClient.instance.interceptors.request.use((req) => {
-  req.headers['Authorization'] = localStorage.getItem(USER_ACCESS_TOKEN_KEY)
-    ? `Bearer ${localStorage.getItem(USER_ACCESS_TOKEN_KEY)}`
-    : '';
-  if (getActivePinia()) {
-    const baseUrl = useSettingStore().settings.baseUrl;
-    baseUrl && (req.baseURL = baseUrl);
-  }
-  return req;
-});
