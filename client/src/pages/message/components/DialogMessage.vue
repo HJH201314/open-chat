@@ -2,7 +2,7 @@
 import useGlobal from '@/commands/useGlobal';
 import useMarkdownIt from '@/commands/useMarkdownIt';
 import { useUserStore } from '@/store/useUserStore';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Down } from '@icon-park/vue-next';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 
@@ -76,7 +76,14 @@ const renderMessage = computed(() =>
   useCachedHtmlMessage.value ? props.htmlMessage : useOriginMessage.value ? props.message : markdownIt.result.value
 );
 
-const thinkingCollapsed = ref(false); // 思考内容是否收起（即时、不等待动画的状态）
+// 思考内容默认收起
+const thinkingCollapsed = ref(true); // 思考内容是否收起（即时、不等待动画的状态）
+watch(() => props.thinking, (newThinking, oldThinking) => {
+  if (newThinking && !oldThinking) {
+    // 思考内容从无到有时默认展开
+    thinkingCollapsed.value = false;
+  }
+});
 const thinkingCollapsing = ref(false); // 正在收起思考内容（动画过程中）
 const statusText = computed(() => {
   // 思考中/思考中断/思考完成
@@ -121,9 +128,6 @@ const { isLargeScreen } = useGlobal();
         />
         <div v-else class="dialog-message-content-body rendered" :class="{ think: thinking }" v-html="renderMessage" />
       </div>
-    </div>
-    <div class="dialog-message-time">
-      {{ props.time }}
     </div>
   </div>
 </template>
