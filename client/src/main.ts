@@ -24,3 +24,5 @@ const app = createApp(App);
 initPlugins(app);
 
 app.mount('#app');
+
+console.info('TUE App is running... 🚀 Build time:', window.buildTime);
