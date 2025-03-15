@@ -53,7 +53,7 @@ export const useUserStore = defineStore('user', () => {
 
   const login = async (_username: string, _password: string) => {
     try {
-      const res = await api.user.login({
+      const res = await genApi.User.loginPost({
         username: _username,
         password: _password,
       });

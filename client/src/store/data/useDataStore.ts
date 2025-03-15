@@ -156,7 +156,7 @@ export const useDataStore = defineStore('data', () => {
           {
             page_num: nextPage,
             page_size: 20,
-            sort_expr: 'id DESC',
+            sort_expr: 'id ASC',
           },
           {
             signal: controller.signal,
@@ -331,6 +331,9 @@ export const useDataStore = defineStore('data', () => {
     const startStreaming = async (sessionId: string, message: string, customReceiver?: MessageCallback) => {
       isStreaming.value = true;
       abortController = new AbortController();
+      abortController.signal.addEventListener('abort', () => {
+        innerCleanEffects();
+      });
       clearMessage();
       return sendMessageText(
         sessionId,
@@ -354,16 +357,22 @@ export const useDataStore = defineStore('data', () => {
         },
         abortController
       ).finally(() => {
-        isStreaming.value = false;
-        clearTimeout(timeout);
+        innerCleanEffects();
       });
     };
+
+    const innerCleanEffects = () => {
+      isStreaming.value = false;
+      clearTimeout(timeout);
+    }
 
     const startTimeout = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        abortController.abort('no data for too long');
-        ToastManager.danger('服务端超时');
+        if (!abortController.signal.aborted) {
+          abortController.abort('no data for too long');
+          ToastManager.danger('服务端超时');
+        }
       }, 10000);
     };
 

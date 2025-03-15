@@ -56,20 +56,47 @@ export interface ApiEntityCommonResponseBool {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseEntityPagingResponseSchemaMessage {
+export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiEntityPagingResponseSchemaMessage;
+  data?: ApiEntityPaginatedContinuationResponseSchemaMessage;
   /** 消息 */
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseEntityPagingResponseSchemaSession {
+export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiEntityPagingResponseSchemaSession;
+  data?: ApiEntityPaginatedContinuationResponseSchemaProblem;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedContinuationResponseSchemaUserSession;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaExam {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaExam;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaProblem {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaProblem;
   /** 消息 */
   msg?: string;
 }
@@ -110,13 +137,18 @@ export interface ApiEntityCommonResponseString {
   msg?: string;
 }
 
-export interface ApiEntityPagingResponseSchemaMessage {
+export interface ApiEntityPaginatedContinuationResponseSchemaMessage {
   list?: ApiSchemaMessage[];
   next_page?: number;
 }
 
-export interface ApiEntityPagingResponseSchemaSession {
-  list?: ApiSchemaSession[];
+export interface ApiEntityPaginatedContinuationResponseSchemaProblem {
+  list?: ApiSchemaProblem[];
+  next_page?: number;
+}
+
+export interface ApiEntityPaginatedContinuationResponseSchemaUserSession {
+  list?: ApiSchemaUserSession[];
   next_page?: number;
 }
 
@@ -127,6 +159,32 @@ export interface ApiSchemaAPIKey {
   key?: string;
   /** 外键，指向 Provider */
   provider_id?: number;
+}
+
+export interface ApiSchemaExam {
+  /** 考试描述 */
+  description?: string;
+  id?: number;
+  name?: string;
+  /** 考试包含的大题 */
+  problems?: ApiSchemaExamProblem[];
+  /** 所属科目分类 */
+  subjects?: string;
+  /** 考试总分（单位：0.01分） */
+  total_score?: number;
+}
+
+export interface ApiSchemaExamProblem {
+  /** 关联考试ID */
+  exam_id?: number;
+  /** 题目详细信息 */
+  problem?: ApiSchemaProblem;
+  /** 关联题目ID */
+  problem_id?: number;
+  /** 题目分值（1表示0.01分） */
+  score?: number;
+  /** 题目排序 */
+  sort_order?: number;
 }
 
 export interface ApiSchemaMessage {
@@ -206,6 +264,48 @@ export interface ApiSchemaPermission {
   updated_at?: string;
 }
 
+export interface ApiSchemaProblem {
+  /** 答案（JSON存储ProblemAnswer） */
+  answer?: ApiSchemaProblemAnswer;
+  /** 支持HTML/Markdown */
+  description?: string;
+  /** 难度等级 1-5 */
+  difficulty?: number;
+  /** 答案解析 */
+  explanation?: string;
+  id?: number;
+  /** 选项（JSON存储ProblemOption数组） */
+  options?: ApiSchemaProblemOption[];
+  /** 所属科目/分类 */
+  subject?: string;
+  type?: ApiSchemaProblemType;
+}
+
+export interface ApiSchemaProblemAnswer {
+  /**
+   * 选择题：存储正确选项ID []uint
+   * 填空题：存储多个填空关键词 []string
+   * 判断题：true/false
+   * 简答题：文本答案 string
+   */
+  answer?: any;
+}
+
+export interface ApiSchemaProblemOption {
+  content?: string;
+  /** 是否正确答案 */
+  correct?: boolean;
+  id?: number;
+}
+
+export enum ApiSchemaProblemType {
+  EnumSingleChoice = 'single_choice',
+  EnumMultipleChoice = 'multiple_choice',
+  EnumFillBlank = 'fill_blank',
+  EnumShortAnswer = 'short_answer',
+  EnumTrueFalse = 'true_false',
+}
+
 export interface ApiSchemaProvider {
   /** 一对多关系，与 APIKey 模型关联 */
   api_keys?: ApiSchemaAPIKey[];
@@ -257,6 +357,22 @@ export interface ApiSchemaUser {
   roles?: ApiSchemaRole[];
   updated_at?: string;
   username?: string;
+}
+
+export interface ApiSchemaUserSession {
+  created_at?: string;
+  /** 原始数据 */
+  id?: number;
+  /** 组装数据 */
+  session?: ApiSchemaSession;
+  session_id?: string;
+  type?: ApiSchemaUserSessionType;
+  user_id?: number;
+}
+
+export enum ApiSchemaUserSessionType {
+  Enum_OWNER = 1,
+  Enum_INVITEE = 2,
 }
 
 export interface ApiUserLoginLoginRequest {

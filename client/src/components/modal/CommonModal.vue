@@ -93,7 +93,6 @@ function handleClose() {
 }
 
 function handleKeydown(e: KeyboardEvent) {
-  console.log(e);
   if (!props.closeOnESC) return;
   if (e.key === 'Escape') {
     handleClose();

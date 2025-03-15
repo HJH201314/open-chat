@@ -13,8 +13,8 @@ import type {
   ApiChatCompletionStreamUserInput,
   ApiEntityCommonResponseArraySchemaModelCache,
   ApiEntityCommonResponseBool,
-  ApiEntityCommonResponseEntityPagingResponseSchemaMessage,
-  ApiEntityCommonResponseEntityPagingResponseSchemaSession,
+  ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
+  ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
   ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseString,
   ApiSchemaSession,
@@ -69,12 +69,13 @@ export class Chat<SecurityDataType = unknown> {
    * @name MessageListGet
    * @summary 获取消息
    * @request GET:/chat/message/list/{session_id}
-   * @response `200` `ApiEntityCommonResponseEntityPagingResponseSchemaMessage` 返回数据
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage` 返回数据
    */
   messageListGet = (
     sessionId: string,
     query: {
       end_time?: number;
+      /** 分页参数 */
       page_num: number;
       page_size?: number;
       sort_expr?: string;
@@ -82,7 +83,7 @@ export class Chat<SecurityDataType = unknown> {
     },
     params: RequestParams = {},
   ) =>
-    this.http.request<ApiEntityCommonResponseEntityPagingResponseSchemaMessage, any>({
+    this.http.request<ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage, any>({
       path: `/chat/message/list/${sessionId}`,
       method: 'GET',
       query: query,
@@ -131,11 +132,12 @@ export class Chat<SecurityDataType = unknown> {
    * @name SessionListGet
    * @summary 获取会话列表
    * @request GET:/chat/session/list
-   * @response `200` `ApiEntityCommonResponseEntityPagingResponseSchemaSession` 返回数据
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession` 返回数据
    */
   sessionListGet = (
     query: {
       end_time?: number;
+      /** 分页参数 */
       page_num: number;
       page_size?: number;
       sort_expr?: string;
@@ -143,7 +145,7 @@ export class Chat<SecurityDataType = unknown> {
     },
     params: RequestParams = {},
   ) =>
-    this.http.request<ApiEntityCommonResponseEntityPagingResponseSchemaSession, any>({
+    this.http.request<ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession, any>({
       path: `/chat/session/list`,
       method: 'GET',
       query: query,

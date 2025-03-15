@@ -13,8 +13,8 @@ import type {
   ApiChatCompletionStreamUserInput,
   ApiEntityCommonResponseArraySchemaModelCache,
   ApiEntityCommonResponseBool,
-  ApiEntityCommonResponseEntityPagingResponseSchemaMessage,
-  ApiEntityCommonResponseEntityPagingResponseSchemaSession,
+  ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
+  ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
   ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseString,
   ApiSchemaSession,
@@ -61,7 +61,7 @@ export namespace Chat {
    * @name MessageListGet
    * @summary 获取消息
    * @request GET:/chat/message/list/{session_id}
-   * @response `200` `ApiEntityCommonResponseEntityPagingResponseSchemaMessage` 返回数据
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage` 返回数据
    */
   export namespace MessageListGet {
     export type RequestParams = {
@@ -70,6 +70,7 @@ export namespace Chat {
     };
     export type RequestQuery = {
       end_time?: number;
+      /** 分页参数 */
       page_num: number;
       page_size?: number;
       sort_expr?: string;
@@ -77,7 +78,7 @@ export namespace Chat {
     };
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseEntityPagingResponseSchemaMessage;
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage;
   }
 
   /**
@@ -124,12 +125,13 @@ export namespace Chat {
    * @name SessionListGet
    * @summary 获取会话列表
    * @request GET:/chat/session/list
-   * @response `200` `ApiEntityCommonResponseEntityPagingResponseSchemaSession` 返回数据
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession` 返回数据
    */
   export namespace SessionListGet {
     export type RequestParams = {};
     export type RequestQuery = {
       end_time?: number;
+      /** 分页参数 */
       page_num: number;
       page_size?: number;
       sort_expr?: string;
@@ -137,7 +139,7 @@ export namespace Chat {
     };
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseEntityPagingResponseSchemaSession;
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession;
   }
 
   /**

@@ -103,7 +103,7 @@ function hide(e?: MouseEvent) {
   position: relative;
   &-info {
     position: absolute;
-    padding: .25rem .5rem;
+    padding: 0.5rem;
     border-radius: .5rem;
     background-color: #303030;
     z-index: 999;
@@ -113,6 +113,7 @@ function hide(e?: MouseEvent) {
 
     &-text {
       font-size: 1rem;
+      line-height: 1;
       white-space: nowrap;
       color: $color-white;
     }

@@ -11,7 +11,7 @@ import DialogMessage from '@/pages/message/components/DialogMessage.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { ArrowUp, Back, CollapseTextInput, Control, Delete, DoubleDown, Edit, Refresh } from '@icon-park/vue-next';
+import { ArrowUp, Back, CollapseTextInput, Control, Delete, DoubleDown, Edit, Refresh, WrongUser } from '@icon-park/vue-next';
 import { until, useElementSize, useFocusWithin, useScroll, watchArray } from '@vueuse/core';
 import { computed, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
@@ -46,6 +46,7 @@ const { providerDropdown } = storeToRefs(useModelStore());
 const isEmptySession = computed(() => messageList.value.length == 0);
 
 const form = reactive({
+  hasPermission: computed(() => userStore.isLogin && (!sessionInfo.value.userId || (sessionInfo.value.userId == userStore.userId))),
   sessionId: ref(''),
   withContext: ref(false),
   providerName: ref(''),
@@ -89,7 +90,7 @@ watch(
 
     if (flags?.needSync) {
       if (!userStore.isLogin || (newSession.userId && newSession.userId != userStore.userId)) {
-        ToastManager.danger('无权限，无法执行同步~');
+        // ToastManager.danger('无权限，无法执行同步~');
         return;
       }
       messageSyncing.value = true;
@@ -203,6 +204,10 @@ async function handleSendMessage() {
     ToastManager.warning('请先登录！');
     return;
   }
+  if (!form.hasPermission) {
+    ToastManager.warning('无此会话权限！');
+    return;
+  }
   if (!form.sessionId || !form.inputValue) return;
   if (isReceivingMsg.value) {
     ToastManager.warning('不能同时回答多个问题哦！');
@@ -254,14 +259,32 @@ function getMsgStreaming(item: MessageInfo) {
   return item.id == answerMsgId.value && isReceivingMsg.value;
 }
 
+function checkPermission(): boolean {
+  if (!userStore.isLogin) {
+    ToastManager.danger('请先登录~');
+    return false;
+  }
+  if (!form.hasPermission) {
+    ToastManager.warning('无此会话权限！');
+    return false;
+  }
+  return true;
+}
+
+function handleActionTipClick() {
+  if (!userStore.isLogin) {
+    ToastManager.info('未登录，仅可查看缓存对话');
+  } else {
+    ToastManager.info('当前账号未拥有会话权限');
+  }
+}
+
 // 从服务器同步数据
 const messageSyncing = ref(false);
 
 async function handleSyncDialog() {
-  if (!userStore.isLogin) {
-    ToastManager.danger('请先登录~');
-    return;
-  }
+  if (!checkPermission()) return;
+
   const currentSessionId = form.sessionId;
   // 消息列表为空，直接进行同步
   if (!messageList.value.length) {
@@ -285,6 +308,8 @@ async function handleSyncDialog() {
 }
 
 function handleEditDialog() {
+  if (!checkPermission()) return;
+
   DialogManager.inputDialog(
     {
       title: '编辑会话',
@@ -303,6 +328,8 @@ function handleEditDialog() {
 }
 
 async function handleEditSystemPrompt() {
+  if (!checkPermission()) return;
+
   // 请求远程 system_prompt
   try {
     const remoteSessionInfo = await genApi.Chat.sessionGet(form.sessionId);
@@ -329,6 +356,8 @@ async function handleEditSystemPrompt() {
 }
 
 function handleDeleteDialog() {
+  if (!checkPermission()) return;
+
   DialogManager.commonDialog({
     title: '删除对话',
     subtitle: '这是不可逆的！',
@@ -376,6 +405,11 @@ const { isSmallScreen } = useGlobal();
         <IconButton type="secondary" style="flex-shrink: 0" @click="$emit('back')">
           <Back size="16" />
         </IconButton>
+        <div v-if="!form.hasPermission" class="dialog-detail-actions-tip" @click="handleActionTipClick">
+          <WrongUser />
+          <span v-if="!userStore.isLogin">未登录</span>
+          <span v-else>无权限</span>
+        </div>
         <span class="dialog-detail-actions-title">
           {{ sessionInfo.title || '未命名对话' }}
         </span>
@@ -537,6 +571,16 @@ $dialog-max-width: 54rem;
     &-subtitle {
       font-size: 0.75rem;
       flex-shrink: 0;
+    }
+
+    &-tip {
+      flex-shrink: 0;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      line-height: 1;
+      padding: 0.25rem;
+      color: $color-danger;
+      background-color: color.scale($color-danger, $alpha: -85%);
     }
   }
 

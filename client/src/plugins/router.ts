@@ -46,8 +46,8 @@ export default router;
 
 const siteLoadingBus = useEventBus(siteLoadingKey);
 
-router.beforeEach((_, __, next) => {
-  siteLoadingBus.emit('start');
+router.beforeEach((to, from, next) => {
+  to !== from && siteLoadingBus.emit('start');
   next();
 });
 
