@@ -9,6 +9,7 @@ import sassDts from 'vite-plugin-sass-dts';
 import mkcert from 'vite-plugin-mkcert';
 import path from 'path';
 import * as fs from 'node:fs';
+import { createHtmlPlugin } from 'vite-plugin-html';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }): UserConfig => {
@@ -36,6 +37,17 @@ export default defineConfig(({ mode }): UserConfig => {
         outputDir: path.resolve(__dirname, './dist'),
       }),
       VitePWA(),
+      // 构建时调整 html 文件
+      createHtmlPlugin({
+        minify: mode === 'production',
+        entry: 'src/main.ts',
+        inject: {
+          data: {
+            // 模版中的 <%- injectScript %>
+            injectScript: `<script>window.buildTime = '${new Date().toLocaleString()}';</script>`,
+          },
+        },
+      }),
       mkcert({
         force: false,
       }),
