@@ -213,12 +213,14 @@ async function handleSendMessage() {
     ToastManager.warning('不能同时回答多个问题哦！');
     return;
   }
+  const savedInputValue = form.inputValue;
   // 发送消息
   try {
     await startReceivingMsg(form.sessionId, form.inputValue, {
       onPreSaveMsg() {
         form.inputValue = '';
         dialogFixedToBottom.value = true;
+        smallInput.value = true;
         return;
       },
       onThinkMessage() {
@@ -229,7 +231,7 @@ async function handleSendMessage() {
       },
       onFinish() {
         if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
-          dataStore.editDialogTitle(form.sessionId, messageList.value[0].content);
+          dataStore.editDialogTitle(form.sessionId, savedInputValue);
         }
       },
     });
