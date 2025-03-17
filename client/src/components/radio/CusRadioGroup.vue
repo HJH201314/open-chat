@@ -58,10 +58,10 @@ watchEffect(() => {
     const { offsetHeight, offsetTop, offsetWidth, offsetLeft } = selectedElement.value;
 
     barStyle.value = {
-      left: `${offsetLeft}px`,
-      top: `${offsetTop}px`,
-      width: `${offsetWidth}px`,
-      height: `${offsetHeight}px`,
+      left: `${offsetLeft + 3}px`,
+      top: `${offsetTop + 3}px`,
+      width: `${offsetWidth - 6}px`,
+      height: `${offsetHeight - 6}px`,
     };
   } else {
     // 无选中元素时的样式，初始化位置和高度以便动画过渡正常
@@ -93,7 +93,7 @@ watchEffect(() => {
   border-radius: 0.6em;
   background-color: $color-grey-200;
   display: flex;
-  padding: 0.25em;
+  padding: 0;
 
   &-bar {
     position: absolute;

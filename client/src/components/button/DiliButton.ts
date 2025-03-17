@@ -3,9 +3,10 @@ import type { CSSProperties } from "vue";
 export type CusButtonProps = {
   text?: string;
   icon?: string;
-  type?: 'normal' | 'primary' | 'text';
+  type?: 'normal' | 'primary' | 'secondary' | 'text';
   backgroundColor?: string;
   fontColor?: string;
+  minWidth?: CSSProperties['min-width'];
   shadow?: boolean;
   disabled?: boolean;
 

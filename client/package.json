@@ -26,6 +26,7 @@
     "@icon-park/vue-next": "^1.4.2",
     "@liuli-util/tree": "^3.9.0",
     "@microsoft/fetch-event-source": "^2.0.1",
+    "@types/tinycolor2": "^1.4.6",
     "@vueuse/components": "^12.7.0",
     "@vueuse/core": "^12.7.0",
     "@vueuse/integrations": "^12.7.0",
@@ -42,6 +43,7 @@
     "pinia": "^3.0.1",
     "rxjs": "^7.8.2",
     "sass": "^1.85.0",
+    "tinycolor2": "^1.6.0",
     "voice-input-button2": "^1.1.9",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"

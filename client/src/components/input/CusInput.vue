@@ -50,5 +50,9 @@ function handleInput(e: any) {
     background-color: $color-white;
     border: 2px solid $color-primary;
   }
+
+  &:disabled {
+    color: $color-grey-400;
+  }
 }
 </style>

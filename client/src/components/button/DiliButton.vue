@@ -18,24 +18,25 @@ const buttonRef = ref<HTMLButtonElement>();
 const buttonStyle = computed(() => {
   const calcStyle: CSSProperties = {
     'box-shadow': props.shadow ? variables.boxShadow : 'none',
-    'padding': props.text ? '.25rem 1rem' : '.25rem',
+    'padding': props.text ? '0.375rem 1rem' : '.375rem',
     ...props.buttonStyle
   };
   return calcStyle;
 });
 
 const backgroundColor = computed(() => {
+  if (props.backgroundColor) return props.backgroundColor;
   if (props.type == 'primary') {
-    return props.backgroundColor || variables.colorPrimary;
+    return variables.colorPrimary;
   } else {
     return '#FFFFFF';
   }
 });
 const hoverBackgroundColor = computed(() => {
-  return getDarkerColor(backgroundColor.value, 0.1);
+  return getDarkerColor(backgroundColor.value, 0.05);
 });
 const activeBackgroundColor = computed(() => {
-  return getDarkerColor(backgroundColor.value, 0.2);
+  return getDarkerColor(backgroundColor.value, 0.1);
 });
 
 const fontColor = computed(() => {
@@ -47,10 +48,10 @@ const fontColor = computed(() => {
   }
 });
 const hoverFontColor = computed(() => {
-  return getDarkerColor(fontColor.value, 0.1);
+  return getDarkerColor(fontColor.value, 0.05);
 });
 const activeFontColor = computed(() => {
-  return getDarkerColor(fontColor.value, 0.2);
+  return getDarkerColor(fontColor.value, 0.1);
 });
 
 function handleClick() {
@@ -112,6 +113,11 @@ function handleClick() {
       background-color: v-bind(activeBackgroundColor);
       color: v-bind(activeFontColor);
       border: 1px solid v-bind(activeBackgroundColor);
+    }
+
+    > .button-text {
+      font-size: 1rem;
+      line-height: 1;
     }
   }
 

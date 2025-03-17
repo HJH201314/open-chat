@@ -156,7 +156,6 @@ export const useDataStore = defineStore('data', () => {
           {
             page_num: nextPage,
             page_size: 20,
-            sort_expr: 'id ASC',
           },
           {
             signal: controller.signal,

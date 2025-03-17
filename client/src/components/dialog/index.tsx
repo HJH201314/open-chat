@@ -15,6 +15,38 @@ type CommonDialogInstance = {
 export class DialogManager {
   private static instances: Map<string, CommonDialogInstance> = new Map();
 
+  /**
+   * 渲染对话框，提供自动销毁能力
+   * @param ele 通过 h()/jsx 创建的组件，组件根元素需为 CommonDialog 组件
+   */
+  public static renderDialog = (ele: Element) => {
+    const id = getRandomString(5);
+    const wrapper = document.createElement('div');
+    document.querySelector('#app')?.appendChild(wrapper);
+
+    // 使用h函数包装 ele 并注入 onAfterClose
+    const wrappedEle = h(ele, {
+      onAfterClose() {
+        DialogManager.destroy(id);
+      }
+    });
+
+    const dialogComponent = createApp(wrappedEle);
+    initPlugins(dialogComponent);
+    const dialogInstance = dialogComponent.mount(wrapper);
+
+    this.instances.set(id, {
+      dom: wrapper,
+      app: dialogComponent,
+    });
+    return dialogInstance;
+  }
+
+  /**
+   * 创建受控的对话框实例
+   * @param props 对话框属性
+   * @param slots 对话框插槽
+   */
   public static createDialog = (props: CommonDialogProps, slots?: CommonDialogSlots) => {
     // 控制 component 中 CommonDialog 的显隐
     const visible = ref(true);

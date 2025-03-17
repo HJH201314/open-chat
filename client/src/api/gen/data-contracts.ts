@@ -20,6 +20,11 @@ export interface ApiChatCompletionStreamUserInput {
   system_prompt?: string;
 }
 
+export interface ApiChatShareSessionShareRequest {
+  active?: boolean;
+  share_info?: ApiSchemaShareInfo;
+}
+
 export interface ApiEntityCommonResponseAny {
   /** 代码 */
   code?: number;
@@ -128,6 +133,15 @@ export interface ApiEntityCommonResponseSchemaUser {
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseSchemaUserSession {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaUserSession;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseString {
   /** 代码 */
   code?: number;
@@ -162,6 +176,7 @@ export interface ApiSchemaAPIKey {
 }
 
 export interface ApiSchemaExam {
+  created_at?: string;
   /** 考试描述 */
   description?: string;
   id?: number;
@@ -172,6 +187,7 @@ export interface ApiSchemaExam {
   subjects?: string;
   /** 考试总分（单位：0.01分） */
   total_score?: number;
+  updated_at?: string;
 }
 
 export interface ApiSchemaExamProblem {
@@ -234,7 +250,7 @@ export interface ApiSchemaModelCache {
   provider_display_name?: string;
   /** 关联的 Provider ID */
   provider_id?: number;
-  /** 关联的 Provider Name */
+  /** 关联的 Provider FileName */
   provider_name?: string;
   updated_at?: string;
 }
@@ -350,6 +366,17 @@ export interface ApiSchemaSession {
   system_prompt?: string;
 }
 
+export interface ApiSchemaShareInfo {
+  /** 邀请码（可选） */
+  code?: string;
+  /** 邀请过期时间 */
+  expired_at?: number;
+  /** 是否永久分享 */
+  permanent?: boolean;
+  /** 分享标题 */
+  title?: string;
+}
+
 export interface ApiSchemaUser {
   created_at?: string;
   id?: number;
@@ -361,12 +388,13 @@ export interface ApiSchemaUser {
 
 export interface ApiSchemaUserSession {
   created_at?: string;
-  /** 原始数据 */
-  id?: number;
   /** 组装数据 */
   session?: ApiSchemaSession;
   session_id?: string;
+  /** 分享字段 */
+  share_info?: ApiSchemaShareInfo;
   type?: ApiSchemaUserSessionType;
+  /** 原始数据 */
   user_id?: number;
 }
 

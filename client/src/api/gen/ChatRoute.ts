@@ -11,11 +11,13 @@
 
 import type {
   ApiChatCompletionStreamUserInput,
+  ApiChatShareSessionShareRequest,
   ApiEntityCommonResponseArraySchemaModelCache,
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
   ApiEntityCommonResponseSchemaSession,
+  ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
   ApiSchemaSession,
 } from './data-contracts';
@@ -159,6 +161,25 @@ export namespace Chat {
   }
 
   /**
+   * @description 分享会话
+   * @tags Session
+   * @name SessionSharePost
+   * @summary 分享会话
+   * @request POST:/chat/session/share/{session_id}
+   * @response `200` `ApiEntityCommonResponseBool` OK
+   */
+  export namespace SessionSharePost {
+    export type RequestParams = {
+      /** 会话 ID */
+      sessionId: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiChatShareSessionShareRequest;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
    * @description 更新会话
    * @tags Session
    * @name SessionUpdatePost
@@ -175,5 +196,24 @@ export namespace Chat {
     export type RequestBody = ApiSchemaSession;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
+   * @description 获取用户会话
+   * @tags Session
+   * @name SessionUserGet
+   * @summary 获取用户会话
+   * @request GET:/chat/session/user/{session_id}
+   * @response `200` `ApiEntityCommonResponseSchemaUserSession` 返回数据
+   */
+  export namespace SessionUserGet {
+    export type RequestParams = {
+      /** 会话 ID */
+      sessionId: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaUserSession;
   }
 }

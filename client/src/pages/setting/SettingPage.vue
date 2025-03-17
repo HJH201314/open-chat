@@ -344,7 +344,7 @@ function forceReloadPage() {
       column-gap: 0.5rem;
 
       /* 添加竖线 */
-      &:not(&:last-child)::after {
+      &:not(:last-child)::after {
         position: absolute;
         content: '';
         left: calc(100% + var(--gap) / 2);

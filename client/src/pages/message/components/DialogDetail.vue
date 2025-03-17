@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import variables from '@/assets/variables.module.scss';
 import { useAutoScrollbar } from '@/commands/useAutoScrollbar';
 import useGlobal from '@/commands/useGlobal';
@@ -11,9 +11,20 @@ import DialogMessage from '@/pages/message/components/DialogMessage.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore';
 import { useUserStore } from '@/store/useUserStore';
-import { ArrowUp, Back, CollapseTextInput, Control, Delete, DoubleDown, Edit, Refresh, WrongUser } from '@icon-park/vue-next';
+import {
+  ArrowUp,
+  Back,
+  CollapseTextInput,
+  Control,
+  Delete,
+  DoubleDown,
+  Edit,
+  Refresh,
+  Share,
+  WrongUser,
+} from '@icon-park/vue-next';
 import { until, useElementSize, useFocusWithin, useScroll, watchArray } from '@vueuse/core';
-import { computed, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useModelStore } from '@/store/useModelStore.ts';
 import { storeToRefs } from 'pinia';
 import { scrollToBottom } from '@/utils/element.ts';
@@ -25,6 +36,9 @@ import LoadingModal from '@/components/modal/LoadingModal.vue';
 import type { MessageInfo } from '@/types/data.ts';
 import genApi from '@/api/gen-api.ts';
 import CusTooltip from '@/components/tooltip/CusTooltip.vue';
+import api from '@/api';
+import CusInput from '@/components/input/CusInput.vue';
+import ShareDialog from '@/pages/message/components/ShareDialog.vue';
 
 interface DialogDetailProps {
   dialogId: string;
@@ -46,7 +60,9 @@ const { providerDropdown } = storeToRefs(useModelStore());
 const isEmptySession = computed(() => messageList.value.length == 0);
 
 const form = reactive({
-  hasPermission: computed(() => userStore.isLogin && (!sessionInfo.value.userId || (sessionInfo.value.userId == userStore.userId))),
+  hasPermission: computed(
+    () => userStore.isLogin && (!sessionInfo.value.userId || sessionInfo.value.userId == userStore.userId)
+  ),
   sessionId: ref(''),
   withContext: ref(false),
   providerName: ref(''),
@@ -281,6 +297,14 @@ function handleActionTipClick() {
   }
 }
 
+function handleShareDialog() {
+  if (!checkPermission()) return;
+
+  const dialog = DialogManager.renderDialog(h(ShareDialog, {
+    sessionId: form.sessionId,
+  }));
+}
+
 // 从服务器同步数据
 const messageSyncing = ref(false);
 
@@ -417,6 +441,11 @@ const { isSmallScreen } = useGlobal();
         </span>
         <span class="dialog-detail-actions-subtitle"> {{ messageList.length }} 条消息 </span>
       </div>
+      <CusTooltip text="分享对话" position="bottom">
+        <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="handleShareDialog">
+          <Share size="16" />
+        </IconButton>
+      </CusTooltip>
       <CusTooltip text="刷新对话列表" position="bottom">
         <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="handleSyncDialog">
           <cus-spin :show="messageSyncing">
@@ -733,7 +762,8 @@ $dialog-max-width: 54rem;
           transform: scale(0.875);
         }
 
-        &:hover, &:active {
+        &:hover,
+        &:active {
           background: $color-primary-darker;
           box-shadow: $box-shadow-deeper;
 
@@ -743,7 +773,8 @@ $dialog-max-width: 54rem;
               0% {
                 transform: translateY(150%);
               }
-              30%, 70% {
+              30%,
+              70% {
                 transform: translateY(0%);
               }
               100% {

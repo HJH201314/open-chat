@@ -11,11 +11,13 @@
 
 import type {
   ApiChatCompletionStreamUserInput,
+  ApiChatShareSessionShareRequest,
   ApiEntityCommonResponseArraySchemaModelCache,
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
   ApiEntityCommonResponseSchemaSession,
+  ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
   ApiSchemaSession,
 } from './data-contracts';
@@ -171,6 +173,24 @@ export class Chat<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description 分享会话
+   *
+   * @tags Session
+   * @name SessionSharePost
+   * @summary 分享会话
+   * @request POST:/chat/session/share/{session_id}
+   * @response `200` `ApiEntityCommonResponseBool` OK
+   */
+  sessionSharePost = (sessionId: string, req: ApiChatShareSessionShareRequest, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/chat/session/share/${sessionId}`,
+      method: 'POST',
+      body: req,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
    * @description 更新会话
    *
    * @tags Session
@@ -184,6 +204,23 @@ export class Chat<SecurityDataType = unknown> {
       path: `/chat/session/update/${sessionId}`,
       method: 'POST',
       body: req,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 获取用户会话
+   *
+   * @tags Session
+   * @name SessionUserGet
+   * @summary 获取用户会话
+   * @request GET:/chat/session/user/{session_id}
+   * @response `200` `ApiEntityCommonResponseSchemaUserSession` 返回数据
+   */
+  sessionUserGet = (sessionId: string, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaUserSession, any>({
+      path: `/chat/session/user/${sessionId}`,
+      method: 'GET',
       type: ContentType.Json,
       format: 'json',
       ...params,

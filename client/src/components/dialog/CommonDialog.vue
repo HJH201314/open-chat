@@ -98,7 +98,9 @@ defineExpose<CommonDialogExpose>({
       </main>
       <hr v-if="showCancel || (showConfirm && content)" />
       <footer>
-        <slot name="action"></slot>
+        <div style="flex: 1;">
+          <slot name="action"></slot>
+        </div>
         <DiliButton
           v-if="showCancel"
           style="margin-left: auto"
@@ -139,10 +141,6 @@ defineExpose<CommonDialogExpose>({
     padding: 0 0.5rem;
     min-height: 0;
     overflow-y: auto;
-
-    > &:not(:last-child) {
-      margin-bottom: 0.5rem;
-    }
   }
 
   > footer {
