@@ -5,6 +5,7 @@ import { noPaddingKey, siteLoadingKey } from '@/constants/eventBusKeys';
 import { useEventBus } from '@vueuse/core';
 import { ref, useTemplateRef } from 'vue';
 import CusFullSiteProgress from '@/components/progress/CusFullSiteProgress.vue';
+import CusThemeProvider from '@/components/theme/CusThemeProvider.ts';
 
 const siteProgressRef = useTemplateRef('site-progress');
 const siteProgressBus = useEventBus(siteLoadingKey);
@@ -24,11 +25,13 @@ noPaddingBus.on((v) => {
 
 <template>
   <div class="app-base">
-    <CusFullSiteProgress ref="site-progress" />
-    <SideBar />
-    <div :class="{ 'no-padding': !showPadding }" class="app-base-panel">
-      <Panel />
-    </div>
+    <CusThemeProvider>
+      <CusFullSiteProgress ref="site-progress" />
+      <SideBar />
+      <div :class="{ 'no-padding': !showPadding }" class="app-base-panel">
+        <Panel />
+      </div>
+    </CusThemeProvider>
   </div>
 </template>
 

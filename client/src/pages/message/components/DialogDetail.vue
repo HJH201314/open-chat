@@ -161,6 +161,7 @@ defineExpose({
         <DialogMessage
           v-show="!isReceivingMsg && !isEmptySession && inputUserInput"
           id="user-typing-box"
+          key="user-typing-box"
           :markdown-render="false"
           :message="inputUserInput"
           role="user"

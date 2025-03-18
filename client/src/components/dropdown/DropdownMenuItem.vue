@@ -1,14 +1,11 @@
 <template>
-  <li
-    ref="menu-item"
-    v-element-hover="(state) => handleHover(state)"
-    class="menu-item"
-    @click.stop="handleClick(option)"
-  >
-    <div>
-      <span>{{ option.label }}</span>
+  <li ref="menu-item" v-element-hover="(state) => handleHover(state)" class="menu-item">
+    <div ref="menu-item-body" class="menu-item-body" @click="handleClick">
+      <div style="flex: 1">
+        <span>{{ option.label }}</span>
+      </div>
+      <Right v-if="option.children" class="arrow" style="margin-left: auto"></Right>
     </div>
-    <Right v-if="option.children" class="arrow" style="margin-left: auto"></Right>
     <dropdown-menu
       v-if="option.children"
       v-model:current-showing-path="currentShowingPath"
@@ -48,7 +45,7 @@ const props = withDefaults(
 const currentShowingPath = defineModel<string[]>('currentShowingPath');
 const frontPath = useArrayFilter(
   () => currentShowingPath.value ?? [],
-  (v, i) => {
+  (_, i) => {
     return i < props._depth - 1;
   }
 );
@@ -90,17 +87,21 @@ function handleHover(state: boolean) {
 const { isLargeScreen } = useGlobal();
 
 // 处理菜单项点击
-function handleClick(option: DropdownOption) {
-  if (option.children && option.children.length) {
+function handleClick() {
+  if (props.option.children && props.option.children.length) {
     isLargeScreen.value && isSubMenuOpen.value ? hideSubMenu() : showSubMenu();
   } else {
-    emit('select', option.value, option, [...props._valuePath, option.value]);
+    emit('select', props.option.value, props.option, [...props._valuePath, props.option.value]);
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .menu-item {
+  min-width: 5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   white-space: nowrap;
 
   &:not(:last-child):first-child {
@@ -113,6 +114,13 @@ function handleClick(option: DropdownOption) {
 
   &:is(:first-child):last-child {
     border-radius: 8px;
+  }
+
+  &-body {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 }
 </style>

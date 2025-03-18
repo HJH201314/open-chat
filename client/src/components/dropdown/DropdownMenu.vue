@@ -23,6 +23,7 @@ import DropdownMenuItem from '@/components/dropdown/DropdownMenuItem.vue';
 import type { DropdownMenuEmits, DropdownMenuInnerProps, DropdownOption } from '@/components/dropdown/types';
 import { useElementBounding } from '@vueuse/core';
 import { computed, defineEmits, defineProps, reactive, useTemplateRef } from 'vue';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(
   defineProps<
@@ -36,6 +37,8 @@ const props = withDefaults(
     position: 'bottom',
   }
 );
+
+const { theme } = useTheme();
 
 const currentShowingPath = defineModel<string[]>('currentShowingPath');
 
@@ -132,7 +135,7 @@ const emit = defineEmits<DropdownMenuEmits>();
     }
 
     &.selected {
-      color: $color-primary;
+      color: v-bind('theme.colorPrimary');
     }
   }
 }

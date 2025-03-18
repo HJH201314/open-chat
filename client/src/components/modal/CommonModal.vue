@@ -112,9 +112,9 @@ defineExpose<CommonModalFunc>({
 </script>
 
 <template>
-  <Teleport :to="teleportTo" :disabled="!teleportTo">
+  <Teleport :to="teleportTo" :disabled="!teleportTo" :defer="true">
     <Transition name="show" @after-leave="afterClose">
-      <div v-if="showModal" :style="{ ...props.maskStyle, 'z-index': zIndex }" class="modal-mask">
+      <div v-if="showModal" ref="modal" :style="{ ...props.maskStyle, 'z-index': zIndex }" class="modal-mask">
         <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
         <div
           ref="modal-body"
