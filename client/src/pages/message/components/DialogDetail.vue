@@ -20,7 +20,7 @@ interface Props {
   isLogin: boolean;
   messageSyncing: boolean;
   isReceivingMsg: boolean;
-  answerMsgId: number; // 用于判断当前正在输出的消息，进行异化展示
+  answerMsgId?: number; // 用于判断当前正在输出的消息，进行异化展示
   answerMsg: string;
   thinkMsg: string;
   isSmallScreen: boolean;

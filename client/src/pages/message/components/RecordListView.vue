@@ -9,7 +9,18 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { CloseOne, Plus, Refresh, Search } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, h, onMounted, onActivated, onDeactivated, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import {
+  computed,
+  h,
+  onActivated,
+  onDeactivated,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch,
+  watchEffect,
+} from 'vue';
 import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
@@ -252,10 +263,17 @@ const { arrivedState } = useScroll(dialogListRef);
       </div>
     </div>
     <div v-if="!displayList.length" class="dialog-list-empty">
-      <DiliButton v-if="!userStore.isLogin" type="primary" text="登录" :button-style="{ width: '3rem' }" @click="() => goToLogin()" />
+      <DiliButton
+        v-if="!userStore.isLogin"
+        type="primary"
+        text="登录"
+        :button-style="{ width: '3rem' }"
+        @click="() => goToLogin()"
+      />
       {{ userStore.isLogin ? '快来新建对话吧' : '后即可查看' }}
     </div>
     <LoadingModal
+      v-if="recordListViewRef"
       :teleport-to="recordListViewRef"
       :visible="dataStore.isFetchingSessions"
       color="var(--color-primary)"
