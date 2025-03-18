@@ -1,20 +1,21 @@
 import api from '@/api';
 import useMarkdownIt from '@/commands/useMarkdownIt';
-import showToast, { quickToast } from '@/components/toast/toast.ts';
+import showToast from '@/components/toast/toast.ts';
 import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { MessageInfo, SessionInfo } from '@/types/data.ts';
 import { CommandParser, useCommandParser } from '@/utils/command-parser';
-import { watchArray, watchThrottled } from '@vueuse/core';
+import { useToggle, watchArray, watchThrottled } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, shallowRef } from 'vue';
+import { reactive, ref, shallowRef, watch } from 'vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import { from, useObservable } from '@vueuse/rxjs';
+import { toObserver, useSubscription } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
 import { db } from '@/store/data/database.ts';
 import genApi from '@/api/gen-api.ts';
 import { useModelStore } from '@/store/useModelStore.ts';
-import type { ApiSchemaSession, ApiSchemaUserSession } from '@/api/gen/data-contracts.ts';
+import type { ApiSchemaUserSession } from '@/api/gen/data-contracts.ts';
+import { useUserStore } from '@/store/useUserStore.ts';
 
 interface MessageCallback {
   // 预保存数据后的回调
@@ -35,9 +36,23 @@ interface MessageCallback {
 
 /* 数据相关 TODO: 迁移与单个 session 相关的操作到 useSession */
 export const useDataStore = defineStore('data', () => {
-  const sessions = useObservable(from(liveQuery(async () => db.sessions.orderBy('createAt').reverse().toArray())), {
-    initialValue: [] as SessionInfo[],
-  });
+  const userStore = useUserStore();
+
+  const sessions = ref<SessionInfo[]>([]);
+
+  // userId 切换时，订阅新的 query
+  watch(
+    () => userStore.userId,
+    (newUserId) => {
+      // 订阅 session
+      useSubscription(
+        liveQuery(async () => {
+          return (await db.sessions.where({ userId: newUserId }).reverse().sortBy('createAt')) || ({} as SessionInfo);
+        }).subscribe(toObserver(sessions))
+      );
+    },
+    { immediate: true }
+  );
 
   const roleStore = useRoleStore();
   const modelStore = useModelStore();
@@ -142,12 +157,14 @@ export const useDataStore = defineStore('data', () => {
     }
   }
 
+  const [isFetchingSessions, changeFetchingStatus] = useToggle(false);
   /**
    * 从服务器拉取会话
    */
   async function fetchSessions(abortController?: AbortController) {
     const controller = abortController || new AbortController();
     const remoteSessions: ApiSchemaUserSession[] = [];
+    changeFetchingStatus(true);
     // 获取所有远程数据
     let nextPage = 1;
     while (nextPage) {
@@ -166,6 +183,7 @@ export const useDataStore = defineStore('data', () => {
         else break;
       } catch (_) {
         ToastManager.danger('刷新数据异常，请稍后重试~');
+        changeFetchingStatus(false);
         return false;
       }
     }
@@ -200,8 +218,10 @@ export const useDataStore = defineStore('data', () => {
       db.sessions.bulkAdd(newSessions);
     } catch (_) {
       ToastManager.danger('刷新数据异常，请稍后重试~');
+      changeFetchingStatus(false);
       return false;
     }
+    changeFetchingStatus(false);
     return true;
   }
 
@@ -315,7 +335,7 @@ export const useDataStore = defineStore('data', () => {
         } else if (event.event === 'cmd') {
           await handleCommand(new CommandParser(event.data, true).parseJSON());
         }
-      },
+      }
     );
   };
 
@@ -363,7 +383,7 @@ export const useDataStore = defineStore('data', () => {
     const innerCleanEffects = () => {
       isStreaming.value = false;
       clearTimeout(timeout);
-    }
+    };
 
     const startTimeout = () => {
       clearTimeout(timeout);
@@ -469,6 +489,7 @@ export const useDataStore = defineStore('data', () => {
 
   return {
     sessions,
+    isFetchingSessions,
     fetchSessions,
     updateSessionFlags,
     addDialog: addSession,

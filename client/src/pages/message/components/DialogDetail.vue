@@ -192,10 +192,9 @@ defineExpose({
         v-model:input-with-context="inputWithContext"
         :input-model-name="inputModelName"
         :provider-dropdown="providerDropdown"
-        :is-small-screen="isSmallScreen"
-        :is-empty-session="isEmptySession"
-        :is-receiving-msg="isReceivingMsg"
-        :message-syncing="messageSyncing"
+        :display-in-middle="isEmptySession && !isSmallScreen"
+        :is-streaming="isReceivingMsg"
+        :hide-self="messageSyncing"
         @send="$emit('send')"
         @model-select="$emit('modelSelect', $event)"
       />

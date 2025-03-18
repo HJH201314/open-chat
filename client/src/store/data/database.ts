@@ -15,7 +15,7 @@ const db = new Dexie('ChatDatabase') as Dexie & {
 
 // Schema declaration:
 db.version(1).stores({
-  sessions: '++, &id, title, avatar, botRole, createAt, withContext, provider, model, flags',
+  sessions: '++, &id, *userId, [id+userId], title, avatar, botRole, createAt, withContext, provider, model, flags',
   messages: '++id, *sessionId, [id+sessionId], remoteId, time, sender, type, content, reasoningContent, htmlContent',
 });
 

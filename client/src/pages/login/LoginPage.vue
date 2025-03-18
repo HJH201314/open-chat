@@ -238,6 +238,7 @@ function showUserAgreement() {
     top: 0.5rem;
     right: 0.5rem;
     display: flex;
+    align-items: center;
     gap: 0.5rem;
   }
 

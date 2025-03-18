@@ -9,18 +9,16 @@ import { ref } from 'vue';
 
 interface Props {
   providerDropdown: DropdownOption[];
-  isSmallScreen: boolean;
-  isEmptySession: boolean;
-  isReceivingMsg: boolean;
-  messageSyncing: boolean;
+  displayInMiddle: boolean;
+  isStreaming: boolean;
+  hideSelf: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   providerDropdown: () => [],
-  isSmallScreen: false,
-  isEmptySession: false,
-  isReceivingMsg: false,
-  messageSyncing: false,
+  displayInMiddle: false,
+  isStreaming: false,
+  hideSelf: false,
 });
 
 const inputModelName = defineModel<string>('inputModelName', { default: '' });
@@ -54,9 +52,9 @@ function handleModelSelect(selectPath: string[]) {
 <template>
   <div
     :class="{
-      'dialog-input--first': isEmptySession && !isSmallScreen,
+      'dialog-input--first': displayInMiddle,
       'small-input': smallInput,
-      hide: messageSyncing,
+      hide: hideSelf,
     }"
     class="dialog-input"
   >
@@ -90,7 +88,7 @@ function handleModelSelect(selectPath: string[]) {
       @keydown="handleInputKeydown"
     />
     <div class="dialog-input-send" @click="$emit('send')">
-      <ArrowUp v-if="!isReceivingMsg" class="sending" fill="white" size="16" />
+      <ArrowUp v-if="!isStreaming" class="sending" fill="white" size="16" />
       <cus-spin v-else />
     </div>
   </div>

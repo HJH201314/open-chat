@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { type CusRadioGroupProps, RadioGroupInjectionKey } from '@/components/radio/types.ts';
 import { getRandomString } from '@/utils/string.ts';
-import { computed, type CSSProperties, provide, reactive, ref, toRefs, watchEffect } from 'vue';
+import {
+  computed,
+  type CSSProperties,
+  provide,
+  reactive,
+  ref,
+  toRefs,
+  watchEffect,
+  onMounted,
+  onUnmounted,
+  useTemplateRef, watch,
+} from 'vue';
 import { useEventListener } from '@vueuse/core';
 
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
@@ -77,18 +88,45 @@ function positionBar() {
   }
 }
 
-watchEffect(() => {
-  positionBar();
+watch(() => selectedElement.value, () => {
+  requestUpdateBarPosition();
 });
 
-// 监听窗口大小变化
-useEventListener(window, 'resize', () => {
-  positionBar();
+const radioGroupRef = useTemplateRef('radio-group');
+let resizeObserver: ResizeObserver | null = null;
+let rafId: number | null = null;
+
+function requestUpdateBarPosition() {
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+  }
+  rafId = requestAnimationFrame(() => {
+    positionBar();
+    rafId = null;
+  });
+}
+
+onMounted(() => {
+  if (radioGroupRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      requestUpdateBarPosition();
+    });
+    resizeObserver.observe(radioGroupRef.value);
+  }
+});
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  }
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+  }
 });
 </script>
 
 <template>
-  <fieldset class="cus-radio-group">
+  <fieldset ref="radio-group" class="cus-radio-group">
     <div class="cus-radio-group-bar" :class="{ [typeClassName]: !!typeClassName }" :style="barStyle"></div>
     <slot></slot>
   </fieldset>

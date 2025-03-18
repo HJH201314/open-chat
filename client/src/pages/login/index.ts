@@ -2,11 +2,21 @@ import CommonModal from '@/components/modal/CommonModal.vue';
 import LoginPage from '@/pages/login/LoginPage.vue';
 import initPlugins from '@/utils/initPlugins';
 import { createApp, h, ref } from 'vue';
+import useGlobal from '@/commands/useGlobal.ts';
+import router from '@/plugins/router.ts';
+
+export const goToLogin = () => {
+  if (useGlobal().isLargeScreen.value) {
+    showLoginDialog();
+  } else {
+    router.push('/login');
+  }
+};
 
 /**
  * 弹出登录弹窗
  */
-export const showLoginDialog = async () => {
+export const showLoginDialog = () => {
   // 创建挂载点
   const mountDiv = document.createElement('div');
   document.querySelector('#app')?.appendChild(mountDiv);

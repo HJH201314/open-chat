@@ -9,12 +9,14 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { CloseOne, Plus, Refresh, Search } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, h, onMounted, onActivated, onDeactivated, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { onClickOutside, until, useScroll } from '@vueuse/core';
+import LoadingModal from '@/components/modal/LoadingModal.vue';
+import { goToLogin } from '@/pages/login';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -26,16 +28,22 @@ const settingStore = useSettingStore();
 const currentSessionId = useRouteParams<string>('sessionId');
 
 onMounted(() => {
-  dataStore.$subscribe((_, state) => {
-    // 挂载时，如果没有对话数据，需要尝试刷新对话
-    if (!state.sessions.length) {
-      if (userStore.isLogin) {
-        dataStore.fetchSessions();
-      } else {
-        router.replace('/login');
-      }
-    }
-  });
+  // 页面首次加载时检查是否需要刷新
+  if (!dataStore.sessions.length && userStore.isLogin) {
+    dataStore.fetchSessions();
+  }
+});
+
+// 添加页面激活时的刷新逻辑
+onActivated(() => {
+  if (!dataStore.sessions.length && userStore.isLogin) {
+    dataStore.fetchSessions();
+  }
+});
+
+// 添加页面失活时的清理逻辑（如果需要的话）
+onDeactivated(() => {
+  // 可以在这里添加清理逻辑
 });
 
 async function handleAddRecord(roleId?: number) {
@@ -135,11 +143,13 @@ const searchForm = reactive({
 });
 
 const searchInputRef = useTemplateRef('search-input');
+
 async function handleSearchIconClick() {
   searchForm.inputting = true;
   await until(() => searchInputRef.value).not.toBeNull();
   searchInputRef.value?.focus();
 }
+
 onClickOutside(useTemplateRef('search-bar'), () => {
   searchForm.inputting = false;
 });
@@ -165,20 +175,30 @@ const displayList = computed(() => {
 });
 
 const dialogListRef = useTemplateRef('dialog-list');
+const recordListViewRef = useTemplateRef('record-list-view');
 const { arrivedState } = useScroll(dialogListRef);
 </script>
 <template>
   <!-- 角色列表 -->
-  <div class="dialog-list">
-    <div class="dialog-list-bar" :class="{ 'shadow': !arrivedState.top }">
+  <div ref="record-list-view" class="dialog-list">
+    <div class="dialog-list-bar" :class="{ shadow: !arrivedState.top }">
       <div
         ref="search-bar"
         :class="{ 'dialog-list-bar-search': searchForm.inputting, 'dialog-list-action-button': !searchForm.inputting }"
         @click="handleSearchIconClick"
       >
         <Search size="1.2rem" />
-        <input v-show="searchForm.inputting" ref="search-input" v-model="searchForm.searchVal" placeholder="搜索对话内容" />
-        <span v-if="searchForm.inputting && searchForm.searchVal" class="dialog-list-bar-search-reset" @click="searchForm.searchVal = ''">
+        <input
+          v-show="searchForm.inputting"
+          ref="search-input"
+          v-model="searchForm.searchVal"
+          placeholder="搜索对话内容"
+        />
+        <span
+          v-if="searchForm.inputting && searchForm.searchVal"
+          class="dialog-list-bar-search-reset"
+          @click="searchForm.searchVal = ''"
+        >
           <CloseOne theme="filled" />
         </span>
       </div>
@@ -231,6 +251,16 @@ const { arrivedState } = useScroll(dialogListRef);
         </div>
       </div>
     </div>
+    <div v-if="!displayList.length" class="dialog-list-empty">
+      <DiliButton v-if="!userStore.isLogin" type="primary" text="登录" :button-style="{ width: '3rem' }" @click="() => goToLogin()" />
+      {{ userStore.isLogin ? '快来新建对话吧' : '后即可查看' }}
+    </div>
+    <LoadingModal
+      :teleport-to="recordListViewRef"
+      :visible="dataStore.isFetchingSessions"
+      color="var(--color-primary)"
+      tip="努力加载中..."
+    ></LoadingModal>
   </div>
 </template>
 <style lang="scss" scoped>
@@ -343,7 +373,9 @@ const { arrivedState } = useScroll(dialogListRef);
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: color, background-color 0.2s $ease-out-circ;
+    transition:
+      color,
+      background-color 0.2s $ease-out-circ;
     opacity: 0.6;
     box-shadow: $box-shadow-shallower;
 
@@ -384,8 +416,9 @@ const { arrivedState } = useScroll(dialogListRef);
     &-center {
       flex: 1;
       display: grid;
-      grid-template-areas: "title title"
-                           "digest datetime";
+      grid-template-areas:
+        'title title'
+        'digest datetime';
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
@@ -419,6 +452,21 @@ const { arrivedState } = useScroll(dialogListRef);
         text-align: right;
       }
     }
+  }
+
+  &-empty {
+    text-wrap: nowrap;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: $color-primary;
+    font-size: 1.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 }
 

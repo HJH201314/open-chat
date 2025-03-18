@@ -139,7 +139,6 @@ const isEmptyTipAvailable = ref(true);
     text-align: center;
     color: $color-primary;
     font-size: 2rem;
-    font-weight: bold;
   }
 }
 

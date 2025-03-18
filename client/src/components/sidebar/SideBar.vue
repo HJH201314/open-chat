@@ -5,7 +5,7 @@ import showToast from '@/components/toast/toast';
 import ToastManager from '@/components/toast/ToastManager';
 import Tooltip from '@/components/tooltip/CusTooltip.vue';
 import { toggleSidebarKey } from '@/constants/eventBusKeys';
-import { showLoginDialog } from '@/pages/login';
+import { goToLogin } from '@/pages/login';
 import SettingPage from '@/pages/setting/SettingPage.vue';
 import { useUserStore } from '@/store/useUserStore';
 import { Github, Home, Login, Logout, MenuFold, MenuUnfold, Message, SettingTwo, User } from '@icon-park/vue-next';
@@ -147,11 +147,7 @@ function handleLogin() {
   if (userStore.isLogin) {
     userStore.logout();
   } else {
-    if (isLargeScreen.value) {
-      showLoginDialog();
-    } else {
-      router.push('/login');
-    }
+    goToLogin();
   }
 }
 
