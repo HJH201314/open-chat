@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import useGlobal from '@/commands/useGlobal';
-import RecordList from '@/pages/message/components/RecordList.vue';
+import RecordListView from '@/pages/message/components/RecordListView.vue';
 import { noPaddingKey, toggleSidebarKey } from '@/constants/eventBusKeys';
-import DialogDetail from '@/pages/message/components/DialogDetail.vue';
+import ChatDetailView from '@/pages/message/components/ChatDetailView.vue';
 import { useEventBus } from '@vueuse/core';
 import { useRouteParams } from '@vueuse/router';
 import { computed, reactive, ref, watchEffect } from 'vue';
@@ -10,9 +10,6 @@ import { useRouter } from 'vue-router';
 
 const currentRecord = reactive({
   id: '',
-  title: '',
-  dialogNum: 0,
-  createAt: '',
 });
 
 // 路由处理，根据 sessionId 退出或进入详情
@@ -57,7 +54,7 @@ const isEmptyTipAvailable = ref(true);
 <template>
   <div class="message-page">
     <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
-      <RecordList
+      <RecordListView
         v-show="showListView"
         :class="{ 'message-page-record-list-absolute': !isLargeScreen }"
         class="message-page-record-list transition-all-circ"
@@ -70,7 +67,7 @@ const isEmptyTipAvailable = ref(true);
         @before-enter="isEmptyTipAvailable = false"
         @after-leave="isEmptyTipAvailable = true"
       >
-        <DialogDetail
+        <ChatDetailView
           v-if="showDialogView && currentRecord.id"
           id="dialog-detail-view"
           :dialog-id="currentRecord.id"

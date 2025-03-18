@@ -18,17 +18,25 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
   const messages = ref<MessageInfo[]>([]);
 
   // sessionId 切换时，订阅新的 query
-  watch(() => resolvedSessionId.value, (newSessionId) => {
-    // 订阅 session
-    useSubscription(liveQuery(async () => {
-      return await db.sessions.where({ id: resolvedSessionId.value }).last() || ({} as SessionInfo);
-    }).subscribe(toObserver(session)));
+  watch(
+    () => resolvedSessionId.value,
+    (newSessionId) => {
+      // 订阅 session
+      useSubscription(
+        liveQuery(async () => {
+          return (await db.sessions.where({ id: resolvedSessionId.value }).last()) || ({} as SessionInfo);
+        }).subscribe(toObserver(session))
+      );
 
-    // 订阅 message
-    useSubscription(liveQuery(async () => {
-      return db.messages.where({ sessionId: newSessionId }).reverse().sortBy('time');
-    }).subscribe(toObserver(messages)));
-  });
+      // 订阅 message
+      useSubscription(
+        liveQuery(async () => {
+          return db.messages.where({ sessionId: newSessionId }).reverse().sortBy('time');
+        }).subscribe(toObserver(messages))
+      );
+    },
+    { immediate: true }
+  );
 
   async function addMessage(msg: MessageInfo) {
     return db.messages.add(msg);
@@ -78,10 +86,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
           type: 'text',
           content: v.content,
           reasoningContent: JSON.parse(`"${v.reasoning_content}"`),
-          htmlContent:
-            v.role == 'assistant'
-              ? renderMarkdown(v.content)
-              : v.content,
+          htmlContent: v.role == 'assistant' ? renderMarkdown(v.content) : v.content,
         }) as MessageInfo
     );
     try {

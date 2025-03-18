@@ -2,6 +2,7 @@
 import { type CusRadioGroupProps, RadioGroupInjectionKey } from '@/components/radio/types.ts';
 import { getRandomString } from '@/utils/string.ts';
 import { computed, type CSSProperties, provide, reactive, ref, toRefs, watchEffect } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
   modelValue: '',
@@ -53,7 +54,8 @@ const barStyle = ref<CSSProperties>({
   width: '0',
   height: '0',
 });
-watchEffect(() => {
+
+function positionBar() {
   if (selectedElement.value) {
     const { offsetHeight, offsetTop, offsetWidth, offsetLeft } = selectedElement.value;
 
@@ -72,8 +74,16 @@ watchEffect(() => {
       width: '1em',
       height: 'calc(100% - 0.5em)',
     };
-    console.log(JSON.stringify(barStyle.value), typeClassName);
   }
+}
+
+watchEffect(() => {
+  positionBar();
+});
+
+// 监听窗口大小变化
+useEventListener(window, 'resize', () => {
+  positionBar();
 });
 </script>
 
@@ -93,6 +103,7 @@ watchEffect(() => {
   border-radius: 0.6em;
   background-color: $color-grey-200;
   display: flex;
+  flex-wrap: wrap;
   padding: 0;
 
   &-bar {

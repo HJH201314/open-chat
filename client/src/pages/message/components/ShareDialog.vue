@@ -19,12 +19,12 @@ const props = defineProps<{
 
 const { session: sessionInfo } = useSession(props.sessionId);
 
-const savedRemoteUserSessionConfig = ref({} as ApiSchemaShareInfo);
+const savedRemoteUserSessionShare = ref({} as ApiSchemaShareInfo);
 const expiredTimeText = computed(() =>
-  savedRemoteUserSessionConfig.value.permanent
+  savedRemoteUserSessionShare.value.permanent
     ? ' (永久)'
-    : new Date(savedRemoteUserSessionConfig.value.expired_at || 0).getTime() > Date.now()
-      ? ` (${new Date(savedRemoteUserSessionConfig.value.expired_at || 0).toLocaleString()}到期)`
+    : new Date(savedRemoteUserSessionShare.value.expired_at || 0).getTime() > Date.now()
+      ? ` (${new Date(savedRemoteUserSessionShare.value.expired_at || 0).toLocaleString()}到期)`
       : ''
 );
 const form = reactive<{
@@ -60,12 +60,8 @@ async function refreshSessionShareInfo(type: 'refresh' | 'get' = 'get') {
     const sessionRes = await genApi.Chat.sessionUserGet(props.sessionId);
     const shareInfo = sessionRes.data.data?.share_info;
     if (shareInfo) {
-      savedRemoteUserSessionConfig.value = {
-        code: shareInfo.code,
-        title: shareInfo.title,
-        expired_at: shareInfo.expired_at,
-      };
-      console.log(savedRemoteUserSessionConfig.value);
+      savedRemoteUserSessionShare.value = JSON.parse(JSON.stringify(shareInfo)) as ApiSchemaShareInfo;
+      console.log(savedRemoteUserSessionShare.value);
       form.isActive = shareInfo.permanent || new Date(shareInfo.expired_at || 0).getTime() > Date.now();
       form.code = shareInfo.code || '';
       type == 'get' && (form.title = shareInfo.title || '');
@@ -159,7 +155,7 @@ defineExpose({
       <div v-if="loadFinished" class="share-dialog__body">
         <CusInput v-model="form.title" placeholder="分享名称（默认为对话标题）" :disabled="form.isActive" />
         <Transition mode="out-in">
-          <div v-if="!form.isActive" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap">
+          <div v-if="!form.isActive" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
             <CusRadioGroup v-model="form.expirePeriod" style="flex-shrink: 0">
               <CusRadioButton value="forever" label="永久" />
               <CusRadioButton value="1hour" label="1小时" />
@@ -168,14 +164,16 @@ defineExpose({
               <CusRadioButton value="30day" label="30天" />
               <CusRadioButton value="any" label="自定义" />
             </CusRadioGroup>
-            <CusInput
-              v-if="form.expirePeriod == 'any'"
-              v-model.number="form.expireDays"
-              :input-attrs="{ type: 'number' }"
-              placeholder="时间（天）"
-              style="flex-shrink: 1"
-            />
-            <span v-if="form.expirePeriod == 'any'">天</span>
+            <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem;">
+              <CusInput
+                v-if="form.expirePeriod == 'any'"
+                v-model.number="form.expireDays"
+                :input-attrs="{ type: 'number' }"
+                placeholder="时间（天）"
+                style="flex-shrink: 1; flex-basis: 5rem"
+              />
+              <span v-if="form.expirePeriod == 'any'">天</span>
+            </div>
           </div>
           <div v-else style="display: flex; gap: 0.5rem; align-items: center">
             <CusInput v-model="form.link" placeholder="分享链接" disabled />
@@ -192,10 +190,10 @@ defineExpose({
       </div>
     </template>
     <template #action>
-      <div v-if="loadFinished" style="display: flex; gap: 0.5rem; align-items: center">
+      <div v-if="loadFinished" style="display: flex; gap: 0.5rem; align-items: center;">
         <CusToggle
           v-model="form.isActive"
-          :label="form.isActive ? `已公开分享${expiredTimeText}` : '未公开分享'"
+          :label="form.isActive ? `已公开${expiredTimeText}` : '未公开'"
           :highlight="form.isActive"
           style="flex-shrink: 0"
           @change="handleToggleActive"
