@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { DoubleDown } from '@icon-park/vue-next';
 import { until, useElementSize, useScroll } from '@vueuse/core';
-import { computed, useTemplateRef, watch } from 'vue';
+import { computed, type Ref, useTemplateRef, watch } from 'vue';
 import DialogAction from './DialogAction.vue';
 import DialogInput from './DialogInput.vue';
 import DialogMessage from './DialogMessage.vue';
@@ -61,9 +61,9 @@ const emit = defineEmits<{
 
 const dialogDetailRef = useTemplateRef('dialog-detail');
 const dialogListRef = useTemplateRef('dialog-list');
-const inputPanelRef = useTemplateRef('input-panel');
+const inputPanelRef = useTemplateRef<HTMLElement>('input-panel');
 
-const { height: panelHeight } = useElementSize(inputPanelRef);
+const { height: panelHeight } = useElementSize(() => inputPanelRef.value);
 const panelPlaceholderPx = computed(() => `${panelHeight.value + 12}px`);
 const fixDialogToBottomPx = computed(() => `${panelHeight.value + 12}px`);
 
