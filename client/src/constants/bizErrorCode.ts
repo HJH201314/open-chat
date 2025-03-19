@@ -5,26 +5,29 @@
  */
 
 export type BizErrorType = {
-  code: number;
+  bizCode: number;
+  httpCode: number;
   msg: string;
 };
 
 export type BizErrorMapType = {
   name: string;
-  code: number;
+  bizCode: number;
+  httpCode: number;
   msg: string;
 };
 
 export const BIZ_ERROR: Record<string, BizErrorType> = {
   ErrNoPermission: {
-    code: 10001,
+    httpCode: 400,
+    bizCode: 10001,
     msg: 'no permission',
   },
 };
 
 export const BIZ_ERROR_MAP = Object.entries(BIZ_ERROR).reduce(
-  (acc, [name, { code, msg }]) => {
-    acc[code] = { name, code, msg };
+  (acc, [name, { bizCode, httpCode, msg }]) => {
+    acc[bizCode] = { name, bizCode, httpCode, msg };
     return acc;
   },
   {} as Record<number, BizErrorMapType>

@@ -2,12 +2,18 @@
 package constants
 
 type BizError struct {
-	Code int
-	Msg  string
+	Msg      string
+	HttpCode int
+	BizCode  int
+}
+
+// Error 实现 error 接口
+func (e BizError) Error() string {
+	return e.Msg
 }
 
 var (
     {% for entry in entries -%}
-	    {{ entry.name }} = BizError{Code: {{ entry.code }}, Msg: "{{ entry.msg }}"}{% unless forloop.last %}
+	    {{ entry.name }} = BizError{HttpCode: {{ entry.httpCode }}, BizCode: {{ entry.bizCode }}, Msg: "{{ entry.msg }}"}{% unless forloop.last %}
     {% endunless %}{% endfor %}
 )

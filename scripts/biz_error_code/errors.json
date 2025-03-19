@@ -1,6 +1,7 @@
 {
   "ErrNoPermission": {
-    "Code": 10001,
+    "BizCode": 10001,
+    "HttpCode": 400,
     "Msg": "no permission"
   }
 }

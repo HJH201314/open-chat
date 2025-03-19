@@ -3,7 +3,8 @@ import * as path from 'path';
 import { Liquid } from 'liquidjs';
 
 interface ErrorDefinition {
-  Code: number;
+  BizCode: number;
+  HttpCode: number;
   Msg: string;
 }
 
@@ -19,14 +20,16 @@ async function main() {
   const templateDataGO = {
     entries: Object.entries(errorDefs).map(([name, err]) => ({
       name,
-      code: err.Code,
+      httpCode: err.HttpCode,
+      bizCode: err.BizCode,
       msg: err.Msg.replace(/"/g, '\\"'),
     })),
   };
   const templateDataTS = {
     entries: Object.entries(errorDefs).map(([name, err]) => ({
       name,
-      code: err.Code,
+      httpCode: err.HttpCode,
+      bizCode: err.BizCode,
       msg: err.Msg.replace(/'/g, "\\'"),
     })),
   };

@@ -5,28 +5,31 @@
  */
 
 export type BizErrorType = {
-  code: number;
+  bizCode: number;
+  httpCode: number;
   msg: string;
 };
 
 export type BizErrorMapType = {
   name: string;
-  code: number;
+  bizCode: number;
+  httpCode: number;
   msg: string;
 };
 
 export const BIZ_ERROR: Record<string, BizErrorType> = {
   {% for entry in entries -%}
   {{ entry.name }}: {
-    code: {{ entry.code }},
+    httpCode: {{ entry.httpCode }},
+    bizCode: {{ entry.bizCode }},
     msg: '{{ entry.msg }}',
   },{% unless forloop.last %}
   {% endunless %}{% endfor %}
 };
 
 export const BIZ_ERROR_MAP = Object.entries(BIZ_ERROR).reduce(
-  (acc, [name, { code, msg }]) => {
-    acc[code] = { name, code, msg };
+  (acc, [name, { bizCode, httpCode, msg }]) => {
+    acc[bizCode] = { name, bizCode, httpCode, msg };
     return acc;
   },
   {} as Record<number, BizErrorMapType>
