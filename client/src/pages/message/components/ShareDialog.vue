@@ -27,14 +27,14 @@ const expiredTimeText = computed(() =>
       ? ` (${new Date(savedRemoteUserSessionShare.value.expired_at || 0).toLocaleString()}到期)`
       : ''
 );
-const form = reactive<{
+const form: {
   isActive: boolean;
   title: string;
   code: string;
   link: string;
   expirePeriod: '1hour' | '1day' | '7day' | '30day' | 'forever' | 'any';
   expireDays: number;
-}>({
+} = reactive({
   isActive: false,
   title: '',
   code: '',
