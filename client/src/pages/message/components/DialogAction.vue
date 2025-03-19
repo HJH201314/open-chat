@@ -52,7 +52,7 @@ const emit = defineEmits<{
         <Share size="16" />
       </IconButton>
     </CusTooltip>
-    <CusTooltip text="刷新对话列表" position="bottom">
+    <CusTooltip text="刷新对话" position="bottom">
       <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="$emit('sync')">
         <cus-spin :show="messageSyncing">
           <Refresh size="16" />

@@ -1,12 +1,13 @@
 import initPlugins from '@/utils/initPlugins';
 import { getRandomString } from '@/utils/string';
-import { type App, createApp, defineComponent, h, nextTick, onMounted, ref, type VNode } from 'vue';
+import { type App, createApp, defineComponent, h, onMounted, ref, type VNode } from 'vue';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
 import type { CommonDialogExpose, CommonDialogProps, CommonDialogSlots } from '@/components/dialog/types.ts';
 import CusInput from '@/components/input/CusInput.vue';
 import type { CusInputProps } from '@/components/input/CusInput';
 import { until } from '@vueuse/core';
 import { useModalVisible } from '@/components/modal/util/useModalVisible.ts';
+import CusThemeProvider from '@/components/theme/CusThemeProvider.ts';
 
 type CommonDialogInstance = {
   dom: HTMLDivElement;
@@ -26,11 +27,13 @@ export class DialogManager {
     document.querySelector('#app')?.appendChild(wrapper);
 
     // 使用 h 函数包装 ele 并注入 onAfterClose
-    const wrappedEle = h(ele, {
-      onAfterClose() {
-        DialogManager.destroy(id);
-      }
-    });
+    const wrappedEle = h(CusThemeProvider, () =>
+      h(ele, {
+        onAfterClose() {
+          DialogManager.destroy(id);
+        },
+      })
+    );
 
     const dialogComponent = createApp(wrappedEle);
     initPlugins(dialogComponent);
@@ -41,7 +44,7 @@ export class DialogManager {
       app: dialogComponent,
     });
     return dialogInstance;
-  }
+  };
 
   /**
    * 创建受控的模态对话框实例
@@ -70,17 +73,19 @@ export class DialogManager {
       });
 
       return () =>
-        h(
-          CommonDialog,
-          {
-            ...options.value,
-            visible: visible.value,
-            onAfterClose() {
-              DialogManager.destroy(id);
+        h(CusThemeProvider, () =>
+          h(
+            CommonDialog,
+            {
+              ...options.value,
+              visible: visible.value,
+              onAfterClose() {
+                DialogManager.destroy(id);
+              },
+              ref: modalRef,
             },
-            ref: modalRef,
-          },
-          slots
+            slots
+          )
         );
     });
     const id = getRandomString(5);
@@ -116,43 +121,15 @@ export class DialogManager {
    */
   public static commonDialog = async (props: CommonDialogProps, defaultSlot?: VNode) =>
     new Promise<boolean>((resolve) => {
-      const id = getRandomString(5);
-      const dialogDiv = document.createElement('div');
-      document.querySelector('#app')?.appendChild(dialogDiv);
-      const dialogRef = ref<CommonDialogExpose>();
-      const dialogApp = createApp({
-        render: () =>
-          h(
-            CommonDialog,
-            {
-              ...props,
-              onConfirm() {
-                resolve(true);
-              },
-              onCancel() {
-                resolve(false);
-              },
-              onAfterClose() {
-                DialogManager.destroy(id);
-              },
-              ref: dialogRef,
-            },
-            {
-              default: () => defaultSlot,
-            }
-          ),
-      });
-      initPlugins(dialogApp);
-      dialogApp.mount(dialogDiv);
-      nextTick(() => {
-        // nextTick确保dialog已完成挂载
-        dialogRef.value?.show();
-      });
-      this.instances.set(id, {
-        dom: dialogDiv,
-        app: dialogApp,
-      });
-      console.debug(this.instances);
+      const dialog = DialogManager.createDialog(
+        {
+          confirmHandler: () => resolve(true),
+          cancelHandler: () => resolve(false),
+          ...props,
+        },
+        defaultSlot ? { default: () => defaultSlot } : {}
+      );
+      dialog.show();
     });
 
   /**

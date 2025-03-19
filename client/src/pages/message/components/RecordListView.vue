@@ -253,9 +253,9 @@ const { arrivedState } = useScroll(dialogListRef);
           <div class="title">
             {{ item.title || '未命名对话' }}
           </div>
-          <div class="digest">
-            {{ item.botRole }}
-          </div>
+<!--          <div class="digest">-->
+<!--            {{ item.botRole }}-->
+<!--          </div>-->
           <div class="datetime">
             {{ new Date(item.createAt ?? '').toLocaleString() }}
           </div>
@@ -270,7 +270,7 @@ const { arrivedState } = useScroll(dialogListRef);
         :button-style="{ width: '3rem' }"
         @click="() => goToLogin()"
       />
-      {{ userStore.isLogin ? '快来新建对话吧' : '后即可查看' }}
+      {{ userStore.isLogin ? '快来新建对话吧' : '后即刻开始' }}
     </div>
     <LoadingModal
       v-if="recordListViewRef"

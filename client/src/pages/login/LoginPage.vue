@@ -60,7 +60,7 @@ const submitDisabled = ref(false);
 
 function initPage() {
   emoji.value = '🚀';
-  // @ts-ignore
+  // @ts-ignore EasyTyper 没有类型声明
   typer.value = new EasyTyper(typerObj, ['即刻启航']);
 }
 
@@ -77,11 +77,15 @@ function closePage() {
 async function handleLogin() {
   try {
     submitDisabled.value = true;
-    await userStore.login(loginForm.username, loginForm.password);
+    const res = await userStore.login(loginForm.username, loginForm.password);
+    if (!res) {
+      loginForm.shake += 1;
+      ToastManager.danger('点火失败，请重试！', { position: 'bottom' });
+    }
   } catch (e) {
     console.error(e);
     loginForm.shake += 1;
-    ToastManager.danger('点火失败', { position: 'bottom' });
+    ToastManager.danger('点火失败，请重试！', { position: 'bottom' });
     return;
   } finally {
     submitDisabled.value = false;
@@ -141,7 +145,7 @@ watch(
   (v) => {
     if (v) {
       emoji.value = '🎉';
-      // @ts-ignore
+      // @ts-ignore EasyTyper 没有类型声明
       typer.value = new EasyTyper(typerObj, '欢迎回来');
       showToast({ text: `登录成功，欢迎回来，UID:${userStore.userId}`, position: 'top' });
       setTimeout(() => {

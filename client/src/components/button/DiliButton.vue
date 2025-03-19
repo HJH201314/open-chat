@@ -41,10 +41,15 @@ const activeBackgroundColor = computed(() => {
 
 const fontColor = computed(() => {
   if (props.fontColor) return props.fontColor;
-  if (props.type == 'primary') {
-    return '#FFFFFF';
-  } else {
-    return variables.colorBlack;
+  switch (props.type) {
+    case 'primary':
+      return '#FFFFFF';
+    case 'secondary':
+      return variables.colorBlack; // TODO
+    case 'text':
+      return variables.colorPrimary;
+    default:
+      return variables.colorBlack;
   }
 });
 const hoverFontColor = computed(() => {

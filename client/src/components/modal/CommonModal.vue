@@ -5,7 +5,7 @@
 import type { CommonModalFunc, CommonModalProps } from '@/components/modal/types.ts';
 import { useCommonModalStore } from '@/components/modal/store.ts';
 import { Close } from '@icon-park/vue-next';
-import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, ref, toRef, useTemplateRef, watch, watchEffect } from 'vue';
 
 defineOptions({
   // CommonModal 通过 teleport 传递到 body 上，不继承父级的属性
@@ -86,6 +86,16 @@ watch(modalBodyRef, (modalBodyRef) => {
     modalBodyRef.focus();
   }
 });
+const showModalBody = ref(false);
+watchEffect((onCleanup) => {
+  // 延时更新 ModalBody 的展示，以支持动画入场
+  const timeout = setTimeout(() => {
+    showModalBody.value = showModal.value;
+  }, 0);
+  onCleanup(() => {
+    clearTimeout(timeout);
+  });
+})
 
 function handleClose() {
   close();
@@ -116,17 +126,20 @@ defineExpose<CommonModalFunc>({
     <Transition name="show" @after-leave="afterClose">
       <div v-if="showModal" ref="modal" :style="{ ...props.maskStyle, 'z-index': zIndex }" class="modal-mask">
         <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
-        <div
-          ref="modal-body"
-          :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }"
-          class="modal-body"
-          :class="{ preset: presetBody }"
-          tabindex="-1"
-          @keydown="handleKeydown"
-        >
-          <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
-          <slot :close="close" :is-shown="showModal"></slot>
-        </div>
+        <Transition name="flow-from-bottom">
+          <div
+            v-show="showModalBody"
+            ref="modal-body"
+            :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }"
+            class="modal-body"
+            :class="{ preset: presetBody }"
+            tabindex="-1"
+            @keydown="handleKeydown"
+          >
+            <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
+            <slot :close="close" :is-shown="showModal"></slot>
+          </div>
+        </Transition>
       </div>
     </Transition>
   </Teleport>
@@ -189,5 +202,18 @@ defineExpose<CommonModalFunc>({
 .show-enter-from,
 .show-leave-to {
   opacity: 0;
+}
+
+.flow-from-bottom {
+  &-enter-active,
+  &-leave-active {
+    z-index: 1000;
+    transition: transform 0.2s $ease-out-circ;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    transform: translateY(10px);
+  }
 }
 </style>

@@ -14,6 +14,7 @@ import router from '@/plugins/router.ts';
 import genApi from '@/api/gen-api.ts';
 import ShareDialog from '@/pages/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 interface Props {
   dialogId: string;
@@ -30,7 +31,7 @@ const emit = defineEmits<{
 const dataStore = useDataStore();
 const userStore = useUserStore();
 const { providerDropdown } = storeToRefs(useModelStore());
-
+const { theme } = useTheme();
 
 const form = reactive({
   sessionId: props.dialogId,
@@ -216,10 +217,8 @@ async function handleSyncDialog() {
     return;
   }
   DialogManager.createDialog({
-    title: '同步对话数据',
-    content:
-      '此操作将会将本地缓存数据与服务器数据同步：<br/>&nbsp;&nbsp;1. 数据以服务器数据为准<br />&nbsp;&nbsp;2. 重新渲染并缓存消息<br/>',
-    subtitle: '此操作不可逆，确认继续吗？',
+    title: '刷新对话',
+    content: '即将从服务器重新获取数据，如遇客户端渲染异常，可尝试执行。',
     async confirmHandler(controller) {
       await syncMessages(currentSessionId, controller);
     },
@@ -278,11 +277,15 @@ function handleDeleteDialog() {
   if (!checkPermission()) return;
 
   DialogManager.commonDialog({
+    type: 'danger',
     title: '删除对话',
     subtitle: '这是不可逆的！',
-    content: `确认删除与 ${sessionInfo.value.botRole} 的 对话 <${sessionInfo.value.title}> <br />`,
+    subtitleStyle: {
+      color: theme.colorDanger,
+    },
+    content: `确认删除对话 <${sessionInfo.value.title}> <br />`,
     confirmButtonProps: {
-      backgroundColor: variables.colorDanger,
+      backgroundColor: theme.colorDanger,
     },
   }).then((res) => {
     if (res) {

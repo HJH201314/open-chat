@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, h, ref, watchEffect } from 'vue';
 import type { ToastProps } from './types';
-import variables from '@/assets/variables.module.scss';
 import { Alarm, Caution, Info, Remind, Success } from '@icon-park/vue-next';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(defineProps<ToastProps>(), {
   text: '',
@@ -51,18 +51,19 @@ const toastClass = computed(() => {
   return ['toast', `toast-${className}`];
 });
 
+const { theme } = useTheme();
 const wrapperColor = computed(() => {
   switch (props.type) {
     case 'success':
-      return variables.colorSuccess;
+      return theme.colorSuccess;
     case 'warning':
-      return variables.colorWarning;
+      return theme.colorWarning;
     case 'danger':
-      return variables.colorDanger;
+      return theme.colorDanger;
     case 'info':
-      return variables.colorInfo;
+      return theme.colorInfo;
     default:
-      return variables.colorPrimary;
+      return theme.colorPrimary;
   }
 });
 

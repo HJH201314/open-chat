@@ -10,11 +10,13 @@ type MethodType =
   | ((abortController: HandlerController) => Promise<any>);
 export type CommonDialogProps = {
   visible?: boolean;
+  type?: 'info' | 'warning' | 'danger' | 'success' | 'none';
   title?: string;
   subtitle?: string;
   content?: string;
   showCancel?: boolean;
   showConfirm?: boolean;
+  showHr?: boolean;
   cancelHandler?: MethodType;
   confirmHandler?: MethodType;
 
