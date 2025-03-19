@@ -9,15 +9,12 @@
     <dropdown-menu
       v-if="option.children"
       v-model:current-showing-path="currentShowingPath"
-      :_current-option-path="_currentOptionPath"
       :_depth="_depth + 1"
       :_value-path="[..._valuePath, option.value]"
       :is-open="isSubMenuOpen"
       :options="option.children"
       :parent-bounding="bounding"
       :position="getChildrenPos(option)"
-      :selected-value="selectedValue"
-      @select="(v, o, arr) => $emit('select', v, o, arr)"
     ></dropdown-menu>
   </li>
 </template>
@@ -25,11 +22,15 @@
 <script lang="ts" setup>
 import useGlobal from '@/commands/useGlobal';
 import DropdownMenu from '@/components/dropdown/DropdownMenu.vue';
-import type { DropdownMenuEmits, DropdownMenuInnerProps, DropdownOption } from '@/components/dropdown/types';
+import {
+  DropdownCurrentInfoInjectionKey,
+  type DropdownMenuInnerProps,
+  type DropdownOption,
+} from '@/components/dropdown/types';
 import { Right } from '@icon-park/vue-next';
 import { vElementHover } from '@vueuse/components';
 import { useArrayFilter, useArrayIncludes, useElementBounding } from '@vueuse/core';
-import { defineEmits, defineProps, useTemplateRef } from 'vue';
+import { defineProps, inject, useTemplateRef } from 'vue';
 
 const props = withDefaults(
   defineProps<
@@ -42,6 +43,8 @@ const props = withDefaults(
   }
 );
 
+const currentDropdownInfo = inject(DropdownCurrentInfoInjectionKey);
+
 const currentShowingPath = defineModel<string[]>('currentShowingPath');
 const frontPath = useArrayFilter(
   () => currentShowingPath.value ?? [],
@@ -49,8 +52,6 @@ const frontPath = useArrayFilter(
     return i < props._depth - 1;
   }
 );
-
-const emit = defineEmits<DropdownMenuEmits>();
 
 /**
  * 获取下级菜单的位置
@@ -91,7 +92,7 @@ function handleClick() {
   if (props.option.children && props.option.children.length) {
     isLargeScreen.value && isSubMenuOpen.value ? hideSubMenu() : showSubMenu();
   } else {
-    emit('select', props.option.value, props.option, [...props._valuePath, props.option.value]);
+    currentDropdownInfo?.onSelect(props.option, [...props._valuePath, props.option.value]);
   }
 }
 </script>

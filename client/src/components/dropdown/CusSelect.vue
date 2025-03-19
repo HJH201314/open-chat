@@ -1,9 +1,44 @@
+<template>
+  <div ref="dropdown" :class="{ active: isOpen, disabled: disabled }" class="dropdown">
+    <div
+      ref="dropdown-toggle"
+      :class="{ 'dropdown-toggle--active': isOpen }"
+      :style="toggleStyle"
+      class="dropdown-toggle"
+      @click="toggleDropdown"
+    >
+      {{ labelRenderText?.(selectedOption, selectedOptionPath) || selectedLabel }}
+      <span class="arrow"></span>
+    </div>
+    <Teleport to="body">
+      <dropdown-menu
+        ref="root-menu"
+        v-model:current-showing-path="currentShowingPath"
+        :_current-option-path="selectedOptionPath"
+        :_depth="1"
+        :_value-path="[]"
+        :is-open="isOpen"
+        :options="options"
+        :parent-bounding="toggleBounding"
+        :position="position"
+      ></dropdown-menu>
+    </Teleport>
+  </div>
+</template>
+
 <script lang="ts" setup>
 import DropdownMenu from '@/components/dropdown/DropdownMenu.vue';
-import type { CusSelectProps, DropdownMenuEmits, DropdownOption } from '@/components/dropdown/types';
+import {
+  type CusSelectEmits,
+  type CusSelectProps,
+  DropdownCurrentInfoInjectionKey,
+  type DropdownOption,
+} from '@/components/dropdown/types';
 import { onClickOutside, useElementBounding } from '@vueuse/core';
-import { computed, ref, useTemplateRef, watch } from 'vue';
+import { computed, provide, reactive, ref, useTemplateRef, watch } from 'vue';
 
+// 双向绑定 modelValue: 当前选中项的 value
+const modelValue = defineModel<string>('modelValue');
 const props = withDefaults(defineProps<CusSelectProps>(), {
   placeholder: '请选择',
   position: 'bottom',
@@ -11,29 +46,25 @@ const props = withDefaults(defineProps<CusSelectProps>(), {
   toggleStyle: () => ({}),
 });
 
-const emit = defineEmits<
-  {
-    (event: 'update:modelValue', value: string): void;
-  } & DropdownMenuEmits
->();
+const emit = defineEmits<CusSelectEmits>();
 
 const selfRef = useTemplateRef('dropdown');
 const toggleRef = useTemplateRef('dropdown-toggle');
 const toggleBounding = useElementBounding(toggleRef);
 
 watch(
-  () => props.modelValue,
+  () => modelValue.value,
   (newVal) => {
     // v-model 更新时手动更新选中项
     receiveModelValue(newVal);
-  },
+  }
 );
 watch(
   () => props.options,
   () => {
     // 选项更新时重新更新选中项
-    receiveModelValue(props.modelValue);
-  },
+    receiveModelValue(modelValue.value);
+  }
 );
 
 const receiveModelValue = (newVal?: string) => {
@@ -52,9 +83,9 @@ const findCurrentValueOption = (options: DropdownOption[], target: string | unde
     .find((opt) => opt.value === target);
 };
 // 当前选中值
-const selectedValue = ref(props.modelValue);
+const selectedValue = ref(modelValue.value);
 // 当前选中项
-const selectedOption = ref(findCurrentValueOption(props.options, props.modelValue));
+const selectedOption = ref(findCurrentValueOption(props.options, modelValue.value));
 // 当前选中项的 label
 const selectedLabel = computed(() => {
   return selectedOption.value ? selectedOption.value.label : props.placeholder;
@@ -63,7 +94,7 @@ const selectedLabel = computed(() => {
 const getTargetPath = (
   options: DropdownOption[],
   target: DropdownOption,
-  path: DropdownOption[] = [],
+  path: DropdownOption[] = []
 ): DropdownOption[] | null => {
   for (const option of options) {
     // 包含当前 level 的 value
@@ -92,6 +123,16 @@ const selectedOptionPath = computed(() => {
   }
 });
 
+// 提供当前选中项的信息
+provide(
+  DropdownCurrentInfoInjectionKey,
+  reactive({
+    currentOptionPath: selectedOptionPath,
+    currentValue: selectedValue,
+    onSelect: selectOption,
+  })
+);
+
 // 当前展开的路径
 const currentShowingPath = ref<string[]>([]);
 
@@ -113,49 +154,19 @@ onClickOutside(
   },
   {
     ignore: [selfRef, toggleRef],
-  },
+  }
 );
 
-function selectOption(value: string, option: DropdownOption, valuePath: string[]) {
-  console.log('selected', value, option, valuePath);
-  selectedValue.value = value;
+function selectOption(option: DropdownOption, valuePath: string[]) {
+  console.log('selected', option, valuePath);
+  selectedValue.value = option.value;
   selectedOption.value = option;
-  emit('update:modelValue', value);
-  emit('select', value, option, valuePath);
+  modelValue.value = option.value;
+  emit('select', option.value, option, valuePath);
   isOpen.value = false;
   currentShowingPath.value = [];
 }
 </script>
-
-<template>
-  <div ref="dropdown" :class="{ active: isOpen, disabled: disabled }" class="dropdown">
-    <div
-      ref="dropdown-toggle"
-      :class="{ 'dropdown-toggle--active': isOpen }"
-      :style="toggleStyle"
-      class="dropdown-toggle"
-      @click="toggleDropdown"
-    >
-      {{ labelRenderText?.(selectedOption, selectedOptionPath) || selectedLabel }}
-      <span class="arrow"></span>
-    </div>
-    <Teleport to="body">
-      <dropdown-menu
-        ref="root-menu"
-        v-model:current-showing-path="currentShowingPath"
-        :_current-option-path="selectedOptionPath"
-        :_depth="1"
-        :_value-path="[]"
-        :is-open="isOpen"
-        :options="options"
-        :parent-bounding="toggleBounding"
-        :position="position"
-        :selected-value="selectedValue"
-        @select="selectOption"
-      ></dropdown-menu>
-    </Teleport>
-  </div>
-</template>
 
 <style lang="scss" scoped>
 @use '@/assets/variables' as *;

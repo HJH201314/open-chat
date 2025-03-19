@@ -5,14 +5,14 @@
         v-for="option in options"
         :key="option.value"
         v-model:current-showing-path="currentShowingPath"
-        :_current-option-path="_currentOptionPath"
         :_depth="_depth"
         :_value-path="_valuePath"
-        :class="{ selected: option.value === selectedValue || _currentOptionPath?.includes(option) }"
+        :class="{
+          selected:
+            option.value === dropdownCurrent?.currentValue || dropdownCurrent?.currentOptionPath?.includes(option),
+        }"
         :option="option"
-        :selected-value="selectedValue"
         class="dropdown-menu-item"
-        @select="(v, o, arr) => $emit('select', v, o, arr)"
       />
     </ul>
   </transition>
@@ -20,9 +20,13 @@
 
 <script lang="ts" setup>
 import DropdownMenuItem from '@/components/dropdown/DropdownMenuItem.vue';
-import type { DropdownMenuEmits, DropdownMenuInnerProps, DropdownOption } from '@/components/dropdown/types';
+import {
+  DropdownCurrentInfoInjectionKey,
+  type DropdownMenuInnerProps,
+  type DropdownOption,
+} from '@/components/dropdown/types';
 import { useElementBounding } from '@vueuse/core';
-import { computed, defineEmits, defineProps, reactive, useTemplateRef } from 'vue';
+import { computed, defineProps, inject, reactive, useTemplateRef } from 'vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(
@@ -41,6 +45,9 @@ const props = withDefaults(
 const { theme } = useTheme();
 
 const currentShowingPath = defineModel<string[]>('currentShowingPath');
+
+// 注入当前选中项信息
+const dropdownCurrent = inject(DropdownCurrentInfoInjectionKey);
 
 const selfRef = useTemplateRef('menu');
 
@@ -65,8 +72,6 @@ const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `uns
 // 遮罩放大倍数
 // const scaleY = computed(() => `${window.outerHeight / selfHeight.value}`);
 // const scaleX = computed(() => `${window.outerWidth / selfWidth.value}`);
-
-const emit = defineEmits<DropdownMenuEmits>();
 </script>
 
 <style lang="scss" scoped>
