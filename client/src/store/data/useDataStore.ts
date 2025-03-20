@@ -38,6 +38,8 @@ interface MessageCallback {
 export const useDataStore = defineStore('data', () => {
   const userStore = useUserStore();
 
+  // 由于 sessions 是异步加载的，所以直接判断 session 的长度来判断 sessions 是否为空不准确，此处通过 isSessionsEmpty 来判断
+  const [isSessionsEmpty, changeSessionsEmpty] = useToggle(false);
   const sessions = ref<SessionInfo[]>([]);
 
   // userId 切换时，订阅新的 query
@@ -47,7 +49,9 @@ export const useDataStore = defineStore('data', () => {
       // 订阅 session
       useSubscription(
         liveQuery(async () => {
-          return (await db.sessions.where({ userId: newUserId }).reverse().sortBy('createAt')) || ({} as SessionInfo);
+          const res = (await db.sessions.where({ userId: newUserId }).reverse().sortBy('createAt')) || ([] as SessionInfo[]);
+          changeSessionsEmpty(res.length == 0);
+          return res;
         }).subscribe(toObserver(sessions))
       );
     },
@@ -75,6 +79,7 @@ export const useDataStore = defineStore('data', () => {
       if (status === 200 && data.data) {
         await db.sessions.add({
           id: sessionId,
+          userId: userStore.userId,
           title: '',
           avatar: '',
           botRole: roleStore.roles?.find((r) => r[0] === role)?.[1] || '未知',
@@ -489,6 +494,7 @@ export const useDataStore = defineStore('data', () => {
 
   return {
     sessions,
+    isSessionsEmpty,
     isFetchingSessions,
     fetchSessions,
     updateSessionFlags,

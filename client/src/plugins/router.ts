@@ -35,11 +35,6 @@ const router = createRouter({
       name: 'manage-user',
       component: () => import('@/pages/manage/user/ManageUserPage.vue'),
     },
-    {
-      path: '/chat/setting',
-      name: 'setting',
-      component: () => import('@/pages/setting/SettingPage.vue'),
-    },
   ],
 });
 

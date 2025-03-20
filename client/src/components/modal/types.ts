@@ -3,7 +3,9 @@ import type { CSSProperties, MaybeRef, Ref, RendererElement } from 'vue';
 export type CommonModalProps = {
   teleportTo?: MaybeRef<RendererElement | string | null>;
   showClose?: boolean;
+  showBodyTransition?: boolean;
   closeOnESC?: boolean;
+  closeOnClickMask?: boolean;
   visible?: boolean; // 默认不展示
   maskStyle?: CSSProperties;
   modalStyle?: CSSProperties;

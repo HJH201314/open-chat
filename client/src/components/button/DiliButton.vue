@@ -18,7 +18,7 @@ const buttonRef = ref<HTMLButtonElement>();
 const buttonStyle = computed(() => {
   const calcStyle: CSSProperties = {
     'box-shadow': props.shadow ? variables.boxShadow : 'none',
-    'padding': props.text ? '0.375rem 1rem' : '.375rem',
+    'padding': props.text ? '0.375em 1em' : '.375em',
     ...props.buttonStyle
   };
   return calcStyle;
@@ -121,7 +121,7 @@ function handleClick() {
     }
 
     > .button-text {
-      font-size: 1rem;
+      font-size: 1em;
       line-height: 1;
     }
   }

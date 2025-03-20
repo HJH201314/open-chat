@@ -11,9 +11,11 @@ type MethodType =
 export type CommonDialogProps = {
   visible?: boolean;
   type?: 'info' | 'warning' | 'danger' | 'success' | 'none';
+  icon?: VNode;
   title?: string;
   subtitle?: string;
   content?: string;
+  showClose?: boolean;
   showCancel?: boolean;
   showConfirm?: boolean;
   showHr?: boolean;

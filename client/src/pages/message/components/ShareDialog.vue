@@ -3,7 +3,7 @@ import CommonDialog from '@/components/dialog/CommonDialog.vue';
 import { useModalVisible } from '@/components/modal/util/useModalVisible.ts';
 import useSession from '@/store/data/useSession.ts';
 import CusInput from '@/components/input/CusInput.vue';
-import { computed, reactive, ref, watch, watchEffect } from 'vue';
+import { computed, h, reactive, ref, watch, watchEffect } from 'vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
@@ -12,6 +12,7 @@ import ToastManager from '@/components/toast/ToastManager.ts';
 import DiliButton from '@/components/button/DiliButton.vue';
 import { useClipboard } from '@vueuse/core';
 import type { ApiSchemaShareInfo } from '@/api/gen/data-contracts.ts';
+import { Share } from '@icon-park/vue-next';
 
 const props = defineProps<{
   sessionId: string;
@@ -101,6 +102,9 @@ async function handleToggleActive(active: boolean) {
         case '30day':
           expiredTime.setDate(expiredTime.getDate() + 30);
           break;
+        case 'any':
+          expiredTime.setDate(expiredTime.getDate() + form.expireDays);
+          break;
         default:
           expiredTime.setTime(0);
       }
@@ -147,6 +151,7 @@ defineExpose({
   <CommonDialog
     :visible="visible"
     title="分享对话"
+    :icon="h(Share)"
     :subtitle="form.isActive ? `取消分享后可修改设置` : '分享对话将生成一个链接，通过此链接可以查看此对话的聊天记录'"
     :show-confirm="false"
     :cancel-button-props="{ text: '关闭' }"
@@ -164,7 +169,7 @@ defineExpose({
               <CusRadioButton value="30day" label="30天" />
               <CusRadioButton value="any" label="自定义" />
             </CusRadioGroup>
-            <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem;">
+            <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
               <CusInput
                 v-if="form.expirePeriod == 'any'"
                 v-model.number="form.expireDays"

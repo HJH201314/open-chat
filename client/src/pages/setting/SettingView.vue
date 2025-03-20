@@ -109,12 +109,16 @@ function forceReloadPage() {
   // @ts-ignore lib 类型标注错误
   window.location.reload(true);
 }
+
+defineExpose({
+  save: handleSave,
+  reset: handleReset,
+})
 </script>
 
 <template>
   <div :class="{ large: !isModal && isLargeScreen, modal: isModal }" class="setting-page">
     <div class="setting-page-wrapper">
-      <div class="setting-page-title">对话设置</div>
       <div class="setting-list">
         <div class="setting-list-container">
           <div class="setting-list-section">
@@ -237,19 +241,6 @@ function forceReloadPage() {
               </span>
             </div>
           </div>
-          <div class="setting-actions-placeholder"></div>
-        </div>
-        <div :class="{ 'setting-actions--large': isLargeScreen }" class="setting-actions">
-          <DiliButton
-            :background-color="variables.colorPrimary"
-            :button-style="{ width: '100%', 'text-align': 'center' }"
-            style="flex: 1"
-            text="保存"
-            type="primary"
-            @click="handleSave"
-          />
-          <DiliButton v-if="isModal" shadow text="关闭" type="normal" @click="$emit('cancel')" />
-          <DiliButton style="margin-left: auto" text="重置" type="normal" @click="handleReset" />
         </div>
       </div>
     </div>
@@ -262,10 +253,8 @@ function forceReloadPage() {
 
 .setting-page {
   position: relative;
-  height: 100%;
   width: 100%;
   box-sizing: border-box;
-  padding: 0.5rem;
 
   &-wrapper {
     height: 100%;
@@ -277,11 +266,6 @@ function forceReloadPage() {
       max-width: 48rem;
       margin-inline: auto;
     }
-  }
-
-  &.large,
-  &.modal {
-    padding: 0.75rem;
   }
 
   &-title {
@@ -387,25 +371,6 @@ function forceReloadPage() {
       align-items: flex-end;
       flex-direction: column;
     }
-  }
-}
-
-.setting-actions {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.5rem;
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  background-color: rgba(255 255 255 / 85%);
-  backdrop-filter: blur(10px);
-  box-shadow: $box-shadow;
-  border-radius: 0.5rem;
-
-  &-placeholder {
-    height: 2.5rem;
   }
 }
 </style>

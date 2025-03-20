@@ -3,9 +3,9 @@
 import DiliButton from '@/components/button/DiliButton.vue';
 import type { CommonDialogEmits, CommonDialogExpose, CommonDialogProps } from '@/components/dialog/types.ts';
 import CommonModal from '@/components/modal/CommonModal.vue';
-import { type Component, computed, h, ref, shallowRef, watch } from 'vue';
+import { computed, h, ref, shallowRef, watch } from 'vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import { Alarm, Caution, Info, Success } from '@icon-park/vue-next';
+import { Alarm, Caution, Close, Info, Success } from '@icon-park/vue-next';
 import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(defineProps<CommonDialogProps>(), {
@@ -80,18 +80,18 @@ const { theme } = useTheme();
 const iconElement = computed(() => {
   const baseIconProps = {
     size: '1.25rem',
-    theme: 'filled',
-    style: 'margin-right: 0.5rem',
+    style: 'margin-right: 0.25rem',
   } as any;
+  if (props.icon) return h(props.icon, baseIconProps);
   switch (props.type) {
     case 'success':
-      return h(Success, { fill: theme.colorSuccess, ...baseIconProps });
+      return h(Success, { fill: theme.colorSuccess, theme: 'filled', ...baseIconProps });
     case 'warning':
-      return h(Caution, { fill: theme.colorWarning, ...baseIconProps });
+      return h(Caution, { fill: theme.colorWarning, theme: 'filled', ...baseIconProps });
     case 'danger':
-      return h(Alarm, { fill: theme.colorDanger, ...baseIconProps });
+      return h(Alarm, { fill: theme.colorDanger, theme: 'filled', ...baseIconProps });
     case 'info':
-      return h(Info, { fill: theme.colorInfo, ...baseIconProps });
+      return h(Info, { fill: theme.colorInfo, theme: 'filled', ...baseIconProps });
     default:
       return null;
   }
@@ -108,19 +108,24 @@ defineExpose<CommonDialogExpose>({
   <CommonModal
     :modal-style="{ ...props.modalStyle }"
     :show-close="false"
+    :close-on-click-mask="false"
     :visible="modalVisible"
     @after-close="afterClose"
   >
     <div class="dialog">
-      <header>
-        <Component :is="iconElement" v-if="!!iconElement" />
+      <header :style="{ marginRight: showClose ? '3rem' : '1rem' }">
+        <Component :is="iconElement" v-if="!!(iconElement)" />
         <div v-if="title" class="dialog-title" :style="titleStyle">{{ title }}</div>
         <div v-if="subtitle" class="dialog-sub-title" :style="subtitleStyle">{{ subtitle }}</div>
+        <DiliButton v-if="showClose" class="header-close" @click="handleCancel">
+          <Close size="1rem" />
+        </DiliButton>
       </header>
       <hr v-if="showHr && (title || (subtitle && content))" />
       <main>
         <div class="dialog-content" v-html="content"></div>
         <slot></slot>
+        <div style="height: 0.5rem;"></div><!-- 高度占位 -->
       </main>
       <footer>
         <div style="flex: 1">
@@ -146,19 +151,20 @@ defineExpose<CommonDialogExpose>({
 @use '@/assets/variables.scss' as *;
 
 .dialog {
+  position: relative;
   width: 512px; // 默认宽度
-  max-width: calc(100% - 2rem);
-  max-height: calc(100% - 2rem);
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
   background-color: $color-white;
   border-radius: 0.5rem;
   box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   overflow: hidden;
 
   > hr {
     margin-inline: 45%;
+    margin-block: 0.5rem;
     height: 3px;
     border: none;
     border-radius: 3px;
@@ -169,21 +175,29 @@ defineExpose<CommonDialogExpose>({
     line-height: 1;
     margin: 1rem 1rem 0 1rem;
     display: flex;
+    flex-direction: row;
     align-items: flex-end;
+    justify-content: flex-start;
     row-gap: 0.25rem;
     flex-wrap: wrap;
+
+    > .header-close {
+      position: absolute;
+      right: 0.875rem;
+      top: 0.875rem;
+      font-size: 0.75rem;
+    }
   }
 
   > main {
     flex: 1;
-    margin-inline: 1rem;
+    padding: 0 1rem;
     min-height: 0;
     overflow-y: auto;
   }
 
   > footer {
     width: 100%;
-    margin-top: 0.5rem;
     padding: 0.5rem 1rem;
     display: flex;
     justify-content: flex-end;

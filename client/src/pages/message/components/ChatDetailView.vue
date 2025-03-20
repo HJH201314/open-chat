@@ -15,6 +15,7 @@ import genApi from '@/api/gen-api.ts';
 import ShareDialog from '@/pages/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
+import { Control, Edit, Refresh } from '@icon-park/vue-next';
 
 interface Props {
   dialogId: string;
@@ -217,6 +218,7 @@ async function handleSyncDialog() {
     return;
   }
   DialogManager.createDialog({
+    icon: h(Refresh),
     title: '刷新对话',
     content: '即将从服务器重新获取数据，如遇客户端渲染异常，可尝试执行。',
     async confirmHandler(controller) {
@@ -230,6 +232,7 @@ function handleEditDialog() {
 
   DialogManager.inputDialog(
     {
+      icon: h(Edit),
       title: '编辑会话',
       content: '修改会话名称为',
     },
@@ -253,6 +256,7 @@ async function handleEditSystemPrompt() {
     const remoteSessionInfo = await genApi.Chat.sessionGet(form.sessionId);
     const res = await DialogManager.inputDialog(
       {
+        icon: h(Control),
         title: '编辑系统提示词',
         subtitle: '注意：部分模型可能对系统提示词不敏感',
         content: '修改系统提示词为',
@@ -283,7 +287,7 @@ function handleDeleteDialog() {
     subtitleStyle: {
       color: theme.colorDanger,
     },
-    content: `确认删除对话 <${sessionInfo.value.title}> <br />`,
+    content: `确认删除对话：<br /> - ${sessionInfo.value.title} <br />`,
     confirmButtonProps: {
       backgroundColor: theme.colorDanger,
     },

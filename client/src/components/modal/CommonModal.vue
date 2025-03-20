@@ -15,7 +15,9 @@ defineOptions({
 const props = withDefaults(defineProps<CommonModalProps>(), {
   teleportTo: 'body',
   showClose: true,
+  showBodyTransition: true,
   closeOnESC: false,
+  closeOnClickMask: false,
   visible: false,
   presetBody: false,
   maskStyle: () => ({}),
@@ -40,6 +42,7 @@ const showModal = ref(false);
 watch(
   () => props.visible,
   (v) => {
+    console.log('visible', v)
     // nextTick才真正改变可视，能够让props.visible从一开始就为true时也展示动画
     nextTick(() => {
       if (v) open();
@@ -87,14 +90,13 @@ watch(modalBodyRef, (modalBodyRef) => {
   }
 });
 const showModalBody = ref(false);
-watchEffect((onCleanup) => {
-  // 延时更新 ModalBody 的展示，以支持动画入场
-  const timeout = setTimeout(() => {
-    showModalBody.value = showModal.value;
-  }, 0);
-  onCleanup(() => {
-    clearTimeout(timeout);
-  });
+watchEffect(() => {
+  // 这一行让 watchEffect 收集 showModal
+  const collectShowModal = showModal.value;
+  // 下一帧更新 ModalBody 的展示，以支持动画入场
+  nextTick(() => {
+    showModalBody.value = collectShowModal;
+  })
 })
 
 function handleClose() {
@@ -107,6 +109,12 @@ function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     handleClose();
   }
+}
+
+function handleMaskClick() {
+  console.log('click mask')
+  if (!props.closeOnClickMask) return;
+  close();
 }
 
 defineSlots<{
@@ -124,22 +132,23 @@ defineExpose<CommonModalFunc>({
 <template>
   <Teleport :to="teleportTo" :disabled="!teleportTo" :defer="true">
     <Transition name="show" @after-leave="afterClose">
-      <div v-if="showModal" ref="modal" :style="{ ...props.maskStyle, 'z-index': zIndex }" class="modal-mask">
+      <div v-if="showModal" ref="modal" :style="{ ...props.maskStyle, 'z-index': zIndex }" class="modal-mask" @click="handleMaskClick">
         <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
-        <Transition name="flow-from-bottom">
-          <div
-            v-show="showModalBody"
-            ref="modal-body"
-            :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }"
-            class="modal-body"
-            :class="{ preset: presetBody }"
-            tabindex="-1"
-            @keydown="handleKeydown"
-          >
-            <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
-            <slot :close="close" :is-shown="showModal"></slot>
-          </div>
-        </Transition>
+      </div>
+    </Transition>
+    <Transition :name="showBodyTransition && showModalBody ? 'flow-from-bottom' : 'show'">
+      <div
+        v-show="showModalBody"
+        ref="modal-body"
+        :style="{ ...props.modalStyle, 'z-index': zIndex + 1 }"
+        class="modal-body"
+        :class="{ preset: presetBody }"
+        tabindex="-1"
+        @keydown="handleKeydown"
+        @click.stop
+      >
+        <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
+        <slot :close="close" :is-shown="showModal"></slot>
       </div>
     </Transition>
   </Teleport>
@@ -174,12 +183,10 @@ defineExpose<CommonModalFunc>({
   }
 
   &-body {
-    width: 100%;
-    height: 100%;
-    display: flex; // 居中
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     outline: none;
 
     &.preset {
@@ -196,7 +203,7 @@ defineExpose<CommonModalFunc>({
 .show-enter-active,
 .show-leave-active {
   z-index: 999;
-  transition: opacity 0.2s $ease-out-circ;
+  transition: opacity 0.15s $ease-out-circ;
 }
 
 .show-enter-from,
@@ -207,13 +214,14 @@ defineExpose<CommonModalFunc>({
 .flow-from-bottom {
   &-enter-active,
   &-leave-active {
+    transform-origin: right top;
     z-index: 1000;
-    transition: transform 0.2s $ease-out-circ;
+    transition: transform 0.15s $ease-out-circ;
   }
 
   &-enter-from,
   &-leave-to {
-    transform: translateY(10px);
+    transform: translate(-50%, calc(-50% + 1px)) rotate(-1deg);
   }
 }
 </style>

@@ -1,17 +1,16 @@
 <script lang="ts" setup>
-import type { CommonModalFunc } from '@/components/modal/types.ts';
-import CommonModal from '@/components/modal/CommonModal.vue';
 import showToast from '@/components/toast/toast';
 import ToastManager from '@/components/toast/ToastManager';
 import Tooltip from '@/components/tooltip/CusTooltip.vue';
 import { toggleSidebarKey } from '@/constants/eventBusKeys';
 import { goToLogin } from '@/pages/login';
-import SettingPage from '@/pages/setting/SettingPage.vue';
 import { useUserStore } from '@/store/useUserStore';
 import { Github, Home, Login, Logout, MenuFold, MenuUnfold, Message, SettingTwo, User } from '@icon-park/vue-next';
 import { onClickOutside, useEventBus, useMediaQuery } from '@vueuse/core';
 import { computed, h, onMounted, ref, useTemplateRef, type VNode } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { DialogManager } from '@/components/dialog';
+import SettingDialog from '@/pages/setting/SettingDialog.vue';
 
 const userStore = useUserStore();
 
@@ -79,14 +78,8 @@ const entries = computed<Entry[]>(() => {
       icon: h(SettingTwo),
       href: '/chat/setting',
       onClick() {
-        if (isLargeScreen.value) {
-          // 如果是大屏幕，打开模态框
-          refSettingModal.value?.open();
-        } else {
-          // 小屏幕跳转页面
-          if ('/chat/setting' == route.path) return;
-          router.replace('/chat/setting');
-        }
+        // 打开设置对话框
+        DialogManager.renderDialog(h(SettingDialog));
       },
     },
   ];
@@ -137,11 +130,6 @@ function handleEntryClick(_: Event, entry: Entry) {
   }
   expandBar.value = false;
 }
-
-const refSettingModal = ref<CommonModalFunc>();
-const settingModalVisible = computed(() => {
-  return refSettingModal?.value?.isVisible;
-});
 
 function handleLogin() {
   if (userStore.isLogin) {
@@ -229,9 +217,6 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
           <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
         </div>
       </div>
-      <CommonModal ref="refSettingModal" v-slot="{ close: closeSetting }" preset-body>
-        <SettingPage v-if="settingModalVisible" is-modal @cancel="closeSetting" />
-      </CommonModal>
     </div>
   </Transition>
 </template>

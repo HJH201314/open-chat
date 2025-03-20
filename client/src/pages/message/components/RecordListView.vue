@@ -40,14 +40,16 @@ const currentSessionId = useRouteParams<string>('sessionId');
 
 onMounted(() => {
   // 页面首次加载时检查是否需要刷新
-  if (!dataStore.sessions.length && userStore.isLogin) {
+  if (dataStore.isSessionsEmpty && userStore.isLogin) {
+    console.log('fetch on mounted', userStore.isLogin, userStore.userId)
     dataStore.fetchSessions();
   }
 });
 
 // 添加页面激活时的刷新逻辑
 onActivated(() => {
-  if (!dataStore.sessions.length && userStore.isLogin) {
+  if (dataStore.isSessionsEmpty && userStore.isLogin) {
+    console.log('fetch on activated')
     dataStore.fetchSessions();
   }
 });
@@ -93,7 +95,8 @@ const handleSessionRefresh = async () => {
     ToastManager.danger('请先登录');
     return;
   }
-  if (!dataStore.sessions.length) {
+  if (dataStore.isSessionsEmpty) {
+    console.log('fetch user trigger immediately')
     await dataStore.fetchSessions();
     return;
   }
@@ -107,6 +110,7 @@ const handleSessionRefresh = async () => {
           ToastManager.danger('暂未支持');
           return;
         }
+        console.log('fetch use trigger confirmed')
         await dataStore.fetchSessions(controller);
       },
     },
@@ -267,7 +271,7 @@ const { arrivedState } = useScroll(dialogListRef);
         v-if="!userStore.isLogin"
         type="primary"
         text="登录"
-        :button-style="{ width: '3rem' }"
+        :button-style="{ width: '3em' }"
         @click="() => goToLogin()"
       />
       {{ userStore.isLogin ? '快来新建对话吧' : '后即刻开始' }}

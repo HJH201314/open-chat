@@ -4,16 +4,15 @@ import { getRandomString } from '@/utils/string.ts';
 import {
   computed,
   type CSSProperties,
+  onMounted,
+  onUnmounted,
   provide,
   reactive,
   ref,
   toRefs,
+  useTemplateRef,
   watchEffect,
-  onMounted,
-  onUnmounted,
-  useTemplateRef, watch,
 } from 'vue';
-import { useEventListener } from '@vueuse/core';
 
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
   modelValue: '',
@@ -65,6 +64,7 @@ const barStyle = ref<CSSProperties>({
   width: '0',
   height: '0',
 });
+const barCalculated = ref(false);
 
 function positionBar() {
   if (selectedElement.value) {
@@ -76,20 +76,25 @@ function positionBar() {
       width: `${offsetWidth - 6}px`,
       height: `${offsetHeight - 6}px`,
     };
+
+    // 使用 setTimeout 任务在首次 bar 渲染完成后再启用动画
+    setTimeout(() => {
+      barCalculated.value = true;
+    }, 0);
   } else {
     // 无选中元素时的样式，初始化位置和高度以便动画过渡正常
     barStyle.value = {
       visibility: 'hidden',
       left: '0',
-      top: '0.25em',
+      top: '3px',
       width: '1em',
-      height: 'calc(100% - 0.5em)',
+      height: 'calc(100% - 6px)',
     };
   }
 }
 
-watch(() => selectedElement.value, () => {
-  requestUpdateBarPosition();
+watchEffect(() => {
+  selectedElement.value && requestUpdateBarPosition();
 });
 
 const radioGroupRef = useTemplateRef('radio-group');
@@ -127,7 +132,11 @@ onUnmounted(() => {
 
 <template>
   <fieldset ref="radio-group" class="cus-radio-group">
-    <div class="cus-radio-group-bar" :class="{ [typeClassName]: !!typeClassName }" :style="barStyle"></div>
+    <div
+      class="cus-radio-group-bar"
+      :class="{ 'cus-radio-group-bar--transition': barCalculated, [typeClassName]: !!typeClassName }"
+      :style="barStyle"
+    ></div>
     <slot></slot>
   </fieldset>
 </template>
@@ -149,11 +158,14 @@ onUnmounted(() => {
     z-index: 0;
     border-radius: 0.5rem;
     box-shadow: $next-box-shadow-small;
-    transition:
-      left 0.2s $ease-out-circ,
-      top 0.2s $ease-out-circ,
-      width 0.2s $ease-out-circ,
-      height 0.2s $ease-out-circ;
+
+    &--transition {
+      transition:
+        left 0.2s $ease-out-circ,
+        top 0.2s $ease-out-circ,
+        width 0.2s $ease-out-circ,
+        height 0.2s $ease-out-circ;
+    }
 
     &.type-normal {
       background-color: white;
