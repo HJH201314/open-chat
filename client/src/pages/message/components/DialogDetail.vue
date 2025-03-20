@@ -1,33 +1,17 @@
 <script lang="ts" setup>
 import { DoubleDown } from '@icon-park/vue-next';
 import { until, useElementSize, useScroll } from '@vueuse/core';
-import { computed, type Ref, useTemplateRef, watch } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import DialogAction from './DialogAction.vue';
 import DialogInput from './DialogInput.vue';
 import DialogMessage from './DialogMessage.vue';
 import IconButton from '@/components/IconButton.vue';
 import type { MessageInfo } from '@/types/data';
 import { scrollToBottom } from '@/utils/element.ts';
-import type { DropdownOption } from '@/components/dropdown/types.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
+import type { DialogDetailEmits, DialogDetailProps } from '@/pages/message/components/types.ts';
 
-interface Props {
-  dialogId: string;
-  title: string;
-  messages: MessageInfo[];
-  messageCount: number;
-  hasPermission: boolean;
-  isLogin: boolean;
-  messageSyncing: boolean;
-  isReceivingMsg: boolean;
-  answerMsgId?: number; // 用于判断当前正在输出的消息，进行异化展示
-  answerMsg: string;
-  thinkMsg: string;
-  isSmallScreen: boolean;
-  providerDropdown: DropdownOption[];
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<DialogDetailProps>(), {
   dialogId: '',
   title: '',
   messages: () => [],
@@ -44,20 +28,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const inputModelName = defineModel<string>('inputModelName', { default: '' });
+const inputBotId = defineModel<number>('inputBotId', { default: 0 });
 const inputWithContext = defineModel<boolean>('inputWithContext', { default: true });
 const inputUserInput = defineModel<string>('inputUserInput', { default: '' });
 
-const emit = defineEmits<{
-  (e: 'back'): void;
-  (e: 'share'): void;
-  (e: 'sync'): void;
-  (e: 'edit'): void;
-  (e: 'editSystemPrompt'): void;
-  (e: 'delete'): void;
-  (e: 'actionTipClick'): void;
-  (e: 'send'): void;
-  (e: 'modelSelect', path: string[]): void;
-}>();
+const emit = defineEmits<DialogDetailEmits>();
 
 const dialogDetailRef = useTemplateRef('dialog-detail');
 const dialogListRef = useTemplateRef('dialog-list');
@@ -74,21 +49,6 @@ const { arrivedState, directions: scrollDirections } = useScroll(dialogListRef, 
     }
   },
 });
-
-watch(
-  () => props.dialogId,
-  async (newDialogId) => {
-    if (newDialogId != '') {
-      // 等待到 panelHeight 被成功计算、插入占位高度并 nextTick 渲染完成后
-      await until(panelHeight).toMatch((v) => v > 0);
-      setTimeout(() => {
-        // 滚动到列表底部并默认聚焦输入框
-        scrollDialogListToBottom('instant');
-      }, 50);
-    }
-  },
-  { immediate: true }
-);
 
 const fixDialogToBottom = defineModel<boolean>('fixDialogToBottom', { default: true });
 const isEmptySession = computed(() => props.messages.length === 0);
@@ -117,8 +77,14 @@ function handleFixDialogToBottom() {
   scrollDialogListToBottom('smooth');
 }
 
+// 滚动容器到最底部
 function scrollDialogListToBottom(behavior: ScrollBehavior = 'smooth') {
-  dialogListRef.value && scrollToBottom(dialogListRef.value, behavior);
+  // 确保 panelHeight 已经被计算出来
+  until(panelHeight)
+    .toMatch((v) => v > 0)
+    .then(() => {
+      dialogListRef.value && scrollToBottom(dialogListRef.value, behavior);
+    });
 }
 
 function handleMessageThinkExpand(expand: boolean) {
@@ -157,15 +123,6 @@ defineExpose({
     <div ref="dialog-list" class="dialog-detail-display-area">
       <!-- 对话列表固定中间 -->
       <div class="dialog-detail-dialogs">
-        <!--   消息列表   -->
-        <DialogMessage
-          v-show="!isReceivingMsg && !isEmptySession && inputUserInput"
-          id="user-typing-box"
-          key="user-typing-box"
-          :markdown-render="false"
-          :message="inputUserInput"
-          role="user"
-        />
         <DialogMessage
           v-for="item in messages"
           :key="item.id"
@@ -176,6 +133,15 @@ defineExpose({
           :role="item.sender"
           :time="new Date(item.time).toLocaleString()"
           @think-expand="handleMessageThinkExpand"
+        />
+        <!--   消息列表   -->
+        <DialogMessage
+          v-show="!isReceivingMsg && !isEmptySession && inputUserInput"
+          id="user-typing-box"
+          key="user-typing-box"
+          :markdown-render="false"
+          :message="inputUserInput"
+          role="user"
         />
       </div>
       <IconButton
@@ -192,12 +158,18 @@ defineExpose({
         v-model:input-user-input="inputUserInput"
         v-model:input-with-context="inputWithContext"
         :input-model-name="inputModelName"
+        :input-bot-id="inputBotId"
         :provider-dropdown="providerDropdown"
+        :bot-dropdown="botDropdown"
         :display-in-middle="isEmptySession && !isSmallScreen"
         :is-streaming="isReceivingMsg"
         :hide-self="messageSyncing"
+        :show-model-selector="showModelSelector"
+        :show-bot-selector="showBotSelector"
+        :show-context-toggle="showContextToggle"
         @send="$emit('send')"
         @model-select="$emit('modelSelect', $event)"
+        @bot-select="$emit('botSelect', $event)"
       />
     </div>
     <LoadingModal
@@ -235,7 +207,7 @@ $dialog-max-width: 54rem;
     padding-inline: 0.25rem;
     padding-top: 3rem;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     margin-bottom: v-bind(panelPlaceholderPx);
 
     > :not(:first-child) {

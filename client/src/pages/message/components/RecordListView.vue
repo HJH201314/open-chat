@@ -28,12 +28,14 @@ import { useUserStore } from '@/store/useUserStore.ts';
 import { onClickOutside, until, useScroll } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { goToLogin } from '@/pages/login';
+import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
+import CommonDialog from '@/components/dialog/CommonDialog.vue';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
 }>();
 const dataStore = useDataStore();
-const roleStore = useRoleStore();
+const chatConfigStore = useChatConfigStore();
 const userStore = useUserStore();
 const settingStore = useSettingStore();
 const currentSessionId = useRouteParams<string>('sessionId');
@@ -59,24 +61,17 @@ onDeactivated(() => {
   // 可以在这里添加清理逻辑
 });
 
-async function handleAddRecord(roleId?: number) {
-  const sessionId = await dataStore.addDialog(roleId ?? 1);
+async function handleAddRecord(defaultBotId?: number) {
+  const sessionId = await dataStore.addDialog(defaultBotId ?? 0);
   if (!sessionId) return;
 
-  if (roleId) {
-    dataStore.sendMessageText(
-      sessionId,
-      (await roleStore.getRoleSentence(roleId)) +
-        `当前时间: ${new Date().toLocaleString()}. ` +
-        `准备好了就仅输出：我是你的${roleStore.roleIdMap.get(roleId)}，我们马上开始对话吧！`
-    );
-  }
   handleListItemClick(sessionId);
   roleForm.modalVisible = false;
   if (roleForm.remember) {
     settingStore.saveSetting('roleRemember', true);
-    settingStore.saveSetting('roleDefaultId', roleId?.toString());
+    settingStore.saveSetting('roleDefaultId', defaultBotId?.toString());
   }
+  ToastManager.normal('开始对话吧~', { position: 'top-right' });
 }
 
 function handleListAddClick() {
@@ -223,25 +218,26 @@ const { arrivedState } = useScroll(dialogListRef);
       <div v-show="!searchForm.inputting" class="dialog-list-new-dialog" @click="handleListAddClick">
         <span>开始新对话</span>
         <Plus size="1.2rem" theme="outline" />
-        <CommonModal v-model:visible="roleForm.modalVisible">
+        <CommonDialog v-model:visible="roleForm.modalVisible" title="选择角色" :show-close="true" :show-confirm="false" :show-cancel="false">
           <div class="select-role">
-            <div class="select-role-title">选择角色</div>
             <div class="select-role-list">
               <div
-                v-for="(item, i) in roleStore.roles"
+                v-for="(item, i) in chatConfigStore.botsDropdown"
                 :key="i"
                 class="select-role-item"
-                @click="handleAddRecord(item[0])"
+                @click="handleAddRecord(Number(item.value))"
               >
-                {{ item[1] }}
+                {{ item.label }}
               </div>
             </div>
+          </div>
+          <template #action>
             <div style="display: flex; align-items: center">
-              <Toggle v-model="roleForm.remember" label="记住本次选择" style="margin-top: 1rem" />
+              <Toggle v-model="roleForm.remember" label="记住本次选择" />
               <DiliButton style="margin-left: auto" text="直接开始→" type="primary" @click="handleAddRecord" />
             </div>
-          </div>
-        </CommonModal>
+          </template>
+        </CommonDialog>
       </div>
     </div>
     <div ref="dialog-list" class="dialog-list-container">
@@ -526,13 +522,6 @@ const { arrivedState } = useScroll(dialogListRef);
 }
 
 .select-role {
-  padding: 1rem;
-
-  &-title {
-    @include page-title;
-    margin-bottom: 1rem;
-  }
-
   &-list {
     display: flex;
     flex-wrap: wrap;

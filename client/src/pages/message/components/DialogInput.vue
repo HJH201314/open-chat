@@ -4,32 +4,28 @@ import CusSelect from '@/components/dropdown/CusSelect.vue';
 import CusTextarea from '@/components/textarea/CusTextarea.vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import type { DropdownOption } from '@/components/dropdown/types.ts';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import type { DialogInputEmits, DialogInputProps } from '@/pages/message/components/types.ts';
 
-interface Props {
-  providerDropdown: DropdownOption[];
-  displayInMiddle: boolean;
-  isStreaming: boolean;
-  hideSelf: boolean;
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<DialogInputProps>(), {
   providerDropdown: () => [],
+  botDropdown: () => [],
   displayInMiddle: false,
   isStreaming: false,
   hideSelf: false,
+  showModelSelector: true,
+  showBotSelector: true,
+  showContextToggle: true,
 });
 
+const showToolbar = computed(() => props.showModelSelector || props.showBotSelector || props.showContextToggle);
+
 const inputModelName = defineModel<string>('inputModelName', { default: '' });
+const inputBotId = defineModel<number>('inputBotId', { default: 0 });
 const inputWithContext = defineModel<boolean>('inputWithContext', { default: true });
 const inputUserInput = defineModel<string>('inputUserInput', { default: '' });
 
-const emit = defineEmits<{
-  (e: 'update:model', value: any): void;
-  (e: 'send'): void;
-  (e: 'modelSelect', path: string[]): void;
-}>();
+const emit = defineEmits<DialogInputEmits>();
 
 const smallInput = ref(false);
 
@@ -47,6 +43,10 @@ function handleModelSelect(selectPath: string[]) {
     emit('modelSelect', selectPath);
   }
 }
+
+function handleBotRoleSelect(selectValue: string) {
+  emit('botSelect', Number(selectValue));
+}
 </script>
 
 <template>
@@ -59,8 +59,9 @@ function handleModelSelect(selectPath: string[]) {
     class="dialog-input"
   >
     <Transition name="slide-top-fade">
-      <div v-show="!smallInput" class="dialog-input-bar">
+      <div v-show="!smallInput && showToolbar" class="dialog-input-bar">
         <CusSelect
+          v-if="showModelSelector"
           :model-value="inputModelName"
           :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
           :options="providerDropdown"
@@ -69,7 +70,18 @@ function handleModelSelect(selectPath: string[]) {
           style="font-size: 0.75rem"
           @select="(v, o, path) => handleModelSelect(path)"
         />
+        <CusSelect
+          v-if="showBotSelector"
+          :model-value="String(inputBotId)"
+          :options="botDropdown"
+          :toggle-style="{ opacity: 0.75 }"
+          placeholder="角色选择"
+          position="top"
+          style="font-size: 0.75rem"
+          @select="(v) => handleBotRoleSelect(v)"
+        />
         <CusToggle
+          v-if="showContextToggle"
           v-model="inputWithContext"
           highlight
           label="上下文"
@@ -77,7 +89,11 @@ function handleModelSelect(selectPath: string[]) {
         ></CusToggle>
       </div>
     </Transition>
-    <div class="dialog-input-toggle" :class="{ 'dialog-input-toggle--expand': smallInput, 'dialog-input-toggle--collapse': !smallInput }" @click="smallInput = !smallInput">
+    <div
+      class="dialog-input-toggle"
+      :class="{ 'dialog-input-toggle--expand': smallInput, 'dialog-input-toggle--collapse': !smallInput }"
+      @click="smallInput = !smallInput"
+    >
       <CollapseTextInput v-if="!smallInput" size="16" />
       <ExpandTextInput v-else size="16" />
     </div>

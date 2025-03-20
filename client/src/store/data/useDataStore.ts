@@ -1,21 +1,21 @@
 import api from '@/api';
 import useMarkdownIt from '@/commands/useMarkdownIt';
 import showToast from '@/components/toast/toast.ts';
-import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { MessageInfo, SessionInfo } from '@/types/data.ts';
 import { CommandParser, useCommandParser } from '@/utils/command-parser';
 import { useToggle, watchArray, watchThrottled } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, ref, shallowRef, watch } from 'vue';
+import { h, reactive, ref, shallowRef, watch } from 'vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { toObserver, useSubscription } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
 import { db } from '@/store/data/database.ts';
 import genApi from '@/api/gen-api.ts';
-import { useModelStore } from '@/store/useModelStore.ts';
+import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import type { ApiSchemaUserSession } from '@/api/gen/data-contracts.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
+import { Correct } from '@icon-park/vue-next';
 
 interface MessageCallback {
   // 预保存数据后的回调
@@ -49,7 +49,8 @@ export const useDataStore = defineStore('data', () => {
       // 订阅 session
       useSubscription(
         liveQuery(async () => {
-          const res = (await db.sessions.where({ userId: newUserId }).reverse().sortBy('createAt')) || ([] as SessionInfo[]);
+          const res =
+            (await db.sessions.where({ userId: newUserId }).reverse().sortBy('createAt')) || ([] as SessionInfo[]);
           changeSessionsEmpty(res.length == 0);
           return res;
         }).subscribe(toObserver(sessions))
@@ -58,8 +59,7 @@ export const useDataStore = defineStore('data', () => {
     { immediate: true }
   );
 
-  const roleStore = useRoleStore();
-  const modelStore = useModelStore();
+  const chatConfigStore = useChatConfigStore();
   const settingStore = useSettingStore();
 
   async function getSessionInfo(sessionId: string) {
@@ -68,9 +68,9 @@ export const useDataStore = defineStore('data', () => {
 
   /**
    * 创建一个对话，成功返回 sessionId，失败返回 ''
-   * @param role 角色 ID
+   * @param botRoleId bot 角色 ID
    */
-  async function addSession(role?: number) {
+  async function addSession(botRoleId?: number) {
     try {
       // 获取session_id
       const { status, data } = await genApi.Chat.sessionNewPost();
@@ -82,11 +82,12 @@ export const useDataStore = defineStore('data', () => {
           userId: userStore.userId,
           title: '',
           avatar: '',
-          botRole: roleStore.roles?.find((r) => r[0] === role)?.[1] || '未知',
+          botRole: botRoleId ? chatConfigStore.botsIdNameMap[botRoleId] : '通用',
+          botId: botRoleId,
           createAt: Date.now(),
           withContext: true,
-          provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
-          model: settingStore.settings.defaultModel || modelStore.defaultModel?.modelName,
+          provider: settingStore.settings.defaultProvider || chatConfigStore.defaultModel?.providerName,
+          model: settingStore.settings.defaultModel || chatConfigStore.defaultModel?.modelName,
           flags: {},
         });
       }
@@ -134,6 +135,18 @@ export const useDataStore = defineStore('data', () => {
     });
   }
 
+  function changeSessionBot(sessionId: string, botId: number) {
+    db.sessions.where({ id: sessionId }).modify((session) => {
+      if (botId) {
+        session.botId = botId;
+        session.botRole = chatConfigStore.botsIdNameMap[botId];
+      } else {
+        session.botId = undefined;
+        session.botRole = '通用';
+      }
+    });
+  }
+
   function updateSessionFlags(sessionId: string, flags: SessionInfo['flags']) {
     db.sessions.where({ id: sessionId }).modify((session) => {
       session.flags = {
@@ -163,6 +176,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   const [isFetchingSessions, changeFetchingStatus] = useToggle(false);
+
   /**
    * 从服务器拉取会话
    */
@@ -208,8 +222,8 @@ export const useDataStore = defineStore('data', () => {
               createAt: new Date(remoteSession.created_at!).getTime(),
               withContext: !!remoteSession.enable_context,
               userId: remoteUserSession.user_id,
-              provider: settingStore.settings.defaultProvider || modelStore.defaultModel?.providerName,
-              model: settingStore.settings.defaultModel || modelStore.defaultModel?.modelName,
+              provider: settingStore.settings.defaultProvider || chatConfigStore.defaultModel?.providerName,
+              model: settingStore.settings.defaultModel || chatConfigStore.defaultModel?.modelName,
               flags: {
                 needSync: true,
               },
@@ -301,6 +315,7 @@ export const useDataStore = defineStore('data', () => {
     };
 
     const saveBotMessage = async () => {
+      console.log('[saveBotMessage]', rawData.msg, renderedMsg.value)
       botMsgIndex &&
         (await updateMessage(sessionId, botMsgIndex, {
           content: rawData.msg,
@@ -309,26 +324,22 @@ export const useDataStore = defineStore('data', () => {
         }));
     };
 
-    abort?.signal.addEventListener('abort', async () => {
-      // 中断时保存消息
-      await saveBotMessage();
-      callback?.onFinish?.(renderedMsg.value);
-    });
-
     return api.chat.completionStream(
       {
-        provider: session.provider,
-        modelName: session.model,
-        sessionId: sessionId,
-        msg: message,
-        withContext: session.withContext,
+        provider_name: session.provider,
+        model_name: session.model,
+        bot_id: session.botId,
+        session_id: sessionId,
+        question: message,
+        enable_context: session.withContext,
       },
       ctrl.signal,
       async (event) => {
         if (event.event === 'done') {
           // 当接收到服务器端的结束标记时，数据库保存消息
-          await saveBotMessage();
-          callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
+          saveBotMessage().finally(() => {
+            callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
+          });
         } else if (event.event === 'msg') {
           const data = JSON.parse(event.data)?.content;
           console.log('[msg]', event.data, `'${data}'`);
@@ -371,12 +382,17 @@ export const useDataStore = defineStore('data', () => {
           onMessage(msg, originMsg) {
             answerMessage.value = msg;
             customReceiver?.onMessage?.(msg, originMsg);
-            startTimeout();
+            startTimeout(originMsg);
           },
           onThinkMessage(msg) {
             thinkMessage.value = msg;
             customReceiver?.onThinkMessage?.(msg);
-            startTimeout();
+            startTimeout(msg);
+          },
+          onFinish(msg) {
+            ToastManager.normal('回答完成', { position: 'top-right', icon: h(Correct) });
+            customReceiver?.onFinish?.(msg);
+            innerCleanEffects();
           },
         },
         abortController
@@ -390,11 +406,12 @@ export const useDataStore = defineStore('data', () => {
       clearTimeout(timeout);
     };
 
-    const startTimeout = () => {
+    const startTimeout = (msg: string = '') => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         if (!abortController.signal.aborted) {
           abortController.abort('no data for too long');
+          console.debug('[timeout]', 'no data for too long', msg);
           ToastManager.danger('服务端超时');
         }
       }, 10000);
@@ -498,6 +515,7 @@ export const useDataStore = defineStore('data', () => {
     isFetchingSessions,
     fetchSessions,
     updateSessionFlags,
+    changeSessionBot,
     addDialog: addSession,
     editDialogTitle: editSessionTitle,
     editDialogSystemPrompt: editSessionSystemPrompt,

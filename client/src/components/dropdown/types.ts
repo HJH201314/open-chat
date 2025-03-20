@@ -1,4 +1,4 @@
-import type { CSSProperties, InjectionKey } from 'vue';
+import type { CSSProperties, InjectionKey, VNode } from 'vue';
 
 export const DropdownCurrentInfoInjectionKey: InjectionKey<{
   currentOptionPath: DropdownOption[];
@@ -9,6 +9,7 @@ export const DropdownCurrentInfoInjectionKey: InjectionKey<{
 export type DropdownOption = {
   label: string;
   value: string;
+  icon?: string | VNode;
   children?: DropdownOption[];
   childrenMenuOption?: DropdownMenuProps;
 };

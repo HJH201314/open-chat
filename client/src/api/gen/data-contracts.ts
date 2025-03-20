@@ -10,6 +10,7 @@
  */
 
 export interface ApiChatCompletionStreamUserInput {
+  bot_id?: number;
   enable_context?: boolean;
   /** Model.Name 准确的模型名称 */
   model_name: string;
@@ -30,6 +31,15 @@ export interface ApiEntityCommonResponseAny {
   code?: number;
   /** 数据 */
   data?: any;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseArraySchemaBotRole {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaBotRole[];
   /** 消息 */
   msg?: string;
 }
@@ -84,6 +94,24 @@ export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchem
   code?: number;
   /** 数据 */
   data?: ApiEntityPaginatedContinuationResponseSchemaUserSession;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaCourse;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaCourse {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaCourse;
   /** 消息 */
   msg?: string;
 }
@@ -166,6 +194,11 @@ export interface ApiEntityPaginatedContinuationResponseSchemaUserSession {
   next_page?: number;
 }
 
+export interface ApiEntityPaginatedTotalResponseSchemaCourse {
+  last_page?: number;
+  list?: ApiSchemaCourse[];
+}
+
 export interface ApiSchemaAPIKey {
   created_at?: string;
   id?: number;
@@ -173,6 +206,61 @@ export interface ApiSchemaAPIKey {
   key?: string;
   /** 外键，指向 Provider */
   provider_id?: number;
+}
+
+export interface ApiSchemaBotRole {
+  created_at?: string;
+  /** 角色描述 */
+  description?: string;
+  /** 原始数据 */
+  id?: number;
+  /** 角色名称 */
+  name?: string;
+  /** 组装数据 */
+  prompt_session?: ApiSchemaSession;
+  /** 引用一个 session 中的对话作为 prompt */
+  prompt_session_id?: string;
+}
+
+export interface ApiSchemaCourse {
+  created_at?: string;
+  /** 课程描述 */
+  description?: string;
+  /** 课程考试 */
+  exams?: ApiSchemaCourseExam[];
+  /** 原始数据 */
+  id?: number;
+  /** 课程名称 */
+  name?: string;
+  /** 关联数据 */
+  resources?: ApiSchemaCourseResource[];
+  /** 排好序的数据 */
+  sorted_data?: any[];
+  updated_at?: string;
+}
+
+export interface ApiSchemaCourseExam {
+  /** 关联课程ID */
+  course_id?: number;
+  /** 考试详细信息 */
+  exam?: ApiSchemaExam;
+  /** 关联考试ID */
+  exam_id?: number;
+  id?: number;
+  /** 考试排序 */
+  sort_order?: number;
+}
+
+export interface ApiSchemaCourseResource {
+  /** 关联课程ID */
+  course_id?: number;
+  id?: number;
+  /** 资源详细信息 */
+  resource?: ApiSchemaResource;
+  /** 关联资源ID */
+  resource_id?: number;
+  /** 资源排序 */
+  sort_order?: number;
 }
 
 export interface ApiSchemaExam {
@@ -273,9 +361,11 @@ export interface ApiSchemaPermission {
   /** 权限描述 */
   description?: string;
   id?: number;
+  /** 所属模块（handler名称） */
+  module?: string;
   /** 权限名称 */
   name?: string;
-  /** 权限路径（一般与名称相同） */
+  /** 权限路径（形如：POST:/user/create） */
   path?: string;
   updated_at?: string;
 }
@@ -283,6 +373,7 @@ export interface ApiSchemaPermission {
 export interface ApiSchemaProblem {
   /** 答案（JSON存储ProblemAnswer） */
   answer?: ApiSchemaProblemAnswer;
+  created_at?: string;
   /** 支持HTML/Markdown */
   description?: string;
   /** 难度等级 1-5 */
@@ -295,6 +386,7 @@ export interface ApiSchemaProblem {
   /** 所属科目/分类 */
   subject?: string;
   type?: ApiSchemaProblemType;
+  updated_at?: string;
 }
 
 export interface ApiSchemaProblemAnswer {
@@ -340,6 +432,20 @@ export interface ApiSchemaProvider {
   updated_at?: string;
 }
 
+export interface ApiSchemaResource {
+  created_at?: string;
+  /** 资源描述 */
+  description?: string;
+  /** 文件的 uuid key */
+  file_key?: string;
+  /** OSS 中的文件名 */
+  file_name?: string;
+  id?: number;
+  /** 原始文件名 */
+  origin_file_name?: string;
+  updated_at?: string;
+}
+
 export interface ApiSchemaRole {
   created_at?: string;
   /** 角色描述 */
@@ -353,10 +459,12 @@ export interface ApiSchemaRole {
 }
 
 export interface ApiSchemaSession {
+  /** 上下文大小 */
+  context_size?: number;
   created_at?: string;
   /** 上下文开关 */
   enable_context?: boolean;
-  /** 原始数据g */
+  /** 原始数据 */
   id?: string;
   last_active?: string;
   /** 组装数据 */

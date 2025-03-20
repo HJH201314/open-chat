@@ -10,9 +10,13 @@
  */
 
 import type {
+  ApiEntityCommonResponseAny,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
+  ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
   ApiEntityCommonResponseSchemaProblem,
+  ApiSchemaCourse,
   ApiSchemaExam,
   ApiSchemaProblem,
 } from './data-contracts';
@@ -26,6 +30,104 @@ export class Tue<SecurityDataType = unknown> {
     this.http = http;
   }
 
+  /**
+   * @description 创建课程基础参数，绑定或创建题目、资源
+   *
+   * @tags Course
+   * @name CourseCreatePost
+   * @summary 创建课程
+   * @request POST:/tue/course/create
+   * @response `200` `ApiEntityCommonResponseSchemaCourse` 返回数据
+   */
+  courseCreatePost = (req: ApiSchemaCourse, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaCourse, any>({
+      path: `/tue/course/create`,
+      method: 'POST',
+      body: req,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 获取单个课程
+   *
+   * @tags Course
+   * @name CourseGet
+   * @summary 获取单个课程
+   * @request GET:/tue/course/{id}
+   * @response `200` `ApiEntityCommonResponseSchemaCourse` 返回数据
+   */
+  courseGet = (id: string, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaCourse, any>({
+      path: `/tue/course/${id}`,
+      method: 'GET',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 获取课程列表
+   *
+   * @tags Course
+   * @name CourseListGet
+   * @summary 获取课程列表
+   * @request GET:/tue/course/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse` 返回数据
+   */
+  courseListGet = (
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse, any>({
+      path: `/tue/course/list`,
+      method: 'GET',
+      query: query,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 删除课程
+   *
+   * @tags Course
+   * @name CoursePost
+   * @summary 删除课程
+   * @request POST:/tue/course/{id}
+   * @response `200` `ApiEntityCommonResponseAny` 返回数据
+   */
+  coursePost = (id: string, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseAny, any>({
+      path: `/tue/course/${id}`,
+      method: 'POST',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 更新课程基础参数，增量更新 题目、资源
+   *
+   * @tags Course
+   * @name CourseUpdatePost
+   * @summary 更新课程
+   * @request POST:/tue/course/update
+   * @response `200` `ApiEntityCommonResponseSchemaCourse` 返回数据
+   */
+  courseUpdatePost = (req: ApiSchemaCourse, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaCourse, any>({
+      path: `/tue/course/update`,
+      method: 'POST',
+      body: req,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
   /**
    * @description 保存单个测验
    *

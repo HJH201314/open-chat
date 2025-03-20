@@ -136,7 +136,7 @@ defineExpose<CommonModalFunc>({
         <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
       </div>
     </Transition>
-    <Transition :name="showBodyTransition && showModalBody ? 'flow-from-bottom' : 'show'">
+    <Transition :name="showBodyTransition && showModalBody ? 'x-expand' : 'show'">
       <div
         v-show="showModalBody"
         ref="modal-body"
@@ -211,17 +211,16 @@ defineExpose<CommonModalFunc>({
   opacity: 0;
 }
 
-.flow-from-bottom {
+.x-expand {
   &-enter-active,
   &-leave-active {
-    transform-origin: right top;
     z-index: 1000;
     transition: transform 0.15s $ease-out-circ;
   }
 
   &-enter-from,
   &-leave-to {
-    transform: translate(-50%, calc(-50% + 1px)) rotate(-1deg);
+    transform: translate(-50%, -50%) rotate3d(1, 0, 0, 90deg);
   }
 }
 </style>

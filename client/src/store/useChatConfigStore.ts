@@ -1,8 +1,8 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useArrayMap, useLocalStorage } from '@vueuse/core';
-import { computed, onMounted, watch } from 'vue';
+import { computed, watch } from 'vue';
 import genApi from '@/api/gen-api.ts';
-import type { ApiSchemaModelCache } from '@/api/gen/data-contracts.ts';
+import type { ApiSchemaBotRole, ApiSchemaModelCache } from '@/api/gen/data-contracts.ts';
 import type { DropdownOption } from '@/components/dropdown/types.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
@@ -23,7 +23,7 @@ type ModelAccurateInfo = {
   modelName: string;
 };
 
-export const useModelStore = defineStore('model', () => {
+export const useChatConfigStore = defineStore('model', () => {
   // 供应商及模型数据
   const rawModels = useLocalStorage<ApiSchemaModelCache[]>('models-raw', []);
   const providerModels = useLocalStorage<ProviderModel[]>('provider-model', []);
@@ -76,9 +76,43 @@ export const useModelStore = defineStore('model', () => {
     }
   };
 
-  onMounted(() => {
-    getModelsOnServer();
+  const bots = useLocalStorage<ApiSchemaBotRole[]>('bots-raw', []);
+  const botsIdNameMap = computed(() => {
+    const map = {} as Record<number, string>;
+    bots.value.forEach((value) => {
+      map[value.id!] = value.name!;
+    });
+    return map;
   });
+  const botsNameIdMap = computed(() => {
+    const map = {} as Record<string, number>;
+    bots.value.forEach((value) => {
+      map[value.name!] = value.id!;
+    });
+    return map;
+  });
+  const botsDropdown = computed<DropdownOption[]>(() => [
+    {
+      label: '通用 (默认)',
+      value: '0',
+    },
+    ...bots.value.map((bot) => {
+      return {
+        label: bot.name!,
+        value: String(bot.id!),
+      };
+    }),
+  ]);
+  const getBotsOnServer = async () => {
+    try {
+      const res = await genApi.Chat.configBotsGet();
+      if (res.data.data) {
+        bots.value = res.data.data;
+      }
+    } catch (_) {
+      console.error('获取 bot 角色数据失败');
+    }
+  };
 
   // 登录后获取模型数据
   const userStore = useUserStore();
@@ -87,11 +121,13 @@ export const useModelStore = defineStore('model', () => {
     (isLogin) => {
       if (isLogin) {
         getModelsOnServer();
+        getBotsOnServer();
       }
-    }
+    },
+    { immediate: true }
   );
 
-  // 监听默认模型的变化，若设置中的默认模型为空，则将设置中默认模型设置为本仓库中的默认模型
+  // 监听默认模型的变化，若设置中的默认模型为空，则将设置中默认模型设置为本 store 中的默认模型
   const settingStore = useSettingStore();
   watch(
     () => defaultModel.value,
@@ -106,13 +142,18 @@ export const useModelStore = defineStore('model', () => {
           defaultModel: provider.modelName,
         });
       }
-    },
+    }
   );
 
   return {
     providerModels,
     providerDropdown,
     defaultModel,
+
+    bots,
+    botsNameIdMap,
+    botsIdNameMap,
+    botsDropdown,
   };
 });
 
@@ -136,5 +177,5 @@ const convertProviderToDropdown = (provider: ProviderModel) => {
 };
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useModelStore, import.meta.hot));
+  import.meta.hot.accept(acceptHMRUpdate(useChatConfigStore, import.meta.hot));
 }

@@ -19,6 +19,7 @@ const visible = ref(true);
     :show-close="true"
     :show-confirm="false"
     :show-cancel="false"
+    :close-on-click-mask="true"
   >
     <SettingView ref="setting-view" is-modal></SettingView>
     <template #action>

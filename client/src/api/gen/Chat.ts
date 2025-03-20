@@ -12,6 +12,7 @@
 import type {
   ApiChatCompletionStreamUserInput,
   ApiChatShareSessionShareRequest,
+  ApiEntityCommonResponseArraySchemaBotRole,
   ApiEntityCommonResponseArraySchemaModelCache,
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
@@ -48,11 +49,28 @@ export class Chat<SecurityDataType = unknown> {
       ...params,
     });
   /**
-   * @description 获取所有模型
+   * @description 获取 bot 角色配置
+   *
+   * @tags config
+   * @name ConfigBotsGet
+   * @summary 获取 bot 角色配置
+   * @request GET:/chat/config/bots
+   * @response `200` `ApiEntityCommonResponseArraySchemaBotRole` OK
+   */
+  configBotsGet = (params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseArraySchemaBotRole, any>({
+      path: `/chat/config/bots`,
+      method: 'GET',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 获取模型配置
    *
    * @tags config
    * @name ConfigModelsGet
-   * @summary 获取所有模型
+   * @summary 获取模型配置
    * @request GET:/chat/config/models
    * @response `200` `ApiEntityCommonResponseArraySchemaModelCache` OK
    */

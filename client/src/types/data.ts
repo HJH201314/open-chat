@@ -43,7 +43,8 @@ export type SessionInfo = {
   id: string; // session_id
   title: string;
   avatar: string;
-  botRole: string; // bot角色
+  botRole: string; // bot角色名称
+  botId?: number; // bot角色 ID
   createAt: number;
   withContext: boolean; // 是否启用上下文
   userId?: number; // 用户 ID

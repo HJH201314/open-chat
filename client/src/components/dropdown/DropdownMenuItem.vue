@@ -1,6 +1,7 @@
 <template>
   <li ref="menu-item" v-element-hover="(state) => handleHover(state)" class="menu-item">
     <div ref="menu-item-body" class="menu-item-body" @click="handleClick">
+      <Component :is="iconComponent" v-if="iconComponent" />
       <div style="flex: 1">
         <span>{{ option.label }}</span>
       </div>
@@ -30,7 +31,7 @@ import {
 import { Right } from '@icon-park/vue-next';
 import { vElementHover } from '@vueuse/components';
 import { useArrayFilter, useArrayIncludes, useElementBounding } from '@vueuse/core';
-import { defineProps, inject, useTemplateRef } from 'vue';
+import { computed, defineProps, h, inject, useTemplateRef } from 'vue';
 
 const props = withDefaults(
   defineProps<
@@ -42,6 +43,14 @@ const props = withDefaults(
     position: 'bottom',
   }
 );
+
+const iconComponent = computed(() => {
+  if (typeof props.option.icon == 'string') {
+    return h('img', { style: 'width: 1em; height: 1em;', src: props.option.icon });
+  } else {
+    return props.option.icon ? h(props.option.icon, { style: 'width: 1em; height: 1em;' }) : null;
+  }
+})
 
 const currentDropdownInfo = inject(DropdownCurrentInfoInjectionKey);
 
@@ -122,6 +131,7 @@ function handleClick() {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.25em;
   }
 }
 </style>

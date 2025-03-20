@@ -1,6 +1,7 @@
 import { createRequest, errorHandler, successHandler } from '@/api/base';
 import { SERVER_NEXT_API_URL, USER_ACCESS_TOKEN_KEY } from '@/constants';
 import { type EventSourceMessage, EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source';
+import type { ApiChatCompletionStreamUserInput } from '@/api/gen/data-contracts.ts';
 
 /* 创建对话，返回一个 session_id 作为对话的唯一标识 */
 export const createSession = () =>
@@ -22,23 +23,24 @@ export const deleteSession = (sessionId: string) =>
  * @throws err 流式传输中途出问题时抛出异常
  */
 export const completionStream = (
-  options: API.ChatCompletionOption,
+  options: ApiChatCompletionStreamUserInput & { session_id: string },
   signal: AbortSignal,
   onMessage: (e: EventSourceMessage) => void,
 ) => {
-  const { sessionId, withContext, msg, provider, modelName, systemPrompt } = options;
-  return fetchEventSource(`${SERVER_NEXT_API_URL}/chat/completion/stream/${sessionId}`, {
+  const { session_id, bot_id, enable_context, question, provider_name, model_name, system_prompt } = options;
+  return fetchEventSource(`${SERVER_NEXT_API_URL}/chat/completion/stream/${session_id}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${localStorage.getItem(USER_ACCESS_TOKEN_KEY)}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      enable_context: withContext,
-      system_prompt: systemPrompt,
-      provider_name: provider,
-      model_name: modelName,
-      question: msg,
+      question,
+      bot_id,
+      enable_context,
+      system_prompt,
+      provider_name,
+      model_name,
     }),
     signal: signal,
     openWhenHidden: true, // 页面隐藏时不中断

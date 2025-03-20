@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import variables from '@/assets/variables.module.scss';
 import useGlobal from '@/commands/useGlobal';
 import { DialogManager } from '@/components/dialog';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useUserStore } from '@/store/useUserStore';
 import { watchArray } from '@vueuse/core';
-import { computed, h, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
-import { useModelStore } from '@/store/useModelStore.ts';
+import { computed, h, reactive, ref, useTemplateRef, watch } from 'vue';
+import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import { storeToRefs } from 'pinia';
 import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
@@ -31,7 +30,7 @@ const emit = defineEmits<{
 
 const dataStore = useDataStore();
 const userStore = useUserStore();
-const { providerDropdown } = storeToRefs(useModelStore());
+const { providerDropdown, botsDropdown: botDropdown } = storeToRefs(useChatConfigStore());
 const { theme } = useTheme();
 
 const form = reactive({
@@ -39,8 +38,14 @@ const form = reactive({
   withContext: false,
   providerName: '',
   modelName: '',
+  botRoleId: 0, // 角色 ID
   inputValue: '',
   fixDialogToBottom: true,
+});
+const inputCtrl = reactive({
+  modelSelector: true,
+  botSelector: true,
+  contextToggle: true,
 });
 const hasPermission = computed(
   () => userStore.isLogin && (!sessionInfo.value.userId || sessionInfo.value.userId == userStore.userId)
@@ -49,15 +54,20 @@ const hasPermission = computed(
 const { session: sessionInfo, messages: messageList, syncMessages } = useSession(() => form.sessionId);
 
 // 如果需要响应 props 的变化
-watch(() => props.dialogId, (newId) => {
-  form.sessionId = newId;
-});
+watch(
+  () => props.dialogId,
+  (newId) => {
+    form.sessionId = newId;
+  }
+);
 
 const dialogDetailRef = useTemplateRef<InstanceType<typeof DialogDetail>>('dialog-detail');
 watchArray(messageList, (newVal, oldVal) => {
   // 消息列表变化时，滚动到底部（消息增加 1/2 时平滑，增加多条时立即）
   if (newVal.length) {
-    dialogDetailRef.value?.scrollDialogListToBottom(newVal.length - oldVal.length <= 2 ? 'smooth' : 'instant');
+    setTimeout(() => {
+      dialogDetailRef.value?.scrollDialogListToBottom(newVal.length - oldVal.length <= 2 ? 'smooth' : 'instant');
+    }, 0);
   }
 });
 
@@ -89,11 +99,17 @@ watch(
 );
 
 // 加载 session 信息到 form
-watchEffect(() => {
-  form.withContext = sessionInfo.value.withContext ?? false;
-  form.providerName = sessionInfo.value.provider || '';
-  form.modelName = sessionInfo.value.model || '';
-});
+watch(
+  () => sessionInfo.value,
+  (newSession) => {
+    if (newSession) {
+      form.withContext = newSession.withContext ?? false;
+      form.providerName = newSession.provider || '';
+      form.modelName = newSession.model || '';
+      form.botRoleId = newSession.botId || 0;
+    }
+  }
+);
 
 // 保存上下文开关
 watch(
@@ -111,6 +127,18 @@ watch(
   (newVal, oldVal) => {
     if (newVal[0] !== oldVal[0] || newVal[1] !== oldVal[1]) {
       dataStore.changeDialogModel(form.sessionId, newVal[0], newVal[1]);
+    }
+  }
+);
+
+// 保存 bot 角色
+watch(
+  () => form.botRoleId,
+  (newVal, oldVal) => {
+    if (newVal != oldVal) {
+      dataStore.changeSessionBot(form.sessionId, newVal);
+      // 使用 bot 时，上下文由后台控制
+      inputCtrl.contextToggle = !(newVal > 0);
     }
   }
 );
@@ -322,7 +350,12 @@ const { isSmallScreen } = useGlobal();
     :think-msg="thinkMsg"
     :is-small-screen="isSmallScreen"
     :provider-dropdown="providerDropdown"
+    :bot-dropdown="botDropdown"
     :input-model-name="form.modelName"
+    :input-bot-id="form.botRoleId"
+    :show-model-selector="inputCtrl.modelSelector"
+    :show-bot-selector="inputCtrl.botSelector"
+    :show-context-toggle="inputCtrl.contextToggle"
     @back="$emit('back')"
     @share="handleShareDialog"
     @sync="handleSyncDialog"
@@ -337,6 +370,7 @@ const { isSmallScreen } = useGlobal();
         form.modelName = path[1];
       }
     "
+    @bot-select="(v) => (form.botRoleId = v)"
   />
 </template>
 

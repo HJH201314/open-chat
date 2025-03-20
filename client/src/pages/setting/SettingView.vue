@@ -9,8 +9,8 @@ import showToast from '@/components/toast/toast';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import useRoleStore from '@/store/useRoleStore';
 import { useSettingStore } from '@/store/useSettingStore';
-import { computed, ref, toValue, watch } from 'vue';
-import { useModelStore } from '@/store/useModelStore.ts';
+import { ref, toValue, watch } from 'vue';
+import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import { addChildrenDropdownOptions } from '@/components/dropdown/utils.ts';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/store/data/useDataStore.ts';
@@ -22,7 +22,7 @@ const { isModal = false } = defineProps<{
 
 const settingStore = useSettingStore();
 const roleStore = useRoleStore();
-const { providerDropdown } = storeToRefs(useModelStore());
+const { providerDropdown, botsDropdown } = storeToRefs(useChatConfigStore());
 // 解构赋值editingValue避免使用proxy，此处并不希望未点击保存前生效
 const editingValue = ref({ ...toValue(settingStore.settings) });
 
@@ -76,15 +76,6 @@ function handleClearRoleCache() {
   });
 }
 
-const roleSelectorOptions = computed(() =>
-  roleStore.roles.map((v) => {
-    return {
-      value: v[0].toString(),
-      label: v[1],
-    };
-  })
-);
-
 // 对话相关
 async function handleClearMessageCache() {
   const confirmRes = await DialogManager.commonDialog({
@@ -113,7 +104,7 @@ function forceReloadPage() {
 defineExpose({
   save: handleSave,
   reset: handleReset,
-})
+});
 </script>
 
 <template>
@@ -207,7 +198,7 @@ defineExpose({
               <span class="setting-list-item__title">默认角色</span>
               <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
                 <CusToggle v-model="editingValue.roleRemember" />
-                <CusSelect v-model="editingValue.roleDefaultId" :options="roleSelectorOptions" />
+                <CusSelect v-model="editingValue.roleDefaultId" :options="botsDropdown" />
               </span>
             </div>
           </div>

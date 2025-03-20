@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, h, ref, watchEffect } from 'vue';
 import type { ToastProps } from './types';
-import { Alarm, Caution, Info, Remind, Success } from '@icon-park/vue-next';
+import { Alarm, Caution, Correct, Info, Remind, Success } from '@icon-park/vue-next';
 import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(defineProps<ToastProps>(), {
@@ -68,6 +68,7 @@ const wrapperColor = computed(() => {
 });
 
 const iconElement = computed(() => {
+  if (props.icon) return h(props.icon);
   switch (props.type) {
     case 'success':
       return h(Success);
@@ -77,6 +78,8 @@ const iconElement = computed(() => {
       return h(Alarm);
     case 'info':
       return h(Info);
+    case 'normal':
+      return h(Correct);
     default:
       return h(Remind);
   }

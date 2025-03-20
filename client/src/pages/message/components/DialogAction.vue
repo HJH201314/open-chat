@@ -3,16 +3,9 @@ import { Back, Control, Delete, Edit, Refresh, Share, WrongUser } from '@icon-pa
 import IconButton from '@/components/IconButton.vue';
 import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
+import type { DialogActionEmits, DialogActionProps } from '@/pages/message/components/types.ts';
 
-interface Props {
-  title: string;
-  messageCount: number;
-  hasPermission: boolean;
-  isLogin: boolean;
-  messageSyncing: boolean;
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<DialogActionProps>(), {
   title: '',
   messageCount: 0,
   hasPermission: true,
@@ -20,15 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
   messageSyncing: false,
 });
 
-const emit = defineEmits<{
-  (e: 'back'): void;
-  (e: 'share'): void;
-  (e: 'sync'): void;
-  (e: 'edit'): void;
-  (e: 'editSystemPrompt'): void;
-  (e: 'delete'): void;
-  (e: 'actionTipClick'): void;
-}>();
+const emit = defineEmits<DialogActionEmits>();
 </script>
 
 <template>

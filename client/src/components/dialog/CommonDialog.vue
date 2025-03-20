@@ -10,7 +10,6 @@ import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(defineProps<CommonDialogProps>(), {
   type: 'none',
-  visible: false,
   title: '',
   subtitle: '',
   showCancel: true,
@@ -18,11 +17,12 @@ const props = withDefaults(defineProps<CommonDialogProps>(), {
   showHr: true,
 });
 
+const visible = defineModel<boolean>('visible', { default: false });
 const emits = defineEmits<CommonDialogEmits>();
 const modalVisible = ref(false);
 
 watch(
-  () => props.visible,
+  () => visible.value,
   (newVisible) => {
     if (newVisible) show();
     else close();
@@ -33,11 +33,13 @@ watch(
 // 展示模态框
 function show() {
   modalVisible.value = true;
+  if (!visible.value) visible.value = true;
 }
 
 // 关闭模态框
 function close() {
   modalVisible.value = false;
+  if (visible.value) visible.value = false;
 }
 
 function afterClose() {
@@ -108,7 +110,7 @@ defineExpose<CommonDialogExpose>({
   <CommonModal
     :modal-style="{ ...props.modalStyle }"
     :show-close="false"
-    :close-on-click-mask="false"
+    :close-on-click-mask="closeOnClickMask || showCancel"
     :visible="modalVisible"
     @after-close="afterClose"
   >
@@ -127,7 +129,7 @@ defineExpose<CommonDialogExpose>({
         <slot></slot>
         <div style="height: 0.5rem;"></div><!-- 高度占位 -->
       </main>
-      <footer>
+      <footer v-if="$slots.action || showCancel || showConfirm">
         <div style="flex: 1">
           <slot name="action"></slot>
         </div>
@@ -185,7 +187,6 @@ defineExpose<CommonDialogExpose>({
       position: absolute;
       right: 0.875rem;
       top: 0.875rem;
-      font-size: 0.75rem;
     }
   }
 

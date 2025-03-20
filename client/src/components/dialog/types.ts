@@ -1,5 +1,6 @@
 import type { CSSProperties, VNode } from 'vue';
 import type { CusButtonProps } from '@/components/button/DiliButton';
+import type { CommonModalProps } from '@/components/modal/types.ts';
 
 type HandlerController = {
   signal: AbortSignal;
@@ -9,7 +10,6 @@ type MethodType =
   ((abortController: HandlerController) => any)
   | ((abortController: HandlerController) => Promise<any>);
 export type CommonDialogProps = {
-  visible?: boolean;
   type?: 'info' | 'warning' | 'danger' | 'success' | 'none';
   icon?: VNode;
   title?: string;
@@ -30,7 +30,7 @@ export type CommonDialogProps = {
   cancelButtonProps?: CusButtonProps;
 
   [key: string]: any;
-}
+} & Pick<CommonModalProps, 'closeOnClickMask'>
 
 export type CommonDialogEmits = {
   (event: 'cancel'): void;

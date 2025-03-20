@@ -10,14 +10,111 @@
  */
 
 import type {
+  ApiEntityCommonResponseAny,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
+  ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
   ApiEntityCommonResponseSchemaProblem,
+  ApiSchemaCourse,
   ApiSchemaExam,
   ApiSchemaProblem,
 } from './data-contracts';
 
 export namespace Tue {
+  /**
+   * @description 创建课程基础参数，绑定或创建题目、资源
+   * @tags Course
+   * @name CourseCreatePost
+   * @summary 创建课程
+   * @request POST:/tue/course/create
+   * @response `200` `ApiEntityCommonResponseSchemaCourse` 返回数据
+   */
+  export namespace CourseCreatePost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = ApiSchemaCourse;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaCourse;
+  }
+
+  /**
+   * @description 获取单个课程
+   * @tags Course
+   * @name CourseGet
+   * @summary 获取单个课程
+   * @request GET:/tue/course/{id}
+   * @response `200` `ApiEntityCommonResponseSchemaCourse` 返回数据
+   */
+  export namespace CourseGet {
+    export type RequestParams = {
+      /** 课程 ID */
+      id: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaCourse;
+  }
+
+  /**
+   * @description 获取课程列表
+   * @tags Course
+   * @name CourseListGet
+   * @summary 获取课程列表
+   * @request GET:/tue/course/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse` 返回数据
+   */
+  export namespace CourseListGet {
+    export type RequestParams = {};
+    export type RequestQuery = {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse;
+  }
+
+  /**
+   * @description 删除课程
+   * @tags Course
+   * @name CoursePost
+   * @summary 删除课程
+   * @request POST:/tue/course/{id}
+   * @response `200` `ApiEntityCommonResponseAny` 返回数据
+   */
+  export namespace CoursePost {
+    export type RequestParams = {
+      /** 课程 ID */
+      id: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseAny;
+  }
+
+  /**
+   * @description 更新课程基础参数，增量更新 题目、资源
+   * @tags Course
+   * @name CourseUpdatePost
+   * @summary 更新课程
+   * @request POST:/tue/course/update
+   * @response `200` `ApiEntityCommonResponseSchemaCourse` 返回数据
+   */
+  export namespace CourseUpdatePost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = ApiSchemaCourse;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaCourse;
+  }
+
   /**
    * @description 保存单个测验
    * @tags Exam

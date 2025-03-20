@@ -1,4 +1,4 @@
-import type { MaybeRef, RendererElement } from 'vue';
+import type { MaybeRef, RendererElement, VNode } from 'vue';
 
 export interface ToastProps {
   text?: string;
@@ -14,6 +14,7 @@ export interface ToastProps {
   teleportTo?: MaybeRef<RendererElement | string | null>;
   duration?: 'normal' | 'long' | 'short' | 'forever' | number;
   type?: 'normal' | 'success' | 'danger' | 'info' | 'warning';
+  icon?: VNode;
   showIcon?: boolean;
   onClick?: () => void;
 }
