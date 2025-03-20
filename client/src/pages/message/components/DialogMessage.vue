@@ -84,6 +84,12 @@ watch(() => props.thinking, (newThinking, oldThinking) => {
     thinkingCollapsed.value = false;
   }
 });
+watch(() => props.message, (newMessage, oldMessage) => {
+  if (newMessage && !oldMessage) {
+    // 思考完成时收起
+    thinkingCollapsed.value = true;
+  }
+});
 const thinkingCollapsing = ref(false); // 正在收起思考内容（动画过程中）
 const statusText = computed(() => {
   // 思考中/思考中断/思考完成
