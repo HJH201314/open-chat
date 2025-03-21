@@ -217,6 +217,15 @@ function handleActionTipClick() {
   }
 }
 
+async function handleStarDialog() {
+  const res = await dataStore.updateSessionFlags(form.sessionId, { isStared: !sessionInfo.value.flags?.isStared });
+  if (res) {
+    ToastManager.normal(`${!sessionInfo.value.flags?.isStared ? '取消' : ''}收藏成功`);
+  } else {
+    ToastManager.danger('收藏失败，请稍后重试~');
+  }
+}
+
 function handleShareDialog() {
   if (!checkPermission()) return;
 
@@ -297,7 +306,7 @@ async function handleEditSystemPrompt() {
     if (res.status && res.value) {
       // 确认修改
       const editResp = await dataStore.editDialogSystemPrompt(form.sessionId, res.value);
-      if (editResp) ToastManager.success('修改成功！');
+      if (editResp) ToastManager.normal('修改成功！');
       else ToastManager.danger('修改失败！');
     }
   } catch (_) {
@@ -338,7 +347,7 @@ const { isSmallScreen } = useGlobal();
     v-model:input-with-context="form.withContext"
     class="dialog-detail-view"
     :dialog-id="form.sessionId"
-    :title="sessionInfo.title"
+    :session="sessionInfo"
     :messages="messageList"
     :message-count="messageList.length"
     :has-permission="hasPermission"
@@ -357,6 +366,7 @@ const { isSmallScreen } = useGlobal();
     :show-bot-selector="inputCtrl.botSelector"
     :show-context-toggle="inputCtrl.contextToggle"
     @back="$emit('back')"
+    @star="handleStarDialog"
     @share="handleShareDialog"
     @sync="handleSyncDialog"
     @edit="handleEditDialog"

@@ -31,7 +31,7 @@ const currentSessionId = useRouteParams<string>('sessionId');
 const { pause: pauseSync, resume: resumeSync } = useIntervalFn(
   () => {
     if (userStore.isLogin) {
-      dataStore.fetchSessions();
+      dataStore.syncSessions();
     }
   },
   60000,
@@ -46,7 +46,7 @@ onMounted(() => {
       until(() => dataStore.sessionsFirstLoaded)
         .toBe(true)
         .then(() => {
-          dataStore.fetchSessions();
+          dataStore.syncSessions();
           resumeSync();
         });
     });
@@ -87,7 +87,7 @@ const handleSessionRefresh = async () => {
   }
   if (dataStore.isSessionsEmpty) {
     console.log('fetch user trigger immediately');
-    await dataStore.fetchSessions();
+    await dataStore.syncSessions();
     return;
   }
   const softMode = ref(true);
@@ -101,7 +101,7 @@ const handleSessionRefresh = async () => {
           return;
         }
         console.log('fetch use trigger confirmed');
-        const syncRes = await dataStore.fetchSessions(controller);
+        const syncRes = await dataStore.syncSessions(controller);
         if (!syncRes) {
           ToastManager.danger('同步失败，请稍后再试~', { position: 'top-left' });
         } else {
@@ -371,7 +371,7 @@ const { arrivedState } = useScroll(dialogListRef);
     color: $color-white;
     background-color: color.scale($color-primary, $alpha: -10%);
     border-radius: 0.5rem;
-    transition: all 0.2s $ease-out-circ;
+    transition: all 0.1s $ease-out-circ;
 
     &:hover {
       box-shadow: $box-shadow-deeper-right-bottom;

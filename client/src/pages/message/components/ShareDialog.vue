@@ -122,7 +122,7 @@ async function handleToggleActive(active: boolean) {
       });
     }
     if (res.data.data) {
-      ToastManager.success(`${!active ? '取消' : ''}分享成功`);
+      ToastManager.normal(`${!active ? '取消' : ''}分享成功`);
       await refreshSessionShareInfo('refresh');
     }
   } catch (_) {

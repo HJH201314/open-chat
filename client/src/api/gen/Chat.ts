@@ -22,6 +22,7 @@ import type {
   ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
   ApiSchemaSession,
+  ApiSchemaSessionFlagInfo,
 } from './data-contracts';
 import type { HttpClient, RequestParams } from './http-client';
 import { ContentType } from './http-client';
@@ -125,6 +126,24 @@ export class Chat<SecurityDataType = unknown> {
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/chat/session/del/${sessionId}`,
       method: 'POST',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 更新用户会话标记
+   *
+   * @tags Session
+   * @name SessionFlagPost
+   * @summary 更新用户会话标记
+   * @request POST:/chat/session/flag/{session_id}
+   * @response `200` `ApiEntityCommonResponseBool` OK
+   */
+  sessionFlagPost = (sessionId: string, req: ApiSchemaSessionFlagInfo, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/chat/session/flag/${sessionId}`,
+      method: 'POST',
+      body: req,
       type: ContentType.Json,
       format: 'json',
       ...params,

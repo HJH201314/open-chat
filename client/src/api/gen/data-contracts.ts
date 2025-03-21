@@ -23,7 +23,7 @@ export interface ApiChatCompletionStreamUserInput {
 
 export interface ApiChatShareSessionShareRequest {
   active?: boolean;
-  share_info?: ApiSchemaShareInfo;
+  share_info?: ApiSchemaSessionShareInfo;
 }
 
 export interface ApiEntityCommonResponseAny {
@@ -490,9 +490,15 @@ export interface ApiSchemaSession {
   name?: string;
   /** 系统提示词 */
   system_prompt?: string;
+  updated_at?: string;
 }
 
-export interface ApiSchemaShareInfo {
+export interface ApiSchemaSessionFlagInfo {
+  /** 标星 */
+  star?: boolean;
+}
+
+export interface ApiSchemaSessionShareInfo {
   /** 邀请码（可选） */
   code?: string;
   /** 邀请过期时间 */
@@ -514,12 +520,14 @@ export interface ApiSchemaUser {
 
 export interface ApiSchemaUserSession {
   created_at?: string;
+  flag_info?: ApiSchemaSessionFlagInfo;
   /** 组装数据 */
   session?: ApiSchemaSession;
   session_id?: string;
   /** 分享字段 */
-  share_info?: ApiSchemaShareInfo;
+  share_info?: ApiSchemaSessionShareInfo;
   type?: ApiSchemaUserSessionType;
+  updated_at?: string;
   /** 原始数据 */
   user_id?: number;
 }

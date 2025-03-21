@@ -152,13 +152,23 @@ export const useDataStore = defineStore('data', () => {
     });
   }
 
-  function updateSessionFlags(sessionId: string, flags: SessionInfo['flags']) {
-    db.sessions.where({ id: sessionId }).modify((session) => {
-      session.flags = {
-        ...(session.flags || {}),
-        ...flags,
-      };
-    });
+  async function updateSessionFlags(sessionId: string, flags: SessionInfo['flags']) {
+    try {
+      await db.sessions.where({ id: sessionId }).modify((session) => {
+        session.flags = {
+          ...(session.flags || {}),
+          ...flags,
+        };
+      });
+      if (flags?.isStared != undefined) {
+        await genApi.Chat.sessionFlagPost(sessionId, {
+          star: flags.isStared,
+        })
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   async function delSession(sessionId: string) {
@@ -186,7 +196,7 @@ export const useDataStore = defineStore('data', () => {
   /**
    * 从服务器拉取会话
    */
-  async function fetchSessions(abortController?: AbortController) {
+  async function syncSessions(abortController?: AbortController) {
     const controller = abortController || new AbortController();
     const updatedSessions: ApiSchemaUserSession[] = [];
     const deletedSessions: ApiSchemaUserSession[] = [];
@@ -242,6 +252,7 @@ export const useDataStore = defineStore('data', () => {
             model: settingStore.settings.defaultModel || chatConfigStore.defaultModel?.modelName,
             flags: {
               needSync: true,
+              isStared: remoteUserSession.flag_info?.star,
             },
           })
         } else if (localSession && remoteSession) {
@@ -256,7 +267,8 @@ export const useDataStore = defineStore('data', () => {
               provider: settingStore.settings.defaultProvider || chatConfigStore.defaultModel?.providerName,
               model: settingStore.settings.defaultModel || chatConfigStore.defaultModel?.modelName,
               flags: {
-                needSync: true,
+                needSync: localSession.flags?.needSync, // 保持本地数据
+                isStared: remoteUserSession.flag_info?.star
               },
             },
           })
@@ -546,7 +558,6 @@ export const useDataStore = defineStore('data', () => {
       if (
         messages &&
         (session.id.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
-          session.botRole.toLowerCase().indexOf(text.toLowerCase()) != -1 ||
           messages.toLowerCase().indexOf(text.toLowerCase()) != -1)
       ) {
         res.push(session);
@@ -560,7 +571,7 @@ export const useDataStore = defineStore('data', () => {
     sessionsFirstLoaded,
     isSessionsEmpty,
     isFetchingSessions,
-    fetchSessions,
+    syncSessions,
     updateSessionFlags,
     changeSessionBot,
     addDialog: addSession,

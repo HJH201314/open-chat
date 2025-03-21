@@ -22,6 +22,7 @@ import type {
   ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
   ApiSchemaSession,
+  ApiSchemaSessionFlagInfo,
 } from './data-contracts';
 
 export namespace Chat {
@@ -116,6 +117,25 @@ export namespace Chat {
     };
     export type RequestQuery = {};
     export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
+   * @description 更新用户会话标记
+   * @tags Session
+   * @name SessionFlagPost
+   * @summary 更新用户会话标记
+   * @request POST:/chat/session/flag/{session_id}
+   * @response `200` `ApiEntityCommonResponseBool` OK
+   */
+  export namespace SessionFlagPost {
+    export type RequestParams = {
+      /** 会话 ID */
+      sessionId: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiSchemaSessionFlagInfo;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseBool;
   }

@@ -41,21 +41,22 @@ export type MsgData = {
 
 export type SessionInfo = {
   id: string; // session_id
-  title: string;
-  avatar: string;
-  botRole: string; // bot角色名称
+  createAt?: number;
+  title?: string;
+  avatar?: string;
+  botRole?: string; // bot角色名称
   botId?: number; // bot角色 ID
-  createAt: number;
-  withContext: boolean; // 是否启用上下文
+  withContext?: boolean; // 是否启用上下文
   userId?: number; // 用户 ID
   provider?: string; // 模型供应商
   model?: string; // 模型名称
   flags?: SessionFlags;
-}
+};
 
 export type SessionFlags = {
-  needSync?: boolean;
-}
+  needSync?: boolean; // 是否需要从服务器同步消息数据
+  isStared?: boolean; // 是否收藏
+};
 
 export type MessageInfo = {
   id: number; // 本地ID
@@ -69,4 +70,4 @@ export type MessageInfo = {
   htmlContent?: string; // 编译后的html 消息内容
 
   [key: string]: any;
-}
+};

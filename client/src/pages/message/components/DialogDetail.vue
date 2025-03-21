@@ -12,8 +12,10 @@ import LoadingModal from '@/components/modal/LoadingModal.vue';
 import type { DialogDetailEmits, DialogDetailProps } from '@/pages/message/components/types.ts';
 
 const props = withDefaults(defineProps<DialogDetailProps>(), {
-  dialogId: '',
-  title: '',
+  session: () => ({
+    id: '',
+    createAt: 0,
+  }),
   messages: () => [],
   messageCount: 0,
   hasPermission: true,
@@ -104,12 +106,14 @@ defineExpose({
 <template>
   <div ref="dialog-detail" :class="{ small: isSmallScreen }" class="dialog-detail">
     <DialogAction
-      :title="title"
+      :title="session.title || '未命名对话'"
       :message-count="messageCount"
       :has-permission="hasPermission"
       :is-login="isLogin"
+      :is-stared="session.flags?.isStared"
       :message-syncing="messageSyncing"
       @back="$emit('back')"
+      @star="$emit('star')"
       @share="$emit('share')"
       @sync="$emit('sync')"
       @edit="$emit('edit')"

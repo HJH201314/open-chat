@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Back, Control, Delete, Edit, Refresh, Share, WrongUser } from '@icon-park/vue-next';
+import { Back, Control, Delete, Edit, Refresh, Share, Star, WrongUser } from '@icon-park/vue-next';
 import IconButton from '@/components/IconButton.vue';
 import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
@@ -10,6 +10,7 @@ const props = withDefaults(defineProps<DialogActionProps>(), {
   messageCount: 0,
   hasPermission: true,
   isLogin: false,
+  isStarted: false,
   messageSyncing: false,
 });
 
@@ -32,6 +33,11 @@ const emit = defineEmits<DialogActionEmits>();
       </span>
       <span class="dialog-action-subtitle"> {{ messageCount }} 条消息 </span>
     </div>
+    <CusTooltip text="收藏对话" position="bottom">
+      <IconButton type="secondary" color="warning" style="flex-shrink: 0" @click="$emit('star')">
+        <Star size="16" :theme="isStared ? 'filled' : 'outline'" />
+      </IconButton>
+    </CusTooltip>
     <CusTooltip text="分享对话" position="bottom">
       <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="$emit('share')">
         <Share size="16" />

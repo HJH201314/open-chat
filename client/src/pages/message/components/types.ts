@@ -1,16 +1,18 @@
 import type { DropdownOption } from '@/components/dropdown/types.ts';
-import type { MessageInfo } from '@/types/data.ts';
+import type { MessageInfo, SessionInfo } from '@/types/data.ts';
 
 export type DialogActionProps = {
   title: string;
   messageCount: number;
   hasPermission: boolean;
   isLogin: boolean;
+  isStared?: boolean;
   messageSyncing: boolean;
 };
 
 export type DialogActionEmits = {
   (e: 'back'): void;
+  (e: 'star'): void;
   (e: 'share'): void;
   (e: 'sync'): void;
   (e: 'edit'): void;
@@ -40,14 +42,14 @@ export type DialogInputEmits = {
 };
 
 export type DialogDetailProps = {
-  dialogId: string;
+  session: SessionInfo;
   messages: MessageInfo[];
   isReceivingMsg: boolean;
   answerMsgId?: number; // 用于判断当前正在输出的消息，进行异化展示
   answerMsg: string;
   thinkMsg: string;
   isSmallScreen: boolean;
-} & DialogActionProps & // 透传操作模块参数
+} & Omit<DialogActionProps, 'title'> & // 透传操作模块参数
   Pick<
     DialogInputProps,
     'providerDropdown' | 'botDropdown' | 'showModelSelector' | 'showBotSelector' | 'showContextToggle'

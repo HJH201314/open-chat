@@ -89,7 +89,7 @@ async function handleClearMessageCache() {
     const dataStore = useDataStore();
     const clearRes = await dataStore.clearAllData();
     if (clearRes) {
-      ToastManager.success('清除成功');
+      ToastManager.normal('清除成功');
     } else {
       ToastManager.danger('清除失败');
     }

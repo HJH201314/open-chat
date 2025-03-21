@@ -80,7 +80,7 @@ async function handleAddConfirm(close: CommonDialogExpose['close']) {
       permission: editForm.permission,
     });
     if (res.data.status == 200) {
-      ToastManager.success('新增成功!');
+      ToastManager.normal('新增成功!');
       getUsers();
     } else {
       ToastManager.danger('新增失败!');
@@ -109,7 +109,7 @@ async function handleEditConfirm(close: CommonDialogExpose['close']) {
       permission: editForm.permission,
     });
     if (res.data.status == 200) {
-      ToastManager.success('修改成功!');
+      ToastManager.normal('修改成功!');
       getUsers();
     } else {
       ToastManager.danger('修改失败!');

@@ -100,7 +100,7 @@ async function handleRegister() {
       password: loginForm.password,
     });
     if (res.status === 200 && res.data.data === true) {
-      ToastManager.success('注册成功', { position: 'bottom' });
+      ToastManager.normal('注册成功', { position: 'bottom' });
       await userStore.login(loginForm.username, loginForm.password);
     } else {
       loginForm.shake += 1;
