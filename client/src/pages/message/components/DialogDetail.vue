@@ -211,11 +211,11 @@ $dialog-max-width: 54rem;
     margin-bottom: v-bind(panelPlaceholderPx);
 
     > :not(:first-child) {
-      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
     }
 
     > :first-child {
-      margin-bottom: auto;
+      margin-top: auto;
     }
   }
 

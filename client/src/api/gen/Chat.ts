@@ -17,6 +17,7 @@ import type {
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
+  ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession,
   ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
@@ -204,6 +205,33 @@ export class Chat<SecurityDataType = unknown> {
       path: `/chat/session/share/${sessionId}`,
       method: 'POST',
       body: req,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description 同步会话列表
+   *
+   * @tags Session
+   * @name SessionSyncGet
+   * @summary 同步会话列表
+   * @request GET:/chat/session/sync
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession` 返回数据
+   */
+  sessionSyncGet = (
+    query: {
+      /** 客户端上次同步时间戳 */
+      last_sync_time: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession, any>({
+      path: `/chat/session/sync`,
+      method: 'GET',
+      query: query,
       type: ContentType.Json,
       format: 'json',
       ...params,

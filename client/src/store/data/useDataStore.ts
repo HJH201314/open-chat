@@ -4,13 +4,13 @@ import showToast from '@/components/toast/toast.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { MessageInfo, SessionInfo } from '@/types/data.ts';
 import { CommandParser, useCommandParser } from '@/utils/command-parser';
-import { useToggle, watchArray, watchThrottled } from '@vueuse/core';
+import { useLocalStorage, useTimeoutFn, useToggle, watchArray, watchThrottled } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { h, reactive, ref, shallowRef, watch } from 'vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { toObserver, useSubscription } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
-import { db } from '@/store/data/database.ts';
+import { db, resetDatabase } from '@/store/data/database.ts';
 import genApi from '@/api/gen-api.ts';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import type { ApiSchemaUserSession } from '@/api/gen/data-contracts.ts';
@@ -32,6 +32,7 @@ interface MessageCallback {
    */
   onThinkMessage?: (thinkMsg: string) => void;
   onFinish?: (renderedMsg: string) => void;
+  onError?: () => void;
 }
 
 /* 数据相关 TODO: 迁移与单个 session 相关的操作到 useSession */
@@ -41,17 +42,21 @@ export const useDataStore = defineStore('data', () => {
   // 由于 sessions 是异步加载的，所以直接判断 session 的长度来判断 sessions 是否为空不准确，此处通过 isSessionsEmpty 来判断
   const [isSessionsEmpty, changeSessionsEmpty] = useToggle(false);
   const sessions = ref<SessionInfo[]>([]);
+  const sessionsFirstLoaded = ref(false);
 
   // userId 切换时，订阅新的 query
   watch(
     () => userStore.userId,
     (newUserId) => {
+      // 用户变更后，重置 sessionsFirstLoaded
+      sessionsFirstLoaded.value = false;
       // 订阅 session
       useSubscription(
         liveQuery(async () => {
           const res =
             (await db.sessions.where({ userId: newUserId }).reverse().sortBy('createAt')) || ([] as SessionInfo[]);
           changeSessionsEmpty(res.length == 0);
+          sessionsFirstLoaded.value = true;
           return res;
         }).subscribe(toObserver(sessions))
       );
@@ -175,6 +180,7 @@ export const useDataStore = defineStore('data', () => {
     }
   }
 
+  const lastSyncTime = useLocalStorage('last-sync-time', 0);
   const [isFetchingSessions, changeFetchingStatus] = useToggle(false);
 
   /**
@@ -182,43 +188,68 @@ export const useDataStore = defineStore('data', () => {
    */
   async function fetchSessions(abortController?: AbortController) {
     const controller = abortController || new AbortController();
-    const remoteSessions: ApiSchemaUserSession[] = [];
+    const updatedSessions: ApiSchemaUserSession[] = [];
+    const deletedSessions: ApiSchemaUserSession[] = [];
+    // 本地数据为空时，重置 lastSyncTime
+    if (isSessionsEmpty.value) lastSyncTime.value = 0;
     changeFetchingStatus(true);
     // 获取所有远程数据
     let nextPage = 1;
+    let serverTime = 0;
     while (nextPage) {
       try {
-        const res = await genApi.Chat.sessionListGet(
+        const res = await genApi.Chat.sessionSyncGet(
           {
             page_num: nextPage,
             page_size: 20,
+            last_sync_time: lastSyncTime.value || 0,
           },
           {
             signal: controller.signal,
           }
         );
-        remoteSessions.push(...(res.data.data?.list || []));
+        serverTime = new Date(res.headers['date']).getTime();
+        updatedSessions.push(...(res.data.data?.updated || []));
+        deletedSessions.push(...(res.data.data?.deleted || []));
         if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
         else break;
       } catch (_) {
-        ToastManager.danger('刷新数据异常，请稍后重试~');
         changeFetchingStatus(false);
         return false;
       }
     }
     try {
+      const sessionIdsToBeDeleted = deletedSessions.map((session) => session.session_id).filter((sessionId) => !!sessionId) as string[];
+      const sessionsToBeCreated = [] as SessionInfo[];
+      const sessionsToBeUpdated = [] as { key: string; changes: Partial<SessionInfo>; }[];
       // 组装所有需要缓存的数据
-      const newSessions = await remoteSessions.reduce(
-        async (sessionInfos, remoteUserSession) => {
-          const remoteSession = remoteUserSession.session;
-          const session = await db.sessions.where({ id: remoteSession?.id }).last();
-          if (!session && remoteSession) {
-            (await sessionInfos).push({
-              id: remoteSession.id!,
-              // 若有，标题使用远程的名称，否则使用第一条消息的内容
-              title: remoteSession.name || remoteSession.messages?.[0]?.content || '',
-              avatar: '',
-              botRole: '未知',
+      for (const remoteUserSession of updatedSessions) {
+        const remoteSession = remoteUserSession.session;
+        const localSession = await db.sessions.where({ id: remoteSession?.id }).last();
+        if (!localSession && remoteSession) {
+          // 本地不存在但远端存在，创建
+          sessionsToBeCreated.push({
+            id: remoteSession.id!,
+            // 若有，标题使用远程的名称，否则使用第一条消息的内容
+            title: remoteSession.name || remoteSession.messages?.[0]?.content || '',
+            avatar: '',
+            botId: 0,
+            botRole: '通用（默认）',
+            createAt: new Date(remoteSession.created_at!).getTime(),
+            withContext: !!remoteSession.enable_context,
+            userId: remoteUserSession.user_id,
+            provider: settingStore.settings.defaultProvider || chatConfigStore.defaultModel?.providerName,
+            model: settingStore.settings.defaultModel || chatConfigStore.defaultModel?.modelName,
+            flags: {
+              needSync: true,
+            },
+          })
+        } else if (localSession && remoteSession) {
+          // 本地存在且远端存在，更新
+          sessionsToBeUpdated.push({
+            key: localSession.id,
+            changes: {
+              title: remoteSession.name || localSession.title || remoteSession.messages?.[0]?.content || '',
               createAt: new Date(remoteSession.created_at!).getTime(),
               withContext: !!remoteSession.enable_context,
               userId: remoteUserSession.user_id,
@@ -227,16 +258,19 @@ export const useDataStore = defineStore('data', () => {
               flags: {
                 needSync: true,
               },
-            });
-          }
-          return sessionInfos;
-        },
-        Promise.resolve([] as SessionInfo[])
-      );
-      // 写入 db
-      db.sessions.bulkAdd(newSessions);
+            },
+          })
+        }
+      }
+      await db.transaction('rw', db.sessions, async () => {
+        // 写入 db
+        await db.sessions.bulkAdd(sessionsToBeCreated);
+        await db.sessions.bulkUpdate(sessionsToBeUpdated);
+        await db.sessions.bulkDelete(sessionIdsToBeDeleted);
+      })
+      // 成功后保存时间戳
+      lastSyncTime.value = serverTime;
     } catch (_) {
-      ToastManager.danger('刷新数据异常，请稍后重试~');
       changeFetchingStatus(false);
       return false;
     }
@@ -315,7 +349,7 @@ export const useDataStore = defineStore('data', () => {
     };
 
     const saveBotMessage = async () => {
-      console.log('[saveBotMessage]', rawData.msg, renderedMsg.value)
+      console.log('[saveBotMessage]', rawData.msg, renderedMsg.value);
       botMsgIndex &&
         (await updateMessage(sessionId, botMsgIndex, {
           content: rawData.msg,
@@ -350,6 +384,8 @@ export const useDataStore = defineStore('data', () => {
           rawData.think += data;
         } else if (event.event === 'cmd') {
           await handleCommand(new CommandParser(event.data, true).parseJSON());
+        } else if (event.event === 'error') {
+          callback?.onError?.();
         }
       }
     );
@@ -361,7 +397,6 @@ export const useDataStore = defineStore('data', () => {
     const isStreaming = shallowRef(false);
     const msgId = shallowRef<number>();
     let abortController = new AbortController();
-    let timeout: number | undefined;
 
     const startStreaming = async (sessionId: string, message: string, customReceiver?: MessageCallback) => {
       isStreaming.value = true;
@@ -374,7 +409,6 @@ export const useDataStore = defineStore('data', () => {
         sessionId,
         message,
         {
-          ...(customReceiver || {}),
           onPreSaveMsg(userMsgId, botMsgId) {
             msgId.value = botMsgId;
             customReceiver?.onPreSaveMsg?.(userMsgId, botMsgId);
@@ -382,16 +416,21 @@ export const useDataStore = defineStore('data', () => {
           onMessage(msg, originMsg) {
             answerMessage.value = msg;
             customReceiver?.onMessage?.(msg, originMsg);
-            startTimeout(originMsg);
+            isStreaming.value && restartTimeout(originMsg);
           },
           onThinkMessage(msg) {
             thinkMessage.value = msg;
             customReceiver?.onThinkMessage?.(msg);
-            startTimeout(msg);
+            isStreaming.value && restartTimeout(msg);
           },
           onFinish(msg) {
             ToastManager.normal('回答完成', { position: 'top-right', icon: h(Correct) });
             customReceiver?.onFinish?.(msg);
+            innerCleanEffects();
+          },
+          onError() {
+            ToastManager.danger('出错了，换个姿势再试吧~', { position: 'top-right' });
+            customReceiver?.onError?.();
             innerCleanEffects();
           },
         },
@@ -403,18 +442,26 @@ export const useDataStore = defineStore('data', () => {
 
     const innerCleanEffects = () => {
       isStreaming.value = false;
-      clearTimeout(timeout);
+      stopTooLong();
     };
 
-    const startTimeout = (msg: string = '') => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        if (!abortController.signal.aborted) {
-          abortController.abort('no data for too long');
-          console.debug('[timeout]', 'no data for too long', msg);
-          ToastManager.danger('服务端超时');
-        }
-      }, 10000);
+    const {
+      isPending: isTooLongPending,
+      stop: stopTooLong,
+      start: startTooLong,
+    } = useTimeoutFn((msg: string) => {
+      if (!abortController.signal.aborted) {
+        abortController.abort('no data for too long');
+        console.debug('[timeout]', 'no data for too long', msg);
+        ToastManager.danger('服务端超时');
+      }
+    }, 10000, {
+      immediate: false,
+    });
+
+    const restartTimeout = (msg: string = '') => {
+      stopTooLong();
+      startTooLong(msg);
     };
 
     const clearMessage = () => {
@@ -485,8 +532,7 @@ export const useDataStore = defineStore('data', () => {
    */
   async function clearAllData(): Promise<boolean> {
     try {
-      await db.sessions.clear();
-      await db.messages.clear();
+      await resetDatabase();
       return true;
     } catch (_) {
       return false;
@@ -511,6 +557,7 @@ export const useDataStore = defineStore('data', () => {
 
   return {
     sessions,
+    sessionsFirstLoaded,
     isSessionsEmpty,
     isFetchingSessions,
     fetchSessions,

@@ -4,31 +4,24 @@ import RecordListView from '@/pages/message/components/RecordListView.vue';
 import { noPaddingKey, toggleSidebarKey } from '@/constants/eventBusKeys';
 import ChatDetailView from '@/pages/message/components/ChatDetailView.vue';
 import { useEventBus } from '@vueuse/core';
-import { useRouteParams } from '@vueuse/router';
-import { computed, reactive, ref, watchEffect } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref, watchEffect } from 'vue';
 
-const currentRecord = reactive({
-  id: '',
-});
-
-// 路由处理，根据 sessionId 退出或进入详情
-const router = useRouter();
-const sessionId = useRouteParams('sessionId');
-watchEffect(() => {
-  if (sessionId.value) {
-    currentRecord.id = String(sessionId.value);
-  } else {
-    currentRecord.id = '';
+const props = withDefaults(
+  defineProps<{
+    // 默认通过路由传入的sessionId
+    sessionId?: string;
+  }>(),
+  {
+    sessionId: '',
   }
-})
+);
 
 const { isLargeScreen } = useGlobal();
 const showListView = computed(() => {
-  return isLargeScreen.value || !sessionId.value;
+  return isLargeScreen.value || !props.sessionId;
 });
 const showDialogView = computed(() => {
-  return isLargeScreen.value || sessionId.value;
+  return isLargeScreen.value || props.sessionId;
 });
 
 // 移动端侧边栏隐藏和展示
@@ -42,8 +35,8 @@ watchEffect(() => {
   }
   // 进入对话时侧边栏收起，退出后展开
   else {
-    toggleSideBarBus.emit(!currentRecord.id);
-    noPaddingBus.emit(!!currentRecord.id);
+    toggleSideBarBus.emit(!props.sessionId);
+    noPaddingBus.emit(!!props.sessionId);
   }
 });
 
@@ -61,23 +54,23 @@ const isEmptyTipAvailable = ref(true);
       />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <section v-show="showDialogView" class="session-right" :class="{'session-right-absolute': !isLargeScreen}">
+    <section v-show="showDialogView" class="session-right" :class="{ 'session-right-absolute': !isLargeScreen }">
       <Transition
         :name="isLargeScreen ? 'slide-fade-right' : 'slide-fade-right'"
         @before-enter="isEmptyTipAvailable = false"
         @after-leave="isEmptyTipAvailable = true"
       >
         <ChatDetailView
-          v-if="showDialogView && currentRecord.id"
+          v-if="showDialogView && props.sessionId"
           id="dialog-detail-view"
-          :dialog-id="currentRecord.id"
+          :dialog-id="props.sessionId"
           class="message-page-dialog-detail transition-all-circ"
-          @back="() => router.back()"
+          @back="() => $router.back()"
         />
       </Transition>
       <Transition name="ease-in">
         <div
-          v-if="showDialogView && !currentRecord.id && isEmptyTipAvailable"
+          v-if="showDialogView && !props.sessionId && isEmptyTipAvailable"
           id="dialog-detail-empty-tip"
           class="message-page-empty-tip"
         >

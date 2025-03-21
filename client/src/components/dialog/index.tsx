@@ -43,6 +43,7 @@ export class DialogManager {
       dom: wrapper,
       app: dialogComponent,
     });
+    console.debug('[dialog-rendered] dialog instances', this.instances);
     return dialogInstance;
   };
 
@@ -98,6 +99,7 @@ export class DialogManager {
       dom: wrapper,
       app: dialogComponent,
     });
+    console.debug('[dialog-rendered] current dialog instants', this.instances);
 
     return {
       show,
@@ -179,6 +181,6 @@ export class DialogManager {
     instance.app.unmount();
     instance.dom.remove();
     this.instances.delete(_id);
-    console.debug(this.instances);
+    console.debug('[dialog-destroyed] dialog instances', this.instances);
   }
 }

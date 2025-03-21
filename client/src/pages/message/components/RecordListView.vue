@@ -1,31 +1,18 @@
 <script lang="ts" setup>
 import DiliButton from '@/components/button/DiliButton.vue';
-import CommonModal from '@/components/modal/CommonModal.vue';
 import Toggle from '@/components/toggle/CusToggle.vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
-import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
-import { CloseOne, Plus, Refresh, Search } from '@icon-park/vue-next';
+import { CloseOne, Plus, Search } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import {
-  computed,
-  h,
-  onActivated,
-  onDeactivated,
-  onMounted,
-  reactive,
-  ref,
-  useTemplateRef,
-  watch,
-  watchEffect,
-} from 'vue';
+import { computed, h, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { onClickOutside, until, useScroll } from '@vueuse/core';
+import { onClickOutside, until, useIntervalFn, useScroll } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { goToLogin } from '@/pages/login';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
@@ -40,25 +27,33 @@ const userStore = useUserStore();
 const settingStore = useSettingStore();
 const currentSessionId = useRouteParams<string>('sessionId');
 
+// 定时同步对话列表
+const { pause: pauseSync, resume: resumeSync } = useIntervalFn(
+  () => {
+    if (userStore.isLogin) {
+      dataStore.fetchSessions();
+    }
+  },
+  60000,
+  {
+    immediate: false,
+  }
+);
 onMounted(() => {
-  // 页面首次加载时检查是否需要刷新
-  if (dataStore.isSessionsEmpty && userStore.isLogin) {
-    console.log('fetch on mounted', userStore.isLogin, userStore.userId)
-    dataStore.fetchSessions();
-  }
+  until(() => userStore.isLogin)
+    .toBe(true)
+    .then(() => {
+      until(() => dataStore.sessionsFirstLoaded)
+        .toBe(true)
+        .then(() => {
+          dataStore.fetchSessions();
+          resumeSync();
+        });
+    });
 });
 
-// 添加页面激活时的刷新逻辑
-onActivated(() => {
-  if (dataStore.isSessionsEmpty && userStore.isLogin) {
-    console.log('fetch on activated')
-    dataStore.fetchSessions();
-  }
-});
-
-// 添加页面失活时的清理逻辑（如果需要的话）
-onDeactivated(() => {
-  // 可以在这里添加清理逻辑
+onBeforeUnmount(() => {
+  pauseSync();
 });
 
 async function handleAddRecord(defaultBotId?: number) {
@@ -91,7 +86,7 @@ const handleSessionRefresh = async () => {
     return;
   }
   if (dataStore.isSessionsEmpty) {
-    console.log('fetch user trigger immediately')
+    console.log('fetch user trigger immediately');
     await dataStore.fetchSessions();
     return;
   }
@@ -105,8 +100,13 @@ const handleSessionRefresh = async () => {
           ToastManager.danger('暂未支持');
           return;
         }
-        console.log('fetch use trigger confirmed')
-        await dataStore.fetchSessions(controller);
+        console.log('fetch use trigger confirmed');
+        const syncRes = await dataStore.fetchSessions(controller);
+        if (!syncRes) {
+          ToastManager.danger('同步失败，请稍后再试~', { position: 'top-left' });
+        } else {
+          ToastManager.normal('同步成功', { position: 'top-left' });
+        }
       },
     },
     {
@@ -212,13 +212,16 @@ const { arrivedState } = useScroll(dialogListRef);
           <CloseOne theme="filled" />
         </span>
       </div>
-      <div v-show="!searchForm.inputting" class="dialog-list-action-button" @click="handleSessionRefresh">
-        <Refresh size="1.2rem" theme="outline" />
-      </div>
       <div v-show="!searchForm.inputting" class="dialog-list-new-dialog" @click="handleListAddClick">
         <span>开始新对话</span>
         <Plus size="1.2rem" theme="outline" />
-        <CommonDialog v-model:visible="roleForm.modalVisible" title="选择角色" :show-close="true" :show-confirm="false" :show-cancel="false">
+        <CommonDialog
+          v-model:visible="roleForm.modalVisible"
+          title="选择角色"
+          :show-close="true"
+          :show-confirm="false"
+          :show-cancel="false"
+        >
           <div class="select-role">
             <div class="select-role-list">
               <div
@@ -253,9 +256,9 @@ const { arrivedState } = useScroll(dialogListRef);
           <div class="title">
             {{ item.title || '未命名对话' }}
           </div>
-<!--          <div class="digest">-->
-<!--            {{ item.botRole }}-->
-<!--          </div>-->
+          <!--          <div class="digest">-->
+          <!--            {{ item.botRole }}-->
+          <!--          </div>-->
           <div class="datetime">
             {{ new Date(item.createAt ?? '').toLocaleString() }}
           </div>
@@ -275,7 +278,7 @@ const { arrivedState } = useScroll(dialogListRef);
     <LoadingModal
       v-if="recordListViewRef"
       :teleport-to="recordListViewRef"
-      :visible="dataStore.isFetchingSessions"
+      :visible="dataStore.isFetchingSessions && dataStore.isSessionsEmpty"
       color="var(--color-primary)"
       tip="努力加载中..."
     ></LoadingModal>

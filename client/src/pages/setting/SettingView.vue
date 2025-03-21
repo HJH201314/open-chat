@@ -93,6 +93,7 @@ async function handleClearMessageCache() {
     } else {
       ToastManager.danger('清除失败');
     }
+    forceReloadPage();
   }
 }
 

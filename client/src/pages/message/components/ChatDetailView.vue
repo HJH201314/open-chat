@@ -9,7 +9,6 @@ import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import { storeToRefs } from 'pinia';
 import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import router from '@/plugins/router.ts';
 import genApi from '@/api/gen-api.ts';
 import ShareDialog from '@/pages/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
@@ -77,7 +76,7 @@ watch(
   (newSession) => {
     const { id: newSessionId, flags } = newSession;
     // 如果信息不存在，route 返回
-    if (!newSessionId) router.replace('/chat/message');
+    if (!newSessionId) emit('back');
 
     if (flags?.needSync) {
       if (!userStore.isLogin || (newSession.userId && newSession.userId != userStore.userId)) {
@@ -224,6 +223,7 @@ function handleShareDialog() {
   DialogManager.renderDialog(
     h(ShareDialog, {
       sessionId: form.sessionId,
+      onAfterClose() {},
     })
   );
 }

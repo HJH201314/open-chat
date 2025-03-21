@@ -22,6 +22,7 @@ const router = createRouter({
     {
       path: '/chat/message/:sessionId',
       name: 'messageDetail',
+      props: true,
       component: () => import('@/pages/message/MessagePage.vue'),
     },
     {
@@ -34,6 +35,11 @@ const router = createRouter({
       path: '/manage/user',
       name: 'manage-user',
       component: () => import('@/pages/manage/user/ManageUserPage.vue'),
+    },
+    {
+      path: '/chat/setting',
+      name: 'setting',
+      component: () => import('@/pages/setting/SettingDialog.vue'),
     },
   ],
 });

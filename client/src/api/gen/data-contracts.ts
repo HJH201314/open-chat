@@ -98,6 +98,15 @@ export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchem
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedSyncListResponseSchemaUserSession;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse {
   /** 代码 */
   code?: number;
@@ -192,6 +201,12 @@ export interface ApiEntityPaginatedContinuationResponseSchemaProblem {
 export interface ApiEntityPaginatedContinuationResponseSchemaUserSession {
   list?: ApiSchemaUserSession[];
   next_page?: number;
+}
+
+export interface ApiEntityPaginatedSyncListResponseSchemaUserSession {
+  deleted?: ApiSchemaUserSession[];
+  next_page?: number;
+  updated?: ApiSchemaUserSession[];
 }
 
 export interface ApiEntityPaginatedTotalResponseSchemaCourse {
@@ -292,6 +307,9 @@ export interface ApiSchemaExamProblem {
 }
 
 export interface ApiSchemaMessage {
+  bot_role?: ApiSchemaBotRole;
+  /** 回复所使用的模型 */
+  bot_role_id?: number;
   content?: string;
   created_at?: string;
   /** 默认结构 */

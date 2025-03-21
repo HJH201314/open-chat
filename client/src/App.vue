@@ -2,8 +2,8 @@
 import Panel from '@/components/panel/Panel.vue';
 import SideBar from '@/components/sidebar/SideBar.vue';
 import { noPaddingKey, siteLoadingKey } from '@/constants/eventBusKeys';
-import { useEventBus } from '@vueuse/core';
-import { ref, useTemplateRef } from 'vue';
+import { useEventBus, useWindowSize } from '@vueuse/core';
+import { ref, useTemplateRef, watchEffect } from 'vue';
 import CusFullSiteProgress from '@/components/progress/CusFullSiteProgress.vue';
 import CusThemeProvider from '@/components/theme/CusThemeProvider.ts';
 
@@ -20,6 +20,15 @@ const showPadding = ref(true);
 const noPaddingBus = useEventBus(noPaddingKey);
 noPaddingBus.on((v) => {
   showPadding.value = !v;
+});
+
+// 解决某些移动端浏览器下 vh 并非视口高度的问题
+const { height: windowHeight } = useWindowSize();
+watchEffect(() => {
+  if (windowHeight.value > 0) {
+    const vh = windowHeight.value / 100;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
 });
 </script>
 

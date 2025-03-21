@@ -42,7 +42,6 @@ const showModal = ref(false);
 watch(
   () => props.visible,
   (v) => {
-    console.log('visible', v)
     // nextTick才真正改变可视，能够让props.visible从一开始就为true时也展示动画
     nextTick(() => {
       if (v) open();
@@ -136,7 +135,7 @@ defineExpose<CommonModalFunc>({
         <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
       </div>
     </Transition>
-    <Transition :name="showBodyTransition && showModalBody ? 'x-expand' : 'show'">
+    <Transition :name="showBodyTransition && showModalBody ? 'x-expand' : 'x-expand'">
       <div
         v-show="showModalBody"
         ref="modal-body"
@@ -212,10 +211,12 @@ defineExpose<CommonModalFunc>({
 }
 
 .x-expand {
-  &-enter-active,
-  &-leave-active {
-    z-index: 1000;
+  &-enter-active {
     transition: transform 0.15s $ease-out-circ;
+  }
+
+  &-leave-active {
+    transition: transform 0.1s $ease-out-circ;
   }
 
   &-enter-from,

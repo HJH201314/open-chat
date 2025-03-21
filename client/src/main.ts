@@ -11,11 +11,13 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faComment as farComment } from '@fortawesome/free-regular-svg-icons';
 import { faBars, faComment as fasComment, faGear as fasGear } from '@fortawesome/free-solid-svg-icons';
 /* Import fontawesome icon component */
-
 import { createApp } from 'vue';
 
 import App from './App.vue';
 import '@/assets/code.scss';
+import { initDatabase } from '@/store/data/database.ts';
+
+initDatabase();
 
 library.add(faGithub, faBars, fasComment, farComment, fasGear);
 

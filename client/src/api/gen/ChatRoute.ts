@@ -17,6 +17,7 @@ import type {
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
+  ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession,
   ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
@@ -194,6 +195,28 @@ export namespace Chat {
     export type RequestBody = ApiChatShareSessionShareRequest;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
+   * @description 同步会话列表
+   * @tags Session
+   * @name SessionSyncGet
+   * @summary 同步会话列表
+   * @request GET:/chat/session/sync
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession` 返回数据
+   */
+  export namespace SessionSyncGet {
+    export type RequestParams = {};
+    export type RequestQuery = {
+      /** 客户端上次同步时间戳 */
+      last_sync_time: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession;
   }
 
   /**
