@@ -5,7 +5,7 @@ import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
-import { CloseOne, Plus, Search } from '@icon-park/vue-next';
+import { CloseOne, Plus, Search, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
 import { computed, h, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
@@ -14,9 +14,10 @@ import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { onClickOutside, until, useIntervalFn, useScroll } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
-import { goToLogin } from '@/pages/login';
+import { goToLogin } from '@/pages/user/login';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -187,6 +188,8 @@ const displayList = computed(() => {
 const dialogListRef = useTemplateRef('dialog-list');
 const recordListViewRef = useTemplateRef('record-list-view');
 const { arrivedState } = useScroll(dialogListRef);
+
+const { theme } = useTheme();
 </script>
 <template>
   <!-- 角色列表 -->
@@ -256,11 +259,11 @@ const { arrivedState } = useScroll(dialogListRef);
           <div class="title">
             {{ item.title || '未命名对话' }}
           </div>
-          <!--          <div class="digest">-->
-          <!--            {{ item.botRole }}-->
-          <!--          </div>-->
           <div class="datetime">
             {{ new Date(item.createAt ?? '').toLocaleString() }}
+          </div>
+          <div class="digest">
+            <Star v-if="item.flags?.isStared" :fill="theme.colorWarning" theme="filled" />
           </div>
         </div>
       </div>
@@ -439,9 +442,7 @@ const { arrivedState } = useScroll(dialogListRef);
       display: grid;
       grid-template-areas:
         'title title'
-        'digest datetime';
-      flex-direction: column;
-      justify-content: space-between;
+        'datetime digest';
       overflow: hidden;
 
       .title {
@@ -458,19 +459,19 @@ const { arrivedState } = useScroll(dialogListRef);
         overflow: hidden;
       }
 
-      .digest {
-        grid-area: digest;
-        color: $color-grey-500;
-        font-size: 0.8rem;
-        // 超过长度显示省略号
-        text-overflow: ellipsis;
-      }
-
       .datetime {
         grid-area: datetime;
         color: $color-grey-500;
-        font-size: 0.7rem;
-        text-align: right;
+        font-size: 0.75rem;
+        text-align: left;
+      }
+
+      .digest {
+        grid-area: digest;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
       }
     }
   }

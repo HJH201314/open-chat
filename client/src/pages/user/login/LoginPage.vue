@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import useGlobal from '@/commands/useGlobal';
+import useGlobal from '@/commands/useGlobal.ts';
 import { DialogManager } from '@/components/dialog';
-import showToast from '@/components/toast/toast';
-import { useUserStore } from '@/store/useUserStore';
+import showToast from '@/components/toast/toast.ts';
+import { useUserStore } from '@/store/useUserStore.ts';
 import { Close, Right } from '@icon-park/vue-next';
 import EasyTyper from 'easy-typer-js';
 import { onMounted, reactive, ref, watch } from 'vue';

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import useGlobal from '@/commands/useGlobal';
+import useGlobal from '@/commands/useGlobal.ts';
 import { DialogManager } from '@/components/dialog';
 import { useDataStore } from '@/store/data/useDataStore.ts';
-import { useUserStore } from '@/store/useUserStore';
+import { useUserStore } from '@/store/useUserStore.ts';
 import { watchArray } from '@vueuse/core';
 import { computed, h, reactive, ref, useTemplateRef, watch } from 'vue';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
@@ -10,7 +10,7 @@ import { storeToRefs } from 'pinia';
 import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import genApi from '@/api/gen-api.ts';
-import ShareDialog from '@/pages/message/components/ShareDialog.vue';
+import ShareDialog from '@/pages/user/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import { Control, Edit, Refresh } from '@icon-park/vue-next';

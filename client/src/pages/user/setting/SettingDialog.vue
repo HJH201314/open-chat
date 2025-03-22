@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SettingView from '@/pages/setting/SettingView.vue';
+import SettingView from '@/pages/user/setting/SettingView.vue';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
 import variables from '@/assets/variables.module.scss';
 import DiliButton from '@/components/button/DiliButton.vue';

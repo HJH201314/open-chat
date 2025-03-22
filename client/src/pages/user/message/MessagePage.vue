@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import useGlobal from '@/commands/useGlobal';
-import RecordListView from '@/pages/message/components/RecordListView.vue';
-import { noPaddingKey, toggleSidebarKey } from '@/constants/eventBusKeys';
-import ChatDetailView from '@/pages/message/components/ChatDetailView.vue';
+import useGlobal from '@/commands/useGlobal.ts';
+import RecordListView from '@/pages/user/message/components/RecordListView.vue';
+import { noPaddingKey, toggleSidebarKey } from '@/constants/eventBusKeys.ts';
+import ChatDetailView from '@/pages/user/message/components/ChatDetailView.vue';
 import { useEventBus } from '@vueuse/core';
 import { computed, ref, watchEffect } from 'vue';
 

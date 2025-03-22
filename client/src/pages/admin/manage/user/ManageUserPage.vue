@@ -1,12 +1,12 @@
 <script setup lang="ts">
 
-import UserItemCard from '@/pages/manage/user/components/UserItemCard.vue';
+import UserItemCard from '@/pages/admin/manage/user/components/UserItemCard.vue';
 import DiliButton from '@/components/button/DiliButton.vue';
 
 import { Left, Minus, Plus, Right } from '@icon-park/vue-next';
 import { onMounted, reactive, ref } from 'vue';
 import api from '@/api';
-import ToastManager from '@/components/toast/ToastManager';
+import ToastManager from '@/components/toast/ToastManager.ts';
 import CusInput from '@/components/input/CusInput.vue';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
 import type { CommonDialogExpose } from '@/components/dialog/types.ts';

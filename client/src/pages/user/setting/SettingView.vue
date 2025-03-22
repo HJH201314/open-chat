@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import variables from '@/assets/variables.module.scss';
-import useGlobal from '@/commands/useGlobal';
+import useGlobal from '@/commands/useGlobal.ts';
 import DiliButton from '@/components/button/DiliButton.vue';
 import { DialogManager } from '@/components/dialog';
 import CusSelect from '@/components/dropdown/CusSelect.vue';
 import CusInput from '@/components/input/CusInput.vue';
-import showToast from '@/components/toast/toast';
+import showToast from '@/components/toast/toast.ts';
 import CusToggle from '@/components/toggle/CusToggle.vue';
-import useRoleStore from '@/store/useRoleStore';
-import { useSettingStore } from '@/store/useSettingStore';
+import useRoleStore from '@/store/useRoleStore.ts';
+import { useSettingStore } from '@/store/useSettingStore.ts';
 import { ref, toValue, watch } from 'vue';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import { addChildrenDropdownOptions } from '@/components/dropdown/utils.ts';

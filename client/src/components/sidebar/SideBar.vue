@@ -1,16 +1,15 @@
 <script lang="ts" setup>
-import showToast from '@/components/toast/toast';
 import ToastManager from '@/components/toast/ToastManager';
 import Tooltip from '@/components/tooltip/CusTooltip.vue';
 import { toggleSidebarKey } from '@/constants/eventBusKeys';
-import { goToLogin } from '@/pages/login';
+import { goToLogin } from '@/pages/user/login';
 import { useUserStore } from '@/store/useUserStore';
 import { Github, Home, Login, Logout, MenuFold, MenuUnfold, Message, SettingTwo, User } from '@icon-park/vue-next';
 import { onClickOutside, useEventBus, useMediaQuery } from '@vueuse/core';
 import { computed, h, onMounted, ref, useTemplateRef, type VNode } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
-import SettingDialog from '@/pages/setting/SettingDialog.vue';
+import SettingDialog from '@/pages/user/setting/SettingDialog.vue';
 
 const userStore = useUserStore();
 

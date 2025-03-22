@@ -8,7 +8,7 @@ const router = createRouter({
     {
       path: '/home',
       name: 'homePage',
-      component: () => import('@/pages/home/HomePage.vue'),
+      component: () => import('@/pages/user/home/HomePage.vue'),
     },
     {
       path: '/',
@@ -17,29 +17,29 @@ const router = createRouter({
     {
       path: '/chat/message',
       name: 'messageList',
-      component: () => import('@/pages/message/MessagePage.vue'),
+      component: () => import('@/pages/user/message/MessagePage.vue'),
     },
     {
       path: '/chat/message/:sessionId',
       name: 'messageDetail',
       props: true,
-      component: () => import('@/pages/message/MessagePage.vue'),
+      component: () => import('@/pages/user/message/MessagePage.vue'),
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/pages/login/LoginPage.vue'),
+      component: () => import('@/pages/user/login/LoginPage.vue'),
       props: { isModal: false },
     },
     {
       path: '/manage/user',
       name: 'manage-user',
-      component: () => import('@/pages/manage/user/ManageUserPage.vue'),
+      component: () => import('@/pages/admin/manage/user/ManageUserPage.vue'),
     },
     {
       path: '/chat/setting',
       name: 'setting',
-      component: () => import('@/pages/setting/SettingDialog.vue'),
+      component: () => import('@/pages/user/setting/SettingDialog.vue'),
     },
   ],
 });

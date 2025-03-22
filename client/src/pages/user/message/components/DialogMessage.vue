@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import useGlobal from '@/commands/useGlobal';
+import useGlobal from '@/commands/useGlobal.ts';
 import useMarkdownIt from '@/commands/useMarkdownIt';
-import { useUserStore } from '@/store/useUserStore';
+import { useUserStore } from '@/store/useUserStore.ts';
 import { computed, ref, watch } from 'vue';
 import { Down } from '@icon-park/vue-next';
 import CusSpin from '@/components/spinning/CusSpin.vue';

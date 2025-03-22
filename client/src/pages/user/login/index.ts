@@ -1,6 +1,6 @@
 import CommonModal from '@/components/modal/CommonModal.vue';
-import LoginPage from '@/pages/login/LoginPage.vue';
-import initPlugins from '@/utils/initPlugins';
+import LoginPage from '@/pages/user/login/LoginPage.vue';
+import initPlugins from '@/utils/initPlugins.ts';
 import { createApp, h, ref } from 'vue';
 import useGlobal from '@/commands/useGlobal.ts';
 import router from '@/plugins/router.ts';

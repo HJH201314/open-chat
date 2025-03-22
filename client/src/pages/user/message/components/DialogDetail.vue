@@ -6,10 +6,10 @@ import DialogAction from './DialogAction.vue';
 import DialogInput from './DialogInput.vue';
 import DialogMessage from './DialogMessage.vue';
 import IconButton from '@/components/IconButton.vue';
-import type { MessageInfo } from '@/types/data';
+import type { MessageInfo } from '@/types/data.ts';
 import { scrollToBottom } from '@/utils/element.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
-import type { DialogDetailEmits, DialogDetailProps } from '@/pages/message/components/types.ts';
+import type { DialogDetailEmits, DialogDetailProps } from '@/pages/user/message/components/types.ts';
 
 const props = withDefaults(defineProps<DialogDetailProps>(), {
   session: () => ({
