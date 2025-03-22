@@ -112,6 +112,7 @@ defineExpose({
       :is-login="isLogin"
       :is-stared="session.flags?.isStared"
       :message-syncing="messageSyncing"
+      :menu-collapsed="isSmallScreen"
       @back="$emit('back')"
       @star="$emit('star')"
       @share="$emit('share')"

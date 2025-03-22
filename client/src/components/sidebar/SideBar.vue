@@ -121,7 +121,6 @@ function handleMouseLeave() {
 const router = useRouter();
 
 function handleEntryClick(_: Event, entry: Entry) {
-  showToast({ text: entry.name, position: 'top' });
   if (entry.onClick) {
     entry.onClick();
   } else if (entry.href) {

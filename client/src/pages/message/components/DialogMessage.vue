@@ -271,6 +271,10 @@ const { isLargeScreen } = useGlobal();
 @use '@/assets/variables' as *;
 // 无 scoped 解决 v-html 中的展示问题
 .dialog-message-content-body.rendered {
+  br {
+    display: none;
+  }
+
   ol,
   ul {
     white-space: normal;

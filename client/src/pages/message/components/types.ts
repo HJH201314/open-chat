@@ -8,6 +8,7 @@ export type DialogActionProps = {
   isLogin: boolean;
   isStared?: boolean;
   messageSyncing: boolean;
+  menuInMore?: boolean; // 菜单是否需要通过“更多”按钮打开
 };
 
 export type DialogActionEmits = {
@@ -49,7 +50,7 @@ export type DialogDetailProps = {
   answerMsg: string;
   thinkMsg: string;
   isSmallScreen: boolean;
-} & Omit<DialogActionProps, 'title'> & // 透传操作模块参数
+} & Omit<DialogActionProps, 'title' | 'menuInMore'> & // 透传操作模块参数
   Pick<
     DialogInputProps,
     'providerDropdown' | 'botDropdown' | 'showModelSelector' | 'showBotSelector' | 'showContextToggle'
