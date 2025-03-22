@@ -99,7 +99,6 @@ function handleBotRoleSelect(selectValue: string) {
     </div>
     <CusTextarea
       v-model="inputUserInput"
-      :textarea-attr="{ placeholder: '随便问点啥(●\'◡\'●)' }"
       class="dialog-input-textarea"
       @keydown="handleInputKeydown"
     />
@@ -120,23 +119,23 @@ $dialog-max-width: 54rem;
   position: absolute;
   left: 50%;
   bottom: 0;
-  width: calc(100% - 2rem);
+  width: calc(100% - 1rem);
   max-width: $dialog-max-width;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  background-color: color.scale($color-grey-100, $alpha: -20%);
+  background-color: color.scale($color-grey-100, $alpha: -30%);
   border-radius: 0.5rem 0.5rem 0 0;
-  padding: 0.25rem;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px);
   box-shadow: $box-shadow;
   transition: all 0.2s $ease-out-circ;
+  overflow: hidden;
 
   &:focus-within {
     bottom: 0.35rem;
     border-radius: 0.75rem;
-    box-shadow: $next-box-shadow-medium;
+    box-shadow: $box-shadow-deeper;
   }
 
   &.hide {
@@ -144,6 +143,7 @@ $dialog-max-width: 54rem;
   }
 
   &.small-input {
+    padding: 0.5rem;
     gap: 0;
   }
 
@@ -190,7 +190,10 @@ $dialog-max-width: 54rem;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
+    background: rgba(255 255 255 / 50%);
+    opacity: 0.9;
+    padding: 0.25rem;
 
     &-icon {
       width: 30px;
@@ -227,6 +230,7 @@ $dialog-max-width: 54rem;
     .small-input & {
       transform: scale(0.875);
       right: 2rem;
+      bottom: 0.5rem;
     }
 
     &:hover,
@@ -264,7 +268,7 @@ $dialog-max-width: 54rem;
 
 .slide-top-fade-enter-from,
 .slide-top-fade-leave-to {
-  margin-bottom: -1.5rem;
+  transform: rotate3d(0, 1, 0, 90deg);
   opacity: 0;
 }
 
