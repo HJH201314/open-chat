@@ -2,6 +2,7 @@
 import { computed, type CSSProperties, ref, watch } from 'vue';
 import variables from '@/assets/variables.module.scss';
 import { TransitionPresets, useTransition } from "@vueuse/core";
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 type CircularProgressProps = {
   value?: number;
@@ -13,9 +14,12 @@ type CircularProgressProps = {
   barStyle?: CSSProperties;
 };
 
+const { theme } = useTheme();
+
 const props = withDefaults(defineProps<CircularProgressProps>(), {
+  // TODO: use theme
   backgroundColor: variables.colorGrey200,
-  foregroundColor: variables.colorPrimary,
+  foregroundColor: theme.colorPrimary,
   value: 10,
   size: '6rem',
 });

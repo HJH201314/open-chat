@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import variables from '@/assets/variables.module.scss';
 import useGlobal from '@/commands/useGlobal.ts';
 import DiliButton from '@/components/button/DiliButton.vue';
 import { DialogManager } from '@/components/dialog';
@@ -15,6 +14,7 @@ import { addChildrenDropdownOptions } from '@/components/dropdown/utils.ts';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 const { isModal = false } = defineProps<{
   isModal?: boolean;
@@ -25,6 +25,7 @@ const roleStore = useRoleStore();
 const { providerDropdown, botsDropdown } = storeToRefs(useChatConfigStore());
 // 解构赋值editingValue避免使用proxy，此处并不希望未点击保存前生效
 const editingValue = ref({ ...toValue(settingStore.settings) });
+const { theme } = useTheme();
 
 defineEmits<{
   (event: 'cancel'): void;
@@ -49,7 +50,7 @@ function handleReset() {
     title: '重置设置',
     content: '此操作不可逆，确定要重置设置吗？',
     confirmButtonProps: {
-      backgroundColor: variables.colorDanger,
+      backgroundColor: theme.colorDanger,
     },
   }).then((res) => {
     if (res) {
@@ -67,7 +68,7 @@ function handleClearRoleCache() {
     title: '清除缓存',
     content: '此操作不可逆，清除后需要重新获取数据，是否继续？',
     confirmButtonProps: {
-      backgroundColor: variables.colorDanger,
+      backgroundColor: theme.colorDanger,
     },
   }).then((res) => {
     if (res) {
@@ -82,7 +83,7 @@ async function handleClearMessageCache() {
     title: '清除对话缓存',
     content: '此操作不可逆，清除后需要重新获取数据，是否继续？',
     confirmButtonProps: {
-      backgroundColor: variables.colorDanger,
+      backgroundColor: theme.colorDanger,
     },
   });
   if (confirmRes) {
@@ -208,13 +209,13 @@ defineExpose({
               <span class="setting-list-item__title">清除缓存</span>
               <span class="setting-list-item__value">
                 <DiliButton
-                  :background-color="variables.colorDanger"
+                  :background-color="theme.colorDanger"
                   text="清除角色缓存"
                   type="primary"
                   @click="handleClearRoleCache"
                 />
                 <DiliButton
-                  :background-color="variables.colorDanger"
+                  :background-color="theme.colorDanger"
                   text="清除对话缓存"
                   type="primary"
                   @click="handleClearMessageCache"
@@ -225,7 +226,7 @@ defineExpose({
               <span class="setting-list-item__title">强制刷新页面</span>
               <span class="setting-list-item__value">
                 <DiliButton
-                  :background-color="variables.colorDanger"
+                  :background-color="theme.colorDanger"
                   text="立即重启"
                   type="primary"
                   @click="forceReloadPage"

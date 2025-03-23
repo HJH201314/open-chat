@@ -88,7 +88,8 @@ const showMenu = ref(false);
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
-  background-color: rgba(255 255 255 / 75%);
+  color: var(--color-black);
+  background-color: color-mix(in srgb, var(--color-white), transparent 15%);
   backdrop-filter: blur(10px);
   z-index: 1;
 

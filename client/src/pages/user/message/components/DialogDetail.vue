@@ -229,7 +229,7 @@ $dialog-max-width: 54rem;
     width: 100%;
     font-size: 2rem;
     font-weight: bold;
-    color: $color-primary-darker;
+    color: var(--color-primary-darker);
     text-align: center;
     top: calc(50%);
     transform: translateY(calc(-50% - 2.5em));

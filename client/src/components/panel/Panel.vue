@@ -36,5 +36,6 @@
   width: 100%;
   overflow: hidden;
   transition: all .5s cubic-bezier(.55, 0, .1, 1);
+  background: var(--color-white);
 }
 </style>

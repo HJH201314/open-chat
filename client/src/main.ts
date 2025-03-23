@@ -15,6 +15,7 @@ import { createApp } from 'vue';
 
 import App from './App.vue';
 import '@/assets/code.scss';
+import '@/assets/themes.scss';
 import { initDatabase } from '@/store/data/database.ts';
 
 initDatabase();

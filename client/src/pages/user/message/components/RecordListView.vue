@@ -271,7 +271,7 @@ const { theme } = useTheme();
     <div v-if="!displayList.length" class="dialog-list-empty">
       <DiliButton
         v-if="!userStore.isLogin"
-        type="primary"
+        type="secondary"
         text="登录"
         :button-style="{ width: '3em' }"
         @click="() => goToLogin()"
@@ -320,7 +320,7 @@ const { theme } = useTheme();
     height: min-content;
     gap: 0.25rem;
     padding: 0.5rem;
-    background-color: rgba(255 255 255 / 75%);
+    background-color: color-mix(in srgb, var(--color-white), transparent 50%);
     backdrop-filter: blur(10px);
     transition: box-shadow 0.2s $ease-out-circ;
 
@@ -335,7 +335,7 @@ const { theme } = useTheme();
       // 此处 padding 让搜索图标位置不变
       padding-inline: calc(0.4rem - 2px);
       color: color.scale($color-primary, $alpha: -5%);
-      border: 2px solid $color-primary;
+      border: 2px solid var(--color-primary);
       box-sizing: border-box;
       display: flex;
       align-items: center;
@@ -372,7 +372,8 @@ const { theme } = useTheme();
     justify-content: center;
     gap: 0.5rem;
     color: $color-white;
-    background-color: color.scale($color-primary, $alpha: -10%);
+    background-color: var(--color-primary);
+    opacity: 0.85;
     border-radius: 0.5rem;
     transition: all 0.1s $ease-out-circ;
 
@@ -415,7 +416,6 @@ const { theme } = useTheme();
   &-item {
     padding: 0.5rem;
     border-radius: 0.5rem;
-    background-color: #ffffff;
     cursor: pointer;
     transition: background-color 0.2s $ease-out-cubic;
     display: flex;
@@ -446,6 +446,7 @@ const { theme } = useTheme();
       overflow: hidden;
 
       .title {
+        color: var(--color-black);
         grid-area: title;
         font-weight: bold;
         font-size: 1.1rem;
@@ -482,7 +483,7 @@ const { theme } = useTheme();
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: $color-primary;
+    color: var(--color-primary);
     font-size: 1.5rem;
     display: flex;
     flex-direction: row;
@@ -543,7 +544,7 @@ const { theme } = useTheme();
     &:hover {
       font-size: 1.1rem;
       line-height: 1.5rem;
-      background-color: $color-primary;
+      background-color: var(--color-primary);
       color: $color-white;
     }
   }

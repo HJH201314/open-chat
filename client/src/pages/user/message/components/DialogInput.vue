@@ -191,7 +191,7 @@ $dialog-max-width: 54rem;
     flex-direction: row;
     align-items: center;
     gap: 0.25rem;
-    background: rgba(255 255 255 / 50%);
+    background: rgba(var(--color-white) / 50%);
     opacity: 0.9;
     padding: 0.25rem;
 
@@ -216,7 +216,7 @@ $dialog-max-width: 54rem;
     width: 2rem;
     height: 2rem;
     margin-left: auto;
-    background: $color-primary;
+    background: var(--color-primary);
     color: white;
     border-radius: 35%;
     display: flex;
@@ -235,7 +235,7 @@ $dialog-max-width: 54rem;
 
     &:hover,
     &:active {
-      background: $color-primary-darker;
+      background: var(--color-primary-darker);
       box-shadow: $box-shadow-deeper;
 
       > .sending {

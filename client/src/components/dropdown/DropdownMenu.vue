@@ -27,7 +27,6 @@ import {
 } from '@/components/dropdown/types';
 import { useElementBounding } from '@vueuse/core';
 import { computed, defineProps, inject, reactive, useTemplateRef } from 'vue';
-import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(
   defineProps<
@@ -41,8 +40,6 @@ const props = withDefaults(
     position: 'bottom',
   }
 );
-
-const { theme } = useTheme();
 
 const currentShowingPath = defineModel<string[]>('currentShowingPath');
 
@@ -140,7 +137,7 @@ const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `uns
     }
 
     &.selected {
-      color: v-bind('theme.colorPrimary');
+      color: var(--color-primary);
     }
   }
 }

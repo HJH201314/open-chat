@@ -45,7 +45,7 @@ const toggleClasses = computed(() => {
     }
     &.on {
       justify-content: flex-end;
-      background-color: $color-primary;
+      background-color: var(--color-primary);
     }
   }
 

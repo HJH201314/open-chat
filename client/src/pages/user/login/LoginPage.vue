@@ -268,7 +268,7 @@ function showUserAgreement() {
     &-text {
       font-size: 56px;
       font-weight: bold;
-      color: $color-primary;
+      color: var(--color-primary);
       background-image: $linear-gradient-primary;
       -webkit-text-fill-color: rgba(0, 0, 0, 0);
       background-clip: text;
@@ -285,7 +285,7 @@ function showUserAgreement() {
       content: '';
       height: 1rem;
       width: 4px;
-      background-color: $color-primary;
+      background-color: var(--color-primary);
     }
   }
 
@@ -329,7 +329,7 @@ function showUserAgreement() {
 
       &:focus {
         background: $color-white;
-        border: 2px solid $color-primary;
+        border: 2px solid var(--color-primary);
       }
     }
 
@@ -374,15 +374,15 @@ function showUserAgreement() {
     // background-image: linear-gradient(-135deg, #41e0a3, #56d8c0, #dc8bc3, #56d8c0, #41e0a3, #56d8c0, #dc8bc3, #56d8c0, #41e0a3);
     background-image: linear-gradient(
       -135deg,
-      #418ae0,
-      #56a0d8,
-      #dc8bc3,
-      #56a0d8,
-      #418ae0,
-      #56a0d8,
-      #dc8bc3,
-      #56a0d8,
-      #418ae0
+      var(--color-primary-darker),
+      var(--color-primary),
+      var(--color-primary-lighter),
+      var(--color-primary),
+      var(--color-primary-darker),
+      var(--color-primary),
+      var(--color-primary-lighter),
+      var(--color-primary),
+      var(--color-primary-darker)
     );
     -webkit-text-fill-color: rgba(0, 0, 0, 0);
     background-clip: text;

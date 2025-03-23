@@ -4,12 +4,25 @@ import Tooltip from '@/components/tooltip/CusTooltip.vue';
 import { toggleSidebarKey } from '@/constants/eventBusKeys';
 import { goToLogin } from '@/pages/user/login';
 import { useUserStore } from '@/store/useUserStore';
-import { Github, Home, Login, Logout, MenuFold, MenuUnfold, Message, SettingTwo, User } from '@icon-park/vue-next';
+import {
+  Github,
+  Home,
+  Login,
+  Logout,
+  MenuFold,
+  MenuUnfold,
+  Message,
+  Moon,
+  SettingTwo,
+  SunOne,
+  User,
+} from '@icon-park/vue-next';
 import { onClickOutside, useEventBus, useMediaQuery } from '@vueuse/core';
 import { computed, h, onMounted, ref, useTemplateRef, type VNode } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import SettingDialog from '@/pages/user/setting/SettingDialog.vue';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 const userStore = useUserStore();
 
@@ -18,6 +31,7 @@ const expandBar = ref(false);
 const isAutoExpand = ref(false);
 
 const toggleSideBarBus = useEventBus(toggleSidebarKey);
+const { toggleTheme, currentTheme } = useTheme();
 
 onMounted(() => {
   toggleSideBarBus.on((e) => {
@@ -199,6 +213,17 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
               <Github class="sidebar-entry-icon" size="1.5rem" @click="handleGithubClick"></Github>
             </div>
           </Tooltip>
+          <Tooltip position="right" text="切换主题">
+            <div class="sidebar-entry sidebar-footer-item">
+              <SunOne
+                v-if="currentTheme == 'dark'"
+                class="sidebar-entry-icon"
+                size="1.5rem"
+                @click="toggleTheme"
+              ></SunOne>
+              <Moon v-if="currentTheme == 'light'" class="sidebar-entry-icon" size="1.5rem" @click="toggleTheme"></Moon>
+            </div>
+          </Tooltip>
         </div>
         <hr style="background: #4db6ac; height: 1px; width: 80%" />
         <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
@@ -268,15 +293,15 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
       // background-image: linear-gradient(-135deg, #41e0a3, #56d8c0, #dc8bc3, #56d8c0, #41e0a3, #56d8c0, #dc8bc3, #56d8c0, #41e0a3);
       background-image: linear-gradient(
         -135deg,
-        #418ae0,
-        #56a0d8,
-        #dc8bc3,
-        #56a0d8,
-        #418ae0,
-        #56a0d8,
-        #dc8bc3,
-        #56a0d8,
-        #418ae0
+        var(--color-primary-darker),
+        var(--color-primary),
+        var(--color-primary-lighter),
+        var(--color-primary),
+        var(--color-primary-darker),
+        var(--color-primary),
+        var(--color-primary-lighter),
+        var(--color-primary),
+        var(--color-primary-darker)
       );
       -webkit-text-fill-color: rgba(0, 0, 0, 0);
       background-clip: text;
@@ -352,7 +377,7 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
     &-name {
       font-size: 1.25rem;
       font-weight: bold;
-      color: $color-primary;
+      color: var(--color-primary);
     }
   }
 
@@ -388,14 +413,14 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
 
     &--active {
       background: $color-teal-50;
-      color: $color-primary;
+      color: var(--color-primary);
     }
 
     &-icon {
       aspect-ratio: 1;
 
       &--active {
-        color: $color-primary;
+        color: var(--color-primary);
       }
     }
 
@@ -410,7 +435,7 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
       }
 
       &-active {
-        color: $color-primary;
+        color: var(--color-primary);
       }
     }
 

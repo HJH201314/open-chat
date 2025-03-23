@@ -53,6 +53,7 @@ const toastClass = computed(() => {
 
 const { theme } = useTheme();
 const wrapperColor = computed(() => {
+  console.log(theme);
   switch (props.type) {
     case 'success':
       return theme.colorSuccess;

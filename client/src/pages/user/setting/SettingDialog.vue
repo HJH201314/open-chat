@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import SettingView from '@/pages/user/setting/SettingView.vue';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
-import variables from '@/assets/variables.module.scss';
 import DiliButton from '@/components/button/DiliButton.vue';
 import { h, ref, useTemplateRef } from 'vue';
 import { SettingTwo } from '@icon-park/vue-next';
+import { useTheme } from '@/components/theme/useTheme.ts';
+
+const { theme } = useTheme();
 
 const settingViewRef = useTemplateRef('setting-view');
 
@@ -27,7 +29,7 @@ const visible = ref(true);
         <DiliButton text="重置" type="text" @click="() => settingViewRef?.reset()" />
         <DiliButton text="关闭" type="normal" style="margin-left: auto" @click="() => (visible = false)" />
         <DiliButton
-          :background-color="variables.colorPrimary"
+          :background-color="theme.colorPrimary"
           :button-style="{ width: '100%', 'text-align': 'center' }"
           text="保存"
           type="primary"

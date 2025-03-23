@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Delete, Edit } from "@icon-park/vue-next";
-import DiliButton from "@/components/button/DiliButton.vue";
-import variables from '@/assets/variables.module.scss';
-import { computed } from "vue";
+import { Delete, Edit } from '@icon-park/vue-next';
+import DiliButton from '@/components/button/DiliButton.vue';
+import { computed } from 'vue';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 type UserItemCardProps = {
   avatar?: string;
@@ -23,15 +23,20 @@ const emit = defineEmits<{
   (event: 'delete', user: API.UserVO): void;
 }>();
 
+const { theme } = useTheme();
+
 const permissionName = computed(() => {
   return getPermissionName(props.permission);
 });
 
 function getPermissionName(permissionId: number) {
   switch (permissionId) {
-    case 0: return '访客';
-    case 1: return '用户';
-    case 2: return '管理员';
+    case 0:
+      return '访客';
+    case 1:
+      return '用户';
+    case 2:
+      return '管理员';
   }
 }
 </script>
@@ -51,14 +56,15 @@ function getPermissionName(permissionId: number) {
         ({{ permissionName }})
       </div>
       <div class="action">
-        <DiliButton @click="$emit('edit', {...props})">
-          <edit :fill="variables.colorPrimary" />修改
+        <DiliButton @click="$emit('edit', { ...props })">
+          <edit :fill="theme.colorPrimary" />
+          修改
         </DiliButton>
-        <DiliButton @click="$emit('delete', {...props})">
-          <delete :fill="variables.colorDanger" />删除
+        <DiliButton @click="$emit('delete', { ...props })">
+          <delete :fill="theme.colorDanger" />
+          删除
         </DiliButton>
       </div>
-
     </section>
   </div>
 </template>
@@ -66,15 +72,16 @@ function getPermissionName(permissionId: number) {
 <style scoped lang="scss">
 @use 'sass:color';
 @use '@/assets/variables' as *;
+
 .user-item-card {
   height: max-content;
   width: 333px;
-  padding: .5rem;
-  border-radius: .5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
   background-color: color.adjust($color-primary-lighter, $lightness: 30%);
-  transition: all .25s $ease-out-circ;
+  transition: all 0.25s $ease-out-circ;
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
 
   > .info {
     flex: 1;
@@ -82,27 +89,32 @@ function getPermissionName(permissionId: number) {
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
+
     .username {
       font-weight: bold;
       font-size: 1.1rem;
     }
+
     .permission {
       display: flex;
+
       &-operate {
         &-button {
           border-radius: 50%;
         }
       }
     }
+
     .action {
       display: flex;
-      gap: .5rem;
+      gap: 0.5rem;
     }
   }
 
   > .avatar {
-    border-radius: .5rem;
+    border-radius: 0.5rem;
     overflow: hidden;
+
     img {
       height: 112px;
       width: 112px;

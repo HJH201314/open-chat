@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import type { CusButtonEmits, CusButtonProps } from "@/components/button/DiliButton";
-import variables from '@/assets/variables.module.scss';
-import type { CSSProperties } from "vue";
-import { computed, ref } from "vue";
-import { getDarkerColor } from "@/utils/color";
+import type { CusButtonEmits, CusButtonProps } from '@/components/button/DiliButton';
+import type { CSSProperties } from 'vue';
+import { computed, ref } from 'vue';
+import { getDarkerColor, getLighterColor } from '@/utils/color';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(defineProps<CusButtonProps>(), {
-  text: "",
-  type: "normal",
+  text: '',
+  type: 'normal',
   shadow: false,
 });
 
 const emit = defineEmits<CusButtonEmits>();
 
+const { theme } = useTheme();
+
 const buttonRef = ref<HTMLButtonElement>();
 
 const buttonStyle = computed(() => {
   const calcStyle: CSSProperties = {
-    'box-shadow': props.shadow ? variables.boxShadow : 'none',
-    'padding': props.text ? '0.375em 1em' : '.375em',
-    ...props.buttonStyle
+    padding: props.text ? '0.375em 1em' : '.375em',
+    ...props.buttonStyle,
   };
   return calcStyle;
 });
@@ -27,7 +28,9 @@ const buttonStyle = computed(() => {
 const backgroundColor = computed(() => {
   if (props.backgroundColor) return props.backgroundColor;
   if (props.type == 'primary') {
-    return variables.colorPrimary;
+    return theme.colorPrimary;
+  } else if (props.type == 'secondary')  {
+    return getLighterColor(theme.colorPrimary, 0.9);
   } else {
     return '#FFFFFF';
   }
@@ -45,11 +48,11 @@ const fontColor = computed(() => {
     case 'primary':
       return '#FFFFFF';
     case 'secondary':
-      return variables.colorBlack; // TODO
+      return theme.colorPrimary;
     case 'text':
-      return variables.colorPrimary;
+      return theme.colorPrimary;
     default:
-      return variables.colorBlack;
+      return theme.colorBlack;
   }
 });
 const hoverFontColor = computed(() => {
@@ -63,40 +66,39 @@ function handleClick() {
   if (props.disabled) return; // 如果禁用了，直接拦截click事件
   emit('click');
 }
-
 </script>
 
 <template>
   <div class="dili-button" @click="handleClick">
-    <button ref="buttonRef" :style="buttonStyle" :class="{'disabled': props.disabled}">
+    <button ref="buttonRef" :style="buttonStyle" :class="{ disabled: props.disabled, shadowed: props.shadow }">
       <slot></slot>
       <span v-if="props.text" class="button-text">{{ props.text }}</span>
     </button>
-    <div class="mask" :class="{'disabled': props.disabled}">
-
-    </div>
+    <div class="mask" :class="{ disabled: props.disabled }"></div>
   </div>
 </template>
 
 <style scoped lang="scss">
 @use '@/assets/variables' as *;
+
 .dili-button {
   position: relative;
+
   > .mask {
     position: absolute;
-
   }
+
   > button {
     outline: none;
-    border-radius: .5rem;
-    transition: all .2s $ease-out-circ;
+    border-radius: 0.5rem;
+    transition: all 0.2s $ease-out-circ;
     background-color: v-bind(backgroundColor);
     border: 1px solid v-bind(backgroundColor);
     color: v-bind(fontColor);
     overflow: hidden;
     white-space: pre;
     display: flex;
-    gap: .5rem;
+    gap: 0.5rem;
     align-items: center;
     justify-content: center;
 
@@ -105,6 +107,10 @@ function handleClick() {
       //color: $color-grey-500;
       filter: grayscale(0.5) opacity(0.5);
       cursor: not-allowed;
+    }
+
+    &.shadowed {
+      box-shadow: $box-shadow;
     }
 
     &:not(&.disabled):hover {
@@ -125,6 +131,5 @@ function handleClick() {
       line-height: 1;
     }
   }
-
 }
 </style>

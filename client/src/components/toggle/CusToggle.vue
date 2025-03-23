@@ -71,7 +71,7 @@ function toggle() {
     line-height: 1.5em;
     &--highlight {
       transition: color 0.2s $ease-out-circ;
-      color: $color-primary;
+      color: var(--color-primary);
     }
   }
 }

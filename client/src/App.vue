@@ -5,7 +5,9 @@ import { noPaddingKey, siteLoadingKey } from '@/constants/eventBusKeys';
 import { useEventBus, useWindowSize } from '@vueuse/core';
 import { ref, useTemplateRef, watchEffect } from 'vue';
 import CusFullSiteProgress from '@/components/progress/CusFullSiteProgress.vue';
-import CusThemeProvider from '@/components/theme/CusThemeProvider.ts';
+import { provideTheme } from '@/components/theme/useTheme.ts';
+
+provideTheme();
 
 const siteProgressRef = useTemplateRef('site-progress');
 const siteProgressBus = useEventBus(siteLoadingKey);
@@ -34,13 +36,11 @@ watchEffect(() => {
 
 <template>
   <div class="app-base">
-    <CusThemeProvider>
-      <CusFullSiteProgress ref="site-progress" />
-      <SideBar />
-      <div :class="{ 'no-padding': !showPadding }" class="app-base-panel">
-        <Panel />
-      </div>
-    </CusThemeProvider>
+    <CusFullSiteProgress ref="site-progress" />
+    <SideBar />
+    <div :class="{ 'no-padding': !showPadding }" class="app-base-panel">
+      <Panel />
+    </div>
   </div>
 </template>
 

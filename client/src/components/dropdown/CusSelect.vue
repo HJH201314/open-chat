@@ -194,7 +194,7 @@ function selectOption(option: DropdownOption, valuePath: string[]) {
     }
 
     &:hover {
-      border-color: $color-primary;
+      border-color: var(--color-primary);
     }
   }
 }

@@ -1,4 +1,5 @@
 @use 'variables';
+@use 'themes';
 @use './base.css';
 /* IconPark图标 */
 @use '@icon-park/vue-next/styles/index.css';
@@ -39,13 +40,13 @@ body, html {
 a {
   text-decoration: none;
   display: inline-block;
-  color: variables.$color-primary;
+  color: var(--color-primary);
   transition: all 0.2s variables.$ease-out-circ;
-  background: linear-gradient(to right, variables.$color-primary, variables.$color-primary) no-repeat left bottom;
+  background: linear-gradient(to right, var(--color-primary), var(--color-primary)) no-repeat left bottom;
   background-size: 0 1px;
 
   &:hover {
-    color: variables.$color-primary-darker;
+    color: var(--color-primary-darker);
     background-position: left bottom;
     background-size: 100% 1px;
   }

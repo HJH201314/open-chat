@@ -172,7 +172,7 @@ onUnmounted(() => {
     }
 
     &.type-highlight {
-      background-color: $color-primary;
+      background-color: var(--color-primary);
     }
   }
 }

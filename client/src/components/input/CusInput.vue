@@ -48,7 +48,7 @@ function handleInput(e: any) {
 
   &:focus {
     background-color: $color-white;
-    border: 2px solid $color-primary;
+    border: 2px solid var(--color-primary);
   }
 
   &:disabled {

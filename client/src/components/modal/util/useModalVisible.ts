@@ -1,4 +1,5 @@
-import { type MaybeRefOrGetter, onMounted, shallowRef, toValue, watchEffect } from 'vue';
+import { type MaybeRefOrGetter, shallowRef, toValue, watchEffect } from 'vue';
+import { tryOnMounted } from '@vueuse/core';
 
 /**
  * 控制模态框的显隐
@@ -17,7 +18,7 @@ export const useModalVisible = (defaultVisibility: MaybeRefOrGetter<boolean> = t
     visible.value = false;
   };
 
-  onMounted(() => {
+  tryOnMounted(() => {
     // 外部传入的 visible 值变化时，更新内部 visible 值；onMounted 后再观测以展示模态框开启动画
     watchEffect(() => {
       visible.value = toValue(defaultVisibility);

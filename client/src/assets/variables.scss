@@ -44,14 +44,6 @@ $color-success: #1dd1a1;
 $color-info: #42a5f5;
 $color-warning: #ffa726;
 $color-danger: #ef5350;
-:root {
-  --color-success: #{$color-success};
-  --color-info: #{$color-info};
-  --color-warning: #{$color-warning};
-  --color-danger: #{$color-danger};
-  --color-black: #{$color-black};
-  --color-grey-500: #{$color-grey-500};
-}
 
 $color-hover: $color-grey-300;
 $color-active: $color-grey-400;
@@ -61,12 +53,6 @@ $color-primary-darker: $color-teal-500;
 $color-secondary-lighter: $color-pink-200;
 $color-secondary: $color-pink-400;
 $color-secondary-darker: $color-pink-500;
-:root {
-  --color-primary: #{$color-primary};
-  --color-primary-darker: #{$color-primary-darker};
-  --color-secondary: #{$color-secondary};
-  --color-secondary-darker: #{$color-secondary-darker};
-}
 
 $linear-gradient-primary: linear-gradient(180deg, $color-teal-300, $color-primary-darker);
 $linear-gradient-primary-2: linear-gradient(150deg, $color-teal-300, $color-primary-darker);
