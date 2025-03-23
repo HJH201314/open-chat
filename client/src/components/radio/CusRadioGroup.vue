@@ -11,26 +11,41 @@ import {
   ref,
   toRefs,
   useTemplateRef,
+  watch,
   watchEffect,
 } from 'vue';
 
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
-  modelValue: '',
   name: getRandomString(5),
   type: 'highlight',
+  direction: 'row',
+  barAnimation: true,
 });
+
+const modelValue = defineModel<any>({ default: '' });
+
 const emits = defineEmits<{
-  (event: 'change', value: string): void;
-  (event: 'update:modelValue', value: string): void;
+  (event: 'change', value: any): void;
 }>();
 defineSlots<{
   default(): any;
 }>();
 
-const selectedValue = ref(props.modelValue);
+const selectedValue = ref(modelValue.value);
 const selectedElement = ref<HTMLElement | undefined>(undefined);
 
-function setSelectedValue(v?: string) {
+// 观测 modelValue
+watch(
+  () => modelValue.value,
+  (newModelValue) => {
+    if (newModelValue !== selectedValue.value) {
+      console.log('setSelectedValue by model value', newModelValue);
+      setSelectedValue(modelValue.value);
+    }
+  }
+);
+
+function setSelectedValue(v?: any) {
   selectedValue.value = v || '';
 }
 
@@ -39,8 +54,8 @@ function setSelectedElement(e?: HTMLElement) {
 }
 
 watchEffect(() => {
+  modelValue.value = selectedValue.value;
   emits('change', selectedValue.value);
-  emits('update:modelValue', selectedValue.value);
 });
 
 const { name, type } = toRefs(props);
@@ -49,6 +64,7 @@ provide(
   reactive({
     name,
     type,
+    direction: props.direction,
     value: selectedValue,
     setValue: setSelectedValue,
     setElement: setSelectedElement,
@@ -134,7 +150,7 @@ onUnmounted(() => {
   <fieldset ref="radio-group" class="cus-radio-group">
     <div
       class="cus-radio-group-bar"
-      :class="{ 'cus-radio-group-bar--transition': barCalculated, [typeClassName]: !!typeClassName }"
+      :class="{ 'cus-radio-group-bar--transition': barAnimation && barCalculated, [typeClassName]: !!typeClassName }"
       :style="barStyle"
     ></div>
     <slot></slot>
@@ -150,6 +166,7 @@ onUnmounted(() => {
   border-radius: 0.6em;
   background-color: $color-grey-200;
   display: flex;
+  flex-direction: v-bind('props.direction');
   flex-wrap: wrap;
   padding: 0;
 

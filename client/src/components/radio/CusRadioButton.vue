@@ -14,8 +14,10 @@ const radioChecked = computed(() => (groupInject ? groupInject?.value === radioV
 
 const radioButtonRef = ref<HTMLElement | undefined>(undefined);
 const typeClassName = computed(() => `type-${groupInject?.type || 'highlight'}`);
+const directionClassName = computed(() => `direction-${groupInject?.direction || 'row'}`);
 
 function handleClick() {
+  console.log('setSelectedValue by click', radioValue.value || '');
   groupInject?.setValue(radioValue.value || '');
 }
 
@@ -30,7 +32,7 @@ watchEffect(() => {
   <label
     ref="radioButtonRef"
     class="cus-ratio-button"
-    :class="{ checked: radioChecked, [CheckedClassName]: radioChecked, [typeClassName]: !!typeClassName }"
+    :class="{ checked: radioChecked, [CheckedClassName]: radioChecked, [typeClassName]: !!typeClassName, [directionClassName]: !!directionClassName }"
     @click="handleClick"
   >
     <input :value="radioValue" :name="radioName" type="radio" />
@@ -45,10 +47,10 @@ watchEffect(() => {
   position: relative;
   cursor: pointer;
   z-index: 1;
-  padding: 0.5em 0.75em;
-  border-radius: 0.5rem;
+  padding: 8px 12px;
+  border-radius: 8px;
   line-height: 1;
-  transition: color 0.2s $ease-out-circ;
+  transition: color 0.1s $ease-out-circ;
 
   &.type-normal {
     &.checked {
@@ -62,20 +64,30 @@ watchEffect(() => {
     }
   }
 
-  &:not(:last-child):before {
-    content: '';
-    position: absolute;
-    top: 35%;
-    right: -0.5px;
-    width: 1px;
-    height: 30%;
-    background-color: rgba(0, 0, 0, 0.05);
-    transition: opacity 0.2s $ease-out-circ;
-  }
+  &:not(:last-child) {
+    &:before {
+      content: '';
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.05);
+      transition: opacity 0.2s $ease-out-circ;
+    }
 
-  &.checked {
-    &:not(:last-child):before {
-      opacity: 0;
+    &.direction-row:before {
+      top: 50%;
+      right: -0.5px;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 30%;
+      max-height: 1em;
+    }
+
+    &.direction-column:before {
+      left: 50%;
+      bottom: -0.5px;
+      transform: translateX(-50%);
+      height: 1px;
+      width: 30%;
+      max-width: 1em;
     }
   }
 
