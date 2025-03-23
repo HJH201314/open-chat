@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed, type CSSProperties, ref, watch } from 'vue';
 import variables from '@/assets/variables.module.scss';
-import { TransitionPresets, useTransition } from "@vueuse/core";
+import { TransitionPresets, useTransition } from '@vueuse/core';
+import { size } from 'liquidjs/dist/filters/array';
 import { useTheme } from '@/components/theme/useTheme.ts';
 
 type CircularProgressProps = {
@@ -14,23 +15,29 @@ type CircularProgressProps = {
   barStyle?: CSSProperties;
 };
 
-const { theme } = useTheme();
-
 const props = withDefaults(defineProps<CircularProgressProps>(), {
-  // TODO: use theme
-  backgroundColor: variables.colorGrey200,
-  foregroundColor: theme.colorPrimary,
+  backgroundColor: () => {
+    const { theme } = useTheme();
+    return theme.colorGrey200;
+  },
+  foregroundColor: () => {
+    const { theme } = useTheme();
+    return theme.colorPrimary;
+  },
   value: 10,
   size: '6rem',
 });
 
 const progress = ref(props.value);
 
-watch(() => props.value, (newValue, oldValue) => {
-  if (newValue != undefined && newValue !== oldValue) {
-    progress.value = newValue;
+watch(
+  () => props.value,
+  (newValue, oldValue) => {
+    if (newValue != undefined && newValue !== oldValue) {
+      progress.value = newValue;
+    }
   }
-});
+);
 
 const transitionProgress = useTransition(progress, {
   duration: 200,
@@ -44,13 +51,11 @@ const progressStyle = computed(() => {
     ...props.barStyle,
   };
 });
-
 </script>
 
 <template>
   <div class="circular-progress">
-    <div class="progress-bar" :style="progressStyle">
-    </div>
+    <div class="progress-bar" :style="progressStyle"></div>
     <div class="slot">
       <slot></slot>
     </div>
@@ -59,6 +64,7 @@ const progressStyle = computed(() => {
 
 <style scoped lang="scss">
 @use '@/assets/variables' as *;
+
 .circular-progress {
   position: relative;
   width: v-bind(size);

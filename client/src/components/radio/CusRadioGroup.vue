@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<CusRadioGroupProps>(), {
   type: 'highlight',
   direction: 'row',
   barAnimation: true,
+  displayStyle: 'background',
 });
 
 const modelValue = defineModel<any>({ default: '' });
@@ -53,25 +54,27 @@ function setSelectedElement(e?: HTMLElement) {
   selectedElement.value = e;
 }
 
-watchEffect(() => {
-  modelValue.value = selectedValue.value;
+watch(() => selectedValue.value, (newSelectedValue) => {
   emits('change', selectedValue.value);
+  modelValue.value = newSelectedValue;
 });
 
-const { name, type } = toRefs(props);
+const { name, type, direction, displayStyle } = toRefs(props);
 provide(
   RadioGroupInjectionKey,
-  reactive({
+  {
     name,
     type,
-    direction: props.direction,
+    direction,
+    displayStyle,
     value: selectedValue,
     setValue: setSelectedValue,
     setElement: setSelectedElement,
-  })
+  }
 );
 
 const typeClassName = computed(() => `type-${props.type}`);
+const displayStyleClassName = computed(() => `display-${props.displayStyle}`);
 
 // 选中框样式
 const barStyle = ref<CSSProperties>({
@@ -147,8 +150,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <fieldset ref="radio-group" class="cus-radio-group">
+  <fieldset ref="radio-group" class="cus-radio-group" :class="[displayStyleClassName]">
     <div
+      v-if="displayStyle !== 'icon'"
       class="cus-radio-group-bar"
       :class="{ 'cus-radio-group-bar--transition': barAnimation && barCalculated, [typeClassName]: !!typeClassName }"
       :style="barStyle"

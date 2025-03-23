@@ -20,6 +20,11 @@ export const provideTheme = () => {
     colorInfo: '#1890ff',
     colorWarning: '#faad14',
     colorDanger: '#ff4d4f',
+    colorGrey100: '',
+    colorGrey200: '',
+    colorGrey300: '',
+    colorGrey400: '',
+    colorGrey500: '',
   });
 
   const toggleTheme = () => {
@@ -35,7 +40,14 @@ export const provideTheme = () => {
     const rootStyles = getComputedStyle(document.documentElement);
     // 获取相应变量并更新到 theme 对象中
     Object.entries(theme).forEach(([key, _]) => {
-      theme[key] = rootStyles.getPropertyValue(`--${key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}`).trim();
+      if (key.startsWith('--')) return;
+
+      const cssKey = '--' + key
+        .replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)
+        .replace(/(\D)(\d)/g, '$1-$2'); // 在字母和数字之间添加短横线
+      const cssValue = rootStyles.getPropertyValue(cssKey).trim();
+      theme[key] = cssValue;
+      theme[cssKey] = cssValue;
     });
     console.log(theme);
   };

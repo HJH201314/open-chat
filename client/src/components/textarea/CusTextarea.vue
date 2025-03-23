@@ -1,24 +1,44 @@
 <script setup lang="ts">
-import { ref, type TextareaHTMLAttributes } from 'vue';
-import { useTextareaAutosize } from '@vueuse/core';
+import { ref, type TextareaHTMLAttributes, watch, watchEffect } from 'vue';
+import { useStyleTag, useTextareaAutosize } from '@vueuse/core';
 
 const props = withDefaults(
   defineProps<{
+    autoHeight?: boolean;
     textareaAttr?: TextareaHTMLAttributes;
+    preset?: boolean;
   }>(),
   {
+    autoHeight: true,
     textareaAttr: () => ({}),
+    preset: true,
   }
 );
 
+const emit = defineEmits<{
+  (e: 'change', value: string): void;
+}>();
+
 const modelValue = defineModel<string>('modelValue', { default: '' });
+
+watch(() => modelValue.value, (newVal) => {
+  if (newVal != undefined) {
+    emit('change', newVal);
+  }
+})
 
 // 自适应高度
 const textareaRef = ref<HTMLTextAreaElement>();
+const textareaWrapperRef = ref<HTMLDivElement>();
+
 useTextareaAutosize({
   element: textareaRef,
   input: modelValue,
 });
+
+function handleWrapperClick() {
+  textareaRef.value?.focus();
+}
 
 defineExpose({
   focus: () => {
@@ -27,19 +47,23 @@ defineExpose({
   blur: () => {
     textareaRef.value?.blur();
   },
-})
+});
 </script>
 
 <template>
-  <div class="cus-textarea">
+  <div ref="textareaWrapperRef" class="cus-textarea" :class="{ preset: preset }" @click="handleWrapperClick">
     <textarea ref="textareaRef" v-model="modelValue" v-bind="textareaAttr"></textarea>
   </div>
 </template>
 
 <style scoped lang="scss">
+@use '@/assets/variables' as *;
+
 .cus-textarea {
+  cursor: text;
   // 宽高布局由父级决定
   position: relative;
+  box-sizing: content-box;
   overflow-y: auto;
   //scrollbar-gutter: stable;
 
@@ -47,17 +71,39 @@ defineExpose({
     padding: 0;
     background-color: transparent;
     width: 100%;
-    min-height: 90%;
     box-sizing: border-box;
     outline: none;
-    font-size: 16px;
     resize: none;
 
     -ms-overflow-style: none;
     scrollbar-width: none;
 
+    .preset & {
+      // margin 撑起上下边距，不影响 auto-resize 工作
+      margin: 0.25rem 0;
+    }
+
     &::-webkit-scrollbar {
       display: none;
+    }
+  }
+
+  &.preset {
+    padding-inline: 0.25rem;
+    border: 2px solid $color-grey-100;
+    border-radius: 0.5rem;
+    transition:
+      background-color 0.2s $ease-out-circ,
+      border 0.2s $ease-out-circ;
+    background-color: $color-grey-100;
+
+    &:focus-within {
+      background-color: $color-white;
+      border: 2px solid var(--color-primary);
+    }
+
+    &:disabled {
+      color: $color-grey-400;
     }
   }
 }

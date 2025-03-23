@@ -13,6 +13,7 @@ const props = withDefaults(defineProps<CusInputProps>(), {
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string): void;
+  (event: 'change', value: string): void;
 }>();
 
 const v = ref(props.modelValue || props.value);
@@ -25,6 +26,7 @@ watch(() => props.modelValue, (newValue, oldValue) => {
 
 function handleInput(e: any) {
   emit('update:modelValue', e.target.value as string);
+  emit('change', e.target.value as string);
 }
 </script>
 

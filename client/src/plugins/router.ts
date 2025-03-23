@@ -41,6 +41,12 @@ const router = createRouter({
       name: 'setting',
       component: () => import('@/pages/user/setting/SettingDialog.vue'),
     },
+    {
+      path: '/tue/exam/:examId',
+      name: 'exam',
+      props: true,
+      component: () => import('@/pages/user/exam/ExamPage.vue'),
+    },
   ],
 });
 

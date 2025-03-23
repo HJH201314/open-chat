@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { CheckboxGroupInjectionKey, type CusCheckboxGroupProps } from './types';
 import { getRandomString } from '@/utils/string.ts';
-import { provide, reactive, ref, toRefs, watch } from 'vue';
+import { computed, provide, ref, toRefs, watch } from 'vue';
 
 const props = withDefaults(defineProps<CusCheckboxGroupProps>(), {
   name: getRandomString(5),
   type: 'highlight',
   barAnimation: true,
+  direction: 'column',
+  displayStyle: 'icon',
 });
 
 const modelValue = defineModel<any[]>({ default: [] });
@@ -24,6 +26,7 @@ const selectedValues = ref<any[]>(modelValue.value || []);
 watch(
   () => modelValue.value,
   (newModelValue) => {
+    console.log('[checkbox] newModelValue', newModelValue);
     if (
       newModelValue?.length !== selectedValues.value?.length ||
       !newModelValue?.every((v) => selectedValues.value.includes(v))
@@ -62,21 +65,22 @@ function isSelected(val?: any): boolean {
   return selectedValues.value.includes(val);
 }
 
-const { name, type } = toRefs(props);
-provide(
-  CheckboxGroupInjectionKey,
-  reactive({
-    name,
-    type,
-    values: selectedValues,
-    toggleValue,
-    isSelected,
-  })
-);
+const { name, type, direction, displayStyle } = toRefs(props);
+const displayStyleClassName = computed(() => `display-${props.displayStyle}`);
+
+provide(CheckboxGroupInjectionKey, {
+  name,
+  type,
+  direction,
+  displayStyle,
+  values: selectedValues,
+  toggleValue,
+  isSelected,
+});
 </script>
 
 <template>
-  <fieldset class="cus-checkbox-group">
+  <fieldset class="cus-checkbox-group" :class="[displayStyleClassName, `direction-${props.direction}`]">
     <slot></slot>
   </fieldset>
 </template>
@@ -92,5 +96,13 @@ provide(
   display: flex;
   flex-wrap: wrap;
   padding: 0;
+
+  &.direction-row {
+    flex-direction: row;
+  }
+
+  &.direction-column {
+    flex-direction: column;
+  }
 }
 </style>

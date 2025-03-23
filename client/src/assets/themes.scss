@@ -7,6 +7,10 @@
   --color-danger: #{$color-danger};
   --color-black: #{$color-black};
   --color-white: #{$color-white};
+  --color-grey-100: #{$color-grey-100};
+  --color-grey-200: #{$color-grey-200};
+  --color-grey-300: #{$color-grey-300};
+  --color-grey-400: #{$color-grey-400};
   --color-grey-500: #{$color-grey-500};
   --color-primary: #{$color-primary};
   --color-primary-darker: #{$color-primary-darker};
@@ -14,6 +18,9 @@
   --color-secondary: #{$color-secondary};
   --color-secondary-darker: #{$color-secondary-darker};
   --color-secondary-lighter: #{$color-secondary-lighter};
+
+  --text-primary: var(--color-black);
+  --text-secondary: var(--color-grey-500);
 }
 
 .theme-dark {

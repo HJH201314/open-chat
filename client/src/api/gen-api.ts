@@ -1,6 +1,8 @@
 import { Chat } from '@/api/gen/Chat.ts';
 import { Manage } from '@/api/gen/Manage.ts';
 import { User } from '@/api/gen/User.ts';
+import { Bot } from '@/api/gen/Bot.ts';
+import { Tue } from '@/api/gen/Tue.ts';
 import { defaultAxiosConfig, errorHandler, successHandler } from '@/api/base.ts';
 import { USER_ACCESS_TOKEN_KEY } from '@/constants';
 import { getActivePinia } from 'pinia';
@@ -38,4 +40,6 @@ export default {
   Chat: new Chat(genApiClient),
   Manage: new Manage(genApiClient),
   User: new User(genApiClient),
+  Bot: new Bot(genApiClient),
+  Tue: new Tue(genApiClient),
 };

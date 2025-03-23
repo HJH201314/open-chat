@@ -2,6 +2,7 @@
 import CommonModal from '@/components/modal/CommonModal.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import type { CommonModalProps } from '@/components/modal/types.ts';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(
   defineProps<
@@ -12,7 +13,10 @@ const props = withDefaults(
   >(),
   {
     tip: '加载中...',
-    color: '#000',
+    color: () => {
+      const { theme } = useTheme();
+      return theme.colorPrimary;
+    },
   }
 );
 

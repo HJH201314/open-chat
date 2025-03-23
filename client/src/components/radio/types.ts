@@ -1,10 +1,11 @@
-import type { InjectionKey } from 'vue';
+import type { InjectionKey, Ref } from 'vue';
 
 export type CusRadioGroupProps = {
   name?: string;
   type?: 'normal' | 'highlight';
   direction?: 'row' | 'column';
   barAnimation?: boolean;
+  displayStyle?: 'background' | 'icon';
 };
 
 export type CusRadioButtonProps = {
@@ -16,10 +17,11 @@ export type CusRadioButtonProps = {
 export const CheckedClassName = 'cus-radio-checked';
 
 export const RadioGroupInjectionKey: InjectionKey<{
-  name: string;
-  type: Required<CusRadioGroupProps>['type'];
-  direction: Required<CusRadioGroupProps>['direction'];
-  value: any;
+  name: Ref<string>;
+  type: Ref<Required<CusRadioGroupProps>['type']>;
+  direction: Ref<Required<CusRadioGroupProps>['direction']>;
+  displayStyle: Ref<Required<CusRadioGroupProps>['displayStyle']>;
+  value: Ref<any>;
   setValue: (v?: any) => void;
   setElement: (e?: HTMLElement) => void;
 }> = Symbol('RadioGroupProvide');

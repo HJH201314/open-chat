@@ -1,10 +1,12 @@
-import type { InjectionKey } from 'vue';
+import type { InjectionKey, Ref } from 'vue';
 
 // 多选组件类型定义
 export type CusCheckboxGroupProps = {
   name?: string;
   type?: 'normal' | 'highlight';
   barAnimation?: boolean;
+  direction?: 'row' | 'column';
+  displayStyle?: 'background' | 'icon' | 'both';
 };
 
 export type CusCheckboxButtonProps = {
@@ -17,9 +19,11 @@ export type CusCheckboxButtonProps = {
 export const CheckboxCheckedClassName = 'cus-checkbox-checked';
 
 export const CheckboxGroupInjectionKey: InjectionKey<{
-  name: string;
-  type: Required<CusCheckboxGroupProps>['type'];
-  values: any[];
+  name: Ref<string>;
+  type: Ref<Required<CusCheckboxGroupProps>['type']>;
+  direction?: Ref<Required<CusCheckboxGroupProps>['direction']>;
+  displayStyle: Ref<Required<CusCheckboxGroupProps>['displayStyle']>;
+  values: Ref<any[]>;
   toggleValue: (v?: any) => void;
   isSelected: (v?: any) => boolean;
 }> = Symbol('CheckboxGroupProvide');

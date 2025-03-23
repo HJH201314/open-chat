@@ -58,7 +58,7 @@ function handleBotRoleSelect(selectValue: string) {
     }"
     class="dialog-input"
   >
-    <Transition name="slide-top-fade">
+    <Transition name="bar-fade">
       <div v-show="!smallInput && showToolbar" class="dialog-input-bar">
         <CusSelect
           v-if="showModelSelector"
@@ -100,6 +100,7 @@ function handleBotRoleSelect(selectValue: string) {
     <CusTextarea
       v-model="inputUserInput"
       class="dialog-input-textarea"
+      :preset="false"
       @keydown="handleInputKeydown"
     />
     <div class="dialog-input-send" @click="$emit('send')">
@@ -124,7 +125,6 @@ $dialog-max-width: 54rem;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
   background-color: color.scale($color-grey-100, $alpha: -30%);
   border-radius: 0.5rem 0.5rem 0 0;
   backdrop-filter: blur(5px);
@@ -158,13 +158,15 @@ $dialog-max-width: 54rem;
   &-textarea {
     margin-inline: 0.25rem;
     width: calc(100% - 2.5rem);
-    height: 5rem;
+    min-height: 5rem;
+    max-height: calc(50 * var(--vh));
     box-sizing: border-box;
     transition: all 0.2s $ease-out-circ;
 
     .small-input & {
       width: calc(100% - 4rem);
-      height: 2rem;
+      min-height: 1.75rem;
+      max-height: 1.75rem;
       display: flex;
       align-items: center;
     }
@@ -230,7 +232,7 @@ $dialog-max-width: 54rem;
     .small-input & {
       transform: scale(0.875);
       right: 2rem;
-      bottom: 0.5rem;
+      bottom: 0.35rem;
     }
 
     &:hover,
@@ -266,14 +268,18 @@ $dialog-max-width: 54rem;
 <style lang="scss">
 @use '@/assets/variables' as *;
 
-.slide-top-fade-enter-from,
-.slide-top-fade-leave-to {
-  transform: rotate3d(0, 1, 0, 90deg);
+.bar-fade-enter-from,
+.bar-fade-leave-to {
+  margin-bottom: -1.5rem;
   opacity: 0;
 }
 
-.slide-top-fade-enter-active,
-.slide-top-fade-leave-active {
+.bar-fade-enter-active,
+.bar-fade-leave-active {
+  //position: absolute;
+  //left: 0;
+  //right: 0;
+  //bottom: 100%;
   transition: all 0.2s $ease-out-circ;
 }
 </style>

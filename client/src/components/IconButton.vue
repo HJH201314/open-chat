@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(
   defineProps<{
@@ -12,15 +13,17 @@ const props = withDefaults(
   }
 );
 
+const { theme } = useTheme();
+
 const color = computed(() => {
   switch (props.color) {
     case 'danger':
     case 'warning':
     case 'success':
     case 'info':
-      return `var(--color-${props.color})`;
+      return theme[`--color-${props.color}`];
     default:
-      return props.color || 'var(--color-primary)';
+      return props.color || theme.colorPrimary;
   }
 });
 
