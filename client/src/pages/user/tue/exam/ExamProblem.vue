@@ -60,7 +60,7 @@ watch(
 watch(
   () => innerTextAnswer.value,
   (newTextAns, oldTextAns) => {
-    console.log('text answer change', newTextAns);
+    console.log(`[ExamProblem:${props.page}] text answer change`, newTextAns);
     if (newTextAns !== oldTextAns) {
       answerVM.value = newTextAns;
       emit('answer-change', newTextAns);
@@ -188,8 +188,6 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: -3rem;
-  margin-bottom: 1rem;
 }
 
 .problem-title {
@@ -209,9 +207,6 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
 
 .answer-section {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
   overflow-x: hidden;
   overflow-y: auto;
 

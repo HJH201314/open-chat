@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, useTemplateRef, watch } from 'vue';
 import genApi from '@/api/gen-api.ts';
 import { type ApiSchemaExam } from '@/api/gen/data-contracts.ts';
 import useGlobal from '@/commands/useGlobal.ts';
@@ -8,7 +8,7 @@ import { DialogManager } from '@/components/dialog';
 import router from '@/plugins/router.ts';
 import ExamAnsweringFragment from '@/pages/user/tue/exam/ExamAnsweringFragment.vue';
 import ExamWelcomeFragment from '@/pages/user/tue/exam/ExamWelcomeFragment.vue';
-import { useStepper } from '@vueuse/core';
+import { until, useStepper } from '@vueuse/core';
 import ExamFinishedFragment from '@/pages/user/tue/exam/ExamFinishedFragment.vue';
 import { useRoute } from 'vue-router';
 
@@ -16,11 +16,19 @@ const props = withDefaults(
   defineProps<{
     examId: string;
   }>(),
-  {}
+  {},
 );
 
 const exam = ref<ApiSchemaExam>();
-const { current: currentStep, goToNext: goToNextStep } = useStepper(['welcome','answering','finished'], 'welcome');
+const { current: currentStep, goToNext: goToNextStep } = useStepper(['welcome', 'answering', 'finished'], 'welcome');
+const fragmentAnsweringRef = useTemplateRef('fragment-answering');
+watch(() => currentStep.value, (newStep) => {
+  if (newStep == 'answering') {
+    until(fragmentAnsweringRef).not.toBeNull().then(() => {
+      fragmentAnsweringRef.value?.start();
+    });
+  }
+});
 
 const loadingExam = ref(false);
 // 加载考试信息
@@ -67,8 +75,18 @@ const { isSmallScreen } = useGlobal();
 <template>
   <div class="exam-page" :class="{ small: isSmallScreen }">
     <LoadingModal :visible="loadingExam" />
-    <ExamWelcomeFragment v-if="currentStep == 'welcome'" class="exam-page-fragment-full" :exam="exam" @start="goToNextStep" />
-    <ExamAnsweringFragment v-if="currentStep == 'answering'" class="exam-page-fragment-full" :exam="exam" />
+    <ExamWelcomeFragment
+      v-if="currentStep == 'welcome'"
+      class="exam-page-fragment-full"
+      :exam="exam"
+      @start="goToNextStep"
+    />
+    <ExamAnsweringFragment
+      v-if="currentStep == 'answering'"
+      ref="fragment-answering"
+      class="exam-page-fragment-full"
+      :exam="exam"
+    />
     <ExamFinishedFragment v-if="currentStep == 'finished'" class="exam-page-fragment-full" :exam="exam" />
   </div>
 </template>
@@ -89,5 +107,4 @@ const { isSmallScreen } = useGlobal();
     height: 100%;
   }
 }
-
 </style>

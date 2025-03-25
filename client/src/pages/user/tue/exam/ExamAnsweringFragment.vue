@@ -3,11 +3,14 @@ import ExamProblem from '@/pages/user/tue/exam/ExamProblem.vue';
 import CusProgress from '@/components/progress/CusProgress.vue';
 import CusPagination from '@/components/pagination/CusPagination.vue';
 import DiliButton from '@/components/button/DiliButton.vue';
-import { computed, type CSSProperties, ref, watch } from 'vue';
+import { computed, type CSSProperties, ref, useTemplateRef, watch } from 'vue';
 import { DialogManager } from '@/components/dialog';
 import type { ApiSchemaExam } from '@/api/gen/data-contracts.ts';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import { getProblemCategory } from '@/pages/user/tue/exam/utils.ts';
+import { StopwatchStart } from '@icon-park/vue-next';
+import Panel from '@/components/panel/Panel.vue';
+import { useCountdown } from '@vueuse/core';
 
 const props = withDefaults(
   defineProps<{
@@ -33,18 +36,49 @@ watch(
 );
 
 const { theme } = useTheme();
+
+const { remaining, start: startCountdown } = useCountdown(() => props.exam?.limit_time || 0, { immediate: false });
+const remainingTimeText = computed(() => {
+  const minutes = Math.floor(remaining.value / 60);
+  const seconds = Math.floor(remaining.value % 60);
+  return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+});
+watch(
+  () => remaining.value,
+  (newRemaining) => {
+    if (newRemaining <= 0) {
+      emit('submit', { answers: answers.value });
+    }
+  }
+);
+
 const currentPage = ref(1);
 const maxPage = computed(() => props.exam?.problems?.length || 1);
 
+const examContentRef = useTemplateRef('exam-content');
+watch(
+  () => currentPage.value,
+  (newCurrentPage) => {
+    const problemElement = document.getElementById(`problem-${newCurrentPage - 1}`);
+    if (!problemElement) return;
+    examContentRef.value?.scrollTo({
+      top: problemElement.offsetTop - 16, // offset 减去 padding
+      behavior: 'smooth',
+    });
+  }
+);
+
 function isPageAnswerValid(pageNum: number) {
   const problemId = props.exam?.problems?.[pageNum - 1]?.problem_id;
+  const valid = isAnswerValid(problemId);
   if (problemId) {
-    return isAnswerValid(problemId);
+    return valid;
   }
   return false;
 }
 
-function isAnswerValid(problemId: number) {
+function isAnswerValid(problemId?: number) {
+  if (!problemId) return false;
   const answer = answers.value[problemId];
   return (typeof answer == 'string' && answer) || (typeof answer == 'object' && answer.length);
 }
@@ -61,6 +95,19 @@ function handleNextProblem() {
   }
 }
 
+const answers = ref<Record<number, number[] | string>>({});
+
+const answerFinishProgress = computed(() => {
+  const totalProblemCount = maxPage.value;
+  let finishedProblemCount = 0;
+  Object.entries(answers.value).forEach(([problemId]) => {
+    if (isAnswerValid(Number(problemId))) {
+      finishedProblemCount += 1;
+    }
+  });
+  return (finishedProblemCount / totalProblemCount) * 100;
+});
+
 const highlightInvalidPage = ref(false);
 
 function getPaginationItemStyle(pageNum: number) {
@@ -75,19 +122,6 @@ function getPaginationItemStyle(pageNum: number) {
   }
 }
 
-const answers = ref<Record<number, number[] | string>>({});
-
-const answerFinishProgress = computed(() => {
-  const totalProblemCount = maxPage.value;
-  let finishedProblemCount = 0;
-  Object.entries(answers.value).forEach(([problemId]) => {
-    if (isAnswerValid(Number(problemId))) {
-      finishedProblemCount += 1;
-    }
-  })
-  return (finishedProblemCount / totalProblemCount) * 100;
-});
-
 watch(
   () => answers.value,
   (newAnswers) => {
@@ -95,6 +129,14 @@ watch(
   },
   { deep: true }
 );
+
+const paginationItemStyle = computed(() => {
+  const res = {} as Record<number, CSSProperties>;
+  for (let i = 1; i <= maxPage.value; i++) {
+    res[i] = getPaginationItemStyle(i) ?? {};
+  }
+  return res;
+});
 
 function handleExamSubmit() {
   const incompleteProblemPages: number[] = [];
@@ -127,53 +169,99 @@ function handleExamSubmit() {
     emit('submit', { answers: answers.value });
   }
 }
+
+defineExpose({
+  start: startCountdown,
+});
 </script>
 
 <template>
-  <header class="exam-header">
-    <CusProgress :value="answerFinishProgress" show-text />
-    <div style="display: flex; justify-content: space-between; align-items: center">
-      <DiliButton class="exam-submit-btn" type="primary" @click="handleExamSubmit"> 提交试卷 </DiliButton>
-    </div>
-  </header>
+  <div class="exam-answering-fragment">
+    <header class="exam-header">
+      <div v-if="props.exam?.limit_time" class="exam-countdown" :title="`倒计时${remaining}秒`">
+        <StopwatchStart />
+        {{ remainingTimeText }}
+      </div>
+      <CusProgress :value="answerFinishProgress" foreground-color="var(--color-primary-lighter)" show-text />
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <DiliButton class="exam-submit-btn" type="primary" @click="handleExamSubmit"> 提交试卷</DiliButton>
+      </div>
+    </header>
 
-  <main class="exam-content">
-    <template v-for="(problem, i) in exam?.problems || []" :key="problem.problem_id">
-      <ExamProblem
-        v-show="currentPage - 1 == i"
-        v-model:answer="answers[problem.problem_id!]"
-        :page="i + 1"
-        :exam-problem="problem"
-      />
-    </template>
-  </main>
+    <Panel class="exam-panel">
+      <main ref="exam-content" class="exam-content">
+        <template v-for="(problem, i) in exam?.problems || []" :key="problem.problem_id">
+          <ExamProblem
+            :id="`problem-${i}`"
+            v-model:answer="answers[problem.problem_id!]"
+            :page="i + 1"
+            :exam-problem="problem"
+          />
+        </template>
+      </main>
+    </Panel>
 
-  <nav class="problem-navigation">
-    <CusPagination
-      v-model:current-page="currentPage"
-      :page-count="exam?.problems?.length"
-      :page-item-stsyle="getPaginationItemStyle"
-    ></CusPagination>
-    <div class="problem-navigation-step">
-      <DiliButton type="secondary" :disabled="currentPage <= 1" @click="handleLastProblem"> 上一题</DiliButton>
-      <DiliButton type="secondary" :disabled="currentPage >= maxPage" @click="handleNextProblem"> 下一题</DiliButton>
-    </div>
-  </nav>
+    <nav class="problem-navigation">
+      <CusPagination
+        v-model:current-page="currentPage"
+        class="problem-navigation-page"
+        :show-arrow="false"
+        :page-count="exam?.problems?.length"
+        :page-item-style="paginationItemStyle"
+      ></CusPagination>
+      <div class="problem-navigation-step">
+        <DiliButton type="secondary" :disabled="currentPage <= 1" @click="handleLastProblem"> 上一题</DiliButton>
+        <DiliButton type="secondary" :disabled="currentPage >= maxPage" @click="handleNextProblem"> 下一题</DiliButton>
+      </div>
+    </nav>
+  </div>
 </template>
 
 <style scoped lang="scss">
+.exam-answering-fragment {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+
+  > .exam-header {
+    width: 100%;
+    max-width: 54rem;
+    display: flex;
+    gap: 0.5rem;
+
+    > .exam-countdown {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-secondary);
+    }
+  }
+}
+
 .exam-description {
   color: var(--text-secondary);
 }
 
-.exam-content {
+.exam-panel {
   position: relative;
+  width: 100%;
+  max-width: 54rem;
+  margin-inline: 1rem;
+  padding: 1rem;
+  box-shadow: none;
+}
+
+.exam-content {
+  position: absolute;
+  inset: 0;
+  padding: 1rem;
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  justify-content: center;
-  //overflow-y: auto;
+  overflow-y: auto;
 }
 
 .problem-navigation {
@@ -181,9 +269,15 @@ function handleExamSubmit() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
+  max-width: 54rem;
 
   .small & {
     flex-direction: column-reverse;
+  }
+
+  &-page {
+    max-width: 100%;
   }
 
   &-step {

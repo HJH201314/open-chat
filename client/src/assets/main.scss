@@ -59,7 +59,7 @@ a {
 
 /* 滚动条 */
 ::-webkit-scrollbar {
-  --bar-width: 5px;
+  --bar-width: 2px;
   width: var(--bar-width);
   height: var(--bar-width);
 }
@@ -69,7 +69,7 @@ a {
   background-color: var(--bar-color);
   border-radius: .5rem;
   background-clip: content-box;
-  border: 1px solid transparent;
+  border: none;
 }
 
 /* 滚动条轨道样式 */

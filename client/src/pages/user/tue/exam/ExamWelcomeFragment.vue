@@ -16,7 +16,7 @@ const emit = defineEmits<{
   (e: 'start'): void;
 }>();
 
-const limitTimeText = computed(() => props.exam.limit_time ? `限时：${props.exam.limit_time / 60} 分钟` : '')
+const limitTimeText = computed(() => props.exam.limit_time ? `限时：${(props.exam.limit_time / 60).toFixed(2).replace('.00', '')} 分钟` : '')
 </script>
 
 <template>

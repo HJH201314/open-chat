@@ -38,7 +38,7 @@ const router = createRouter({
       component: () => import('@/pages/user/tue/TueLayout.vue'),
       children: [
         {
-          path: '/exam/:examId',
+          path: 'exam/:examId',
           name: 'examPage',
           props: true,
           component: () => import('@/pages/user/tue/exam/ExamPage.vue'),
