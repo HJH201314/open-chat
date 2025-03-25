@@ -31,7 +31,8 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
       // 订阅 message
       useSubscription(
         liveQuery(async () => {
-          return db.messages.where({ sessionId: newSessionId }).sortBy('time');
+          // 先进行 time 排序，对于相同的 time 使用 remoteId 排序
+          return (await db.messages.where({ sessionId: newSessionId }).sortBy('time')).sort((a, b) => Number(a.remoteId || 0) - Number(b.remoteId || 0));
         }).subscribe(toObserver(messages))
       );
     },

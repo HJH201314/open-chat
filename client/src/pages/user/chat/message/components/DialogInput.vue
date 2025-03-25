@@ -5,7 +5,7 @@ import CusTextarea from '@/components/textarea/CusTextarea.vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import { computed, ref } from 'vue';
-import type { DialogInputEmits, DialogInputProps } from '@/pages/user/message/components/types.ts';
+import type { DialogInputEmits, DialogInputProps } from '@/pages/user/chat/message/components/types.ts';
 
 const props = withDefaults(defineProps<DialogInputProps>(), {
   providerDropdown: () => [],

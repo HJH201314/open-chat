@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -14,9 +15,9 @@ import type {
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseSchemaProvider,
   ApiSchemaProvider,
-} from './data-contracts';
-import type { HttpClient, RequestParams } from './http-client';
-import { ContentType } from './http-client';
+} from "./data-contracts";
+import type { HttpClient, RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 export class Manage<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -37,10 +38,10 @@ export class Manage<SecurityDataType = unknown> {
   providerCreatePost = (provider: ApiSchemaProvider, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaProvider, any>({
       path: `/manage/provider/create`,
-      method: 'POST',
+      method: "POST",
       body: provider,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -55,9 +56,9 @@ export class Manage<SecurityDataType = unknown> {
   providerDeletePost = (providerId: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/manage/provider/delete/${providerId}`,
-      method: 'POST',
+      method: "POST",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -72,9 +73,9 @@ export class Manage<SecurityDataType = unknown> {
   providerGet = (providerId: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaProvider, any>({
       path: `/manage/provider/${providerId}`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -89,9 +90,9 @@ export class Manage<SecurityDataType = unknown> {
   providerListGet = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseArraySchemaProvider, any>({
       path: `/manage/provider/list`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -106,10 +107,10 @@ export class Manage<SecurityDataType = unknown> {
   providerUpdatePost = (provider: ApiSchemaProvider, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/manage/provider/update`,
-      method: 'POST',
+      method: "POST",
       body: provider,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
 }

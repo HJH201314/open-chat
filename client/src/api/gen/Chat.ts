@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -23,9 +24,9 @@ import type {
   ApiEntityCommonResponseString,
   ApiSchemaSession,
   ApiSchemaSessionFlagInfo,
-} from './data-contracts';
-import type { HttpClient, RequestParams } from './http-client';
-import { ContentType } from './http-client';
+} from "./data-contracts";
+import type { HttpClient, RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 export class Chat<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -45,7 +46,7 @@ export class Chat<SecurityDataType = unknown> {
   completionStreamPost = (sessionId: string, request: ApiChatCompletionStreamUserInput, params: RequestParams = {}) =>
     this.http.request<any, any>({
       path: `/chat/completion/stream/${sessionId}`,
-      method: 'POST',
+      method: "POST",
       body: request,
       type: ContentType.Json,
       ...params,
@@ -62,9 +63,9 @@ export class Chat<SecurityDataType = unknown> {
   configBotsGet = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseArraySchemaBotRole, any>({
       path: `/chat/config/bots`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -79,9 +80,9 @@ export class Chat<SecurityDataType = unknown> {
   configModelsGet = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseArraySchemaModelCache, any>({
       path: `/chat/config/models`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -107,10 +108,10 @@ export class Chat<SecurityDataType = unknown> {
   ) =>
     this.http.request<ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage, any>({
       path: `/chat/message/list/${sessionId}`,
-      method: 'GET',
+      method: "GET",
       query: query,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -125,9 +126,9 @@ export class Chat<SecurityDataType = unknown> {
   sessionDelPost = (sessionId: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/chat/session/del/${sessionId}`,
-      method: 'POST',
+      method: "POST",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -142,10 +143,10 @@ export class Chat<SecurityDataType = unknown> {
   sessionFlagPost = (sessionId: string, req: ApiSchemaSessionFlagInfo, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/chat/session/flag/${sessionId}`,
-      method: 'POST',
+      method: "POST",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -160,9 +161,9 @@ export class Chat<SecurityDataType = unknown> {
   sessionGet = (sessionId: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaSession, any>({
       path: `/chat/session/${sessionId}`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -187,10 +188,10 @@ export class Chat<SecurityDataType = unknown> {
   ) =>
     this.http.request<ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession, any>({
       path: `/chat/session/list`,
-      method: 'GET',
+      method: "GET",
       query: query,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -205,9 +206,9 @@ export class Chat<SecurityDataType = unknown> {
   sessionNewPost = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseString, any>({
       path: `/chat/session/new`,
-      method: 'POST',
+      method: "POST",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -222,10 +223,10 @@ export class Chat<SecurityDataType = unknown> {
   sessionSharePost = (sessionId: string, req: ApiChatShareSessionShareRequest, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/chat/session/share/${sessionId}`,
-      method: 'POST',
+      method: "POST",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -249,10 +250,10 @@ export class Chat<SecurityDataType = unknown> {
   ) =>
     this.http.request<ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession, any>({
       path: `/chat/session/sync`,
-      method: 'GET',
+      method: "GET",
       query: query,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -267,10 +268,10 @@ export class Chat<SecurityDataType = unknown> {
   sessionUpdatePost = (sessionId: string, req: ApiSchemaSession, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/chat/session/update/${sessionId}`,
-      method: 'POST',
+      method: "POST",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -285,9 +286,9 @@ export class Chat<SecurityDataType = unknown> {
   sessionUserGet = (sessionId: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaUserSession, any>({
       path: `/chat/session/user/${sessionId}`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
 }

@@ -8,9 +8,10 @@ import CusInput from '@/components/input/CusInput.vue';
 import { useElementSize } from '@vueuse/core';
 import CusCheckboxGroup from '@/components/checkbox/CusCheckboxGroup.vue';
 import CusCheckboxButton from '@/components/checkbox/CusCheckboxButton.vue';
+import { getProblemTypeName } from '@/pages/user/tue/exam/utils.ts';
 
 const props = defineProps<{
-  index?: number;
+  page?: number;
   examProblem: ApiSchemaExamProblem;
 }>();
 
@@ -23,21 +24,7 @@ const emit = defineEmits<{
 
 const problemInfo = computed(() => props.examProblem.problem || ({} as ApiSchemaProblem));
 
-const typeName = computed(() => {
-  switch (problemInfo.value.type) {
-    case ApiSchemaProblemType.EnumSingleChoice:
-      return '单选题';
-    case ApiSchemaProblemType.EnumMultipleChoice:
-      return '多选题';
-    case ApiSchemaProblemType.EnumShortAnswer:
-      return '简答题';
-    case ApiSchemaProblemType.EnumFillBlank:
-      return '填空题';
-    case ApiSchemaProblemType.EnumTrueFalse:
-      return '判断题';
-  }
-  return '未知题型';
-});
+const typeName = computed(() => getProblemTypeName(props.examProblem.problem?.type || ''));
 
 const innerTextAnswer = ref('');
 const innerOptionAnswer = ref<number[]>([]);
@@ -83,7 +70,7 @@ watch(
 watch(
   () => innerOptionAnswer.value,
   (newOptionAns, oldOptionAns) => {
-    console.log('options answer change', newOptionAns);
+    console.log(`[ExamProblem:${props.page}] options answer change`, newOptionAns);
     if (newOptionAns !== oldOptionAns) {
       answerVM.value = newOptionAns;
       emit('answer-change', newOptionAns);
@@ -112,7 +99,7 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
 <template>
   <div class="exam-problem">
     <div class="problem-header">
-      <span class="problem-score">{{ typeName }}&nbsp;&nbsp;&nbsp;{{ (examProblem.score || 0) / 100 }} 分</span>
+      <span class="problem-score">{{ page != undefined ? `${page}. ` : '' }}{{ typeName }}&nbsp;&nbsp;&nbsp;{{ (examProblem.score || 0) / 100 }} 分</span>
     </div>
 
     <div class="problem-content" v-html="problemInfo.description" />
@@ -192,7 +179,6 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
 
 <style scoped lang="scss">
 .exam-problem {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -202,6 +188,8 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: -3rem;
+  margin-bottom: 1rem;
 }
 
 .problem-title {
@@ -221,7 +209,6 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
 
 .answer-section {
   position: relative;
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 1rem;

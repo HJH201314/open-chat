@@ -29,11 +29,16 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  // 临时用强制深色模式
+  &[data-theme="dark"], .theme-dark & {
+    filter: invert(1) hue-rotate(180deg);
+  }
 }
 
 body, html {
   height: 100%;
-  background: linear-gradient(90deg, variables.$color-teal-20, variables.$color-teal-10);
+  background: variables.$body-background;
 }
 
 /* 定义链接样式 */

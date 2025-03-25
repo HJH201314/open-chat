@@ -24,8 +24,5 @@
 }
 
 .theme-dark {
-  --color-white: #{$color-black};
-  --color-black: #{$color-white};
-  --color-primary: #{$color-secondary};
-  --color-primary-darker: #{$color-secondary-darker};
+  // 在这里添加
 }

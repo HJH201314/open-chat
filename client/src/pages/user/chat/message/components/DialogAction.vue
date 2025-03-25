@@ -3,7 +3,7 @@ import { Back, Control, Delete, Edit, More, Refresh, Share, Star, WrongUser } fr
 import IconButton from '@/components/IconButton.vue';
 import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import type { DialogActionEmits, DialogActionProps } from '@/pages/user/message/components/types.ts';
+import type { DialogActionEmits, DialogActionProps } from '@/pages/user/chat/message/components/types.ts';
 import { ref } from 'vue';
 
 const props = withDefaults(defineProps<DialogActionProps>(), {

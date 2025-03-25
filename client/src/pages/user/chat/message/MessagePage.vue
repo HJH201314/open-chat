@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import useGlobal from '@/commands/useGlobal.ts';
-import RecordListView from '@/pages/user/message/components/RecordListView.vue';
-import { noPaddingKey, toggleSidebarKey } from '@/constants/eventBusKeys.ts';
-import ChatDetailView from '@/pages/user/message/components/ChatDetailView.vue';
+import RecordListView from '@/pages/user/chat/message/components/RecordListView.vue';
+import { noPaddingKey } from '@/constants/eventBusKeys.ts';
+import ChatDetailView from '@/pages/user/chat/message/components/ChatDetailView.vue';
 import { useEventBus } from '@vueuse/core';
 import { computed, ref, watchEffect } from 'vue';
 
@@ -24,18 +24,15 @@ const showDialogView = computed(() => {
   return isLargeScreen.value || props.sessionId;
 });
 
-// 移动端侧边栏隐藏和展示
-const toggleSideBarBus = useEventBus(toggleSidebarKey);
+// 移动端 padding 隐藏和展示
 const noPaddingBus = useEventBus(noPaddingKey);
 watchEffect(() => {
   // 大屏时展示边栏、关闭零内衬
   if (isLargeScreen.value) {
-    toggleSideBarBus.emit(true);
     noPaddingBus.emit(false);
   }
   // 进入对话时侧边栏收起，退出后展开
   else {
-    toggleSideBarBus.emit(!props.sessionId);
     noPaddingBus.emit(!!props.sessionId);
   }
 });
@@ -56,7 +53,7 @@ const isEmptyTipAvailable = ref(true);
     <div v-if="showListView && showDialogView" class="split"></div>
     <section v-show="showDialogView" class="session-right" :class="{ 'session-right-absolute': !isLargeScreen }">
       <Transition
-        :name="isLargeScreen ? 'slide-fade-right' : 'slide-fade-right'"
+        :name="isLargeScreen ? 'slide-fade-right' : 'slide-in-right-full'"
         @before-enter="isEmptyTipAvailable = false"
         @after-leave="isEmptyTipAvailable = true"
       >
@@ -158,5 +155,18 @@ const isEmptyTipAvailable = ref(true);
 .show-enter-from,
 .show-leave-to {
   opacity: 0;
+}
+
+.slide-in-right-full {
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  &-enter-active,
+  &-leave-active {
+    transition: all 0.2s $ease-out-circ;
+  }
 }
 </style>

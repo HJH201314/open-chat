@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -19,9 +20,9 @@ import type {
   ApiSchemaCourse,
   ApiSchemaExam,
   ApiSchemaProblem,
-} from './data-contracts';
-import type { HttpClient, RequestParams } from './http-client';
-import { ContentType } from './http-client';
+} from "./data-contracts";
+import type { HttpClient, RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 export class Tue<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -42,10 +43,10 @@ export class Tue<SecurityDataType = unknown> {
   courseCreatePost = (req: ApiSchemaCourse, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaCourse, any>({
       path: `/tue/course/create`,
-      method: 'POST',
+      method: "POST",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -60,9 +61,9 @@ export class Tue<SecurityDataType = unknown> {
   courseGet = (id: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaCourse, any>({
       path: `/tue/course/${id}`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -87,10 +88,10 @@ export class Tue<SecurityDataType = unknown> {
   ) =>
     this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse, any>({
       path: `/tue/course/list`,
-      method: 'GET',
+      method: "GET",
       query: query,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -105,9 +106,9 @@ export class Tue<SecurityDataType = unknown> {
   coursePost = (id: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseAny, any>({
       path: `/tue/course/${id}`,
-      method: 'POST',
+      method: "POST",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -122,10 +123,10 @@ export class Tue<SecurityDataType = unknown> {
   courseUpdatePost = (req: ApiSchemaCourse, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaCourse, any>({
       path: `/tue/course/update`,
-      method: 'POST',
+      method: "POST",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -140,10 +141,10 @@ export class Tue<SecurityDataType = unknown> {
   examCreateGet = (req: ApiSchemaExam, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaExam, any>({
       path: `/tue/exam/create`,
-      method: 'GET',
+      method: "GET",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -158,9 +159,9 @@ export class Tue<SecurityDataType = unknown> {
   examGet = (id: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaExam, any>({
       path: `/tue/exam/${id}`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -175,10 +176,10 @@ export class Tue<SecurityDataType = unknown> {
   problemCreatePost = (req: ApiSchemaProblem, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaProblem, any>({
       path: `/tue/problem/create`,
-      method: 'POST',
+      method: "POST",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -193,9 +194,9 @@ export class Tue<SecurityDataType = unknown> {
   problemGet = (id: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaProblem, any>({
       path: `/tue/problem/${id}`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -220,10 +221,10 @@ export class Tue<SecurityDataType = unknown> {
   ) =>
     this.http.request<ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem, any>({
       path: `/tue/problem/list`,
-      method: 'GET',
+      method: "GET",
       query: query,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
 }

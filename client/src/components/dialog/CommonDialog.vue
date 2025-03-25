@@ -47,33 +47,57 @@ function afterClose() {
 }
 
 const confirming = shallowRef(false);
-let abortController: AbortController = new AbortController();
+const canceling = shallowRef(false);
+let confirmAbortCtrl: AbortController = new AbortController();
+let cancelAbortCtrl: AbortController = new AbortController();
 
 async function handleConfirm() {
   if (confirming.value) return;
   if (props.confirmHandler) {
     confirming.value = true;
-    abortController = new AbortController();
+    confirmAbortCtrl = new AbortController();
     // 向 handler 传递信号
     const res = props.confirmHandler({
-      signal: abortController.signal,
+      signal: confirmAbortCtrl.signal,
       abort() {
-        abortController.abort('handler abort');
+        confirmAbortCtrl.abort('handler abort');
         confirming.value = false;
       },
     });
-    if (res instanceof Promise) {
-      await res;
+    try {
+      if (res instanceof Promise) {
+        await res;
+      }
+    } finally {
+      confirming.value = false;
     }
-    confirming.value = false;
   }
   emits('confirm'); // 传递关闭回调函数
   close(); // 不存在回调函数时默认自动关闭
 }
 
-function handleCancel() {
+async function handleCancel() {
   // 取消时中断确认的处理
-  if (confirming.value) abortController.abort('cancel');
+  if (confirming.value) confirmAbortCtrl.abort('cancel');
+  if (props.cancelHandler) {
+    canceling.value = true;
+    cancelAbortCtrl = new AbortController();
+    // 向 handler 传递信号
+    const res = props.cancelHandler({
+      signal: cancelAbortCtrl.signal,
+      abort() {
+        cancelAbortCtrl.abort('handler abort');
+        canceling.value = false;
+      },
+    });
+    try {
+      if (res instanceof Promise) {
+        await res;
+      }
+    } finally {
+      canceling.value = false;
+    }
+  }
   emits('cancel'); // 传递关闭回调函数
   close(); // 不存在回调函数时默认自动关闭
 }
@@ -140,7 +164,9 @@ defineExpose<CommonDialogExpose>({
           type="text"
           v-bind="cancelButtonProps"
           @click="handleCancel"
-        ></DiliButton>
+        >
+          <cus-spin v-if="canceling" :show="true" />
+        </DiliButton>
         <DiliButton v-if="showConfirm" text="确认" type="primary" v-bind="confirmButtonProps" @click="handleConfirm">
           <cus-spin v-if="confirming" :show="true" />
         </DiliButton>

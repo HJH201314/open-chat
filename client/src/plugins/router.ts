@@ -6,24 +6,44 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/home',
-      name: 'homePage',
-      component: () => import('@/pages/user/home/HomePage.vue'),
-    },
-    {
       path: '/',
       redirect: '/chat/message',
     },
     {
-      path: '/chat/message',
-      name: 'messageList',
-      component: () => import('@/pages/user/message/MessagePage.vue'),
+      path: '/chat',
+      name: 'chatModule',
+      component: () => import('@/pages/user/chat/ChatLayout.vue'),
+      children: [
+        {
+          path: 'message',
+          name: 'messageList',
+          component: () => import('@/pages/user/chat/message/MessagePage.vue'),
+        },
+        {
+          path: 'message/:sessionId',
+          name: 'messageDetail',
+          props: true,
+          component: () => import('@/pages/user/chat/message/MessagePage.vue'),
+        },
+        {
+          path: 'setting',
+          name: 'settingDialog',
+          component: () => import('@/pages/user/chat/setting/SettingDialog.vue'),
+        },
+      ],
     },
     {
-      path: '/chat/message/:sessionId',
-      name: 'messageDetail',
-      props: true,
-      component: () => import('@/pages/user/message/MessagePage.vue'),
+      path: '/tue',
+      name: 'tueModule',
+      component: () => import('@/pages/user/tue/TueLayout.vue'),
+      children: [
+        {
+          path: '/exam/:examId',
+          name: 'examPage',
+          props: true,
+          component: () => import('@/pages/user/tue/exam/ExamPage.vue'),
+        },
+      ],
     },
     {
       path: '/login',
@@ -35,17 +55,6 @@ const router = createRouter({
       path: '/manage/user',
       name: 'manage-user',
       component: () => import('@/pages/admin/manage/user/ManageUserPage.vue'),
-    },
-    {
-      path: '/chat/setting',
-      name: 'setting',
-      component: () => import('@/pages/user/setting/SettingDialog.vue'),
-    },
-    {
-      path: '/tue/exam/:examId',
-      name: 'exam',
-      props: true,
-      component: () => import('@/pages/user/exam/ExamPage.vue'),
     },
   ],
 });

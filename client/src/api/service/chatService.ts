@@ -1,7 +1,8 @@
-import { createRequest, errorHandler, successHandler } from '@/api/base';
+import { createRequest } from '@/api/base';
 import { SERVER_NEXT_API_URL, USER_ACCESS_TOKEN_KEY } from '@/constants';
 import { type EventSourceMessage, EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source';
 import type { ApiChatCompletionStreamUserInput } from '@/api/gen/data-contracts.ts';
+import { errorHandler, successHandler } from '@/api/default.ts';
 
 /* 创建对话，返回一个 session_id 作为对话的唯一标识 */
 export const createSession = () =>

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -14,7 +15,7 @@ import type {
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseSchemaProvider,
   ApiSchemaProvider,
-} from './data-contracts';
+} from "./data-contracts";
 
 export namespace Manage {
   /**

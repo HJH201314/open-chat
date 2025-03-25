@@ -1,36 +1,35 @@
 <script lang="ts" setup>
-import ToastManager from '@/components/toast/ToastManager';
 import Tooltip from '@/components/tooltip/CusTooltip.vue';
-import { toggleSidebarKey } from '@/constants/eventBusKeys';
+import { toggleSidebarExpandKey, toggleSidebarKey } from '@/constants/eventBusKeys';
 import { goToLogin } from '@/pages/user/login';
 import { useUserStore } from '@/store/useUserStore';
-import {
-  Github,
-  Home,
-  Login,
-  Logout,
-  MenuFold,
-  MenuUnfold,
-  Message,
-  Moon,
-  SettingTwo,
-  SunOne,
-  User,
-} from '@icon-park/vue-next';
+import { Login, Logout, MenuFold, MenuUnfold, Moon, SunOne } from '@icon-park/vue-next';
 import { onClickOutside, useEventBus, useMediaQuery } from '@vueuse/core';
-import { computed, h, onMounted, ref, useTemplateRef, type VNode } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { DialogManager } from '@/components/dialog';
-import SettingDialog from '@/pages/user/setting/SettingDialog.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
+import type { SidebarEntry } from '@/components/sidebar/types.ts';
 
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    defaultShow?: boolean;
+    entries?: SidebarEntry[];
+  }>(),
+  {
+    title: 'OpenChat',
+    defaultShow: true,
+    entries: () => [],
+  }
+);
 const userStore = useUserStore();
 
-const showSideBar = ref(true);
+const showSideBar = ref(props.defaultShow);
 const expandBar = ref(false);
 const isAutoExpand = ref(false);
 
 const toggleSideBarBus = useEventBus(toggleSidebarKey);
+const toggleSidebarExpandBus = useEventBus(toggleSidebarExpandKey);
 const { toggleTheme, currentTheme } = useTheme();
 
 onMounted(() => {
@@ -38,71 +37,34 @@ onMounted(() => {
     showSideBar.value = e;
     expandBar.value = false;
   });
+  toggleSidebarExpandBus.on((e) => {
+    if (e) {
+      if (!props.defaultShow) {
+        // 若默认没有展示侧边栏，则先展示并渲染后再展开
+        showSideBar.value = true;
+        setTimeout(() => {
+          expandBar.value = true;
+        }, 0);
+      } else {
+        expandBar.value = true;
+      }
+    } else {
+      if (!props.defaultShow) {
+        expandBar.value = false;
+        setTimeout(() => {
+          showSideBar.value = false;
+        }, 0);
+      }
+      expandBar.value = false;
+    }
+  });
 });
 
-const route = useRoute();
 const isLargeScreen = useMediaQuery('(min-width: 768px)');
 
-type Entry = {
-  key: string;
-  name: string;
-  icon: string | VNode;
-  href?: string;
-  onClick?: () => void;
-};
-// entry中的icon因为使用动态组件，需要在main.ts中注册
-const entries = computed<Entry[]>(() => {
-  let data = [
-    {
-      key: 'home',
-      name: '首页',
-      icon: h(Home),
-      href: '/home',
-    },
-    {
-      key: 'dialog',
-      name: '对话',
-      icon: h(Message),
-      href: '/chat/message',
-    },
-    // {
-    //   key: "start",
-    //   name: "收藏",
-    //   icon: 'star',
-    //   href: "/star",
-    // },
-    {
-      key: 'user',
-      name: '用户',
-      icon: h(User),
-      href: '/manage/user',
-      onClick() {
-        if (userStore.permission == 2) {
-          if ('/manage/user' == route.path) return;
-          router.replace('/manage/user');
-        } else {
-          ToastManager.danger('权限不足');
-        }
-      },
-    },
-    {
-      key: 'setting',
-      name: '设置',
-      icon: h(SettingTwo),
-      href: '/chat/setting',
-      onClick() {
-        // 打开设置对话框
-        DialogManager.renderDialog(h(SettingDialog));
-      },
-    },
-  ];
-  if (userStore.permission != 2) {
-    data = data.filter((v) => {
-      return v.key != 'user';
-    });
-  }
-  return data;
-});
+function handleExpandBar() {
+  toggleSidebarExpandBus.emit(!expandBar.value);
+}
 
 const mouseEnterTimeout = ref<number>();
 const mouseLeaveTimeout = ref<number>();
@@ -131,16 +93,24 @@ function handleMouseLeave() {
   }
 }
 
+const route = useRoute();
 const router = useRouter();
 
-function handleEntryClick(_: Event, entry: Entry) {
+function getEntryActive(entry: SidebarEntry) {
+  if (entry.href) {
+    return route.path.startsWith(entry.href);
+  }
+  return false;
+}
+
+function handleEntryClick(_: Event, entry: SidebarEntry) {
   if (entry.onClick) {
     entry.onClick();
   } else if (entry.href) {
     if (entry.href == route.path) return;
     router.replace(entry.href);
   }
-  expandBar.value = false;
+  expandBar.value && toggleSidebarExpandBus.emit(false);
 }
 
 function handleLogin() {
@@ -151,97 +121,88 @@ function handleLogin() {
   }
 }
 
-function handleGithubClick() {
-  window.open('https://github.com/HJH201314/openai-front');
-}
-
 // 点击 Sidebar 外部隐藏
 onClickOutside(useTemplateRef('sidebar-body'), () => {
-  expandBar.value = false;
+  expandBar.value && toggleSidebarExpandBus.emit(false);
+});
+
+defineExpose({
+  isShowing: showSideBar,
 });
 </script>
 
 <template>
-  <Transition name="show">
-    <div v-show="showSideBar" class="sidebar">
-      <!-- 占位，避免sidebar-body变化（展开）时布局变化 -->
-      <div v-show="showSideBar" class="sidebar-placeholder"></div>
-      <div
-        v-show="showSideBar"
-        ref="sidebar-body"
-        :class="{ 'sidebar-body-expand': expandBar }"
-        class="sidebar-body"
-        @mouseleave="handleMouseLeave"
-      >
-        <div class="sidebar-top">
-          <div v-if="expandBar" class="sidebar-logo sidebar-logo-animation">OpenChat</div>
-          <div class="sidebar-expand" style="aspect-ratio: 1" @click="() => (expandBar = !expandBar)">
-            <MenuUnfold v-if="!expandBar" size="24"></MenuUnfold>
-            <MenuFold v-else size="24"></MenuFold>
-          </div>
-        </div>
-        <div class="sidebar-entries" @mouseenter="handleMouseEnter" @mousemove="handleMouseEnter">
-          <div
-            v-for="entry in entries"
-            :key="entry.key"
-            :class="{ 'sidebar-entry--active': entry.href && route.path.startsWith(entry.href) }"
-            class="sidebar-entry"
-            @click="(e) => handleEntryClick(e, entry)"
-          >
-            <component
-              :is="entry.icon"
-              class="sidebar-entry-icon"
-              :class="{ 'sidebar-entry-icon--active': entry.href && route.path.startsWith(entry.href) }"
-              size="24"
-              theme="outline"
-            ></component>
-            <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{ entry.name }}</span>
-          </div>
-        </div>
-        <Tooltip :text="userStore.isLogin ? '退出登录' : '登录'" class="sidebar-entry-login" position="right">
-          <div class="sidebar-entry" @click="handleLogin">
-            <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
-            <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
-            <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{
-              userStore.isLogin ? '退出登录' : '登录'
-            }}</span>
-          </div>
-        </Tooltip>
-        <div class="sidebar-footer">
-          <Tooltip :enabled="expandBar" position="bottom" text="开源地址">
-            <div class="sidebar-entry sidebar-footer-item">
-              <Github class="sidebar-entry-icon" size="1.5rem" @click="handleGithubClick"></Github>
-            </div>
-          </Tooltip>
-          <Tooltip position="right" text="切换主题">
-            <div class="sidebar-entry sidebar-footer-item">
-              <SunOne
-                v-if="currentTheme == 'dark'"
-                class="sidebar-entry-icon"
-                size="1.5rem"
-                @click="toggleTheme"
-              ></SunOne>
-              <Moon v-if="currentTheme == 'light'" class="sidebar-entry-icon" size="1.5rem" @click="toggleTheme"></Moon>
-            </div>
-          </Tooltip>
-        </div>
-        <hr style="background: #4db6ac; height: 1px; width: 80%" />
-        <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
-          <div class="sidebar-avatar-img">
-            <img alt="avatar" src="/favicon.ico" />
-            <div
-              :class="{
-                'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
-                'sidebar-avatar-status--offline': userStore.loginStatus == 'offline',
-              }"
-              class="sidebar-avatar-status"
-            ></div>
-          </div>
-          <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
+  <!-- place: 控制是否占据宽度；hidden：控制是否隐藏（当 defaultShow == false 时，不应用 hidden，否则无法实现动画收起） -->
+  <div class="sidebar" :class="{ place: props.defaultShow, hidden: !showSideBar && props.defaultShow }">
+    <div
+      ref="sidebar-body"
+      :class="{ 'sidebar-body-expand': expandBar, hidden: !showSideBar }"
+      class="sidebar-body"
+      @mouseleave="handleMouseLeave"
+    >
+      <div class="sidebar-top">
+        <div v-if="expandBar" class="sidebar-logo sidebar-logo-animation">{{ title }}</div>
+        <div class="sidebar-expand" style="aspect-ratio: 1" @click="handleExpandBar">
+          <MenuUnfold v-if="!expandBar" size="24"></MenuUnfold>
+          <MenuFold v-else size="24"></MenuFold>
         </div>
       </div>
+      <div class="sidebar-entries" @mouseenter="handleMouseEnter" @mousemove="handleMouseEnter">
+        <div
+          v-for="entry in entries"
+          :key="entry.key"
+          :class="{ 'sidebar-entry--active': getEntryActive(entry) }"
+          class="sidebar-entry"
+          @click="(e) => handleEntryClick(e, entry)"
+        >
+          <component
+            :is="entry.icon"
+            class="sidebar-entry-icon"
+            :class="{ 'sidebar-entry-icon--active': entry.href && getEntryActive(entry) }"
+            size="24"
+            theme="outline"
+          ></component>
+          <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{ entry.name }}</span>
+        </div>
+      </div>
+      <Tooltip :text="userStore.isLogin ? '退出登录' : '登录'" class="sidebar-entry-login" position="right">
+        <div class="sidebar-entry" @click="handleLogin">
+          <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
+          <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
+          <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{
+            userStore.isLogin ? '退出登录' : '登录'
+          }}</span>
+        </div>
+      </Tooltip>
+      <div class="sidebar-footer">
+        <Tooltip position="right" text="切换主题">
+          <div class="sidebar-entry sidebar-footer-item">
+            <SunOne
+              v-if="currentTheme == 'dark'"
+              class="sidebar-entry-icon"
+              size="1.5rem"
+              @click="toggleTheme"
+            ></SunOne>
+            <Moon v-if="currentTheme == 'light'" class="sidebar-entry-icon" size="1.5rem" @click="toggleTheme"></Moon>
+          </div>
+        </Tooltip>
+      </div>
+      <hr style="background: #4db6ac; height: 1px; width: 80%" />
+      <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
+        <div class="sidebar-avatar-img">
+          <img alt="avatar" src="/favicon.ico" />
+          <div
+            :class="{
+              'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
+              'sidebar-avatar-status--offline': userStore.loginStatus == 'offline',
+            }"
+            class="sidebar-avatar-status"
+          ></div>
+        </div>
+        <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
+      </div>
     </div>
-  </Transition>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -249,17 +210,25 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
 @use '@/assets/functions' as *;
 
 .sidebar {
-  &-placeholder {
+  height: 100%;
+  transition: width 0.2s ease;
+
+  &.place {
     width: 3.5rem;
-    height: 100%;
+  }
+
+  &.hidden {
+    width: 0;
   }
 
   &-body {
     position: fixed; // 统一fixed解决还原时占位异常
     left: 0;
     top: 0;
-    background-color: $color-teal-20;
-    height: 100%;
+    bottom: 0;
+    // 融入 body 渐变
+    background: $body-background;
+    background-size: calc(100 * var(--vh)) 100vw;
     width: 3.5rem;
     padding: 0.5rem 0.5rem 1rem 0.5rem;
     text-align: center;
@@ -269,12 +238,18 @@ onClickOutside(useTemplateRef('sidebar-body'), () => {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    transition: width 0.25s $ease-out-circ;
+    transition:
+      width 0.2s $ease-out-circ,
+      transform 0.2s $ease-out-circ;
     z-index: 999;
 
     &-expand {
       width: 12rem;
       box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &.hidden {
+      transform: translateX(-100%);
     }
   }
 

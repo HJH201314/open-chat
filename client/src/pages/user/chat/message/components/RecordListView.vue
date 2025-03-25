@@ -5,19 +5,22 @@ import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
-import { CloseOne, Plus, Search, Star } from '@icon-park/vue-next';
+import { CloseOne, MenuUnfold, Plus, Search, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
 import { computed, h, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { onClickOutside, until, useIntervalFn, useScroll } from '@vueuse/core';
+import { onClickOutside, until, useEventBus, useIntervalFn, useScroll } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { goToLogin } from '@/pages/user/login';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
+import IconButton from '@/components/IconButton.vue';
+import useGlobal from '@/commands/useGlobal.ts';
+import { toggleSidebarExpandKey } from '@/constants/eventBusKeys.ts';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -135,6 +138,12 @@ const handleSessionRefresh = async () => {
   });
 };
 
+const toggleSideBarExpandBus = useEventBus(toggleSidebarExpandKey);
+
+function handleSidebarUnfold() {
+  toggleSideBarExpandBus.emit(true);
+}
+
 const router = useRouter();
 
 // 点击对话列表项
@@ -190,11 +199,15 @@ const recordListViewRef = useTemplateRef('record-list-view');
 const { arrivedState } = useScroll(dialogListRef);
 
 const { theme } = useTheme();
+const { isSmallScreen } = useGlobal();
 </script>
 <template>
   <!-- 角色列表 -->
   <div ref="record-list-view" class="dialog-list">
     <div class="dialog-list-bar" :class="{ shadow: !arrivedState.top }">
+      <IconButton type="secondary" color="#999" v-if="isSmallScreen" @click="handleSidebarUnfold">
+        <MenuUnfold />
+      </IconButton>
       <div
         ref="search-bar"
         :class="{ 'dialog-list-bar-search': searchForm.inputting, 'dialog-list-action-button': !searchForm.inputting }"

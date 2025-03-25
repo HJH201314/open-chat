@@ -1,5 +1,4 @@
-import api from '@/api';
-import { useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
+import { tryOnMounted, useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
@@ -31,7 +30,7 @@ export const useUserStore = defineStore('user', () => {
     }
   );
 
-  onMounted(async () => {
+  tryOnMounted(async () => {
     // 自动登录逻辑
     await ping();
   });

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -14,7 +15,7 @@ import type {
   ApiEntityCommonResponseSchemaUser,
   ApiUserLoginLoginRequest,
   ApiUserRegisterRegisterRequest,
-} from './data-contracts';
+} from "./data-contracts";
 
 export namespace User {
   /**
@@ -79,7 +80,7 @@ export namespace User {
     export type RequestBody = never;
     export type RequestHeaders = {
       /** 刷新用 Token */
-      'X-Refresh-Token': string;
+      "X-Refresh-Token": string;
     };
     export type ResponseBody = string;
   }

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -23,7 +24,7 @@ import type {
   ApiEntityCommonResponseString,
   ApiSchemaSession,
   ApiSchemaSessionFlagInfo,
-} from './data-contracts';
+} from "./data-contracts";
 
 export namespace Chat {
   /**

@@ -1,12 +1,12 @@
-import { acceptHMRUpdate, defineStore } from "pinia";
-import { useLocalStorage } from "@vueuse/core";
-import { computed, onMounted } from "vue";
-import api from "@/api";
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { tryOnMounted, useLocalStorage } from '@vueuse/core';
+import { computed } from 'vue';
+import api from '@/api';
 
 const useRoleStore = defineStore('bot-roles', () => {
   const roleStorage = useLocalStorage('bot-roles', [] as API.RoleListResult);
   const roles = computed(() => roleStorage.value);
-  const roleSentenceStorage = useLocalStorage<Record<number, string>>('role-sentence', {})
+  const roleSentenceStorage = useLocalStorage<Record<number, string>>('role-sentence', {});
 
   // roleId -> roleName 映射表
   const roleIdMap = computed(() => {
@@ -25,9 +25,9 @@ const useRoleStore = defineStore('bot-roles', () => {
     return map;
   });
 
-  onMounted(() => {
+  tryOnMounted(() => {
     refreshRoles();
-  })
+  });
 
   async function reset() {
     roleSentenceStorage.value = {};
@@ -64,7 +64,7 @@ const useRoleStore = defineStore('bot-roles', () => {
     roleNameMap,
     getRoleSentence,
     reset,
-  }
+  };
 });
 
 export default useRoleStore;

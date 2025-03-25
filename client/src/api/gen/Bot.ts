@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -9,9 +10,9 @@
  * ---------------------------------------------------------------
  */
 
-import type { ApiSchemaBotRole } from './data-contracts';
-import type { HttpClient, RequestParams } from './http-client';
-import { ContentType } from './http-client';
+import type { ApiSchemaBotRole } from "./data-contracts";
+import type { HttpClient, RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 export class Bot<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -32,10 +33,10 @@ export class Bot<SecurityDataType = unknown> {
   createPost = (role: ApiSchemaBotRole, params: RequestParams = {}) =>
     this.http.request<ApiSchemaBotRole, any>({
       path: `/bot/create`,
-      method: 'POST',
+      method: "POST",
       body: role,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -50,9 +51,9 @@ export class Bot<SecurityDataType = unknown> {
   deletePost = (id: number, params: RequestParams = {}) =>
     this.http.request<boolean, any>({
       path: `/bot/${id}/delete`,
-      method: 'POST',
+      method: "POST",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -67,9 +68,9 @@ export class Bot<SecurityDataType = unknown> {
   getBot = (id: number, params: RequestParams = {}) =>
     this.http.request<ApiSchemaBotRole, any>({
       path: `/bot/${id}`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -84,9 +85,9 @@ export class Bot<SecurityDataType = unknown> {
   listGet = (params: RequestParams = {}) =>
     this.http.request<ApiSchemaBotRole[], any>({
       path: `/bot/list`,
-      method: 'GET',
+      method: "GET",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -101,10 +102,10 @@ export class Bot<SecurityDataType = unknown> {
   updatePost = (id: number, role: ApiSchemaBotRole, params: RequestParams = {}) =>
     this.http.request<ApiSchemaBotRole, any>({
       path: `/bot/${id}/update`,
-      method: 'POST',
+      method: "POST",
       body: role,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
 }

@@ -1,6 +1,6 @@
 import useGlobal from '@/commands/useGlobal';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { useLocalStorage } from '@vueuse/core';
+import { tryOnMounted, useLocalStorage } from '@vueuse/core';
 import { computed, onMounted } from 'vue';
 import { SERVER_NEXT_API_URL } from '@/constants';
 
@@ -44,7 +44,7 @@ export const useSettingStore = defineStore('setting', () => {
   const settingStorage = useLocalStorage('setting', defaultSetting);
   const settings = computed(() => settingStorage.value);
 
-  onMounted(() => {
+  tryOnMounted(() => {
     updateSetting();
   });
 

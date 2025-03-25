@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -15,9 +16,9 @@ import type {
   ApiEntityCommonResponseSchemaUser,
   ApiUserLoginLoginRequest,
   ApiUserRegisterRegisterRequest,
-} from './data-contracts';
-import type { HttpClient, RequestParams } from './http-client';
-import { ContentType } from './http-client';
+} from "./data-contracts";
+import type { HttpClient, RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 export class User<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -38,10 +39,10 @@ export class User<SecurityDataType = unknown> {
   loginPost = (req: ApiUserLoginLoginRequest, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaUser, any>({
       path: `/user/login`,
-      method: 'POST',
+      method: "POST",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -55,7 +56,7 @@ export class User<SecurityDataType = unknown> {
   logoutPost = (params: RequestParams = {}) =>
     this.http.request<any, any>({
       path: `/user/logout`,
-      method: 'POST',
+      method: "POST",
       type: ContentType.Json,
       ...params,
     });
@@ -72,9 +73,9 @@ export class User<SecurityDataType = unknown> {
   pingPost = (params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaUser, ApiEntityCommonResponseAny>({
       path: `/user/ping`,
-      method: 'POST',
+      method: "POST",
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
   /**
@@ -89,7 +90,7 @@ export class User<SecurityDataType = unknown> {
   refreshGet = (params: RequestParams = {}) =>
     this.http.request<string, any>({
       path: `/user/refresh`,
-      method: 'GET',
+      method: "GET",
       ...params,
     });
   /**
@@ -104,10 +105,10 @@ export class User<SecurityDataType = unknown> {
   registerPost = (req: ApiUserRegisterRegisterRequest, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/user/register`,
-      method: 'POST',
+      method: "POST",
       body: req,
       type: ContentType.Json,
-      format: 'json',
+      format: "json",
       ...params,
     });
 }

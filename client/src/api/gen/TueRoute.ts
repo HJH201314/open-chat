@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -19,7 +20,7 @@ import type {
   ApiSchemaCourse,
   ApiSchemaExam,
   ApiSchemaProblem,
-} from './data-contracts';
+} from "./data-contracts";
 
 export namespace Tue {
   /**

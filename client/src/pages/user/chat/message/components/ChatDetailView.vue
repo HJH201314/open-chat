@@ -10,7 +10,7 @@ import { storeToRefs } from 'pinia';
 import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import genApi from '@/api/gen-api.ts';
-import ShareDialog from '@/pages/user/message/components/ShareDialog.vue';
+import ShareDialog from '@/pages/user/chat/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import { Control, Edit, Refresh } from '@icon-park/vue-next';

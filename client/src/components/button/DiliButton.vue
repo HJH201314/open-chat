@@ -28,9 +28,9 @@ const buttonStyle = computed(() => {
 const backgroundColor = computed(() => {
   if (props.backgroundColor) return props.backgroundColor;
   if (props.type == 'primary') {
-    return theme.colorPrimary;
+    return props.color || theme.colorPrimary;
   } else if (props.type == 'secondary')  {
-    return getLighterColor(theme.colorPrimary, 0.9);
+    return getLighterColor(props.color || theme.colorPrimary, 0.9);
   } else {
     return '#FFFFFF';
   }
@@ -48,9 +48,9 @@ const fontColor = computed(() => {
     case 'primary':
       return '#FFFFFF';
     case 'secondary':
-      return theme.colorPrimary;
+      return props.color || theme.colorPrimary;
     case 'text':
-      return theme.colorPrimary;
+      return props.color || theme.colorPrimary;
     default:
       return theme.colorBlack;
   }

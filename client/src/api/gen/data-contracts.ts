@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -283,6 +284,8 @@ export interface ApiSchemaExam {
   /** 考试描述 */
   description?: string;
   id?: number;
+  /** 考试限时（单位：秒） */
+  limit_time?: number;
   name?: string;
   /** 考试包含的大题 */
   problems?: ApiSchemaExamProblem[];
@@ -425,11 +428,11 @@ export interface ApiSchemaProblemOption {
 }
 
 export enum ApiSchemaProblemType {
-  EnumSingleChoice = 'single_choice',
-  EnumMultipleChoice = 'multiple_choice',
-  EnumFillBlank = 'fill_blank',
-  EnumShortAnswer = 'short_answer',
-  EnumTrueFalse = 'true_false',
+  EnumSingleChoice = "single_choice",
+  EnumMultipleChoice = "multiple_choice",
+  EnumFillBlank = "fill_blank",
+  EnumShortAnswer = "short_answer",
+  EnumTrueFalse = "true_false",
 }
 
 export interface ApiSchemaProvider {

@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { Left, Right } from '@icon-park/vue-next';
-import { computed, useTemplateRef } from 'vue';
+import { computed, type CSSProperties } from 'vue';
 import DiliButton from '@/components/button/DiliButton.vue';
-import { useElementSize } from '@vueuse/core';
 
 type CusPaginationProps = {
   pageCount?: number; // 总页数
+  showArrow?: boolean;
+  pageItemStyle?: (pageNum: number) => CSSProperties | undefined; // 分页按钮样式
 };
 
 const props = withDefaults(defineProps<CusPaginationProps>(), {
   pageCount: 0,
+  showArrow: true,
+  pageItemStyle: undefined,
 });
 
 const emit = defineEmits<{
@@ -38,26 +41,25 @@ function handleIncPage() {
 function handleDecPage() {
   handleChangePage(currentPageVM.value - 1);
 }
-
-const paginationRef = useTemplateRef('pagination');
-const { height } = useElementSize(paginationRef);
 </script>
 
 <template>
   <div ref="pagination" class="cus-pagination">
-    <DiliButton :disabled="currentPageVM - 1 < 1" @click="handleDecPage">
+    <DiliButton v-if="showArrow" :disabled="currentPageVM - 1 < 1" @click="handleDecPage">
       <Left class="button" size="1rem" />
     </DiliButton>
-    <DiliButton
-      v-for="i in pageNums"
-      :key="i"
-      :button-style="{ 'min-width': `${height}px` }"
-      :type="currentPageVM == i ? 'primary' : 'normal'"
-      @click="handleChangePage(i)"
-    >
-      {{ i }}
-    </DiliButton>
-    <DiliButton :disabled="currentPageVM + 1 > pageNums.length" @click="handleIncPage">
+    <div class="page-numbers">
+      <DiliButton
+        v-for="i in pageNums"
+        :key="i"
+        :button-style="{ 'min-width': `1.875em`, ...pageItemStyle?.(i) }"
+        :type="currentPageVM == i ? 'primary' : 'normal'"
+        @click="handleChangePage(i)"
+      >
+        {{ i }}
+      </DiliButton>
+    </div>
+    <DiliButton v-if="showArrow" :disabled="currentPageVM + 1 > pageNums.length" @click="handleIncPage">
       <Right class="button" size="1rem" />
     </DiliButton>
   </div>
@@ -70,5 +72,11 @@ const { height } = useElementSize(paginationRef);
   display: flex;
   gap: 0.25rem;
   line-height: 1;
+
+  > .page-numbers {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
 }
 </style>
