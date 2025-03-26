@@ -109,12 +109,12 @@ function handleGoPersonal() {
 
   &-score {
     color: var(--color-primary);
-    font-size: 2rem;
+    font-size: 2em;
   }
 
   &-total-score {
     color: var(--text-secondary);
-    font-size: 1.5rem;
+    font-size: 1.5em;
   }
 
   &-back {

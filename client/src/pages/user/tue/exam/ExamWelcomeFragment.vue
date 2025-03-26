@@ -21,9 +21,9 @@ const limitTimeText = computed(() => props.exam.limit_time ? `限时：${(props.
 
 <template>
   <main class="exam-welcome">
-    <h1>{{ exam?.name }}</h1>
+    <h1 class="exam-welcome-title">{{ exam?.name }}</h1>
     <p class="exam-welcome-description">{{ exam?.description }}</p>
-    <p class="exam-welcome-description">{{ limitTimeText }}</p>
+    <p class="exam-welcome-time">{{ limitTimeText }}</p>
     <DiliButton class="exam-welcome-start" type="primary" text="开始作答" @click="$emit('start')" />
   </main>
 </template>
@@ -35,8 +35,17 @@ const limitTimeText = computed(() => props.exam.limit_time ? `限时：${(props.
   justify-content: center;
   align-items: center;
 
+  &-title {
+    font-size: 1.1rem;
+  }
+
   &-description {
     color: var(--text-secondary);
+  }
+
+  &-time {
+    color: var(--text-secondary);
+    margin-top: 1rem;
   }
 
   &-start {

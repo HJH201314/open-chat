@@ -159,6 +159,7 @@ const { left: buttonbackLeft } = useElementBounding(buttonBackRef);
       ref="fragment-answering"
       class="exam-page-fragment-full"
       :exam="exam"
+      :single-problem="true"
       :button-back-left="buttonbackLeft"
       @submit="handleAnswerSubmit"
     />
@@ -190,6 +191,7 @@ const { left: buttonbackLeft } = useElementBounding(buttonBackRef);
     position: absolute;
     left: var(--padding);
     top: var(--padding);
+    z-index: 1;
   }
 
   &-fragment-full {

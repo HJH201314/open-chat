@@ -70,6 +70,7 @@ watch(
 
 const currentPage = ref(1);
 const maxPage = computed(() => props.exam?.problems?.length || 1);
+const singleProblem = ref(false); // 是否为单题模式
 
 const examContentRef = useTemplateRef('exam-content');
 watch(
@@ -220,7 +221,7 @@ defineExpose({
       </div>
       <CusProgress :value="answerFinishProgress" foreground-color="var(--color-primary-lighter)" show-text />
       <div style="display: flex; justify-content: space-between; align-items: center">
-        <DiliButton class="exam-submit-btn" type="primary" @click="handleExamSubmit"> 提交试卷</DiliButton>
+        <DiliButton class="exam-submit-btn" type="primary" @click="handleExamSubmit">&nbsp;提交试卷&nbsp;</DiliButton>
       </div>
     </header>
 
@@ -228,6 +229,7 @@ defineExpose({
       <main ref="exam-content" class="exam-content">
         <template v-for="(problem, i) in exam?.problems || []" :key="problem.problem_id">
           <ExamProblem
+            v-show="!singleProblem || currentPage == i + 1"
             :id="`problem-${i}`"
             v-model:answer="answers[problem.problem_id!]"
             :page="i + 1"
