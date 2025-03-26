@@ -10,13 +10,15 @@ import { useTheme } from '@/components/theme/useTheme.ts';
 import { getProblemCategory } from '@/pages/user/tue/exam/utils.ts';
 import { StopwatchStart } from '@icon-park/vue-next';
 import Panel from '@/components/panel/Panel.vue';
-import { useCountdown } from '@vueuse/core';
+import { useCountdown, useElementBounding } from '@vueuse/core';
 
 const props = withDefaults(
   defineProps<{
+    buttonBackLeft?: number; // 返回按钮的 clientLeft, 用来避让返回按钮
     exam?: ApiSchemaExam;
   }>(),
   {
+    buttonBackLeft: 0,
     exam: () => ({}),
   }
 );
@@ -196,6 +198,14 @@ function doSubmit() {
   emit('submit', { answers: answers.value, timeSpent: timeSpent });
 }
 
+// 专门用来避让返回按钮
+const examPanelRef = useTemplateRef('exam-panel');
+const { left: examPanelLeft } = useElementBounding(examPanelRef);
+const headerPaddingLeft = computed(() => {
+  const deltaX = 40 - (examPanelLeft.value - props.buttonBackLeft);
+  return deltaX > 0 ? deltaX : 0;
+})
+
 defineExpose({
   start: startCountdown,
 });
@@ -203,8 +213,8 @@ defineExpose({
 
 <template>
   <div class="exam-answering-fragment">
-    <header class="exam-header">
-      <div v-if="props.exam?.limit_time" class="exam-countdown" :title="`倒计时${examCountdownRemaining}秒`">
+    <header class="exam-header" :style="{'padding-left': `${headerPaddingLeft}px`}">
+      <div v-if="exam?.limit_time" class="exam-countdown" :title="`倒计时${examCountdownRemaining}秒`">
         <StopwatchStart />
         {{ remainingTimeText }}
       </div>
@@ -214,7 +224,7 @@ defineExpose({
       </div>
     </header>
 
-    <Panel class="exam-panel">
+    <Panel ref="exam-panel" class="exam-panel">
       <main ref="exam-content" class="exam-content">
         <template v-for="(problem, i) in exam?.problems || []" :key="problem.problem_id">
           <ExamProblem

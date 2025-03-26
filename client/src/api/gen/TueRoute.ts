@@ -122,12 +122,12 @@ export namespace Tue {
   /**
    * @description 保存单个测验
    * @tags Exam
-   * @name ExamCreateGet
+   * @name ExamCreatePost
    * @summary 保存单个测验
-   * @request GET:/tue/exam/create
+   * @request POST:/tue/exam/create
    * @response `200` `ApiEntityCommonResponseSchemaExam` 返回数据
    */
-  export namespace ExamCreateGet {
+  export namespace ExamCreatePost {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = ApiSchemaExam;

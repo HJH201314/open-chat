@@ -8,7 +8,7 @@ import { DialogManager } from '@/components/dialog';
 import router from '@/plugins/router.ts';
 import ExamAnsweringFragment from '@/pages/user/tue/exam/ExamAnsweringFragment.vue';
 import ExamWelcomeFragment from '@/pages/user/tue/exam/ExamWelcomeFragment.vue';
-import { until, useStepper } from '@vueuse/core';
+import { until, useElementBounding, useStepper } from '@vueuse/core';
 import ExamFinishedFragment from '@/pages/user/tue/exam/ExamFinishedFragment.vue';
 import { useRoute } from 'vue-router';
 import ToastManager from '@/components/toast/ToastManager.ts';
@@ -56,6 +56,7 @@ const handleLoadExam = async () => {
   try {
     await loadExam();
   } catch (e) {
+    console.error(e);
     DialogManager.commonDialog({
       type: 'danger',
       title: '加载失败',
@@ -104,9 +105,12 @@ const handleBack = () => {
   }
 };
 
+const answerRecordId = ref<number>();
+const timeSpent = ref<number>();
 // 提交回答
 const handleAnswerSubmit = async (payload: { answers: Record<number, number[] | string>; timeSpent: number }) => {
   if (!props.examId) return;
+  timeSpent.value = payload.timeSpent;
 
   const examId = Number(props.examId);
   try {
@@ -118,6 +122,7 @@ const handleAnswerSubmit = async (payload: { answers: Record<number, number[] | 
       time_spent: payload.timeSpent,
     });
     if (res.status == 200) {
+      answerRecordId.value = res.data.data?.record_id;
       goToNextStep();
     }
   } catch (_) {
@@ -126,12 +131,21 @@ const handleAnswerSubmit = async (payload: { answers: Record<number, number[] | 
 };
 
 const { isSmallScreen } = useGlobal();
+
+const buttonBackRef = useTemplateRef('button-back');
+const { left: buttonbackLeft } = useElementBounding(buttonBackRef);
 </script>
 
 <template>
   <div class="exam-page" :class="{ small: isSmallScreen }">
     <LoadingModal :visible="loadingExam" />
-    <IconButton type="secondary" :color="currentStep == 'answering' ? 'danger' : ''" @click="handleBack">
+    <IconButton
+      ref="button-back"
+      class="exam-page-back"
+      type="secondary"
+      :color="currentStep == 'answering' ? 'danger' : ''"
+      @click="handleBack"
+    >
       <Back />
     </IconButton>
     <ExamWelcomeFragment
@@ -145,12 +159,16 @@ const { isSmallScreen } = useGlobal();
       ref="fragment-answering"
       class="exam-page-fragment-full"
       :exam="exam"
+      :button-back-left="buttonbackLeft"
       @submit="handleAnswerSubmit"
     />
     <ExamFinishedFragment
       v-if="currentStep == 'finished'"
       class="exam-page-fragment-full"
       :exam="exam"
+      :time-spent="timeSpent"
+      :exam-total-score="exam?.total_score"
+      :answer-record-id="answerRecordId"
       @back="goToStep('welcome')"
     />
   </div>
@@ -158,14 +176,21 @@ const { isSmallScreen } = useGlobal();
 
 <style scoped lang="scss">
 .exam-page {
+  --padding: 1rem;
+
   position: relative;
   height: 100%;
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: var(--padding);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
+  &-back {
+    position: absolute;
+    left: var(--padding);
+    top: var(--padding);
+  }
 
   &-fragment-full {
     width: 100%;

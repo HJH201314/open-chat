@@ -136,15 +136,15 @@ export class Tue<SecurityDataType = unknown> {
    * @description 保存单个测验
    *
    * @tags Exam
-   * @name ExamCreateGet
+   * @name ExamCreatePost
    * @summary 保存单个测验
-   * @request GET:/tue/exam/create
+   * @request POST:/tue/exam/create
    * @response `200` `ApiEntityCommonResponseSchemaExam` 返回数据
    */
-  examCreateGet = (req: ApiSchemaExam, params: RequestParams = {}) =>
+  examCreatePost = (req: ApiSchemaExam, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaExam, any>({
       path: `/tue/exam/create`,
-      method: "GET",
+      method: "POST",
       body: req,
       type: ContentType.Json,
       format: "json",
