@@ -13,8 +13,8 @@
 import type {
   ApiChatCompletionStreamUserInput,
   ApiChatShareSessionShareRequest,
-  ApiEntityCommonResponseArraySchemaBotRole,
   ApiEntityCommonResponseArraySchemaModelCache,
+  ApiEntityCommonResponseArraySchemaPreset,
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
@@ -51,14 +51,14 @@ export namespace Chat {
    * @name ConfigBotsGet
    * @summary 获取 bot 角色配置
    * @request GET:/chat/config/bots
-   * @response `200` `ApiEntityCommonResponseArraySchemaBotRole` OK
+   * @response `200` `ApiEntityCommonResponseArraySchemaPreset` OK
    */
   export namespace ConfigBotsGet {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseArraySchemaBotRole;
+    export type ResponseBody = ApiEntityCommonResponseArraySchemaPreset;
   }
 
   /**

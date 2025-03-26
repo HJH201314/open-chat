@@ -262,13 +262,10 @@ export const useDataStore = defineStore('data', () => {
             changes: {
               title: remoteSession.name || localSession.title || remoteSession.messages?.[0]?.content || '',
               createAt: new Date(remoteSession.created_at!).getTime(),
-              withContext: !!remoteSession.enable_context,
               userId: remoteUserSession.user_id,
-              provider: settingStore.settings.defaultProvider || chatConfigStore.defaultModel?.providerName,
-              model: settingStore.settings.defaultModel || chatConfigStore.defaultModel?.modelName,
               flags: {
-                needSync: localSession.flags?.needSync, // 保持本地数据
-                isStared: remoteUserSession.flag_info?.star
+                ...(localSession.flags || {}), // 保持本地数据
+                isStared: remoteUserSession.flag_info?.star,
               },
             },
           })

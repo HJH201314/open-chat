@@ -7,7 +7,7 @@ type HandlerController = {
   abort: () => any;
 };
 type MethodType =
-  ((abortController: HandlerController) => any)
+  | ((abortController: HandlerController) => any)
   | ((abortController: HandlerController) => Promise<any>);
 export type CommonDialogProps = {
   type?: 'info' | 'warning' | 'danger' | 'success' | 'none';
@@ -21,6 +21,7 @@ export type CommonDialogProps = {
   showHr?: boolean;
   cancelHandler?: MethodType;
   confirmHandler?: MethodType;
+  actionReversed?: boolean; // 是否调换取消、确认按钮
 
   // 样式调整
   modalStyle?: CSSProperties;
@@ -30,22 +31,22 @@ export type CommonDialogProps = {
   cancelButtonProps?: CusButtonProps;
 
   [key: string]: any;
-} & Pick<CommonModalProps, 'closeOnClickMask'>
+} & Pick<CommonModalProps, 'closeOnClickMask'>;
 
 export type CommonDialogEmits = {
   (event: 'cancel'): void;
   (event: 'confirm'): void;
   (event: 'after-close'): void;
-}
+};
 
 export type CommonDialogExpose = {
   show: () => void;
   close: () => void;
   // 立即触发确认
   confirm: () => Promise<void>;
-}
+};
 
 export type CommonDialogSlots = {
   default?: () => VNode;
   action?: () => VNode;
-}
+};

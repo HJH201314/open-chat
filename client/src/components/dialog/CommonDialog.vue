@@ -157,19 +157,21 @@ defineExpose<CommonDialogExpose>({
         <div style="flex: 1">
           <slot name="action"></slot>
         </div>
-        <DiliButton
-          v-if="showCancel"
-          style="margin-left: auto"
-          text="取消"
-          type="text"
-          v-bind="cancelButtonProps"
-          @click="handleCancel"
-        >
-          <cus-spin v-if="canceling" :show="true" />
-        </DiliButton>
-        <DiliButton v-if="showConfirm" text="确认" type="primary" v-bind="confirmButtonProps" @click="handleConfirm">
-          <cus-spin v-if="confirming" :show="true" />
-        </DiliButton>
+        <div class="action-buttons" :class="{ reversed: actionReversed }">
+          <DiliButton
+            v-if="showCancel"
+            style="margin-left: auto"
+            text="取消"
+            type="text"
+            v-bind="cancelButtonProps"
+            @click="handleCancel"
+          >
+            <cus-spin v-if="canceling" :show="true" />
+          </DiliButton>
+          <DiliButton v-if="showConfirm" text="确认" type="primary" v-bind="confirmButtonProps" @click="handleConfirm">
+            <cus-spin v-if="confirming" :show="true" />
+          </DiliButton>
+        </div>
       </footer>
     </div>
   </CommonModal>
@@ -232,6 +234,17 @@ defineExpose<CommonDialogExpose>({
     align-items: center;
     gap: 0.5rem;
     box-shadow: $box-shadow;
+
+    > .action-buttons {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.5rem;
+
+      &.reversed {
+        flex-direction: row-reverse;
+      }
+    }
   }
 
   &-title {

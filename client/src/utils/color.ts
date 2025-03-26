@@ -36,3 +36,15 @@ export function getLighterColor(color: string, level: number) {
   for (let i = 0; i < 3; i++) rgbc[i] = Math.floor((255 - rgbc[i]) * level + rgbc[i]);
   return RgbToHex(rgbc[0], rgbc[1], rgbc[2]);
 }
+
+/**
+ * 获取颜色变量对应的 hex 颜色值
+ * @param hexOrVar hex 颜色值或颜色变量
+ * @return hex 颜色值；如果输入值不是颜色变量，则返回空
+ */
+export function getColorHex(hexOrVar?: string) {
+  if (!hexOrVar) return '';
+  if (hexOrVar.startsWith('#')) return hexOrVar;
+  hexOrVar = hexOrVar.replace('var(', '').replace(')', '')
+  return getComputedStyle(document.documentElement).getPropertyValue(hexOrVar);
+}

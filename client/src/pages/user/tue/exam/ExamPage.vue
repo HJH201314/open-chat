@@ -11,24 +11,36 @@ import ExamWelcomeFragment from '@/pages/user/tue/exam/ExamWelcomeFragment.vue';
 import { until, useStepper } from '@vueuse/core';
 import ExamFinishedFragment from '@/pages/user/tue/exam/ExamFinishedFragment.vue';
 import { useRoute } from 'vue-router';
+import ToastManager from '@/components/toast/ToastManager.ts';
+import IconButton from '@/components/IconButton.vue';
+import { Back } from '@icon-park/vue-next';
 
 const props = withDefaults(
   defineProps<{
     examId: string;
   }>(),
-  {},
+  {}
 );
 
 const exam = ref<ApiSchemaExam>();
-const { current: currentStep, goToNext: goToNextStep } = useStepper(['welcome', 'answering', 'finished'], 'welcome');
+const {
+  current: currentStep,
+  goToNext: goToNextStep,
+  goTo: goToStep,
+} = useStepper(['welcome', 'answering', 'finished'], 'welcome');
 const fragmentAnsweringRef = useTemplateRef('fragment-answering');
-watch(() => currentStep.value, (newStep) => {
-  if (newStep == 'answering') {
-    until(fragmentAnsweringRef).not.toBeNull().then(() => {
-      fragmentAnsweringRef.value?.start();
-    });
+watch(
+  () => currentStep.value,
+  (newStep) => {
+    if (newStep == 'answering') {
+      until(fragmentAnsweringRef)
+        .not.toBeNull()
+        .then(() => {
+          fragmentAnsweringRef.value?.start();
+        });
+    }
   }
-});
+);
 
 const loadingExam = ref(false);
 // 加载考试信息
@@ -69,12 +81,59 @@ onMounted(async () => {
   }
 });
 
+const handleBack = () => {
+  switch (currentStep.value) {
+    case 'welcome':
+    case 'finished':
+      router.back();
+      return;
+    case 'answering':
+      DialogManager.commonDialog({
+        title: '退出测验',
+        content: '退出后讲清空已作答内容，确定要退出测验吗？',
+        presetType: 'danger',
+        confirmButtonProps: {
+          text: '退出',
+        },
+        confirmHandler: () => {
+          router.back();
+          // TODO： 退出测验记录
+        },
+      });
+      return;
+  }
+};
+
+// 提交回答
+const handleAnswerSubmit = async (payload: { answers: Record<number, number[] | string>; timeSpent: number }) => {
+  if (!props.examId) return;
+
+  const examId = Number(props.examId);
+  try {
+    const res = await genApi.Tue.examSubmitPost(examId, {
+      answers: Object.entries(payload.answers).map(([problemId, answer]) => ({
+        problem_id: Number(problemId),
+        answer: answer,
+      })),
+      time_spent: payload.timeSpent,
+    });
+    if (res.status == 200) {
+      goToNextStep();
+    }
+  } catch (_) {
+    ToastManager.danger('提交失败，请稍后重试！');
+  }
+};
+
 const { isSmallScreen } = useGlobal();
 </script>
 
 <template>
   <div class="exam-page" :class="{ small: isSmallScreen }">
     <LoadingModal :visible="loadingExam" />
+    <IconButton type="secondary" :color="currentStep == 'answering' ? 'danger' : ''" @click="handleBack">
+      <Back />
+    </IconButton>
     <ExamWelcomeFragment
       v-if="currentStep == 'welcome'"
       class="exam-page-fragment-full"
@@ -86,8 +145,14 @@ const { isSmallScreen } = useGlobal();
       ref="fragment-answering"
       class="exam-page-fragment-full"
       :exam="exam"
+      @submit="handleAnswerSubmit"
     />
-    <ExamFinishedFragment v-if="currentStep == 'finished'" class="exam-page-fragment-full" :exam="exam" />
+    <ExamFinishedFragment
+      v-if="currentStep == 'finished'"
+      class="exam-page-fragment-full"
+      :exam="exam"
+      @back="goToStep('welcome')"
+    />
   </div>
 </template>
 

@@ -5,7 +5,7 @@ import { useTheme } from '@/components/theme/useTheme.ts';
 const props = withDefaults(
   defineProps<{
     type?: 'normal' | 'secondary';
-    color?: 'danger' | 'warning' | 'success' | 'info' | string;
+    color?: 'danger' | 'warning' | 'success' | 'info' | 'primary' | string;
   }>(),
   {
     type: 'normal',

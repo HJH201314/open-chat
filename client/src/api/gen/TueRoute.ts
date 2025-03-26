@@ -14,9 +14,12 @@ import type {
   ApiEntityCommonResponseAny,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
+  ApiEntityCommonResponseExamSubmitExamResponse,
   ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
+  ApiEntityCommonResponseSchemaExamUserRecord,
   ApiEntityCommonResponseSchemaProblem,
+  ApiExamSubmitExamRequest,
   ApiSchemaCourse,
   ApiSchemaExam,
   ApiSchemaProblem,
@@ -149,6 +152,62 @@ export namespace Tue {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseSchemaExam;
+  }
+
+  /**
+   * @description 获取用户的考试评分结果
+   * @tags 考试
+   * @name ExamRecordsGet
+   * @summary 获取考试结果
+   * @request GET:/tue/exam/{id}/records
+   * @response `200` `ApiEntityCommonResponseSchemaExamUserRecord` OK
+   */
+  export namespace ExamRecordsGet {
+    export type RequestParams = {
+      /** 考试记录ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaExamUserRecord;
+  }
+
+  /**
+   * @description 管理员重新评分考试
+   * @tags 考试
+   * @name ExamRescorePost
+   * @summary 重新评分考试
+   * @request POST:/tue/exam/{id}/rescore
+   */
+  export namespace ExamRescorePost {
+    export type RequestParams = {
+      /** 考试记录ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = any;
+  }
+
+  /**
+   * @description 提交用户的考试答案并进行评分
+   * @tags 考试
+   * @name ExamSubmitPost
+   * @summary 提交考试答案
+   * @request POST:/tue/exam/{id}/submit
+   * @response `200` `ApiEntityCommonResponseExamSubmitExamResponse` OK
+   */
+  export namespace ExamSubmitPost {
+    export type RequestParams = {
+      /** 考试ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiExamSubmitExamRequest;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseExamSubmitExamResponse;
   }
 
   /**

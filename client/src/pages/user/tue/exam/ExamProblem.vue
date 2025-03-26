@@ -9,6 +9,7 @@ import { useElementSize } from '@vueuse/core';
 import CusCheckboxGroup from '@/components/checkbox/CusCheckboxGroup.vue';
 import CusCheckboxButton from '@/components/checkbox/CusCheckboxButton.vue';
 import { getProblemTypeName } from '@/pages/user/tue/exam/utils.ts';
+import type { AnswerType } from '@/pages/user/tue/exam/types.ts';
 
 const props = defineProps<{
   page?: number;
@@ -16,10 +17,10 @@ const props = defineProps<{
 }>();
 
 // 双向绑定已选中的答案
-const answerVM = defineModel<string | number[]>('answer');
+const answerVM = defineModel<AnswerType>('answer');
 
 const emit = defineEmits<{
-  (e: 'answer-change', answer: string | number[]): void;
+  (e: 'answer-change', answer: AnswerType): void;
 }>();
 
 const problemInfo = computed(() => props.examProblem.problem || ({} as ApiSchemaProblem));
@@ -27,11 +28,13 @@ const problemInfo = computed(() => props.examProblem.problem || ({} as ApiSchema
 const typeName = computed(() => getProblemTypeName(props.examProblem.problem?.type || ''));
 
 const innerTextAnswer = ref('');
+const innerBoolAnswer = ref<boolean>();
 const innerOptionAnswer = ref<number[]>([]);
 
 // 问题变化时，清除保存的选项
 watch(() => problemInfo.value, () => {
   innerTextAnswer.value = '';
+  innerBoolAnswer.value = undefined;
   innerOptionAnswer.value = [];
 }, { deep: false });
 
@@ -43,8 +46,10 @@ watch(
       switch (problemInfo.value.type) {
         case ApiSchemaProblemType.EnumSingleChoice:
         case ApiSchemaProblemType.EnumMultipleChoice:
-        case ApiSchemaProblemType.EnumTrueFalse:
           innerOptionAnswer.value = value as number[];
+          break;
+        case ApiSchemaProblemType.EnumTrueFalse:
+          innerBoolAnswer.value = value as boolean;
           break;
         case ApiSchemaProblemType.EnumShortAnswer:
         case ApiSchemaProblemType.EnumFillBlank:
@@ -58,22 +63,15 @@ watch(
 
 // 观测内部 answer 的变化
 watch(
-  () => innerTextAnswer.value,
-  (newTextAns, oldTextAns) => {
-    console.log(`[ExamProblem:${props.page}] text answer change`, newTextAns);
-    if (newTextAns !== oldTextAns) {
-      answerVM.value = newTextAns;
-      emit('answer-change', newTextAns);
-    }
-  }
-);
-watch(
-  () => innerOptionAnswer.value,
-  (newOptionAns, oldOptionAns) => {
-    console.log(`[ExamProblem:${props.page}] options answer change`, newOptionAns);
-    if (newOptionAns !== oldOptionAns) {
-      answerVM.value = newOptionAns;
-      emit('answer-change', newOptionAns);
+  () => [innerTextAnswer.value, innerBoolAnswer.value, innerOptionAnswer.value],
+  (newAns, oldAns) => {
+    console.log(`[ExamProblem:${props.page}] answer change`, newAns);
+    for (let i = 0; i < newAns.length; i++) {
+      if (newAns[i] !== oldAns[i]) {
+        answerVM.value = newAns[i];
+        answerVM.value != undefined && emit('answer-change', answerVM.value);
+        break;
+      }
     }
   }
 );
@@ -129,7 +127,7 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
             v-for="(option, i) in problemInfo.options"
             :key="option.id"
             class="answer-section-select-item"
-            :value="String(option.id)"
+            :value="option.id"
             :label="`${indexToOption(i)}. ${option.content}`"
           >
             {{ option.content }}
@@ -139,11 +137,11 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
 
       <template v-else-if="problemInfo.type === ApiSchemaProblemType.EnumTrueFalse">
         <CusRadioGroup
-          :model-value="innerOptionAnswer[0]"
+          :model-value="String(innerBoolAnswer)"
           class="answer-section-select"
           direction="column"
           display-style="icon"
-          @change="(val) => (innerOptionAnswer = [val])"
+          @change="(val) => (innerBoolAnswer = (val === 'true'))"
         >
           <CusRadioButton class="answer-section-select-item" value="true" label="A. 正确"> 正确</CusRadioButton>
           <CusRadioButton class="answer-section-select-item" value="false" label="B. 错误"> 错误</CusRadioButton>
@@ -162,7 +160,7 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
             v-for="(option, i) in problemInfo.options"
             :key="option.id"
             class="answer-section-select-item"
-            :value="String(option.id)"
+            :value="Number(option.id)"
             :label="`${indexToOption(i)}. ${option.content}`"
           >
             {{ option.content }}

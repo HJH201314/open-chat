@@ -2,7 +2,7 @@
 import type { CusButtonEmits, CusButtonProps } from '@/components/button/DiliButton';
 import type { CSSProperties } from 'vue';
 import { computed, ref } from 'vue';
-import { getDarkerColor, getLighterColor } from '@/utils/color';
+import { getColorHex, getDarkerColor, getLighterColor } from '@/utils/color';
 import { useTheme } from '@/components/theme/useTheme.ts';
 
 const props = withDefaults(defineProps<CusButtonProps>(), {
@@ -26,11 +26,11 @@ const buttonStyle = computed(() => {
 });
 
 const backgroundColor = computed(() => {
-  if (props.backgroundColor) return props.backgroundColor;
+  if (props.backgroundColor) return getColorHex(props.backgroundColor);
   if (props.type == 'primary') {
-    return props.color || theme.colorPrimary;
+    return getColorHex(props.color) || theme.colorPrimary;
   } else if (props.type == 'secondary')  {
-    return getLighterColor(props.color || theme.colorPrimary, 0.9);
+    return getLighterColor(getColorHex(props.color) || theme.colorPrimary, 0.9);
   } else {
     return '#FFFFFF';
   }
@@ -43,14 +43,14 @@ const activeBackgroundColor = computed(() => {
 });
 
 const fontColor = computed(() => {
-  if (props.fontColor) return props.fontColor;
+  if (props.fontColor) return getColorHex(props.fontColor);
   switch (props.type) {
     case 'primary':
       return '#FFFFFF';
     case 'secondary':
-      return props.color || theme.colorPrimary;
+      return getColorHex(props.color) || theme.colorPrimary;
     case 'text':
-      return props.color || theme.colorPrimary;
+      return getColorHex(props.color) || theme.colorPrimary;
     default:
       return theme.colorBlack;
   }

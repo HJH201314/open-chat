@@ -1,7 +1,7 @@
 import { Chat } from '@/api/gen/Chat.ts';
 import { Manage } from '@/api/gen/Manage.ts';
 import { User } from '@/api/gen/User.ts';
-import { Bot } from '@/api/gen/Bot.ts';
+import { Preset } from '@/api/gen/Preset.ts';
 import { Tue } from '@/api/gen/Tue.ts';
 import { USER_ACCESS_TOKEN_KEY } from '@/constants';
 import { getActivePinia } from 'pinia';
@@ -40,6 +40,6 @@ export default {
   Chat: new Chat(genApiClient),
   Manage: new Manage(genApiClient),
   User: new User(genApiClient),
-  Bot: new Bot(genApiClient),
+  Preset: new Preset(genApiClient),
   Tue: new Tue(genApiClient),
 };

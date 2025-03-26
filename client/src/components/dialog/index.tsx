@@ -14,6 +14,11 @@ type CommonDialogInstance = {
   app: App;
 };
 
+type CommonDialogPropsExtended = CommonDialogProps & {
+  // 自动对 icon 和 button 应用样式
+  presetType?: 'danger' | 'warning' | 'info' | 'success';
+}
+
 export class DialogManager {
   private static instances: Map<string, CommonDialogInstance> = new Map();
 
@@ -52,7 +57,19 @@ export class DialogManager {
    * @param props 对话框属性
    * @param slots 对话框插槽
    */
-  public static createDialog = (props: CommonDialogProps, slots?: CommonDialogSlots) => {
+  public static createDialog = (props: CommonDialogPropsExtended, slots?: CommonDialogSlots) => {
+    if (props.presetType) {
+      props.type = props.presetType;
+      props.confirmButtonProps = {
+        type: 'secondary',
+        color: `var(--color-${props.presetType})`,
+        ...props.confirmButtonProps,
+      }
+      if (props.presetType == 'danger') {
+        props.actionReversed = true;
+      }
+    }
+
     // 控制 component 中 CommonDialog 的显隐
     const { visible, show, hide } = useModalVisible(true);
     const modalRef = ref<CommonDialogExpose>();
@@ -117,11 +134,11 @@ export class DialogManager {
   };
 
   /**
-   * 创建一个对话框用于提示
+   * 创建一个对话框用于提示，适用于简单场景，会覆盖 confirmHandler 和 cancelHandler。复杂处理场景使用：createDialog
    * @param props
    * @param defaultSlot
    */
-  public static commonDialog = async (props: CommonDialogProps, defaultSlot?: VNode) =>
+  public static commonDialog = async (props:  CommonDialogPropsExtended, defaultSlot?: VNode) =>
     new Promise<boolean>((resolve) => {
       const dialog = DialogManager.createDialog(
         {

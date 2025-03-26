@@ -22,7 +22,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'submit', payload: { answers: Record<number, number[] | string> }): void;
+  (e: 'submit', payload: { answers: Record<number, number[] | string>; timeSpent: number }): void;
 }>();
 
 watch(
@@ -37,17 +37,31 @@ watch(
 
 const { theme } = useTheme();
 
-const { remaining, start: startCountdown } = useCountdown(() => props.exam?.limit_time || 0, { immediate: false });
+const countdownTime = 24 * 60 * 60;
+// 这是一个一天的倒计时，单位为秒
+const {
+  remaining: oneDayCountdownRemaining,
+  start: startCountdown,
+  reset: resetCountdown,
+  pause: pauseCountdown,
+} = useCountdown(countdownTime, { immediate: false });
+const examCountdownRemaining = computed(() => {
+  return props.exam?.limit_time
+    ? props.exam?.limit_time - (countdownTime - oneDayCountdownRemaining.value)
+    : oneDayCountdownRemaining.value;
+});
+// 这是经过转换后的考试剩余时间
 const remainingTimeText = computed(() => {
-  const minutes = Math.floor(remaining.value / 60);
-  const seconds = Math.floor(remaining.value % 60);
+  const remaining = examCountdownRemaining.value;
+  const minutes = Math.floor(remaining / 60);
+  const seconds = Math.floor(remaining % 60);
   return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 });
 watch(
-  () => remaining.value,
+  () => examCountdownRemaining.value,
   (newRemaining) => {
     if (newRemaining <= 0) {
-      emit('submit', { answers: answers.value });
+      doSubmit();
     }
   }
 );
@@ -80,7 +94,9 @@ function isPageAnswerValid(pageNum: number) {
 function isAnswerValid(problemId?: number) {
   if (!problemId) return false;
   const answer = answers.value[problemId];
-  return (typeof answer == 'string' && answer) || (typeof answer == 'object' && answer.length);
+  return (
+    (typeof answer == 'string' && answer) || typeof answer == 'boolean' || (typeof answer == 'object' && answer.length)
+  );
 }
 
 function handleLastProblem() {
@@ -159,6 +175,9 @@ function handleExamSubmit() {
       confirmButtonProps: {
         text: '去检查',
       },
+      cancelHandler: () => {
+        doSubmit();
+      },
       confirmHandler: () => {
         highlightInvalidPage.value = true;
         currentPage.value = incompleteProblemPages[0];
@@ -166,8 +185,15 @@ function handleExamSubmit() {
     });
     return;
   } else {
-    emit('submit', { answers: answers.value });
+    doSubmit();
   }
+}
+
+function doSubmit() {
+  const timeSpent = countdownTime - oneDayCountdownRemaining.value;
+  resetCountdown();
+  pauseCountdown();
+  emit('submit', { answers: answers.value, timeSpent: timeSpent });
 }
 
 defineExpose({
@@ -178,7 +204,7 @@ defineExpose({
 <template>
   <div class="exam-answering-fragment">
     <header class="exam-header">
-      <div v-if="props.exam?.limit_time" class="exam-countdown" :title="`倒计时${remaining}秒`">
+      <div v-if="props.exam?.limit_time" class="exam-countdown" :title="`倒计时${examCountdownRemaining}秒`">
         <StopwatchStart />
         {{ remainingTimeText }}
       </div>

@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useArrayMap, useLocalStorage } from '@vueuse/core';
 import { computed, watch } from 'vue';
 import genApi from '@/api/gen-api.ts';
-import type { ApiSchemaBotRole, ApiSchemaModelCache } from '@/api/gen/data-contracts.ts';
+import type { ApiSchemaModelCache, ApiSchemaPreset } from '@/api/gen/data-contracts.ts';
 import type { DropdownOption } from '@/components/dropdown/types.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
@@ -76,7 +76,7 @@ export const useChatConfigStore = defineStore('model', () => {
     }
   };
 
-  const bots = useLocalStorage<ApiSchemaBotRole[]>('bots-raw', []);
+  const bots = useLocalStorage<ApiSchemaPreset[]>('bots-raw', []);
   const botsIdNameMap = computed(() => {
     const map = {} as Record<number, string>;
     bots.value.forEach((value) => {

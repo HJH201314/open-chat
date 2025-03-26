@@ -36,20 +36,20 @@ export interface ApiEntityCommonResponseAny {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseArraySchemaBotRole {
-  /** 代码 */
-  code?: number;
-  /** 数据 */
-  data?: ApiSchemaBotRole[];
-  /** 消息 */
-  msg?: string;
-}
-
 export interface ApiEntityCommonResponseArraySchemaModelCache {
   /** 代码 */
   code?: number;
   /** 数据 */
   data?: ApiSchemaModelCache[];
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseArraySchemaPreset {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaPreset[];
   /** 消息 */
   msg?: string;
 }
@@ -117,6 +117,15 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseExamSubmitExamResponse {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiExamSubmitExamResponse;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseSchemaCourse {
   /** 代码 */
   code?: number;
@@ -131,6 +140,15 @@ export interface ApiEntityCommonResponseSchemaExam {
   code?: number;
   /** 数据 */
   data?: ApiSchemaExam;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaExamUserRecord {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaExamUserRecord;
   /** 消息 */
   msg?: string;
 }
@@ -215,6 +233,23 @@ export interface ApiEntityPaginatedTotalResponseSchemaCourse {
   list?: ApiSchemaCourse[];
 }
 
+export interface ApiExamSubmitExamRequest {
+  /** 答案列表 */
+  answers?: ApiExamSubmitExamRequestAnswer[];
+  /** 答题用时（秒） */
+  time_spent?: number;
+}
+
+export interface ApiExamSubmitExamRequestAnswer {
+  answer?: any;
+  problem_id?: number;
+}
+
+export interface ApiExamSubmitExamResponse {
+  /** 记录ID */
+  record_id?: number;
+}
+
 export interface ApiSchemaAPIKey {
   created_at?: string;
   id?: number;
@@ -222,20 +257,6 @@ export interface ApiSchemaAPIKey {
   key?: string;
   /** 外键，指向 Provider */
   provider_id?: number;
-}
-
-export interface ApiSchemaBotRole {
-  created_at?: string;
-  /** 角色描述 */
-  description?: string;
-  /** 原始数据 */
-  id?: number;
-  /** 角色名称 */
-  name?: string;
-  /** 组装数据 */
-  prompt_session?: ApiSchemaSession;
-  /** 引用一个 session 中的对话作为 prompt */
-  prompt_session_id?: string;
 }
 
 export interface ApiSchemaCourse {
@@ -309,10 +330,43 @@ export interface ApiSchemaExamProblem {
   sort_order?: number;
 }
 
+export interface ApiSchemaExamUserRecord {
+  /** 用户答案（关联表储存） */
+  answers?: ApiSchemaExamUserRecordAnswer[];
+  created_at?: string;
+  /** 组装字段 */
+  exam?: ApiSchemaExam;
+  /** 考试ID */
+  exam_id?: number;
+  /** 普通字段 */
+  id?: number;
+  /** 总评分状态 */
+  status?: ApiSchemaScoreStatus;
+  /** 答题用时（单位：秒） */
+  time_spent?: number;
+  /** 总得分（单位：0.01分） */
+  total_score?: number;
+  updated_at?: string;
+  /** 用户ID */
+  user_id?: number;
+}
+
+export interface ApiSchemaExamUserRecordAnswer {
+  /** 用户答案 */
+  answer?: any;
+  /** 评语/反馈 */
+  comments?: string;
+  /** 测验 ID */
+  exam_id?: number;
+  /** 题目 ID */
+  problem_id?: number;
+  /** 得分（单位：0.01分） */
+  score?: number;
+  /** 评分状态 */
+  status?: ApiSchemaScoreStatus;
+}
+
 export interface ApiSchemaMessage {
-  bot_role?: ApiSchemaBotRole;
-  /** 回复所使用的模型 */
-  bot_role_id?: number;
   content?: string;
   created_at?: string;
   /** 默认结构 */
@@ -321,6 +375,9 @@ export interface ApiSchemaMessage {
   model?: ApiSchemaModel;
   /** 回复所使用的模型 */
   model_id?: number;
+  preset?: ApiSchemaPreset;
+  /** 回复所使用的模型 */
+  preset_id?: number;
   reasoning_content?: string;
   /** user/assistant/system */
   role?: string;
@@ -336,9 +393,12 @@ export interface ApiSchemaModel {
   description?: string;
   /** 对外展示模型名称 */
   display_name?: string;
+  /** 原始数据 */
   id?: number;
   /** 模型名称 */
   name?: string;
+  /** 组装数据 */
+  provider?: ApiSchemaProvider;
   /** 关联的 Provider ID */
   provider_id?: number;
   updated_at?: string;
@@ -352,9 +412,12 @@ export interface ApiSchemaModelCache {
   description?: string;
   /** 对外展示模型名称 */
   display_name?: string;
+  /** 原始数据 */
   id?: number;
   /** 模型名称 */
   name?: string;
+  /** 组装数据 */
+  provider?: ApiSchemaProvider;
   /** 关联的 Provider DisplayName */
   provider_display_name?: string;
   /** 关联的 Provider ID */
@@ -389,6 +452,22 @@ export interface ApiSchemaPermission {
   /** 权限路径（形如：POST:/user/create） */
   path?: string;
   updated_at?: string;
+}
+
+export interface ApiSchemaPreset {
+  created_at?: string;
+  /** 角色描述 */
+  description?: string;
+  /** 原始数据 */
+  id?: number;
+  /** 角色名称 */
+  name?: string;
+  /** 组装数据 */
+  prompt_session?: ApiSchemaSession;
+  /** 引用一个 session 中的对话作为 prompt */
+  prompt_session_id?: string;
+  /** 角色所属模块（chat、tue 等） */
+  type?: string;
 }
 
 export interface ApiSchemaProblem {
@@ -477,6 +556,13 @@ export interface ApiSchemaRole {
   /** 多对多关联 */
   permissions?: ApiSchemaPermission[];
   updated_at?: string;
+}
+
+export enum ApiSchemaScoreStatus {
+  EnumStatusPending = "pending",
+  EnumStatusScoring = "scoring",
+  EnumStatusCompleted = "completed",
+  EnumStatusFailed = "failed",
 }
 
 export interface ApiSchemaSession {
