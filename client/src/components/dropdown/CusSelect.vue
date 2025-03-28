@@ -1,5 +1,5 @@
 <template>
-  <div ref="dropdown" :class="{ active: isOpen, disabled: disabled }" class="dropdown">
+  <div ref="dropdown" :class="{ active: isOpen, disabled: disabled, [backgroundModeClassName]: true }" class="dropdown">
     <div
       ref="dropdown-toggle"
       :class="{ 'dropdown-toggle--active': isOpen }"
@@ -40,11 +40,14 @@ import { computed, provide, reactive, ref, useTemplateRef, watch } from 'vue';
 // 双向绑定 modelValue: 当前选中项的 value
 const modelValue = defineModel<string>('modelValue');
 const props = withDefaults(defineProps<CusSelectProps>(), {
+  backgroundMode: 'color',
   placeholder: '请选择',
   position: 'bottom',
   _depth: 0,
   toggleStyle: () => ({}),
 });
+
+const backgroundModeClassName = computed(() => `bg-mode-${props.backgroundMode}`);
 
 const emit = defineEmits<CusSelectEmits>();
 
@@ -189,9 +192,26 @@ function selectOption(option: DropdownOption, valuePath: string[]) {
     background-color: $color-grey-100;
     transition: background-color 0.2s $ease-out-circ;
 
-    &--active {
-      background-color: $color-grey-300;
+    &.bg-mode {
+      &-color {
+        background-color: $color-grey-100;
+      }
+      &-transparent {
+        background-color: $color-bg-transparent-100;
+      }
     }
+
+    &--active {
+      &.bg-mode {
+        &-color {
+          background-color: $color-grey-300;
+        }
+        &-transparent {
+          background-color: $color-bg-transparent-300;
+        }
+      }
+    }
+
 
     &:hover {
       border-color: var(--color-primary);

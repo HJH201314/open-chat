@@ -6,7 +6,7 @@ import { useTheme } from '@/components/theme/useTheme.ts';
 import { useElementSize, useWindowSize } from '@vueuse/core';
 import { AdminLayoutContentSizeKey } from '@/pages/admin/types.ts';
 import useGlobal from '@/commands/useGlobal.ts';
-import { RollbackIcon } from 'tdesign-icons-vue-next';
+import { MenuApplicationIcon, MenuIcon, RollbackIcon } from 'tdesign-icons-vue-next';
 import type { MenuValue } from 'tdesign-vue-next';
 
 type Entry = {
@@ -16,79 +16,81 @@ type Entry = {
   icon?: string;
   children?: Entry[];
 };
-const entries: Entry[] = [
-  {
-    title: '仪表盘',
-    icon: 'dashboard',
-    name: 'AdminDashboard',
-    path: '/admin/dashboard',
-  },
-  {
-    title: '课程管理',
-    icon: 'course',
-    name: 'ManageCourse',
-    path: '/admin/manage/tue',
-    children: [
-      {
-        title: '课程',
-        icon: 'book',
-        name: 'ManageCourseCourse',
-        path: '/admin/manage/tue/course',
-      },
-      {
-        title: '测验',
-        icon: 'pen-ball',
-        name: 'ManageCourseExam',
-        path: '/admin/manage/tue/exam',
-      },
-      {
-        title: '题目',
-        icon: 'questionnaire',
-        name: 'ManageCourseProblem',
-        path: '/admin/manage/tue/problem',
-      },
-    ],
-  },
-  {
-    title: '用户管理',
-    icon: 'user-1',
-    name: 'ManageUser',
-    path: '/admin/manage/user',
-  },
-  {
-    title: '系统设置',
-    icon: 'system-components',
-    name: 'ManageSystem',
-    path: '/admin/manage/system',
-    children: [
-      {
-        title: '接入点',
-        // icon: 'system-components',
-        name: 'ManageSystemProvider',
-        path: '/admin/manage/system/provider',
-      },
-      {
-        title: '模型',
-        // icon: 'system-components',
-        name: 'ManageSystemModel',
-        path: '/admin/manage/system/model',
-      },
-      {
-        title: '模型聚合',
-        // icon: 'system-components',
-        name: 'ManageSystemCollection',
-        path: '/admin/manage/system/collection',
-      },
-    ],
-  },
-];
+// const entries: Entry[] = [
+//   {
+//     title: '仪表盘',
+//     icon: 'dashboard',
+//     name: 'AdminDashboard',
+//     path: '/admin/dashboard',
+//   },
+//   {
+//     title: '课程管理',
+//     icon: 'course',
+//     name: 'ManageCourse',
+//     path: '/admin/manage/tue',
+//     children: [
+//       {
+//         title: '课程',
+//         icon: 'book',
+//         name: 'ManageCourseCourse',
+//         path: '/admin/manage/tue/course',
+//       },
+//       {
+//         title: '测验',
+//         icon: 'pen-ball',
+//         name: 'ManageCourseExam',
+//         path: '/admin/manage/tue/exam',
+//       },
+//       {
+//         title: '题目',
+//         icon: 'questionnaire',
+//         name: 'ManageCourseProblem',
+//         path: '/admin/manage/tue/problem',
+//       },
+//     ],
+//   },
+//   {
+//     title: '用户管理',
+//     icon: 'user-1',
+//     name: 'ManageUser',
+//     path: '/admin/manage/user',
+//   },
+//   {
+//     title: '系统设置',
+//     icon: 'system-components',
+//     name: 'ManageSystem',
+//     path: '/admin/manage/system',
+//     children: [
+//       {
+//         title: '接入点',
+//         // icon: 'system-components',
+//         name: 'ManageSystemProvider',
+//         path: '/admin/manage/system/provider',
+//       },
+//       {
+//         title: '模型',
+//         // icon: 'system-components',
+//         name: 'ManageSystemModel',
+//         path: '/admin/manage/system/model',
+//       },
+//       {
+//         title: '模型聚合',
+//         // icon: 'system-components',
+//         name: 'ManageSystemCollection',
+//         path: '/admin/manage/system/collection',
+//       },
+//     ],
+//   },
+// ];
 
 const router = useRouter();
+const entries = computed(() => router.getRoutes().find((route) => route.name === 'Admin')?.children || []);
 const route = useRoute();
 const currentRoute = ref(route.name);
 watch(
   () => currentRoute.value,
   (newRouteName) => {
+    console.log(router.getRoutes())
     router.replace({ name: newRouteName });
   }
 );
@@ -101,6 +103,7 @@ const collapseIconName = computed(() => (collapsed.value ? 'chevron-right' : 'ch
 const changeCollapsed = () => {
   collapsed.value = !collapsed.value;
 };
+const showSidebar = ref(!isSmallScreen.value);
 
 const contentRef = useTemplateRef<HTMLElement>('content');
 const asideRef = useTemplateRef<HTMLElement>('aside');
@@ -120,7 +123,7 @@ const { currentTheme } = useTheme();
 
 <template>
   <t-layout>
-    <t-aside ref="aside" style="width: fit-content;">
+    <t-aside v-if="showSidebar" ref="aside" style="width: fit-content;">
       <t-menu v-model:value="currentRoute" :theme="currentTheme" width="170px" :collapsed="collapsed" style="overflow-x: hidden;">
         <template #operations>
           <t-button class="t-demo-collapse-btn" variant="text" shape="square" @click="changeCollapsed">
@@ -136,31 +139,36 @@ const { currentTheme } = useTheme();
           <!-- 有二级菜单 -->
           <t-submenu v-if="entry.children" :value="entry.name">
             <template #icon>
-              <t-icon :name="entry.icon" />
+              <t-icon :name="entry.meta?.icon" />
             </template>
             <template #title>
-              <span>{{ entry.title }}</span>
+              <span>{{ entry.meta?.title }}</span>
             </template>
             <t-menu-item v-for="subEntry in entry.children" :key="subEntry.name" :value="subEntry.name">
               <template #icon>
-                <t-icon :name="subEntry.icon" />
+                <t-icon :name="subEntry.meta?.icon" />
               </template>
-              <span>{{ subEntry.title }}</span>
+              <span>{{ subEntry.meta?.title }}</span>
             </t-menu-item>
           </t-submenu>
           <!-- 一级菜单 -->
           <t-menu-item v-else :value="entry.name">
             <template #icon>
-              <t-icon :name="entry.icon" />
+              <t-icon :name="entry.meta?.icon" />
             </template>
-            <span>{{ entry.title }}</span>
+            <span>{{ entry.meta?.title }}</span>
           </t-menu-item>
         </template>
       </t-menu>
     </t-aside>
     <t-layout>
       <t-header style="padding: 1rem; background-color: transparent; display: flex; align-items: center; gap: 0.5rem">
-        <t-button variant="outline" shape="circle" @click="router.back()">
+        <t-button v-if="isSmallScreen" variant="outline" shape="circle" @click="showSidebar = !showSidebar">
+          <template #icon>
+            <menu-application-icon />
+          </template>
+        </t-button>
+        <t-button v-else variant="outline" shape="circle" @click="router.back()">
           <template #icon>
             <rollback-icon />
           </template>

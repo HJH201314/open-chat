@@ -153,6 +153,24 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvid
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaRole;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaUser;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseExamSubmitExamResponse {
   /** 代码 */
   code?: number;
@@ -230,6 +248,15 @@ export interface ApiEntityCommonResponseSchemaProvider {
   code?: number;
   /** 数据 */
   data?: ApiSchemaProvider;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaRole {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaRole;
   /** 消息 */
   msg?: string;
 }
@@ -313,6 +340,16 @@ export interface ApiEntityPaginatedTotalResponseSchemaModelCollection {
 
 export interface ApiEntityPaginatedTotalResponseSchemaProvider {
   list?: ApiSchemaProvider[];
+  total?: number;
+}
+
+export interface ApiEntityPaginatedTotalResponseSchemaRole {
+  list?: ApiSchemaRole[];
+  total?: number;
+}
+
+export interface ApiEntityPaginatedTotalResponseSchemaUser {
+  list?: ApiSchemaUser[];
   total?: number;
 }
 
@@ -700,6 +737,7 @@ export interface ApiSchemaSessionShareInfo {
 export interface ApiSchemaUser {
   created_at?: string;
   id?: number;
+  password?: string;
   /** 用户与角色之间的多对多关系 */
   roles?: ApiSchemaRole[];
   updated_at?: string;

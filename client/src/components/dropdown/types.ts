@@ -37,6 +37,7 @@ export type CusSelectEmits = {
 };
 
 export type CusSelectProps = {
+  backgroundMode?: 'color' | 'transparent';
   options: DropdownOption[]; // 下拉选项，支持嵌套
   placeholder?: string; // 占位符
   labelRenderText?: (selectedOption?: DropdownOption, selectedOptionPath?: DropdownOption[]) => string | undefined;

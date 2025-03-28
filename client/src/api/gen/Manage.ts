@@ -17,14 +17,20 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser,
   ApiEntityCommonResponseSchemaAPIKey,
   ApiEntityCommonResponseSchemaModel,
   ApiEntityCommonResponseSchemaModelCollection,
   ApiEntityCommonResponseSchemaProvider,
+  ApiEntityCommonResponseSchemaRole,
+  ApiEntityCommonResponseSchemaUser,
   ApiSchemaAPIKey,
   ApiSchemaModel,
   ApiSchemaModelCollection,
   ApiSchemaProvider,
+  ApiSchemaRole,
+  ApiSchemaUser,
 } from "./data-contracts";
 import type { HttpClient, RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
@@ -418,6 +424,202 @@ export class Manage<SecurityDataType = unknown> {
       path: `/manage/provider/${id}/update`,
       method: "POST",
       body: provider,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 创建角色
+   *
+   * @tags Role
+   * @name RoleCreatePost
+   * @summary 创建角色
+   * @request POST:/manage/role/create
+   * @response `200` `ApiEntityCommonResponseSchemaProvider` 成功创建的角色
+   */
+  roleCreatePost = (role: ApiSchemaRole, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaProvider, any>({
+      path: `/manage/role/create`,
+      method: "POST",
+      body: role,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 删除角色
+   *
+   * @tags Role
+   * @name RoleDeletePost
+   * @summary 删除角色
+   * @request POST:/manage/role/{id}/delete
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  roleDeletePost = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/role/${id}/delete`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取角色
+   *
+   * @tags Role
+   * @name RoleGet
+   * @summary 获取角色
+   * @request GET:/manage/role/{id}
+   * @response `200` `ApiEntityCommonResponseSchemaRole` 角色
+   */
+  roleGet = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaRole, any>({
+      path: `/manage/role/${id}`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 批量分页获取角色
+   *
+   * @tags Role
+   * @name RoleListGet
+   * @summary 批量分页获取角色
+   * @request GET:/manage/role/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole` 角色列表
+   */
+  roleListGet = (
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole, any>({
+      path: `/manage/role/list`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新角色
+   *
+   * @tags Role
+   * @name RoleUpdatePost
+   * @summary 更新角色
+   * @request POST:/manage/role/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  roleUpdatePost = (id: number, role: ApiSchemaRole, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/role/${id}/update`,
+      method: "POST",
+      body: role,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 创建用户
+   *
+   * @tags User
+   * @name UserCreatePost
+   * @summary 创建用户
+   * @request POST:/manage/user/create
+   * @response `200` `ApiEntityCommonResponseSchemaProvider` 成功创建的用户
+   */
+  userCreatePost = (user: ApiSchemaUser, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaProvider, any>({
+      path: `/manage/user/create`,
+      method: "POST",
+      body: user,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 删除用户
+   *
+   * @tags User
+   * @name UserDeletePost
+   * @summary 删除用户
+   * @request POST:/manage/user/{id}/delete
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  userDeletePost = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/user/${id}/delete`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取用户
+   *
+   * @tags User
+   * @name UserGet
+   * @summary 获取用户
+   * @request GET:/manage/user/{id}
+   * @response `200` `ApiEntityCommonResponseSchemaUser` 用户
+   */
+  userGet = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaUser, any>({
+      path: `/manage/user/${id}`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 批量分页获取用户
+   *
+   * @tags User
+   * @name UserListGet
+   * @summary 批量分页获取用户
+   * @request GET:/manage/user/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser` 用户列表
+   */
+  userListGet = (
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser, any>({
+      path: `/manage/user/list`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新用户
+   *
+   * @tags User
+   * @name UserUpdatePost
+   * @summary 更新用户
+   * @request POST:/manage/user/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  userUpdatePost = (id: number, user: ApiSchemaUser, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/user/${id}/update`,
+      method: "POST",
+      body: user,
       type: ContentType.Json,
       format: "json",
       ...params,

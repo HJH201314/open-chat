@@ -35,9 +35,13 @@
         lazy-load
       >
         <template #operation="{ row }">
-          <t-space size="medium">
-            <t-link theme="primary" hover="color" @click="handleEdit(row)">编辑</t-link>
-            <t-link theme="danger" hover="color" @click="handleDelete(row)">删除</t-link>
+          <t-space size="small">
+            <t-tooltip :delay="10" content="编辑">
+              <t-link theme="primary" hover="color" @click="handleEdit(row)"><Edit /></t-link>
+            </t-tooltip>
+            <t-tooltip :delay="10" content="删除">
+              <t-link theme="danger" hover="color" @click="handleDelete(row)"><Delete /></t-link>
+            </t-tooltip>
           </t-space>
         </template>
         <template #provider-title>
@@ -51,7 +55,7 @@
         </template>
         <template #config="{ row }">
           <t-popup :content="getConfigContent(row)" :overlay-inner-style="{ 'white-space': 'pre' }">
-            <t-link theme="primary"> 查看 </t-link>
+            <t-link theme="primary"> 查看</t-link>
           </t-popup>
         </template>
       </t-table>
@@ -60,18 +64,18 @@
 </template>
 
 <script setup lang="tsx">
-import { computed, h, inject, onMounted, reactive, ref, useTemplateRef, watchEffect } from 'vue';
+import { computed, h, inject, onMounted, reactive, ref, watchEffect } from 'vue';
 import type { ApiSchemaModel } from '@/api/gen/data-contracts.ts';
 import genApi from '@/api/gen-api.ts';
 import { AdminLayoutContentSizeKey } from '@/pages/admin/types.ts';
 import type { PrimaryTableCol } from 'tdesign-vue-next/es/table/type';
 import { DialogManager } from '@/components/dialog';
-import DialogCreateProvider from '@/pages/admin/system/provider/DialogCreateProvider.vue';
 import TableTitleArea from '@/pages/admin/component/TableTitleArea.vue';
 import { AddIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 import router from '@/plugins/router.ts';
 import { useRouteQuery } from '@vueuse/router';
 import DialogCreateModel from '@/pages/admin/system/provider/DialogCreateModel.vue';
+import { Delete, Edit } from '@icon-park/vue-next';
 
 const contentSize = inject(AdminLayoutContentSizeKey);
 const tableWidth = computed(() => contentSize?.width?.value || 1200);
@@ -85,7 +89,7 @@ const pagination = reactive({
   pageSizeOptions: [5, 10, 15, 20],
   defaultCurrent: pageNum,
   defaultPageSize: pageSize,
-  onChange(param: { current: number, previous: numebr, pageSize: number }) {
+  onChange(param: { current: number; previous: number; pageSize: number }) {
     pageNum.value = param.current;
     pageSize.value = param.pageSize;
   },
@@ -140,7 +144,9 @@ function getConfigContent(row: ApiSchemaModel) {
   if (Object.keys(config).length == 0) {
     return '-';
   } else {
-    return Object.entries(config).map(([key, value]) => `${key}: ${value}`).join('\n');
+    return Object.entries(config)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
   }
 }
 

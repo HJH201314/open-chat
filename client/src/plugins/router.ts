@@ -47,7 +47,7 @@ const router = createRouter({
     },
     {
       path: '/admin',
-      name: 'admin',
+      name: 'Admin',
       redirect: '/admin/dashboard',
       meta: { title: '首页' },
       component: () => import('@/pages/admin/AdminLayout.vue'),
@@ -55,20 +55,41 @@ const router = createRouter({
         {
           path: 'dashboard',
           name: 'AdminDashboard',
-          meta: { title: '仪表盘' },
+          meta: { title: '仪表盘', icon: 'dashboard' },
           component: () => import('@/pages/admin/home/HomePage.vue'),
         },
         {
           path: 'manage/user',
+          redirect: '/admin/manage/user/user',
           name: 'ManageUser',
-          meta: { title: '用户管理' },
-          component: () => import('@/pages/admin/manage/user/ManageUserPage.vue'),
+          meta: { title: '用户管理', icon: 'user-1' },
+          component: () => import('@/pages/admin/user/ManageUserPage.vue'),
+          children: [
+            {
+              path: 'user',
+              name: 'ManageUserUser',
+              meta: { title: '用户' },
+              component: () => import('@/pages/admin/user/ManageUserUser.vue'),
+            },
+            // {
+            //   path: 'role',
+            //   name: 'ManageUserRole',
+            //   meta: { title: '角色' },
+            //   component: () => import('@/pages/admin/user/ManageUserRole.vue'),
+            // },
+            // {
+            //   path: 'permission',
+            //   name: 'ManageUserPermission',
+            //   meta: { title: '权限' },
+            //   component: () => import('@/pages/admin/user/ManageUserPermission.vue'),
+            // },
+          ]
         },
         {
           path: 'manage/system',
           redirect: '/admin/manage/system/provider',
           name: 'ManageSystem',
-          meta: { title: '系统管理' },
+          meta: { title: '系统管理', icon: 'system-components' },
           component: () => import('@/pages/admin/system/ManageSystemPage.vue'),
           children: [
             {
