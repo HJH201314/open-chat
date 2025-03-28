@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { getColorHex } from '@/utils/color.ts';
 
 type CusSpinProps = {
   show?: boolean; // 使用默认旋转组件时，决定是否展示；使用插槽时，决定是否执行旋转
   size?: string; // 大小，需要单位
   thickness?: string; // 厚度，需要单位
-  color?: string | string[];
+  color?: string;
 };
 
 const props = withDefaults(defineProps<CusSpinProps>(), {
@@ -20,6 +21,7 @@ const slots = defineSlots<{
   default?(): any
 }>();
 
+const indicatorColor = computed(() => getColorHex(props.color));
 const showDefaultSpinning = computed(() => props.show && !slots.default);
 const slotSpinning = computed(() => props.show && slots.default);
 </script>
@@ -62,7 +64,7 @@ const slotSpinning = computed(() => props.show && slots.default);
 }
 
 .damping-circle {
-  border: v-bind(thickness) solid v-bind(color);
+  border: v-bind(thickness) solid v-bind(indicatorColor);
   border-top: 2px solid transparent;
   border-radius: 50%;
 }

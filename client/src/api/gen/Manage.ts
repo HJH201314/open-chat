@@ -13,7 +13,17 @@
 import type {
   ApiEntityCommonResponseArraySchemaProvider,
   ApiEntityCommonResponseBool,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider,
+  ApiEntityCommonResponseSchemaAPIKey,
+  ApiEntityCommonResponseSchemaModel,
+  ApiEntityCommonResponseSchemaModelCollection,
   ApiEntityCommonResponseSchemaProvider,
+  ApiSchemaAPIKey,
+  ApiSchemaModel,
+  ApiSchemaModelCollection,
   ApiSchemaProvider,
 } from "./data-contracts";
 import type { HttpClient, RequestParams } from "./http-client";
@@ -26,6 +36,294 @@ export class Manage<SecurityDataType = unknown> {
     this.http = http;
   }
 
+  /**
+   * @description 创建模型集合
+   *
+   * @tags ModelCollection
+   * @name CollectionCreatePost
+   * @summary 创建模型集合
+   * @request POST:/manage/collection/create
+   * @response `200` `ApiEntityCommonResponseSchemaModelCollection` 成功创建的模型集合
+   */
+  collectionCreatePost = (model: ApiSchemaModelCollection, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaModelCollection, any>({
+      path: `/manage/collection/create`,
+      method: "POST",
+      body: model,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 删除模型集合
+   *
+   * @tags Model
+   * @name CollectionDeletePost
+   * @summary 删除模型集合
+   * @request POST:/manage/collection/delete/{collection_id}
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  collectionDeletePost = (collectionId: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/collection/delete/${collectionId}`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取模型集合
+   *
+   * @tags ModelCollection
+   * @name CollectionGet
+   * @summary 获取模型集合
+   * @request GET:/manage/collection/{collection_id}
+   * @response `200` `ApiEntityCommonResponseSchemaModelCollection` 模型
+   */
+  collectionGet = (collectionId: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaModelCollection, any>({
+      path: `/manage/collection/${collectionId}`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 批量获取模型集合
+   *
+   * @tags ModelCollection
+   * @name CollectionListGet
+   * @summary 批量获取模型集合
+   * @request GET:/manage/collection/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection` 模型集合列表
+   */
+  collectionListGet = (
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection, any>({
+      path: `/manage/collection/list`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 创建 APIKey 并绑定 到 API 提供商
+   *
+   * @tags APIKey
+   * @name KeyCreatePost
+   * @summary 创建 APIKey
+   * @request POST:/manage/key/create
+   * @response `200` `ApiEntityCommonResponseSchemaAPIKey` 成功创建的 API Key
+   */
+  keyCreatePost = (apikey: ApiSchemaAPIKey, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaAPIKey, any>({
+      path: `/manage/key/create`,
+      method: "POST",
+      body: apikey,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 删除 APIKey
+   *
+   * @tags APIKey
+   * @name KeyDeletePost
+   * @summary 删除 APIKey
+   * @request POST:/manage/key/{id}/delete
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  keyDeletePost = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/key/${id}/delete`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 列出供应商的 APIKey
+   *
+   * @tags APIKey
+   * @name KeyListProviderGet
+   * @summary 列出APIKey
+   * @request GET:/manage/key/list/provider/{id}
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey` 成功创建的 API Key
+   */
+  keyListProviderGet = (
+    id: number,
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey, any>({
+      path: `/manage/key/list/provider/${id}`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 创建模型并绑定到 API 供应商
+   *
+   * @tags Model
+   * @name ModelCreatePost
+   * @summary 创建模型
+   * @request POST:/manage/model/create
+   * @response `200` `ApiEntityCommonResponseSchemaModel` 成功创建的模型
+   */
+  modelCreatePost = (model: ApiSchemaModel, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaModel, any>({
+      path: `/manage/model/create`,
+      method: "POST",
+      body: model,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 删除模型
+   *
+   * @tags Model
+   * @name ModelDeletePost
+   * @summary 删除模型
+   * @request POST:/manage/model/delete/{model_id}
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  modelDeletePost = (modelId: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/model/delete/${modelId}`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取模型
+   *
+   * @tags Model
+   * @name ModelGet
+   * @summary 获取模型
+   * @request GET:/manage/model/{model_id}
+   * @response `200` `ApiEntityCommonResponseSchemaModel` 模型
+   */
+  modelGet = (modelId: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaModel, any>({
+      path: `/manage/model/${modelId}`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 批量获取模型
+   *
+   * @tags Model
+   * @name ModelListGet
+   * @summary 批量获取模型
+   * @request GET:/manage/model/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel` 模型列表
+   */
+  modelListGet = (
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel, any>({
+      path: `/manage/model/list`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取 API 提供商的模型
+   *
+   * @tags Model
+   * @name ModelProviderGet
+   * @summary 获取 API 提供商的模型
+   * @request GET:/manage/model/provider/{provider_id}
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel` 模型列表
+   */
+  modelProviderGet = (
+    providerId: number,
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel, any>({
+      path: `/manage/model/provider/${providerId}`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Update 更新模型，若参数不传入或为空，则不会更新
+   *
+   * @tags Model
+   * @name ModelUpdatePost
+   * @summary 更新模型
+   * @request POST:/manage/model/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  modelUpdatePost = (model: ApiSchemaModel, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/model/update`,
+      method: "POST",
+      body: model,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取所有 API 提供商
+   *
+   * @tags Provider
+   * @name ProviderAllGet
+   * @summary 获取所有 API 提供商
+   * @request GET:/manage/provider/all
+   * @response `200` `ApiEntityCommonResponseArraySchemaProvider` API 提供商列表
+   */
+  providerAllGet = (params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseArraySchemaProvider, any>({
+      path: `/manage/provider/all`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
   /**
    * @description 创建 API 提供商
    *
@@ -50,12 +348,12 @@ export class Manage<SecurityDataType = unknown> {
    * @tags Provider
    * @name ProviderDeletePost
    * @summary 删除 API 提供商
-   * @request POST:/manage/provider/delete/{provider_id}
+   * @request POST:/manage/provider/{id}/delete
    * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
    */
-  providerDeletePost = (providerId: number, params: RequestParams = {}) =>
+  providerDeletePost = (id: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
-      path: `/manage/provider/delete/${providerId}`,
+      path: `/manage/provider/${id}/delete`,
       method: "POST",
       type: ContentType.Json,
       format: "json",
@@ -85,12 +383,23 @@ export class Manage<SecurityDataType = unknown> {
    * @name ProviderListGet
    * @summary 批量获取 API 提供商
    * @request GET:/manage/provider/list
-   * @response `200` `ApiEntityCommonResponseArraySchemaProvider` API 提供商列表
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider` API 提供商列表
    */
-  providerListGet = (params: RequestParams = {}) =>
-    this.http.request<ApiEntityCommonResponseArraySchemaProvider, any>({
+  providerListGet = (
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider, any>({
       path: `/manage/provider/list`,
       method: "GET",
+      query: query,
       type: ContentType.Json,
       format: "json",
       ...params,
@@ -101,12 +410,12 @@ export class Manage<SecurityDataType = unknown> {
    * @tags Provider
    * @name ProviderUpdatePost
    * @summary 更新 API 提供商
-   * @request POST:/manage/provider/update
+   * @request POST:/manage/provider/{id}/update
    * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
    */
-  providerUpdatePost = (provider: ApiSchemaProvider, params: RequestParams = {}) =>
+  providerUpdatePost = (id: number, provider: ApiSchemaProvider, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
-      path: `/manage/provider/update`,
+      path: `/manage/provider/${id}/update`,
       method: "POST",
       body: provider,
       type: ContentType.Json,

@@ -34,6 +34,7 @@ export class DialogManager {
     // 使用 h 函数包装 ele 并注入 onAfterClose
     const wrappedEle = h(CusThemeProvider, () =>
       h(ele, {
+        visible: true,
         onAfterClose() {
           DialogManager.destroy(id);
         },
@@ -156,7 +157,7 @@ export class DialogManager {
    * @param props
    * @param inputProps
    */
-  public static inputDialog = (props?: CommonDialogProps, inputProps?: CusInputProps) =>
+  public static inputDialog = (props?: CommonDialogProps & { placeholder: string }, inputProps?: CusInputProps) =>
     new Promise<{
       status: boolean;
       value: string;
@@ -170,7 +171,7 @@ export class DialogManager {
               onUpdate:modelValue={(v: string) => {
                 value.value = v;
               }}
-              placeholder={'请输入点什么'}
+              placeholder={props?.placeholder ?? '请输入点什么'}
               {...inputProps}
             ></CusInput>
           );

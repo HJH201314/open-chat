@@ -53,6 +53,7 @@ let cancelAbortCtrl: AbortController = new AbortController();
 
 async function handleConfirm() {
   if (confirming.value) return;
+  let preventClose = false;
   if (props.confirmHandler) {
     confirming.value = true;
     confirmAbortCtrl = new AbortController();
@@ -63,15 +64,18 @@ async function handleConfirm() {
         confirmAbortCtrl.abort('handler abort');
         confirming.value = false;
       },
-    });
+    }, () => preventClose = true);
     try {
       if (res instanceof Promise) {
         await res;
       }
+    } catch (e) {
+      console.error(e);
     } finally {
       confirming.value = false;
     }
   }
+  if (preventClose) return;
   emits('confirm'); // 传递关闭回调函数
   close(); // 不存在回调函数时默认自动关闭
 }
@@ -79,6 +83,7 @@ async function handleConfirm() {
 async function handleCancel() {
   // 取消时中断确认的处理
   if (confirming.value) confirmAbortCtrl.abort('cancel');
+  let preventClose = false;
   if (props.cancelHandler) {
     canceling.value = true;
     cancelAbortCtrl = new AbortController();
@@ -89,15 +94,18 @@ async function handleCancel() {
         cancelAbortCtrl.abort('handler abort');
         canceling.value = false;
       },
-    });
+    }, () => preventClose = true);
     try {
       if (res instanceof Promise) {
         await res;
       }
+    } catch (e) {
+      console.error(e);
     } finally {
       canceling.value = false;
     }
   }
+  if (preventClose) return;
   emits('cancel'); // 传递关闭回调函数
   close(); // 不存在回调函数时默认自动关闭
 }

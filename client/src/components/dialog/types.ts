@@ -7,8 +7,8 @@ type HandlerController = {
   abort: () => any;
 };
 type MethodType =
-  | ((abortController: HandlerController) => any)
-  | ((abortController: HandlerController) => Promise<any>);
+  | ((abortController: HandlerController, preventDefault: () => void) => any)
+  | ((abortController: HandlerController, preventDefault: () => void) => Promise<any>);
 export type CommonDialogProps = {
   type?: 'info' | 'warning' | 'danger' | 'success' | 'none';
   icon?: VNode;

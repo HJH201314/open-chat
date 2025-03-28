@@ -11,6 +11,7 @@ import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import genApi from '@/api/gen-api.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
+import Logo from '@/components/Logo.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -166,7 +167,7 @@ function showUserAgreement() {
 <template>
   <div :class="{ 'in-page': !isModal }" class="login">
     <div class="login-right-top">
-      <CusRadioGroup v-model="loginForm.type" class="login-type" name="loginType">
+      <CusRadioGroup v-model="loginForm.type" class="login-type" name="loginType" background-mode="transparent">
         <CusRadioButton value="login" label="登录"></CusRadioButton>
         <CusRadioButton value="register" label="注册"></CusRadioButton>
       </CusRadioGroup>
@@ -177,7 +178,7 @@ function showUserAgreement() {
         @click="closePage"
       />
     </div>
-    <div class="sidebar-logo sidebar-logo-animation" style="font-size: 32px">OpenChat</div>
+    <Logo style="font-size: 32px"></Logo>
     <div class="login-top">
       <span class="login-top-emoji transition-all-circ">{{ emoji }}</span>
       <div v-if="!isLargeScreen" style="height: 0.01rem" />
@@ -323,7 +324,7 @@ function showUserAgreement() {
       border-radius: 0.5rem;
       padding: 0.25rem 0.5rem;
       border: 2px solid #ffffff00;
-      background-color: $color-grey-100;
+      background-color: rgba(0, 0, 0, 0.05);
       outline: none;
       transition: all 0.2s $ease-out-circ;
 

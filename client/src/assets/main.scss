@@ -42,7 +42,7 @@ body, html {
 }
 
 /* 定义链接样式 */
-a {
+a:not(.t-link) {
   text-decoration: none;
   display: inline-block;
   color: var(--color-primary);

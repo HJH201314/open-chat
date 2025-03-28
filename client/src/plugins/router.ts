@@ -46,6 +46,54 @@ const router = createRouter({
       ],
     },
     {
+      path: '/admin',
+      name: 'admin',
+      redirect: '/admin/dashboard',
+      meta: { title: '首页' },
+      component: () => import('@/pages/admin/AdminLayout.vue'),
+      children: [
+        {
+          path: 'dashboard',
+          name: 'AdminDashboard',
+          meta: { title: '仪表盘' },
+          component: () => import('@/pages/admin/home/HomePage.vue'),
+        },
+        {
+          path: 'manage/user',
+          name: 'ManageUser',
+          meta: { title: '用户管理' },
+          component: () => import('@/pages/admin/manage/user/ManageUserPage.vue'),
+        },
+        {
+          path: 'manage/system',
+          redirect: '/admin/manage/system/provider',
+          name: 'ManageSystem',
+          meta: { title: '系统管理' },
+          component: () => import('@/pages/admin/system/ManageSystemPage.vue'),
+          children: [
+            {
+              path: 'provider',
+              name: 'ManageSystemProvider',
+              meta: { title: '接入点' },
+              component: () => import('@/pages/admin/system/provider/ManageSystemProvider.vue'),
+            },
+            {
+              path: 'model',
+              name: 'ManageSystemModel',
+              meta: { title: '模型' },
+              component: () => import('@/pages/admin/system/provider/ManageSystemModel.vue'),
+            },
+            {
+              path: 'collection',
+              name: 'ManageSystemCollection',
+              meta: { title: '模型聚合' },
+              component: () => import('@/pages/admin/system/collection/ManageSystemCollection.vue'),
+            },
+          ]
+        },
+      ],
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/pages/user/login/LoginPage.vue'),

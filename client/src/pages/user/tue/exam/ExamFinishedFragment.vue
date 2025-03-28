@@ -92,7 +92,7 @@ function handleGoPersonal() {
     <p v-else class="exam-finished-description">你已完成测验，请稍后查看分数~</p>
     <DiliButton v-if="score !== undefined" class="exam-finished-back" type="primary" text="查看详情" @click="handleGoDetail" />
     <DiliButton v-else class="exam-finished-back" type="primary" text="个人中心" @click="handleGoPersonal" />
-    <DiliButton class="exam-finished-back" type="secondary" text="返回首页" @click="$emit('back')" />
+    <DiliButton class="exam-finished-back" type="secondary" text="再来一次" @click="$emit('back')" />
   </main>
 </template>
 

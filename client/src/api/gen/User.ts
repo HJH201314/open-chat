@@ -28,6 +28,23 @@ export class User<SecurityDataType = unknown> {
   }
 
   /**
+   * @description 获取当前用户信息
+   *
+   * @tags User
+   * @name CurrentGet
+   * @summary 获取当前用户信息
+   * @request GET:/user/current
+   * @response `200` `ApiEntityCommonResponseSchemaUser` get current user info successfully
+   */
+  currentGet = (params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaUser, any>({
+      path: `/user/current`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
    * @description 用户登录
    *
    * @tags User

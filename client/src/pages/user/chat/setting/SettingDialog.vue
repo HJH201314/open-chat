@@ -2,7 +2,7 @@
 import SettingView from '@/pages/user/chat/setting/SettingView.vue';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
 import DiliButton from '@/components/button/DiliButton.vue';
-import { h, ref, useTemplateRef } from 'vue';
+import { h, useTemplateRef } from 'vue';
 import { SettingTwo } from '@icon-park/vue-next';
 import { useTheme } from '@/components/theme/useTheme.ts';
 
@@ -10,14 +10,14 @@ const { theme } = useTheme();
 
 const settingViewRef = useTemplateRef('setting-view');
 
-const visible = ref(true);
+const dialogRef = useTemplateRef('dialog');
 </script>
 
 <template>
   <CommonDialog
+    ref="dialog"
     title="对话设置"
     :icon="h(SettingTwo)"
-    :visible="visible"
     :show-close="true"
     :show-confirm="false"
     :show-cancel="false"
@@ -27,7 +27,7 @@ const visible = ref(true);
     <template #action>
       <div style="display: flex; gap: 0.5rem">
         <DiliButton text="重置" type="text" @click="() => settingViewRef?.reset()" />
-        <DiliButton text="关闭" type="normal" style="margin-left: auto" @click="() => (visible = false)" />
+        <DiliButton text="关闭" type="normal" style="margin-left: auto" @click="dialogRef?.close()" />
         <DiliButton
           :background-color="theme.colorPrimary"
           :button-style="{ width: '100%', 'text-align': 'center' }"

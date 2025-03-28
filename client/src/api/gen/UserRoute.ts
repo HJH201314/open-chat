@@ -19,6 +19,22 @@ import type {
 
 export namespace User {
   /**
+   * @description 获取当前用户信息
+   * @tags User
+   * @name CurrentGet
+   * @summary 获取当前用户信息
+   * @request GET:/user/current
+   * @response `200` `ApiEntityCommonResponseSchemaUser` get current user info successfully
+   */
+  export namespace CurrentGet {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaUser;
+  }
+
+  /**
    * @description 用户登录
    * @tags User
    * @name LoginPost

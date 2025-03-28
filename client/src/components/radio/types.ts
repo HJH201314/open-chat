@@ -5,6 +5,7 @@ export type CusRadioGroupProps = {
   type?: 'normal' | 'highlight';
   direction?: 'row' | 'column';
   barAnimation?: boolean;
+  backgroundMode?: 'color' | 'transparent';
   displayStyle?: 'background' | 'icon';
 };
 

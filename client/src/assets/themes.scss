@@ -23,6 +23,31 @@
   --text-secondary: var(--color-grey-500);
 }
 
+// 覆写 TDesign 样式
+:root {
+  --td-brand-color-1: #{$color-teal-30};
+  --td-brand-color-2: #{$color-teal-50};
+  --td-brand-color-3: #{$color-teal-80};
+  --td-brand-color-4: #{$color-teal-100};
+  --td-brand-color-5: #{$color-teal-200};
+  --td-brand-color-6: #{$color-teal-300};
+  --td-brand-color-7: #{$color-teal-400};
+  --td-brand-color-8: #{$color-teal-500};
+  --td-brand-color-9: #{$color-teal-600};
+  --td-brand-color-10: #{$color-teal-700};
+  --td-radius-small: 7px;
+  --td-radius-default: 8px;
+  --td-radius-medium: 11px;
+  --td-radius-large: 14px;
+  --td-radius-extraLarge: 17px;
+  --td-component-border: transparent;
+  --td-border-level-1-color: transparent;
+  //--td-border-level-2-color: transparent;
+  --td-shadow-1: #{$box-shadow-shallower};
+  --td-shadow-2: #{$box-shadow};
+  --td-shadow-3: #{$box-shadow-deeper};
+}
+
 .theme-dark {
   // 在这里添加
 }

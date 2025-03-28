@@ -1,14 +1,16 @@
 <script lang="ts" setup>
-import Tooltip from '@/components/tooltip/CusTooltip.vue';
+import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 import { toggleSidebarExpandKey, toggleSidebarKey } from '@/constants/eventBusKeys';
 import { goToLogin } from '@/pages/user/login';
 import { useUserStore } from '@/store/useUserStore';
-import { Login, Logout, MenuFold, MenuUnfold, Moon, SunOne } from '@icon-park/vue-next';
+import { Login, Logout, MenuFold, MenuUnfold, Moon, SunOne, DashboardOne } from '@icon-park/vue-next';
 import { onClickOutside, useEventBus, useMediaQuery } from '@vueuse/core';
-import { onMounted, ref, useTemplateRef } from 'vue';
+import { onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import type { SidebarEntry } from '@/components/sidebar/types.ts';
+import Logo from '@/components/Logo.vue';
+import CusPopover from '@/components/tooltip/CusPopover.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -27,6 +29,10 @@ const userStore = useUserStore();
 const showSideBar = ref(props.defaultShow);
 const expandBar = ref(false);
 const isAutoExpand = ref(false);
+
+watch(() => props.defaultShow, (newVal) => {
+  showSideBar.value = newVal;
+});
 
 const toggleSideBarBus = useEventBus(toggleSidebarKey);
 const toggleSidebarExpandBus = useEventBus(toggleSidebarExpandKey);
@@ -141,7 +147,7 @@ defineExpose({
       @mouseleave="handleMouseLeave"
     >
       <div class="sidebar-top">
-        <div v-if="expandBar" class="sidebar-logo sidebar-logo-animation">{{ title }}</div>
+        <Logo v-if="expandBar" style="flex: 1; padding-left: 0.75rem;">{{ title }}</Logo>
         <div class="sidebar-expand" style="aspect-ratio: 1" @click="handleExpandBar">
           <MenuUnfold v-if="!expandBar" size="24"></MenuUnfold>
           <MenuFold v-else size="24"></MenuFold>
@@ -165,7 +171,7 @@ defineExpose({
           <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{ entry.name }}</span>
         </div>
       </div>
-      <Tooltip :text="userStore.isLogin ? '退出登录' : '登录'" class="sidebar-entry-login" position="right">
+      <CusTooltip :text="userStore.isLogin ? '退出登录' : '登录'" class="sidebar-entry-login" position="right">
         <div class="sidebar-entry" @click="handleLogin">
           <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
           <Logout v-else class="sidebar-entry-icon" size="24"></Logout>
@@ -173,9 +179,9 @@ defineExpose({
             userStore.isLogin ? '退出登录' : '登录'
           }}</span>
         </div>
-      </Tooltip>
+      </CusTooltip>
       <div class="sidebar-footer">
-        <Tooltip position="right" text="切换主题">
+        <CusTooltip position="right" text="切换主题">
           <div class="sidebar-entry sidebar-footer-item">
             <SunOne
               v-if="currentTheme == 'dark'"
@@ -185,22 +191,34 @@ defineExpose({
             ></SunOne>
             <Moon v-if="currentTheme == 'light'" class="sidebar-entry-icon" size="1.5rem" @click="toggleTheme"></Moon>
           </div>
-        </Tooltip>
+        </CusTooltip>
       </div>
       <hr style="background: #4db6ac; height: 1px; width: 80%" />
-      <div class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
+      <CusPopover position="right" class="sidebar-avatar sidebar-entry" @click="!userStore.isLogin ? handleLogin() : void 0">
         <div class="sidebar-avatar-img">
           <img alt="avatar" src="/favicon.ico" />
           <div
             :class="{
-              'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
-              'sidebar-avatar-status--offline': userStore.loginStatus == 'offline',
-            }"
+            'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
+            'sidebar-avatar-status--offline': userStore.loginStatus == 'offline',
+          }"
             class="sidebar-avatar-status"
           ></div>
         </div>
         <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
-      </div>
+        <template v-if="userStore.isLogin" #popover>
+          <div class="sidebar-user-action">
+            <div v-if="userStore.isAdmin" class="sidebar-user-action-item" @click="router.push('/admin')">
+              <DashboardOne />
+              <span class="sidebar-user-action-item-name">管理面板</span>
+            </div>
+            <div v-if="userStore.isLogin" class="sidebar-user-action-item" @click="userStore.logout()">
+              <Login />
+              <span class="sidebar-user-action-item-name">退出登录</span>
+            </div>
+          </div>
+        </template>
+      </CusPopover>
     </div>
   </div>
 </template>
@@ -258,40 +276,6 @@ defineExpose({
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-  }
-
-  &-logo {
-    flex: 1;
-    font-size: 24px;
-
-    &-animation {
-      // background-image: linear-gradient(-135deg, #41e0a3, #56d8c0, #dc8bc3, #56d8c0, #41e0a3, #56d8c0, #dc8bc3, #56d8c0, #41e0a3);
-      background-image: linear-gradient(
-        -135deg,
-        var(--color-primary-darker),
-        var(--color-primary),
-        var(--color-primary-lighter),
-        var(--color-primary),
-        var(--color-primary-darker),
-        var(--color-primary),
-        var(--color-primary-lighter),
-        var(--color-primary),
-        var(--color-primary-darker)
-      );
-      -webkit-text-fill-color: rgba(0, 0, 0, 0);
-      background-clip: text;
-      background-size: 200% 200%;
-      animation: text-masked-animation 3s infinite linear;
-    }
-
-    @keyframes text-masked-animation {
-      0% {
-        background-position: 0 -100%;
-      }
-      100% {
-        background-position: -100% 0;
-      }
-    }
   }
 
   &-expand {
@@ -432,6 +416,23 @@ defineExpose({
 
     &-item {
       width: max-content;
+    }
+  }
+
+  &-user-action {
+    padding: 0.25rem;
+
+    &-item {
+      cursor: pointer;
+      border-radius: 0.4rem;
+      padding: 0.25rem 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover {
+        background-color: $color-grey-100;
+      }
     }
   }
 }

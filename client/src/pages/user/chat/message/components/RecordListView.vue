@@ -321,6 +321,11 @@ const { isSmallScreen } = useGlobal();
     &::-webkit-scrollbar {
       display: none;
     }
+
+    &:focus-visible {
+      border-radius: 0.75rem;
+      outline: var(--color-primary) auto 1px;
+    }
   }
 
   &-bar {
@@ -454,8 +459,8 @@ const { isSmallScreen } = useGlobal();
       flex: 1;
       display: grid;
       grid-template-areas:
-        'title title'
-        'datetime digest';
+        'title title title'
+        'datetime datetime digest';
       overflow: hidden;
 
       .title {

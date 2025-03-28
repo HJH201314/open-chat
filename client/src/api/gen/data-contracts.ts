@@ -108,6 +108,15 @@ export interface ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUse
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaAPIKey;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse {
   /** 代码 */
   code?: number;
@@ -117,11 +126,47 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaModel;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaModelCollection;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaProvider;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseExamSubmitExamResponse {
   /** 代码 */
   code?: number;
   /** 数据 */
   data?: ApiExamSubmitExamResponse;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaAPIKey {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaAPIKey;
   /** 消息 */
   msg?: string;
 }
@@ -149,6 +194,24 @@ export interface ApiEntityCommonResponseSchemaExamUserRecord {
   code?: number;
   /** 数据 */
   data?: ApiSchemaExamUserRecord;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaModel {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaModel;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaModelCollection {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaModelCollection;
   /** 消息 */
   msg?: string;
 }
@@ -228,9 +291,29 @@ export interface ApiEntityPaginatedSyncListResponseSchemaUserSession {
   updated?: ApiSchemaUserSession[];
 }
 
+export interface ApiEntityPaginatedTotalResponseSchemaAPIKey {
+  list?: ApiSchemaAPIKey[];
+  total?: number;
+}
+
 export interface ApiEntityPaginatedTotalResponseSchemaCourse {
-  last_page?: number;
   list?: ApiSchemaCourse[];
+  total?: number;
+}
+
+export interface ApiEntityPaginatedTotalResponseSchemaModel {
+  list?: ApiSchemaModel[];
+  total?: number;
+}
+
+export interface ApiEntityPaginatedTotalResponseSchemaModelCollection {
+  list?: ApiSchemaModelCollection[];
+  total?: number;
+}
+
+export interface ApiEntityPaginatedTotalResponseSchemaProvider {
+  list?: ApiSchemaProvider[];
+  total?: number;
 }
 
 export interface ApiExamSubmitExamRequest {
@@ -376,7 +459,7 @@ export interface ApiSchemaMessage {
   /** 回复所使用的模型 */
   model_id?: number;
   preset?: ApiSchemaPreset;
-  /** 回复所使用的模型 */
+  /** 回复所使用的预设 */
   preset_id?: number;
   reasoning_content?: string;
   /** user/assistant/system */
@@ -427,6 +510,19 @@ export interface ApiSchemaModelCache {
   updated_at?: string;
 }
 
+export interface ApiSchemaModelCollection {
+  created_at?: string;
+  /** 额外描述 */
+  description?: string;
+  /** 展示名称 */
+  display_name?: string;
+  id?: number;
+  /** 关联的模型 */
+  models?: ApiSchemaModel[];
+  /** 唯一标识名称 */
+  name?: string;
+}
+
 export interface ApiSchemaModelConfig {
   /** 是否允许用户自行修改系统提示 */
   allow_system_prompt?: boolean;
@@ -468,6 +564,9 @@ export interface ApiSchemaPreset {
   prompt_session_id?: string;
   /** 角色所属模块（chat、tue 等） */
   type?: string;
+  updated_at?: string;
+  /** 预设版本号，可能被用于标记是否需要强制更新 */
+  version?: number;
 }
 
 export interface ApiSchemaProblem {
@@ -525,10 +624,10 @@ export interface ApiSchemaProvider {
   /** 对外展示提供商名称 */
   display_name?: string;
   id?: number;
+  /** 一对多关系，与 Model 模型关联 */
+  models?: ApiSchemaModel[];
   /** 提供商名称 */
   name?: string;
-  /** 一对多关系，与 Model 模型关联 */
-  schema?: ApiSchemaModel[];
   updated_at?: string;
 }
 

@@ -1,15 +1,16 @@
 import { tryOnMounted, useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 import genApi from '@/api/gen-api.ts';
+import type { ApiSchemaUser } from '@/api/gen/data-contracts.ts';
 
 /* 用户相关 */
 export const useUserStore = defineStore('user', () => {
   const accessToken = useLocalStorage(USER_ACCESS_TOKEN_KEY, '');
   const refreshToken = useLocalStorage(USER_REFRESH_TOKEN_KEY, '');
   const avatar = ref('/favicon.ico');
-  const currentUser = useSessionStorage<API.UserLoginResult>('current-user', {});
+  const currentUser = useSessionStorage<ApiSchemaUser>('current-user', {});
   const loginStatus = ref<'login' | 'logout' | 'offline'>('logout');
   const isLogin = computed(() => {
     // 状态不为登出即视作已登录，offline 状态允许再次请求进行尝试
@@ -17,7 +18,10 @@ export const useUserStore = defineStore('user', () => {
   });
   const username = computed(() => currentUser.value.username ?? '未登录');
   const userId = computed(() => currentUser.value.id ?? -1);
-  const permission = ref(0);
+  const roles = computed(() => currentUser.value.roles ?? []);
+  const isAdmin = computed(() => {
+    return roles.value.map((role) => role.name).join('').toLowerCase().includes('admin');
+  });
 
   // 每小时 ping 一下确认登录过期没
   const { pause: pausePing, resume: resumePing } = useIntervalFn(
@@ -37,7 +41,7 @@ export const useUserStore = defineStore('user', () => {
 
   const ping = async () => {
     try {
-      const res = await genApi.User.pingPost();
+      const res = await genApi.User.currentGet();
       if (res.data?.data?.id) {
         loginStatus.value = 'login';
         currentUser.value = res.data.data;
@@ -58,7 +62,6 @@ export const useUserStore = defineStore('user', () => {
       });
       if (res.data.code === 200) {
         loginStatus.value = 'login';
-        permission.value = 0; // TODO
         currentUser.value = res.data.data;
         resumePing();
         return true;
@@ -79,7 +82,6 @@ export const useUserStore = defineStore('user', () => {
   function logout() {
     genApi.User.logoutPost();
     loginStatus.value = 'logout';
-    permission.value = 0;
     currentUser.value = {};
     accessToken.value = '';
     refreshToken.value = '';
@@ -92,8 +94,9 @@ export const useUserStore = defineStore('user', () => {
     isLogin,
     userId,
     username,
-    permission,
+    roles,
     currentUser,
+    isAdmin,
     login,
     logout,
     refreshToken,

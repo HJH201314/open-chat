@@ -7,7 +7,6 @@ import {
   onMounted,
   onUnmounted,
   provide,
-  reactive,
   ref,
   toRefs,
   useTemplateRef,
@@ -18,6 +17,7 @@ import {
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
   name: getRandomString(5),
   type: 'highlight',
+  backgroundMode: 'color',
   direction: 'row',
   barAnimation: true,
   displayStyle: 'background',
@@ -54,27 +54,28 @@ function setSelectedElement(e?: HTMLElement) {
   selectedElement.value = e;
 }
 
-watch(() => selectedValue.value, (newSelectedValue) => {
-  emits('change', selectedValue.value);
-  modelValue.value = newSelectedValue;
-});
-
-const { name, type, direction, displayStyle } = toRefs(props);
-provide(
-  RadioGroupInjectionKey,
-  {
-    name,
-    type,
-    direction,
-    displayStyle,
-    value: selectedValue,
-    setValue: setSelectedValue,
-    setElement: setSelectedElement,
+watch(
+  () => selectedValue.value,
+  (newSelectedValue) => {
+    emits('change', selectedValue.value);
+    modelValue.value = newSelectedValue;
   }
 );
 
+const { name, type, direction, displayStyle } = toRefs(props);
+provide(RadioGroupInjectionKey, {
+  name,
+  type,
+  direction,
+  displayStyle,
+  value: selectedValue,
+  setValue: setSelectedValue,
+  setElement: setSelectedElement,
+});
+
 const typeClassName = computed(() => `type-${props.type}`);
 const displayStyleClassName = computed(() => `display-${props.displayStyle}`);
+const backgroundModeClassName = computed(() => `bg-mode-${props.backgroundMode}`);
 
 // 选中框样式
 const barStyle = ref<CSSProperties>({
@@ -150,7 +151,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <fieldset ref="radio-group" class="cus-radio-group" :class="[displayStyleClassName]">
+  <fieldset ref="radio-group" class="cus-radio-group" :class="[displayStyleClassName, backgroundModeClassName]">
     <div
       v-if="displayStyle !== 'icon'"
       class="cus-radio-group-bar"
@@ -168,11 +169,19 @@ onUnmounted(() => {
   position: relative;
   width: fit-content;
   border-radius: 0.6em;
-  background-color: $color-grey-200;
   display: flex;
   flex-direction: v-bind('props.direction');
   flex-wrap: wrap;
   padding: 0;
+
+  &.bg-mode {
+    &-color {
+      background-color: $color-grey-200;
+    }
+    &-transparent {
+      background-color: $color-bg-transparent-200;
+    }
+  }
 
   &-bar {
     position: absolute;
