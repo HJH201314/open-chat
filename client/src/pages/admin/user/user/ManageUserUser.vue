@@ -1,8 +1,8 @@
 <template>
-  <t-space direction="vertical">
-    <TableTitleArea title="接入点" subtitle="每个接入点对应一个 API 服务">
+  <div>
+    <TableTitleArea title="用户" subtitle="管理用户及其角色">
       <template #actions>
-        <t-button variant="outline" shape="circle" @click="getProviders()">
+        <t-button variant="outline" shape="circle" @click="getUsers()">
           <template #icon>
             <refresh-icon />
           </template>
@@ -11,17 +11,17 @@
           <template #icon>
             <add-icon />
           </template>
-          创建
+          新建
         </t-button>
       </template>
     </TableTitleArea>
-    <div :style="{ 'overflow-x': 'auto', width: `${tableWidth}px` }">
+    <TableWrapper v-slot="{ maxHeight }">
       <t-table
         ref="table"
         row-key="id"
         size="small"
-        max-height="100%"
         table-layout="auto"
+        :max-height="maxHeight"
         :allow-resize-column-width="false"
         :data="data"
         :loading="loading"
@@ -34,53 +34,52 @@
         cell-empty-content="-"
         lazy-load
       >
-        <template #operation="{ row }">
+        <template #roles="{ row }">
           <t-space size="small">
+            <t-tag v-for="role in row.roles || []" :key="role" theme="primary" variant="light">
+              <t-link theme="primary">{{ role.display_name }}</t-link>
+            </t-tag>
+          </t-space>
+        </template>
+        <template #operation="{ row }">
+          <ActionSet>
             <t-tooltip :delay="10" content="编辑">
               <t-link theme="primary" hover="color" @click="handleEdit(row)">
-                <Edit />
+                <edit-icon />
               </t-link>
             </t-tooltip>
-            <t-tooltip :delay="10" content="模型">
-              <t-link theme="primary" hover="color" @click="handleModel(row)">
-                <RobotOne />
-              </t-link>
-            </t-tooltip>
-            <t-tooltip :delay="10" content="API">
-              <t-link theme="primary" hover="color" @click="handleConfigKey(row)">
-                <Api />
+            <t-tooltip :delay="10" content="登出">
+              <t-link theme="danger" hover="color" @click="handleLogout(row)">
+                <logout-icon />
               </t-link>
             </t-tooltip>
             <t-tooltip :delay="10" content="删除">
               <t-link theme="danger" hover="color" @click="handleDelete(row)">
-                <Delete />
+                <delete-icon />
               </t-link>
             </t-tooltip>
-          </t-space>
+          </ActionSet>
         </template>
       </t-table>
-    </div>
-  </t-space>
+    </TableWrapper>
+  </div>
 </template>
 
 <script setup lang="tsx">
-import { computed, h, inject, onMounted, reactive, ref, watchEffect } from 'vue';
-import type { ApiSchemaProvider } from '@/api/gen/data-contracts.ts';
+import { h, onMounted, reactive, ref, watchEffect } from 'vue';
+import type { ApiSchemaUser } from '@/api/gen/data-contracts.ts';
 import genApi from '@/api/gen-api.ts';
-import { AdminLayoutContentSizeKey } from '@/pages/admin/types.ts';
 import type { PrimaryTableCol } from 'tdesign-vue-next/es/table/type';
 import { DialogManager } from '@/components/dialog';
-import DialogCreateProvider from '@/pages/admin/system/provider/DialogCreateProvider.vue';
 import TableTitleArea from '@/pages/admin/component/TableTitleArea.vue';
-import { AddIcon, RefreshIcon } from 'tdesign-icons-vue-next';
-import DialogApiKey from '@/pages/admin/system/provider/DialogApiKey.vue';
-import { useRouter } from 'vue-router';
-import { Api, Delete, Edit, RobotOne } from '@icon-park/vue-next';
+import { AddIcon, DeleteIcon, EditIcon, LogoutIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import DialogCreateUser from '@/pages/admin/user/user/DialogCreateUser.vue';
+import ToastManager from '@/components/toast/ToastManager.ts';
+import { useUserStore } from '@/store/useUserStore.ts';
+import TableWrapper from '@/pages/admin/component/TableWrapper.vue';
+import ActionSet from '@/pages/admin/component/ActionSet.vue';
 
-const contentSize = inject(AdminLayoutContentSizeKey);
-const tableWidth = computed(() => contentSize?.width?.value || 1200);
-
-const data = ref<ApiSchemaProvider[]>([]);
+const data = ref<ApiSchemaUser[]>([]);
 const total = ref(0);
 const pageNum = ref(1);
 const pageSize = ref(10);
@@ -97,21 +96,21 @@ const pagination = reactive({
 
 onMounted(() => {
   watchEffect(() => {
-    getProviders(pageNum.value, pageSize.value);
+    getUsers(pageNum.value, pageSize.value);
   });
 });
 
 const loading = ref(false);
 
-async function getProviders(page?: number, size?: number) {
+async function getUsers(page?: number, size?: number) {
   const finalPageNum = page || pageNum.value || 1;
   const finalPageSize = size || pageSize.value || 10;
   try {
     loading.value = true;
-    const res = await genApi.Manage.providerListGet({
+    const res = await genApi.Manage.userListGet({
       page_num: finalPageNum,
       page_size: finalPageSize,
-      sort_expr: 'created_at DESC',
+      sort_expr: 'id DESC',
     });
     if (res.status == 200 && res.data.data) {
       total.value = res.data.data.total || 0;
@@ -124,66 +123,65 @@ async function getProviders(page?: number, size?: number) {
   }
 }
 
-const columns = ref<PrimaryTableCol<ApiSchemaProvider>[]>([
+const columns = ref<PrimaryTableCol<ApiSchemaUser>[]>([
   { colKey: 'serial-number', title: 'NO', width: '2rem', align: 'center' },
-  { colKey: 'name', title: '标识名', width: '15rem' },
-  { colKey: 'display_name', title: '展示名' },
-  { colKey: 'description', title: '描述' },
-  { colKey: 'base_url', title: '接口' },
+  { colKey: 'username', title: '用户名', width: '15rem' },
+  { colKey: 'roles', title: '角色', width: '15rem' },
   { colKey: 'operation', title: '操作', width: '7rem', fixed: 'right' },
 ]);
 
 const dialogMode = ref<'create' | 'edit'>('edit');
-const dialogData = ref<ApiSchemaProvider>({});
+const dialogData = ref<ApiSchemaUser>({});
 
-function handleEdit(row: ApiSchemaProvider) {
+function handleEdit(row: ApiSchemaUser) {
   dialogMode.value = Object.keys(row).length == 0 ? 'create' : 'edit';
   dialogData.value = row;
   DialogManager.renderDialog(
-    h(DialogCreateProvider, {
+    h(DialogCreateUser, {
       mode: dialogMode.value,
       data: dialogData.value,
       onConfirm() {
-        getProviders();
+        getUsers();
       },
     })
   );
 }
 
-const router = useRouter();
+const userStore = useUserStore();
 
-function handleModel(row: ApiSchemaProvider) {
-  console.log('handleModel', row);
-  if (row.id) {
-    router.replace({
-      name: 'ManageSystemModel',
-      query: {
-        provider_id: row.id,
-      },
-    });
-  }
-}
-
-function handleConfigKey(row: ApiSchemaProvider) {
-  DialogManager.renderDialog(
-    h(DialogApiKey, {
-      data: row,
-    })
-  );
-}
-
-function handleDelete(row: ApiSchemaProvider) {
+function handleLogout(row: ApiSchemaUser) {
+  const logoutSelf = row.id == userStore.userId;
   DialogManager.commonDialog({
-    title: '删除接入点',
-    content: `确定要删除接入点 ${row.name} 吗？`,
+    title: '登出用户',
+    content: logoutSelf ? '确定要登出自己吗？' : `确定要登出用户 ${row.username} 吗？`,
     presetType: 'danger',
   }).then(async (res) => {
     if (res) {
       try {
         if (!row.id) return;
-        const res = await genApi.Manage.providerDeletePost(row.id);
+        const res = await genApi.Manage.userLogoutPost(row.id);
+        if (res.status == 200 && res.data.data) {
+          ToastManager.normal('强制登出成功');
+        }
+      } catch (_) {
+        ToastManager.danger('操作失败');
+      }
+    }
+  });
+}
+
+function handleDelete(row: ApiSchemaUser) {
+  DialogManager.commonDialog({
+    title: '删除用户',
+    content: `确定要删除用户 ${row.username} 吗？`,
+    presetType: 'danger',
+  }).then(async (res) => {
+    if (res) {
+      try {
+        if (!row.id) return;
+        const res = await genApi.Manage.userDeletePost(row.id);
         if (res.status == 200) {
-          getProviders();
+          getUsers();
         }
       } catch (error) {
         console.log(error);

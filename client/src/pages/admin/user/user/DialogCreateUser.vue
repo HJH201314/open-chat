@@ -7,8 +7,9 @@ import type { CommonDialogProps } from '@/components/dialog/types.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import type { FormInstanceFunctions } from 'tdesign-vue-next/es/form/type';
 import { checkFormValidateResult } from '@/utils/tdesign.ts';
-import type { TransferValue } from 'tdesign-vue-next/es/transfer/type';
 import type { TransferProps } from 'tdesign-vue-next';
+import { useUserStore } from '@/store/useUserStore.ts';
+import { DialogManager } from '@/components/dialog';
 
 type T = ApiSchemaUser;
 
@@ -18,6 +19,7 @@ const props = defineProps<{
 }>();
 
 const title = computed(() => `${props.mode == 'create' ? '创建' : '编辑'}用户`);
+const subtitle = computed(() => (props.mode == 'edit' && props.data?.id ? `(UID: ${props.data?.id})` : ''));
 const formRef = useTemplateRef<FormInstanceFunctions<T>>('form');
 
 const getRoles = async () => {
@@ -27,22 +29,22 @@ const getRoles = async () => {
   });
   if (res.status == 200 && res.data.data) {
     roleList.value = (res.data.data.list || []).map((item) => ({
-      label: item.name || '',
+      label: item.display_name || '',
       value: item.id || 0,
     }));
   }
-}
+};
 
 // 角色处理
-const roleList = ref<TransferProps['data']>([])
-const roleIds = ref<number[]>([])
+const roleList = ref<TransferProps['data']>([]);
+const roleIds = ref<number[]>([]);
 const checked = ref<TransferProps['checked']>([]);
 const handleCheckedChange: TransferProps['onCheckedChange'] = ({
-                                                                 checked: checkedVal,
-                                                                 sourceChecked,
-                                                                 targetChecked,
-                                                                 type,
-                                                               }) => {
+  checked: checkedVal,
+  sourceChecked,
+  targetChecked,
+  type,
+}) => {
   console.log('handleCheckedChange', {
     checkedVal,
     sourceChecked,
@@ -52,7 +54,7 @@ const handleCheckedChange: TransferProps['onCheckedChange'] = ({
   checked.value = checkedVal;
 };
 const handleChange: TransferProps['onChange'] = (newTargetValue) => {
-  console.log('newTargetValue', newTargetValue);
+  roleIds.value = newTargetValue as number[];
 };
 
 const formData: T & {
@@ -70,6 +72,7 @@ watch(
   { immediate: true }
 );
 
+const userStore = useUserStore();
 
 const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) => {
   const res = (await formRef.value?.validate()) || {};
@@ -78,11 +81,13 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
     prevent();
     return;
   }
+  console.log(roleIds.value);
+  // return;
   if (props.mode == 'create') {
     await genApi.Manage.userCreatePost({
       username: formData.username,
       password: formData.password,
-      roles: roleIds.value.map((item) => ({ id: item } as ApiSchemaRole)),
+      roles: roleIds.value.map((item) => ({ id: item }) as ApiSchemaRole),
     });
   } else {
     if (!props.data?.id) return;
@@ -93,41 +98,39 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
       }
     }
     if (JSON.stringify(roleIds.value.sort()) != JSON.stringify(props.data?.roles?.map((item) => item.id).sort())) {
-      updateData.roles = roleIds.value.map((item) => ({ id: item } as ApiSchemaRole));
+      if (userStore.userId == props.data?.id) {
+        const res = await DialogManager.commonDialog({ title: '修改？', content: '你正在修改自己的权限，请再三确认！', presetType: 'danger' });
+        if (!res) return;
+      }
+      updateData.roles = roleIds.value.map((item) => ({ id: item }) as ApiSchemaRole);
     }
-    await genApi.Manage.userUpdatePost(props.data?.id, updateData);
+    // do update
+    if (Object.keys(updateData).length != 0)  {
+      await genApi.Manage.userUpdatePost(props.data?.id, updateData);
+    }
   }
 };
 </script>
 
 <template>
-  <CommonDialog :title="title" :confirm-handler="handleConfirm">
+  <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm">
     <template #default>
-      <t-form ref="form" :data="formData" label-align="top" style="margin: 1rem 0">
+      <t-form ref="form" :data="formData" label-align="top" style="margin-bottom: 1rem">
         <t-form-item label="用户名" name="username" :rules="[{ required: true }]">
           <t-input v-model="formData.username" placeholder="用户名"></t-input>
         </t-form-item>
         <t-form-item label="密码" name="password" :rules="[{ required: mode == 'create' }]">
-          <t-input v-model="formData.password" placeholder="密码，不修改则留空"></t-input>
+          <t-input v-model="formData.password" type="password" placeholder="密码，不修改则留空"></t-input>
         </t-form-item>
         <t-form-item label="角色" name="roles">
           <t-transfer
             v-model="roleIds"
             :data="roleList"
+            :title="['可选角色', '已选角色']"
             :operation="['移除', '添加']"
             @change="handleChange"
             @checked-change="handleCheckedChange"
-          >
-            <template #title="props">
-              <div>{{ props.type === 'target' ? '可选' : '已选' }}</div>
-            </template>
-            <template #footer="props">
-              <div style="padding: 12px; border-top: 1px solid #e7e7e7">
-                <span v-if="props.type === 'source'">可选角色</span>
-                <span v-else>已选角色</span>
-              </div>
-            </template>
-          </t-transfer>
+          ></t-transfer>
         </t-form-item>
       </t-form>
     </template>

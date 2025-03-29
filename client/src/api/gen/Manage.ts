@@ -16,18 +16,23 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser,
+  ApiEntityCommonResponseInt,
   ApiEntityCommonResponseSchemaAPIKey,
   ApiEntityCommonResponseSchemaModel,
   ApiEntityCommonResponseSchemaModelCollection,
+  ApiEntityCommonResponseSchemaPermission,
   ApiEntityCommonResponseSchemaProvider,
   ApiEntityCommonResponseSchemaRole,
   ApiEntityCommonResponseSchemaUser,
+  ApiEntityReqUpdateBodySchemaRole,
   ApiSchemaAPIKey,
   ApiSchemaModel,
   ApiSchemaModelCollection,
+  ApiSchemaPermission,
   ApiSchemaProvider,
   ApiSchemaRole,
   ApiSchemaUser,
@@ -314,6 +319,69 @@ export class Manage<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description 获取权限
+   *
+   * @tags Permission
+   * @name PermissionGet
+   * @summary 获取权限
+   * @request GET:/manage/permission/{id}
+   * @response `200` `ApiEntityCommonResponseSchemaPermission` 权限
+   */
+  permissionGet = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaPermission, any>({
+      path: `/manage/permission/${id}`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 批量分页获取权限
+   *
+   * @tags Permission
+   * @name PermissionListGet
+   * @summary 批量分页获取权限
+   * @request GET:/manage/permission/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission` 权限列表
+   */
+  permissionListGet = (
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission, any>({
+      path: `/manage/permission/list`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新权限
+   *
+   * @tags Permission
+   * @name PermissionUpdatePost
+   * @summary 更新权限
+   * @request POST:/manage/permission/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  permissionUpdatePost = (id: number, permission: ApiSchemaPermission, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/permission/${id}/update`,
+      method: "POST",
+      body: permission,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
    * @description 获取所有 API 提供商
    *
    * @tags Provider
@@ -517,7 +585,7 @@ export class Manage<SecurityDataType = unknown> {
    * @request POST:/manage/role/{id}/update
    * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
    */
-  roleUpdatePost = (id: number, role: ApiSchemaRole, params: RequestParams = {}) =>
+  roleUpdatePost = (id: number, role: ApiEntityReqUpdateBodySchemaRole, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/manage/role/${id}/update`,
       method: "POST",
@@ -602,6 +670,23 @@ export class Manage<SecurityDataType = unknown> {
       path: `/manage/user/list`,
       method: "GET",
       query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 强制登出用户
+   *
+   * @tags User
+   * @name UserLogoutPost
+   * @summary 强制登出用户
+   * @request POST:/manage/user/{id}/logout
+   * @response `200` `ApiEntityCommonResponseInt` 成功登出的设备数量
+   */
+  userLogoutPost = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseInt, any>({
+      path: `/manage/user/${id}/logout`,
+      method: "POST",
       type: ContentType.Json,
       format: "json",
       ...params,

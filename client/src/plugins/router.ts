@@ -69,20 +69,20 @@ const router = createRouter({
               path: 'user',
               name: 'ManageUserUser',
               meta: { title: '用户' },
-              component: () => import('@/pages/admin/user/ManageUserUser.vue'),
+              component: () => import('@/pages/admin/user/user/ManageUserUser.vue'),
             },
-            // {
-            //   path: 'role',
-            //   name: 'ManageUserRole',
-            //   meta: { title: '角色' },
-            //   component: () => import('@/pages/admin/user/ManageUserRole.vue'),
-            // },
-            // {
-            //   path: 'permission',
-            //   name: 'ManageUserPermission',
-            //   meta: { title: '权限' },
-            //   component: () => import('@/pages/admin/user/ManageUserPermission.vue'),
-            // },
+            {
+              path: 'role',
+              name: 'ManageUserRole',
+              meta: { title: '角色' },
+              component: () => import('@/pages/admin/user/role/ManageUserRole.vue'),
+            },
+            {
+              path: 'permission',
+              name: 'ManageUserPermission',
+              meta: { title: '权限' },
+              component: () => import('@/pages/admin/user/permission/ManageUserPermission.vue'),
+            },
           ]
         },
         {
@@ -96,13 +96,13 @@ const router = createRouter({
               path: 'provider',
               name: 'ManageSystemProvider',
               meta: { title: '接入点' },
-              component: () => import('@/pages/admin/system/provider/ManageSystemProvider.vue'),
+              component: () => import('@/pages/admin/system/provider/provider/ManageSystemProvider.vue'),
             },
             {
               path: 'model',
               name: 'ManageSystemModel',
               meta: { title: '模型' },
-              component: () => import('@/pages/admin/system/provider/ManageSystemModel.vue'),
+              component: () => import('@/pages/admin/system/provider/model/ManageSystemModel.vue'),
             },
             {
               path: 'collection',

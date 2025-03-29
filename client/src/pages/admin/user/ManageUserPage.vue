@@ -1,9 +1,8 @@
 <template>
-  <t-space direction="vertical">
-    <RouterView />
-  </t-space>
+  <RouterView />
 </template>
 
-<script setup lang="tsx"></script>
+<script setup lang="tsx">
+</script>
 
 <style scoped lang="scss"></style>

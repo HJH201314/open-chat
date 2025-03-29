@@ -5,10 +5,11 @@ import CommonDialog from '@/components/dialog/CommonDialog.vue';
 import genApi from '@/api/gen-api.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import type { PrimaryTableCol } from 'tdesign-vue-next/es/table/type';
-import { AddIcon } from 'tdesign-icons-vue-next';
+import { AddIcon, CopyIcon, DeleteIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { DialogManager } from '@/components/dialog';
 import DiliButton from '@/components/button/DiliButton.vue';
+import ActionSet from '@/pages/admin/component/ActionSet.vue';
 
 type T = ApiSchemaProvider;
 
@@ -126,10 +127,10 @@ async function handleDelete(row: ApiSchemaAPIKey) {
             <span style="line-break: anywhere">{{ getDisplayKey(row.key) }}</span>
           </template>
           <template #operation="{ row }">
-            <t-space size="medium">
-              <t-link theme="primary" hover="color" @click="handleCopy(row)">复制</t-link>
-              <t-link theme="danger" hover="color" @click="handleDelete(row)">删除</t-link>
-            </t-space>
+            <ActionSet>
+              <t-link theme="primary" hover="color" @click="handleCopy(row)"><copy-icon /></t-link>
+              <t-link theme="danger" hover="color" @click="handleDelete(row)"><delete-icon /></t-link>
+            </ActionSet>
           </template>
         </t-table>
       </div>

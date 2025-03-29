@@ -1,8 +1,8 @@
 <template>
-  <t-space direction="vertical">
-    <TableTitleArea title="用户" subtitle="在这里你是主宰">
+  <div>
+    <TableTitleArea title="角色" subtitle="角色将一系列权限聚合并统一分配给用户">
       <template #actions>
-        <t-button variant="outline" shape="circle" @click="getUsers()">
+        <t-button variant="outline" shape="circle" @click="getRoles()">
           <template #icon>
             <refresh-icon />
           </template>
@@ -15,12 +15,12 @@
         </t-button>
       </template>
     </TableTitleArea>
-    <div :style="{ 'overflow-x': 'auto', width: `${tableWidth}px` }">
+    <TableWrapper v-slot="{ maxHeight }">
       <t-table
         ref="table"
         row-key="id"
         size="small"
-        max-height="100%"
+        :max-height="maxHeight"
         table-layout="auto"
         :allow-resize-column-width="false"
         :data="data"
@@ -34,49 +34,41 @@
         cell-empty-content="-"
         lazy-load
       >
-        <template #roles="{ row }">
-          <t-space size="small">
-            <t-tag v-for="role in (row.roles || []).map((r) => r.name)" theme="primary" variant="light"
-              >{{ role }}
-            </t-tag>
-          </t-space>
+        <template #active="{ row }">
+          <t-switch :value="row.active" @change="(v) => handleActiveChange(row, v)" />
         </template>
         <template #operation="{ row }">
-          <t-space size="small">
+          <ActionSet>
             <t-tooltip :delay="10" content="编辑">
               <t-link theme="primary" hover="color" @click="handleEdit(row)">
-                <Edit />
+                <edit-icon />
               </t-link>
             </t-tooltip>
             <t-tooltip :delay="10" content="删除">
               <t-link theme="danger" hover="color" @click="handleDelete(row)">
-                <Delete />
+                <delete-icon />
               </t-link>
             </t-tooltip>
-          </t-space>
+          </ActionSet>
         </template>
       </t-table>
-    </div>
-  </t-space>
+    </TableWrapper>
+  </div>
 </template>
 
 <script setup lang="tsx">
-import { computed, h, inject, onMounted, reactive, ref, watchEffect } from 'vue';
-import type { ApiSchemaUser } from '@/api/gen/data-contracts.ts';
+import { h, onMounted, reactive, ref, watchEffect } from 'vue';
+import type { ApiSchemaRole } from '@/api/gen/data-contracts.ts';
 import genApi from '@/api/gen-api.ts';
-import { AdminLayoutContentSizeKey } from '@/pages/admin/types.ts';
 import type { PrimaryTableCol } from 'tdesign-vue-next/es/table/type';
 import { DialogManager } from '@/components/dialog';
 import TableTitleArea from '@/pages/admin/component/TableTitleArea.vue';
-import { AddIcon, RefreshIcon } from 'tdesign-icons-vue-next';
-import { useRouter } from 'vue-router';
-import { Delete, Edit } from '@icon-park/vue-next';
-import DialogCreateUser from '@/pages/admin/user/DialogCreateUser.vue';
+import { AddIcon, DeleteIcon, EditIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import DialogCreateRole from '@/pages/admin/user/role/DialogCreateRole.vue';
+import TableWrapper from '@/pages/admin/component/TableWrapper.vue';
+import ActionSet from '@/pages/admin/component/ActionSet.vue';
 
-const contentSize = inject(AdminLayoutContentSizeKey);
-const tableWidth = computed(() => contentSize?.width?.value || 1200);
-
-const data = ref<ApiSchemaUser[]>([]);
+const data = ref<ApiSchemaRole[]>([]);
 const total = ref(0);
 const pageNum = ref(1);
 const pageSize = ref(10);
@@ -91,23 +83,17 @@ const pagination = reactive({
   total,
 });
 
-onMounted(() => {
-  watchEffect(() => {
-    getUsers(pageNum.value, pageSize.value);
-  });
-});
-
 const loading = ref(false);
 
-async function getUsers(page?: number, size?: number) {
+async function getRoles(page?: number, size?: number) {
   const finalPageNum = page || pageNum.value || 1;
   const finalPageSize = size || pageSize.value || 10;
   try {
     loading.value = true;
-    const res = await genApi.Manage.userListGet({
+    const res = await genApi.Manage.roleListGet({
       page_num: finalPageNum,
       page_size: finalPageSize,
-      sort_expr: 'id DESC',
+      sort_expr: 'id ASC',
     });
     if (res.status == 200 && res.data.data) {
       total.value = res.data.data.total || 0;
@@ -120,44 +106,70 @@ async function getUsers(page?: number, size?: number) {
   }
 }
 
-const columns = ref<PrimaryTableCol<ApiSchemaUser>[]>([
+onMounted(() => {
+  setTimeout(() => {
+    // 监听 page_num、page_size 变化
+    watchEffect(() => {
+      getRoles(pageNum.value, pageSize.value);
+    });
+  }, 0);
+});
+
+const columns: PrimaryTableCol<ApiSchemaRole>[] = [
   { colKey: 'serial-number', title: 'NO', width: '2rem', align: 'center' },
-  { colKey: 'username', title: '用户名', width: '15rem' },
-  { colKey: 'roles', title: '角色', width: '15rem' },
-  { colKey: 'operation', title: '操作', width: '7rem', fixed: 'right' },
-]);
+  { colKey: 'name', title: '标识名' },
+  { colKey: 'display_name', title: '展示名', minWidth: '8rem', width: '8rem' },
+  { colKey: 'description', title: '描述', minWidth: '8rem', width: '8rem' },
+  { colKey: 'active', title: '是否启用' },
+  { colKey: 'operation', title: '操作', fixed: 'right' },
+];
 
 const dialogMode = ref<'create' | 'edit'>('edit');
-const dialogData = ref<ApiSchemaUser>({});
+const dialogData = ref<ApiSchemaRole>({});
 
-function handleEdit(row: ApiSchemaUser) {
+async function handleActiveChange(row: ApiSchemaRole, v: boolean) {
+  try {
+    if (!row.id) return;
+    const res = await genApi.Manage.roleUpdatePost(row.id, {
+      data: {
+        active: v,
+      },
+      updates: ['active'],
+    });
+    if (res.status == 200) {
+      row.active = v;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function handleEdit(row: ApiSchemaRole) {
   dialogMode.value = Object.keys(row).length == 0 ? 'create' : 'edit';
   dialogData.value = row;
   DialogManager.renderDialog(
-    h(DialogCreateUser, {
+    h(DialogCreateRole, {
       mode: dialogMode.value,
       data: dialogData.value,
       onConfirm() {
-        getUsers();
+        getRoles();
       },
     })
   );
 }
 
-const router = useRouter();
-
-function handleDelete(row: ApiSchemaUser) {
+function handleDelete(row: ApiSchemaRole) {
   DialogManager.commonDialog({
-    title: '删除用户',
-    content: `确定要删除用户 ${row.username} 吗？`,
+    title: '删除模型',
+    content: `确定要删除模型 ${row.name} 吗？`,
     presetType: 'danger',
   }).then(async (res) => {
     if (res) {
       try {
         if (!row.id) return;
-        const res = await genApi.Manage.userDeletePost(row.id);
+        const res = await genApi.Manage.roleDeletePost(row.id);
         if (res.status == 200) {
-          getUsers();
+          getRoles();
         }
       } catch (error) {
         console.log(error);

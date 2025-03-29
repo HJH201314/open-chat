@@ -16,18 +16,23 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser,
+  ApiEntityCommonResponseInt,
   ApiEntityCommonResponseSchemaAPIKey,
   ApiEntityCommonResponseSchemaModel,
   ApiEntityCommonResponseSchemaModelCollection,
+  ApiEntityCommonResponseSchemaPermission,
   ApiEntityCommonResponseSchemaProvider,
   ApiEntityCommonResponseSchemaRole,
   ApiEntityCommonResponseSchemaUser,
+  ApiEntityReqUpdateBodySchemaRole,
   ApiSchemaAPIKey,
   ApiSchemaModel,
   ApiSchemaModelCollection,
+  ApiSchemaPermission,
   ApiSchemaProvider,
   ApiSchemaRole,
   ApiSchemaUser,
@@ -292,6 +297,67 @@ export namespace Manage {
   }
 
   /**
+   * @description 获取权限
+   * @tags Permission
+   * @name PermissionGet
+   * @summary 获取权限
+   * @request GET:/manage/permission/{id}
+   * @response `200` `ApiEntityCommonResponseSchemaPermission` 权限
+   */
+  export namespace PermissionGet {
+    export type RequestParams = {
+      /** 权限 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaPermission;
+  }
+
+  /**
+   * @description 批量分页获取权限
+   * @tags Permission
+   * @name PermissionListGet
+   * @summary 批量分页获取权限
+   * @request GET:/manage/permission/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission` 权限列表
+   */
+  export namespace PermissionListGet {
+    export type RequestParams = {};
+    export type RequestQuery = {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission;
+  }
+
+  /**
+   * @description 更新权限
+   * @tags Permission
+   * @name PermissionUpdatePost
+   * @summary 更新权限
+   * @request POST:/manage/permission/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  export namespace PermissionUpdatePost {
+    export type RequestParams = {
+      /** 权限 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiSchemaPermission;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
    * @description 获取所有 API 提供商
    * @tags Provider
    * @name ProviderAllGet
@@ -494,7 +560,7 @@ export namespace Manage {
       id: number;
     };
     export type RequestQuery = {};
-    export type RequestBody = ApiSchemaRole;
+    export type RequestBody = ApiEntityReqUpdateBodySchemaRole;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseBool;
   }
@@ -574,6 +640,25 @@ export namespace Manage {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser;
+  }
+
+  /**
+   * @description 强制登出用户
+   * @tags User
+   * @name UserLogoutPost
+   * @summary 强制登出用户
+   * @request POST:/manage/user/{id}/logout
+   * @response `200` `ApiEntityCommonResponseInt` 成功登出的设备数量
+   */
+  export namespace UserLogoutPost {
+    export type RequestParams = {
+      /** 用户 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseInt;
   }
 
   /**

@@ -1,5 +1,5 @@
 <template>
-  <t-space direction="vertical">
+  <div>
     <TableTitleArea title="模型" subtitle="每个模型定义在接入点中的名称和默认参数">
       <template #actions>
         <t-button variant="outline" shape="circle" @click="getModels()">
@@ -15,13 +15,13 @@
         </t-button>
       </template>
     </TableTitleArea>
-    <div :style="{ 'overflow-x': 'auto', width: `${tableWidth}px` }">
+    <TableWrapper v-slot="{ maxHeight }">
       <t-table
         ref="table"
         row-key="id"
         size="small"
-        max-height="100%"
         table-layout="auto"
+        :max-height="maxHeight"
         :allow-resize-column-width="false"
         :data="data"
         :loading="loading"
@@ -35,14 +35,18 @@
         lazy-load
       >
         <template #operation="{ row }">
-          <t-space size="small">
+          <ActionSet>
             <t-tooltip :delay="10" content="编辑">
-              <t-link theme="primary" hover="color" @click="handleEdit(row)"><Edit /></t-link>
+              <t-link theme="primary" hover="color" @click="handleEdit(row)">
+                <edit-icon />
+              </t-link>
             </t-tooltip>
             <t-tooltip :delay="10" content="删除">
-              <t-link theme="danger" hover="color" @click="handleDelete(row)"><Delete /></t-link>
+              <t-link theme="danger" hover="color" @click="handleDelete(row)">
+                <delete-icon />
+              </t-link>
             </t-tooltip>
-          </t-space>
+          </ActionSet>
         </template>
         <template #provider-title>
           <t-space size="small">
@@ -59,26 +63,23 @@
           </t-popup>
         </template>
       </t-table>
-    </div>
-  </t-space>
+    </TableWrapper>
+  </div>
 </template>
 
 <script setup lang="tsx">
-import { computed, h, inject, onMounted, reactive, ref, watchEffect } from 'vue';
+import { h, onMounted, reactive, ref, watchEffect } from 'vue';
 import type { ApiSchemaModel } from '@/api/gen/data-contracts.ts';
 import genApi from '@/api/gen-api.ts';
-import { AdminLayoutContentSizeKey } from '@/pages/admin/types.ts';
 import type { PrimaryTableCol } from 'tdesign-vue-next/es/table/type';
 import { DialogManager } from '@/components/dialog';
 import TableTitleArea from '@/pages/admin/component/TableTitleArea.vue';
-import { AddIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import { AddIcon, DeleteIcon, EditIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 import router from '@/plugins/router.ts';
 import { useRouteQuery } from '@vueuse/router';
-import DialogCreateModel from '@/pages/admin/system/provider/DialogCreateModel.vue';
-import { Delete, Edit } from '@icon-park/vue-next';
-
-const contentSize = inject(AdminLayoutContentSizeKey);
-const tableWidth = computed(() => contentSize?.width?.value || 1200);
+import DialogCreateModel from '@/pages/admin/system/provider/model/DialogCreateModel.vue';
+import TableWrapper from '@/pages/admin/component/TableWrapper.vue';
+import ActionSet from '@/pages/admin/component/ActionSet.vue';
 
 const data = ref<ApiSchemaModel[]>([]);
 const total = ref(0);
@@ -123,19 +124,21 @@ async function getModels(page?: number, size?: number, provider?: number) {
 }
 
 onMounted(() => {
-  // 监听 page_num、page_size、provider_id 变化
-  watchEffect(() => {
-    getModels(pageNum.value, pageSize.value, providerId.value);
-  });
+  setTimeout(() => {
+    // 监听 page_num、page_size、provider_id 变化
+    watchEffect(() => {
+      getModels(pageNum.value, pageSize.value, providerId.value);
+    });
+  }, 0);
 });
 
 const columns: PrimaryTableCol<ApiSchemaModel>[] = [
   { colKey: 'serial-number', title: 'NO', width: '2rem', align: 'center' },
   { colKey: 'provider', title: 'provider-title' },
-  { colKey: 'name', title: '标识名', width: '15rem' },
-  { colKey: 'display_name', title: '展示名' },
-  { colKey: 'description', title: '描述' },
-  { colKey: 'config', title: '默认配置' },
+  { colKey: 'name', title: '标识名', minWidth: '10rem', width: '10rem' },
+  { colKey: 'display_name', title: '展示名', minWidth: '10rem', width: '10rem' },
+  { colKey: 'description', title: '描述', minWidth: '10rem', width: '10rem' },
+  { colKey: 'config', title: '默认配置', minWidth: '3rem', width: '3rem'  },
   { colKey: 'operation', title: '操作', fixed: 'right' },
 ];
 

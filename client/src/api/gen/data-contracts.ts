@@ -144,6 +144,15 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelC
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaPermission;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider {
   /** 代码 */
   code?: number;
@@ -176,6 +185,15 @@ export interface ApiEntityCommonResponseExamSubmitExamResponse {
   code?: number;
   /** 数据 */
   data?: ApiExamSubmitExamResponse;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseInt {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: number;
   /** 消息 */
   msg?: string;
 }
@@ -230,6 +248,15 @@ export interface ApiEntityCommonResponseSchemaModelCollection {
   code?: number;
   /** 数据 */
   data?: ApiSchemaModelCollection;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaPermission {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaPermission;
   /** 消息 */
   msg?: string;
 }
@@ -338,6 +365,11 @@ export interface ApiEntityPaginatedTotalResponseSchemaModelCollection {
   total?: number;
 }
 
+export interface ApiEntityPaginatedTotalResponseSchemaPermission {
+  list?: ApiSchemaPermission[];
+  total?: number;
+}
+
 export interface ApiEntityPaginatedTotalResponseSchemaProvider {
   list?: ApiSchemaProvider[];
   total?: number;
@@ -351,6 +383,11 @@ export interface ApiEntityPaginatedTotalResponseSchemaRole {
 export interface ApiEntityPaginatedTotalResponseSchemaUser {
   list?: ApiSchemaUser[];
   total?: number;
+}
+
+export interface ApiEntityReqUpdateBodySchemaRole {
+  data?: ApiSchemaRole;
+  updates?: string[];
 }
 
 export interface ApiExamSubmitExamRequest {
@@ -574,6 +611,8 @@ export interface ApiSchemaModelConfig {
 }
 
 export interface ApiSchemaPermission {
+  /** 是否启用（唯一可设置的字段） */
+  active?: boolean;
   created_at?: string;
   /** 权限描述 */
   description?: string;
@@ -683,9 +722,13 @@ export interface ApiSchemaResource {
 }
 
 export interface ApiSchemaRole {
+  /** 是否启用 */
+  active?: boolean;
   created_at?: string;
   /** 角色描述 */
   description?: string;
+  /** 角色名称 */
+  display_name?: string;
   id?: number;
   /** 角色名称 */
   name?: string;

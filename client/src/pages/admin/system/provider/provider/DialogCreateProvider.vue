@@ -16,6 +16,7 @@ const props = defineProps<{
 }>();
 
 const title = computed(() => `${props.mode == 'create' ? '创建' : '编辑'}接入点`);
+const subtitle = computed(() => (props.mode == 'edit' && props.data?.id ? `(ID: ${props.data?.id})` : ''));
 const formRef = useTemplateRef<FormInstanceFunctions<T>>('form');
 
 const formData: T & {
@@ -67,9 +68,9 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
 </script>
 
 <template>
-  <CommonDialog :title="title" subtitle="一个接入点是一个 OpenAI 兼容 API 的供应商" :confirm-handler="handleConfirm">
+  <CommonDialog :title="title" :subtitle="subtitle" subtitle="一个接入点是一个 OpenAI 兼容 API 的供应商" :confirm-handler="handleConfirm">
     <template #default>
-      <t-form ref="form" :data="formData" style="margin: 1rem 0">
+      <t-form ref="form" :data="formData" style="margin-bottom: 1rem">
         <t-form-item label="标识名" name="name" :rules="[{ required: true }]">
           <t-input v-model="formData.name" placeholder="标识名，建议为英文简称"></t-input>
         </t-form-item>
