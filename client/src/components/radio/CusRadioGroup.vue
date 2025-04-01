@@ -32,7 +32,7 @@ defineSlots<{
   default(): any;
 }>();
 
-const selectedValue = ref(modelValue.value);
+const selectedValue = ref(modelValue.value); // 选中值，可以为 undefined
 const selectedElement = ref<HTMLElement | undefined>(undefined);
 
 // 观测 modelValue
@@ -42,16 +42,22 @@ watch(
     if (newModelValue !== selectedValue.value) {
       console.log('setSelectedValue by model value', newModelValue);
       setSelectedValue(modelValue.value);
+      // 若值为空，则重置选中元素
+      if (!modelValue.value) setSelectedElement(undefined);
     }
   }
 );
 
 function setSelectedValue(v?: any) {
-  selectedValue.value = v || '';
+  selectedValue.value = v;
 }
 
 function setSelectedElement(e?: HTMLElement) {
   selectedElement.value = e;
+  if (!e) {
+    // 取消选中，重置 bar 状态
+    barCalculated.value = false;
+  }
 }
 
 watch(
@@ -113,8 +119,8 @@ function positionBar() {
   }
 }
 
-watchEffect(() => {
-  selectedElement.value && requestUpdateBarPosition();
+watch(() => selectedElement.value, () => {
+  requestUpdateBarPosition();
 });
 
 const radioGroupRef = useTemplateRef('radio-group');
@@ -172,14 +178,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: v-bind('props.direction');
   flex-wrap: wrap;
-  padding: 0;
 
   &.bg-mode {
     &-color {
-      background-color: $color-grey-200;
+      background-color: $color-grey-100;
     }
     &-transparent {
-      background-color: $color-bg-transparent-200;
+      background-color: $color-bg-transparent-100;
     }
   }
 

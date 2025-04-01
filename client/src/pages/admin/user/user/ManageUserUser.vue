@@ -82,7 +82,7 @@ import ActionSet from '@/pages/admin/component/ActionSet.vue';
 const data = ref<ApiSchemaUser[]>([]);
 const total = ref(0);
 const pageNum = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(15);
 const pagination = reactive({
   pageSizeOptions: [5, 10, 15, 20],
   defaultCurrent: pageNum,
@@ -125,8 +125,8 @@ async function getUsers(page?: number, size?: number) {
 
 const columns = ref<PrimaryTableCol<ApiSchemaUser>[]>([
   { colKey: 'serial-number', title: 'NO', width: '2rem', align: 'center' },
-  { colKey: 'username', title: '用户名', width: '15rem' },
-  { colKey: 'roles', title: '角色', width: '15rem' },
+  { colKey: 'username', title: '用户名' },
+  { colKey: 'roles', title: '角色' },
   { colKey: 'operation', title: '操作', width: '7rem', fixed: 'right' },
 ]);
 

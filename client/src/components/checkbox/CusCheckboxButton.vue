@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue';
-import { CheckboxCheckedClassName, type CusCheckboxButtonProps, CheckboxGroupInjectionKey } from './types';
+import { CheckboxCheckedClassName, CheckboxGroupInjectionKey, type CusCheckboxButtonProps } from './types';
 
 const props = withDefaults(defineProps<CusCheckboxButtonProps>(), {
-  disabled: false
+  disabled: false,
 });
 
 const innerChecked = ref(false);
@@ -12,7 +12,9 @@ const groupInject = inject(CheckboxGroupInjectionKey);
 
 const checkboxName = computed(() => groupInject?.name?.value || props.name);
 const checkboxValue = computed(() => props.value);
-const checkboxChecked = computed(() => (groupInject ? groupInject.isSelected(checkboxValue.value) : innerChecked.value));
+const checkboxChecked = computed(() =>
+  groupInject ? groupInject.isSelected(checkboxValue.value) : innerChecked.value
+);
 
 const typeClassName = computed(() => `type-${groupInject?.type?.value || 'highlight'}`);
 const directionClassName = computed(() => `direction-${groupInject?.direction?.value || 'column'}`);
@@ -33,7 +35,7 @@ function handleClick() {
       [typeClassName]: !!typeClassName,
       [directionClassName]: !!directionClassName,
       disabled: props.disabled,
-      [`display-${displayStyle}`]: true
+      [`display-${displayStyle}`]: true,
     }"
     @click="handleClick"
   >
@@ -53,10 +55,9 @@ function handleClick() {
 .cus-checkbox-button {
   position: relative;
   cursor: pointer;
-  z-index: 1;
   padding: 8px 12px;
   border-radius: 8px;
-  line-height: 1;
+  //line-height: 1;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -78,7 +79,7 @@ function handleClick() {
     transition: all 0.2s $ease-out-circ;
     background-color: white;
     flex-shrink: 0;
-    
+
     svg {
       width: 0.8em;
       height: 0.8em;
@@ -87,13 +88,14 @@ function handleClick() {
     }
   }
 
-  &.display-icon, &.display-both {
+  &.display-icon,
+  &.display-both {
     &.type-normal {
       &.checked {
         .checkbox-icon {
           border-color: var(--color-primary);
           background-color: transparent;
-          
+
           svg {
             fill: var(--color-primary);
           }
@@ -106,7 +108,7 @@ function handleClick() {
         .checkbox-icon {
           border-color: var(--color-primary);
           background-color: var(--color-primary);
-          
+
           svg {
             fill: white;
           }
@@ -115,8 +117,9 @@ function handleClick() {
     }
   }
 
-  &.display-background, &.display-both {
-    transition: 
+  &.display-background,
+  &.display-both {
+    transition:
       color 0.1s $ease-out-circ,
       background-color 0.2s $ease-out-circ;
 
@@ -166,4 +169,4 @@ function handleClick() {
     display: none;
   }
 }
-</style> 
+</style>

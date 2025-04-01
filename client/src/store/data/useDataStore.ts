@@ -346,7 +346,7 @@ export const useDataStore = defineStore('data', () => {
     );
 
     // 处理指令
-    const handleCommand = async (cp: CommandParser) => {
+    const handleJSONCommand = async (cp: CommandParser) => {
       const idCmd = cp.getCommandByName('ID');
       if (idCmd) {
         // 保存远程消息 ID
@@ -354,6 +354,18 @@ export const useDataStore = defineStore('data', () => {
         rawData.msg = rawData.msg.replace(idCmd.raw, '');
         await updateMessage(sessionId, userMsgIndex, { remoteId: msgIds[0] });
         await updateMessage(sessionId, botMsgIndex, { remoteId: msgIds[1] });
+      }
+      const tooltipCmd = cp.getCommandByName('tooltip');
+      if (tooltipCmd) {
+        await updateMessage(sessionId, botMsgIndex, { extra: { 'tooltip': tooltipCmd.values.join('') } });
+      }
+      const problemCmd = cp.getCommandByName('tool:question');
+      if (problemCmd) {
+        await updateMessage(sessionId, botMsgIndex, { extra: { 'question': problemCmd.data } });
+      }
+      const examCmd = cp.getCommandByName('tool:exam');
+      if (examCmd) {
+        await updateMessage(sessionId, botMsgIndex, { extra: { 'exam': examCmd.data } });
       }
     };
 
@@ -392,7 +404,7 @@ export const useDataStore = defineStore('data', () => {
           console.log('[think]', event.data, `'${data}'`);
           rawData.think += data;
         } else if (event.event === 'cmd') {
-          await handleCommand(new CommandParser(event.data, true).parseJSON());
+          await handleJSONCommand(new CommandParser(event.data, true).parseJSON());
         } else if (event.event === 'error') {
           callback?.onError?.();
         }
@@ -464,7 +476,7 @@ export const useDataStore = defineStore('data', () => {
         console.debug('[timeout]', 'no data for too long', msg);
         ToastManager.danger('服务端超时');
       }
-    }, 10000, {
+    }, 60000000, {
       immediate: false,
     });
 

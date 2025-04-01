@@ -27,6 +27,11 @@ export interface ApiChatShareSessionShareRequest {
   share_info?: ApiSchemaSessionShareInfo;
 }
 
+export interface ApiCourseMakeQuestionRequest {
+  description: string;
+  type: ApiSchemaProblemType;
+}
+
 export interface ApiEntityCommonResponseAny {
   /** 代码 */
   code?: number;
@@ -81,15 +86,6 @@ export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchem
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem {
-  /** 代码 */
-  code?: number;
-  /** 数据 */
-  data?: ApiEntityPaginatedContinuationResponseSchemaProblem;
-  /** 消息 */
-  msg?: string;
-}
-
 export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession {
   /** 代码 */
   code?: number;
@@ -113,6 +109,15 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey
   code?: number;
   /** 数据 */
   data?: ApiEntityPaginatedTotalResponseSchemaAPIKey;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaBucket {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaBucket;
   /** 消息 */
   msg?: string;
 }
@@ -153,6 +158,15 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermis
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaProblem;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider {
   /** 代码 */
   code?: number;
@@ -189,6 +203,15 @@ export interface ApiEntityCommonResponseExamSubmitExamResponse {
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseExamSubmitProblemResponse {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiExamSubmitProblemResponse;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseInt {
   /** 代码 */
   code?: number;
@@ -203,6 +226,15 @@ export interface ApiEntityCommonResponseSchemaAPIKey {
   code?: number;
   /** 数据 */
   data?: ApiSchemaAPIKey;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaBucket {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaBucket;
   /** 消息 */
   msg?: string;
 }
@@ -230,6 +262,15 @@ export interface ApiEntityCommonResponseSchemaExamUserRecord {
   code?: number;
   /** 数据 */
   data?: ApiSchemaExamUserRecord;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseSchemaMessage {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaMessage;
   /** 消息 */
   msg?: string;
 }
@@ -329,11 +370,6 @@ export interface ApiEntityPaginatedContinuationResponseSchemaMessage {
   next_page?: number;
 }
 
-export interface ApiEntityPaginatedContinuationResponseSchemaProblem {
-  list?: ApiSchemaProblem[];
-  next_page?: number;
-}
-
 export interface ApiEntityPaginatedContinuationResponseSchemaUserSession {
   list?: ApiSchemaUserSession[];
   next_page?: number;
@@ -347,6 +383,11 @@ export interface ApiEntityPaginatedSyncListResponseSchemaUserSession {
 
 export interface ApiEntityPaginatedTotalResponseSchemaAPIKey {
   list?: ApiSchemaAPIKey[];
+  total?: number;
+}
+
+export interface ApiEntityPaginatedTotalResponseSchemaBucket {
+  list?: ApiSchemaBucket[];
   total?: number;
 }
 
@@ -370,6 +411,11 @@ export interface ApiEntityPaginatedTotalResponseSchemaPermission {
   total?: number;
 }
 
+export interface ApiEntityPaginatedTotalResponseSchemaProblem {
+  list?: ApiSchemaProblem[];
+  total?: number;
+}
+
 export interface ApiEntityPaginatedTotalResponseSchemaProvider {
   list?: ApiSchemaProvider[];
   total?: number;
@@ -385,13 +431,35 @@ export interface ApiEntityPaginatedTotalResponseSchemaUser {
   total?: number;
 }
 
+export interface ApiEntityReqUpdateBodySchemaBucket {
+  data: ApiSchemaBucket;
+  /** @minItems 1 */
+  updates: string[];
+}
+
+export interface ApiEntityReqUpdateBodySchemaModelCollection {
+  data: ApiSchemaModelCollection;
+  /** @minItems 1 */
+  updates: string[];
+}
+
+export interface ApiEntityReqUpdateBodySchemaProblem {
+  data: ApiSchemaProblem;
+  /** @minItems 1 */
+  updates: string[];
+}
+
 export interface ApiEntityReqUpdateBodySchemaRole {
-  data?: ApiSchemaRole;
-  updates?: string[];
+  data: ApiSchemaRole;
+  /** @minItems 1 */
+  updates: string[];
 }
 
 export interface ApiExamSubmitExamRequest {
-  /** 答案列表 */
+  /**
+   * 答案列表
+   * @minItems 1
+   */
   answers?: ApiExamSubmitExamRequestAnswer[];
   /** 答题用时（秒） */
   time_spent?: number;
@@ -407,6 +475,11 @@ export interface ApiExamSubmitExamResponse {
   record_id?: number;
 }
 
+export interface ApiExamSubmitProblemResponse {
+  comment?: string;
+  score?: number;
+}
+
 export interface ApiSchemaAPIKey {
   created_at?: string;
   id?: number;
@@ -414,6 +487,18 @@ export interface ApiSchemaAPIKey {
   key?: string;
   /** 外键，指向 Provider */
   provider_id?: number;
+}
+
+export interface ApiSchemaBucket {
+  access_key_id?: string;
+  bucket_name?: string;
+  created_at?: string;
+  display_name?: string;
+  endpoint_url?: string;
+  id?: number;
+  region?: string;
+  secret_access_key?: string;
+  updated_at?: string;
 }
 
 export interface ApiSchemaCourse {
@@ -526,6 +611,7 @@ export interface ApiSchemaExamUserRecordAnswer {
 export interface ApiSchemaMessage {
   content?: string;
   created_at?: string;
+  extra?: object;
   /** 默认结构 */
   id?: number;
   /** 组装结构 */
@@ -651,7 +737,11 @@ export interface ApiSchemaProblem {
   created_at?: string;
   /** 支持HTML/Markdown */
   description?: string;
-  /** 难度等级 1-5 */
+  /**
+   * 难度等级 1-5
+   * @min 1
+   * @max 5
+   */
   difficulty?: number;
   /** 答案解析 */
   explanation?: string;

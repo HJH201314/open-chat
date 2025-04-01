@@ -8,6 +8,7 @@ const props = withDefaults(defineProps<CusCheckboxGroupProps>(), {
   type: 'highlight',
   barAnimation: true,
   direction: 'column',
+  backgroundMode: 'color',
   displayStyle: 'icon',
 });
 
@@ -67,6 +68,7 @@ function isSelected(val?: any): boolean {
 
 const { name, type, direction, displayStyle } = toRefs(props);
 const displayStyleClassName = computed(() => `display-${props.displayStyle}`);
+const backgroundModeClassName = computed(() => `bg-mode-${props.backgroundMode}`);
 
 provide(CheckboxGroupInjectionKey, {
   name,
@@ -80,7 +82,7 @@ provide(CheckboxGroupInjectionKey, {
 </script>
 
 <template>
-  <fieldset class="cus-checkbox-group" :class="[displayStyleClassName, `direction-${props.direction}`]">
+  <fieldset class="cus-checkbox-group" :class="[displayStyleClassName, backgroundModeClassName, `direction-${props.direction}`]">
     <slot></slot>
   </fieldset>
 </template>
@@ -92,10 +94,19 @@ provide(CheckboxGroupInjectionKey, {
   position: relative;
   width: fit-content;
   border-radius: 0.6em;
-  background-color: $color-grey-200;
   display: flex;
   flex-wrap: wrap;
-  padding: 0;
+  padding: 3px;
+  gap: 2px;
+
+  &.bg-mode {
+    &-color {
+      background-color: $color-grey-100;
+    }
+    &-transparent {
+      background-color: $color-bg-transparent-100;
+    }
+  }
 
   &.direction-row {
     flex-direction: row;

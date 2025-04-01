@@ -88,6 +88,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
           content: v.content,
           reasoningContent: JSON.parse(`"${v.reasoning_content}"`),
           htmlContent: v.role == 'assistant' ? renderMarkdown(v.content) : v.content,
+          extra: v.extra,
         }) as MessageInfo
     );
     try {

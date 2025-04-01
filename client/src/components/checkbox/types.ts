@@ -6,6 +6,7 @@ export type CusCheckboxGroupProps = {
   type?: 'normal' | 'highlight';
   barAnimation?: boolean;
   direction?: 'row' | 'column';
+  backgroundMode?: 'color' | 'transparent';
   displayStyle?: 'background' | 'icon' | 'both';
 };
 

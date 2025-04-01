@@ -24,7 +24,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'submit', payload: { answers: Record<number, number[] | string>; timeSpent: number }): void;
+  (e: 'submit', payload: { answers: Record<number, number[] | string | boolean>; timeSpent: number }): void;
 }>();
 
 watch(
@@ -114,7 +114,7 @@ function handleNextProblem() {
   }
 }
 
-const answers = ref<Record<number, number[] | string>>({});
+const answers = ref<Record<number, number[] | string | boolean>>({});
 
 const answerFinishProgress = computed(() => {
   const totalProblemCount = maxPage.value;
@@ -233,7 +233,9 @@ defineExpose({
             :id="`problem-${i}`"
             v-model:answer="answers[problem.problem_id!]"
             :page="i + 1"
-            :exam-problem="problem"
+            :problem="problem.problem"
+            :score="problem.score"
+            :sort-order="problem.sort_order"
           />
         </template>
       </main>
@@ -311,10 +313,11 @@ defineExpose({
   max-width: 54rem;
 
   .small & {
-    flex-direction: column-reverse;
+    flex-direction: row-reverse;
   }
 
   &-page {
+    min-width: 0;
     max-width: 100%;
   }
 
@@ -324,6 +327,7 @@ defineExpose({
     flex-direction: row;
     gap: 0.5rem;
     justify-content: flex-end;
+    flex-shrink: 0;
   }
 }
 </style>

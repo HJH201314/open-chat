@@ -11,14 +11,18 @@
  */
 
 import type {
+  ApiCourseMakeQuestionRequest,
   ApiEntityCommonResponseAny,
-  ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem,
+  ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem,
   ApiEntityCommonResponseExamSubmitExamResponse,
+  ApiEntityCommonResponseExamSubmitProblemResponse,
   ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
   ApiEntityCommonResponseSchemaExamUserRecord,
   ApiEntityCommonResponseSchemaProblem,
+  ApiEntityReqUpdateBodySchemaProblem,
   ApiExamSubmitExamRequest,
   ApiSchemaCourse,
   ApiSchemaExam,
@@ -40,6 +44,25 @@ export namespace Tue {
     export type RequestBody = ApiSchemaCourse;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseSchemaCourse;
+  }
+
+  /**
+   * @description 删除课程
+   * @tags Course
+   * @name CourseDeletePost
+   * @summary 删除课程
+   * @request POST:/tue/course/{id}/delete
+   * @response `200` `ApiEntityCommonResponseAny` 返回数据
+   */
+  export namespace CourseDeletePost {
+    export type RequestParams = {
+      /** 课程 ID */
+      id: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseAny;
   }
 
   /**
@@ -82,25 +105,6 @@ export namespace Tue {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse;
-  }
-
-  /**
-   * @description 删除课程
-   * @tags Course
-   * @name CoursePost
-   * @summary 删除课程
-   * @request POST:/tue/course/{id}
-   * @response `200` `ApiEntityCommonResponseAny` 返回数据
-   */
-  export namespace CoursePost {
-    export type RequestParams = {
-      /** 课程 ID */
-      id: string;
-    };
-    export type RequestQuery = {};
-    export type RequestBody = never;
-    export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseAny;
   }
 
   /**
@@ -155,6 +159,22 @@ export namespace Tue {
   }
 
   /**
+   * @description 随机测验
+   * @tags Exam
+   * @name ExamRandomPost
+   * @summary 随机测验
+   * @request POST:/tue/exam/random
+   * @response `200` `ApiEntityCommonResponseSchemaExam` 返回数据
+   */
+  export namespace ExamRandomPost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaExam;
+  }
+
+  /**
    * @description 获取用户的考试评分结果
    * @tags 考试
    * @name ExamRecordsGet
@@ -189,6 +209,22 @@ export namespace Tue {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = any;
+  }
+
+  /**
+   * @description 提交单个问题并验证答案
+   * @tags Exam
+   * @name ExamSingleProblemSubmitPost
+   * @summary 提交单个问题并验证答案
+   * @request POST:/tue/exam/single-problem/submit
+   * @response `200` `ApiEntityCommonResponseExamSubmitProblemResponse` OK
+   */
+  export namespace ExamSingleProblemSubmitPost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = ApiExamSubmitExamRequest;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseExamSubmitProblemResponse;
   }
 
   /**
@@ -227,6 +263,25 @@ export namespace Tue {
   }
 
   /**
+   * @description 删除题目
+   * @tags Problem
+   * @name ProblemDeletePost
+   * @summary 删除题目
+   * @request POST:/tue/problem/{id}/delete
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  export namespace ProblemDeletePost {
+    export type RequestParams = {
+      /** 题目 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
    * @description 获取单个题目
    * @tags Problem
    * @name ProblemGet
@@ -251,7 +306,7 @@ export namespace Tue {
    * @name ProblemListGet
    * @summary 分页获取题目列表
    * @request GET:/tue/problem/list
-   * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem` 返回数据
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem` 返回数据
    */
   export namespace ProblemListGet {
     export type RequestParams = {};
@@ -265,6 +320,41 @@ export namespace Tue {
     };
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem;
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem;
+  }
+
+  /**
+   * @description 创建题目
+   * @tags Problem
+   * @name ProblemMakePost
+   * @summary 创建题目
+   * @request POST:/tue/problem/make
+   * @response `200` `ApiEntityCommonResponseSchemaProblem` 生成的题目
+   */
+  export namespace ProblemMakePost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = ApiCourseMakeQuestionRequest;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaProblem;
+  }
+
+  /**
+   * @description 更新题目
+   * @tags Problem
+   * @name ProblemUpdatePost
+   * @summary 更新题目
+   * @request POST:/tue/problem/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  export namespace ProblemUpdatePost {
+    export type RequestParams = {
+      /** 题目 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiEntityReqUpdateBodySchemaProblem;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
   }
 }

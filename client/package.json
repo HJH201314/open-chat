@@ -10,7 +10,7 @@
     "dev:tauri": "pnpm tauri dev",
     "serve": "cd server && pnpm run dev",
     "build": "run-p type-check \"build-only {@}\" --",
-    "preview": "vite preview",
+    "preview": "vite preview --host",
     "test:unit": "vitest",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",

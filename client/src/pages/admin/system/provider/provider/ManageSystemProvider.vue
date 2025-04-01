@@ -82,7 +82,7 @@ import ActionSet from '@/pages/admin/component/ActionSet.vue';
 const data = ref<ApiSchemaProvider[]>([]);
 const total = ref(0);
 const pageNum = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(15);
 const pagination = reactive({
   pageSizeOptions: [5, 10, 15, 20],
   defaultCurrent: pageNum,

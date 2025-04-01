@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 import genApi from '@/api/gen-api.ts';
 import type { ApiSchemaUser } from '@/api/gen/data-contracts.ts';
+import { encryptWithPublicKey } from '@/utils/encrypt.ts';
 
 /* 用户相关 */
 export const useUserStore = defineStore('user', () => {
@@ -34,17 +35,14 @@ export const useUserStore = defineStore('user', () => {
     }
   );
 
-  tryOnMounted(async () => {
-    // 自动登录逻辑
-    await ping();
-  });
-
   const ping = async () => {
     try {
+      if (!accessToken.value) return;
+
       const res = await genApi.User.currentGet();
       if (res.data?.data?.id) {
         loginStatus.value = 'login';
-        currentUser.value = res.data.data;
+        currentUser.value = { ...res.data.data };
       } else {
         // 切换到 offline，表明登录态可能存在问题
         loginStatus.value === 'login' && (loginStatus.value = 'offline');
@@ -54,15 +52,22 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  const login = async (_username: string, _password: string) => {
+  const login = async (_username: string, _password: string, _publicKey: string = '') => {
     try {
+      let publicKey = '';
+      if (_publicKey) {
+        publicKey = _publicKey;
+      } else {
+        const keyRes = await genApi.Base.publicKeyGet();
+        publicKey = keyRes.data?.data || '';
+      }
       const res = await genApi.User.loginPost({
         username: _username,
-        password: _password,
+        password: await encryptWithPublicKey(publicKey, _password),
       });
       if (res.data.code === 200) {
         loginStatus.value = 'login';
-        currentUser.value = res.data.data;
+        currentUser.value = { ...res.data.data };
         resumePing();
         return true;
       } else {
@@ -87,6 +92,11 @@ export const useUserStore = defineStore('user', () => {
     refreshToken.value = '';
     pausePing();
   }
+
+  tryOnMounted(async () => {
+    // 自动登录逻辑
+    await ping();
+  });
 
   return {
     avatar,

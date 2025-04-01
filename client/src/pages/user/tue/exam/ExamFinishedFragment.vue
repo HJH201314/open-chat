@@ -5,6 +5,7 @@ import { ref, watch, watchEffect } from 'vue';
 import genApi from '@/api/gen-api.ts';
 import { ApiSchemaScoreStatus } from '@/api/gen/data-contracts.ts';
 import { ParticleManager } from '@/components/particle/ParticleManager.ts';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
   timeSpent?: number; // 耗时
@@ -73,8 +74,10 @@ watchEffect(() => {
   console.log(props);
 });
 
+const route = useRoute();
+const router = useRouter();
 function handleGoDetail() {
-  // TODO
+  router.push(`/tue/exam-answer/${route.params['examId']}`)
 }
 
 function handleGoPersonal() {
@@ -90,7 +93,7 @@ function handleGoPersonal() {
       <span v-if="examTotalScore" class="exam-finished-total-score"> / {{ examTotalScore }}</span>
     </p>
     <p v-else class="exam-finished-description">你已完成测验，请稍后查看分数~</p>
-    <DiliButton v-if="score !== undefined" class="exam-finished-back" type="primary" text="查看详情" @click="handleGoDetail" />
+    <DiliButton v-if="score !== undefined" class="exam-finished-back" type="primary" text="查看答案" @click="handleGoDetail" />
     <DiliButton v-else class="exam-finished-back" type="primary" text="个人中心" @click="handleGoPersonal" />
     <DiliButton class="exam-finished-back" type="secondary" text="再来一次" @click="$emit('back')" />
   </main>

@@ -23,7 +23,7 @@
     "jsx": "preserve",
     "jsxImportSource": "vue",
     "lib": [
-      "ES2023",
+      "ES2024",
       "DOM",
       "DOM.Iterable"
     ]

@@ -48,6 +48,10 @@ function handleInput(e: any) {
   transition: background-color .2s $ease-out-circ, border .2s $ease-out-circ;
   background-color: $color-grey-100;
 
+  &:hover {
+    border: 2px solid var(--color-primary-lighter);
+  }
+
   &:focus {
     background-color: $color-white;
     border: 2px solid var(--color-primary);

@@ -71,7 +71,7 @@ import ActionSet from '@/pages/admin/component/ActionSet.vue';
 const data = ref<ApiSchemaRole[]>([]);
 const total = ref(0);
 const pageNum = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(15);
 const pagination = reactive({
   pageSizeOptions: [5, 10, 15, 20],
   defaultCurrent: pageNum,
@@ -118,10 +118,10 @@ onMounted(() => {
 const columns: PrimaryTableCol<ApiSchemaRole>[] = [
   { colKey: 'serial-number', title: 'NO', width: '2rem', align: 'center' },
   { colKey: 'name', title: '标识名' },
-  { colKey: 'display_name', title: '展示名', minWidth: '8rem', width: '8rem' },
-  { colKey: 'description', title: '描述', minWidth: '8rem', width: '8rem' },
+  { colKey: 'display_name', title: '展示名', minWidth: '8rem' },
+  { colKey: 'description', title: '描述', minWidth: '8rem' },
   { colKey: 'active', title: '是否启用' },
-  { colKey: 'operation', title: '操作', fixed: 'right' },
+  { colKey: 'operation', title: '操作', width: '4rem', fixed: 'right' },
 ];
 
 const dialogMode = ref<'create' | 'edit'>('edit');

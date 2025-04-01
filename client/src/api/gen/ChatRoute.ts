@@ -19,9 +19,11 @@ import type {
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
   ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession,
+  ApiEntityCommonResponseSchemaMessage,
   ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
+  ApiSchemaMessage,
   ApiSchemaSession,
   ApiSchemaSessionFlagInfo,
 } from "./data-contracts";
@@ -101,6 +103,25 @@ export namespace Chat {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage;
+  }
+
+  /**
+   * @description 更新消息
+   * @tags Message
+   * @name MessageUpdatePost
+   * @summary 更新消息
+   * @request POST:/chat/message/{id}/update
+   * @response `200` `ApiEntityCommonResponseSchemaMessage` 返回数据
+   */
+  export namespace MessageUpdatePost {
+    export type RequestParams = {
+      /** 消息 ID */
+      id: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiSchemaMessage;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaMessage;
   }
 
   /**

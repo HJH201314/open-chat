@@ -43,7 +43,7 @@ import TableWrapper from '@/pages/admin/component/TableWrapper.vue';
 const data = ref<ApiSchemaPermission[]>([]);
 const total = ref(0);
 const pageNum = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(15);
 const pagination = reactive({
   pageSizeOptions: [5, 10, 15, 20],
   defaultCurrent: pageNum,
@@ -89,10 +89,10 @@ onMounted(() => {
 
 const columns: PrimaryTableCol<ApiSchemaPermission>[] = [
   { colKey: 'serial-number', title: 'NO', width: '2rem', align: 'center' },
-  { colKey: 'name', title: '标识名', width: '10rem' },
-  { colKey: 'path', title: '路径', width: '10rem' },
-  { colKey: 'description', title: '描述', width: '12rem', minWidth: '12rem' },
-  { colKey: 'module', title: '模块', width: '6rem' },
+  { colKey: 'name', title: '标识名' },
+  { colKey: 'path', title: '路径' },
+  { colKey: 'description', title: '描述', minWidth: '12rem' },
+  { colKey: 'module', title: '模块' },
   { colKey: 'active', title: '启用' },
 ];
 

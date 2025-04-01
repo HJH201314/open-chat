@@ -1,7 +1,8 @@
 import { USER_ACCESS_TOKEN_KEY } from '@/constants';
 import { useSettingStore } from '@/store/useSettingStore';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
-import { defaultAxiosConfig, errorHandler, successHandler } from '@/api/default.ts';
+import { errorHandler, successHandler } from '@/api/handler.ts';
+import { defaultAxiosConfig } from '@/api/config.ts';
 
 /* 创建axios实例 */
 const axiosInstance = axios.create(defaultAxiosConfig);

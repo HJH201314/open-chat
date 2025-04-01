@@ -11,7 +11,8 @@ const router = createRouter({
     },
     {
       path: '/chat',
-      name: 'chatModule',
+      name: 'ChatModule',
+      redirect: '/chat/message',
       component: () => import('@/pages/user/chat/ChatLayout.vue'),
       children: [
         {
@@ -38,10 +39,22 @@ const router = createRouter({
       component: () => import('@/pages/user/tue/TueLayout.vue'),
       children: [
         {
-          path: 'exam/:examId',
-          name: 'examPage',
+          path: 'exam/auto',
+          name: 'ExamPage',
           props: true,
           component: () => import('@/pages/user/tue/exam/ExamPage.vue'),
+        },
+        {
+          path: 'exam/:examId',
+          name: 'ExamPage',
+          props: true,
+          component: () => import('@/pages/user/tue/exam/ExamPage.vue'),
+        },
+        {
+          path: 'exam-answer/:examId',
+          name: 'ExamAnswerPage',
+          props: true,
+          component: () => import('@/pages/user/tue/exam/answer/ExamAnswerPage.vue'),
         },
       ],
     },
@@ -57,6 +70,33 @@ const router = createRouter({
           name: 'AdminDashboard',
           meta: { title: '仪表盘', icon: 'dashboard' },
           component: () => import('@/pages/admin/home/HomePage.vue'),
+        },
+        {
+          path: 'manage/tue',
+          name: 'Tue',
+          meta: { title: '题库管理', icon: 'book' },
+          redirect: '/admin/manage/tue/problem',
+          component: () => import('@/pages/admin/tue/ManageTuePage.vue'),
+          children: [
+            {
+              path: 'problem',
+              name: 'ManageTueProblem',
+              meta: { title: '题库' },
+              component: () => import('@/pages/admin/tue/problem/ManageTueProblem.vue'),
+            },
+            // {
+            //   path: 'exam',
+            //   name: 'ManageTueExam',
+            //   meta: { title: '测验' },
+            //   component: () => import('@/pages/admin/tue/problem/ManageTueExam.vue'),
+            // },
+            // {
+            //   path: 'problem',
+            //   name: 'ManageTueCourse',
+            //   meta: { title: '课程' },
+            //   component: () => import('@/pages/admin/tue/problem/ManageTueCourse.vue'),
+            // },
+          ]
         },
         {
           path: 'manage/user',
@@ -110,6 +150,12 @@ const router = createRouter({
               meta: { title: '模型聚合' },
               component: () => import('@/pages/admin/system/collection/ManageSystemCollection.vue'),
             },
+            {
+              path: 'bucket',
+              name: 'ManageSystemBucket',
+              meta: { title: '储存桶' },
+              component: () => import('@/pages/admin/system/bucket/ManageSystemBucket.vue'),
+            },
           ]
         },
       ],
@@ -119,11 +165,6 @@ const router = createRouter({
       name: 'login',
       component: () => import('@/pages/user/login/LoginPage.vue'),
       props: { isModal: false },
-    },
-    {
-      path: '/manage/user',
-      name: 'manage-user',
-      component: () => import('@/pages/admin/manage/user/ManageUserPage.vue'),
     },
   ],
 });

@@ -3,11 +3,13 @@ import { Manage } from '@/api/gen/Manage.ts';
 import { User } from '@/api/gen/User.ts';
 import { Preset } from '@/api/gen/Preset.ts';
 import { Tue } from '@/api/gen/Tue.ts';
+import { Base } from '@/api/gen/Base.ts';
 import { USER_ACCESS_TOKEN_KEY } from '@/constants';
 import { getActivePinia } from 'pinia';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import { HttpClient } from '@/api/gen/http-client.ts';
-import { defaultAxiosConfig, errorHandler, successHandler } from '@/api/default.ts';
+import { errorHandler, successHandler } from '@/api/handler.ts';
+import { defaultAxiosConfig } from '@/api/config.ts';
 
 /* 生成的 API 客户端 */
 export const genApiClient = new HttpClient({
@@ -42,4 +44,5 @@ export default {
   User: new User(genApiClient),
   Preset: new Preset(genApiClient),
   Tue: new Tue(genApiClient),
+  Base: new Base(genApiClient),
 };

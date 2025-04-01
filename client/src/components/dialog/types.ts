@@ -25,6 +25,7 @@ export type CommonDialogProps = {
 
   // 样式调整
   modalStyle?: CSSProperties;
+  dialogStyle?: CSSProperties;
   titleStyle?: CSSProperties;
   subtitleStyle?: CSSProperties;
   confirmButtonProps?: CusButtonProps;

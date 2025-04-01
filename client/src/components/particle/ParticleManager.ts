@@ -9,9 +9,9 @@ export class ParticleManager {
   public static isShowing = false;
 
   public static init() {
-    ParticleManager.app = createApp(h(CusParticle));
+    this.app = createApp(h(CusParticle));
     // 使用Particles
-    ParticleManager.app.use(VueParticles, {
+    this.app.use(VueParticles, {
       init: async (engine) => {
         await loadConfettiPreset(engine);
       },
@@ -19,21 +19,27 @@ export class ParticleManager {
   }
 
   public static show() {
-    if (!ParticleManager.app) {
-      ParticleManager.init();
+    if (this.isShowing) {
+      this.hide();
     }
-    if (!ParticleManager.container) {
-      ParticleManager.container = document.createElement('div');
-      ParticleManager.container?.setAttribute('id', 'cus-particle-container');
-      document.body.appendChild(ParticleManager.container!);
+    if (!this.app) {
+      this.init();
     }
-    ParticleManager.hide();
-    ParticleManager.app?.mount('#cus-particle-container');
-    ParticleManager.isShowing = true;
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container?.setAttribute('id', 'cus-particle-container');
+      document.body.appendChild(this.container!);
+    }
+    this.app?.mount('#cus-particle-container');
+    this.isShowing = true;
   }
 
   public static hide() {
-    if (!ParticleManager.isShowing) return;
-    ParticleManager.app?.unmount();
+    if (!this.isShowing) return;
+    this.app?.unmount();
+    this.app = undefined;
+    this.container?.remove();
+    this.container = undefined;
+    this.isShowing = false;
   }
 }

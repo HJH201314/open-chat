@@ -4,7 +4,9 @@ import RecordListView from '@/pages/user/chat/message/components/RecordListView.
 import { noPaddingKey } from '@/constants/eventBusKeys.ts';
 import ChatDetailView from '@/pages/user/chat/message/components/ChatDetailView.vue';
 import { useEventBus } from '@vueuse/core';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
+import { useUserStore } from '@/store/useUserStore.ts';
+import { useRouter } from 'vue-router';
 
 const props = withDefaults(
   defineProps<{
@@ -39,6 +41,19 @@ watchEffect(() => {
 
 // 通过Transition的事件控制 isEmptyTipAvailable，避免应用动画时刷新空空如也和消息列表挤压
 const isEmptyTipAvailable = ref(true);
+
+const userStore = useUserStore();
+const router = useRouter();
+watch(
+  () => userStore.isLogin,
+  (newIsLogin) => {
+    if (!newIsLogin) {
+      router.replace({
+        name: 'ChatModule',
+      });
+    }
+  }
+);
 </script>
 
 <template>

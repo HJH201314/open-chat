@@ -68,7 +68,7 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
 </script>
 
 <template>
-  <CommonDialog :title="title" :subtitle="subtitle" subtitle="一个接入点是一个 OpenAI 兼容 API 的供应商" :confirm-handler="handleConfirm">
+  <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm">
     <template #default>
       <t-form ref="form" :data="formData" style="margin-bottom: 1rem">
         <t-form-item label="标识名" name="name" :rules="[{ required: true }]">

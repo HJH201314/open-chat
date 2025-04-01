@@ -125,7 +125,7 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
 </script>
 
 <template>
-  <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm">
+  <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm" :dialog-style="{ 'width': '789px' }">
     <template #default>
       <t-form ref="form" :data="formData" style="margin-bottom: 1rem">
         <t-form-item label="标识名" name="name" :rules="[{ required: mode == 'create' }]">

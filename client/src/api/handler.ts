@@ -1,15 +1,8 @@
-import type { AxiosRequestConfig } from 'axios';
-import { SERVER_NEXT_API_URL, USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
+import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 import { getActivePinia } from 'pinia';
 import { useUserStore } from '@/store/useUserStore.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import router from '@/plugins/router.ts';
-
-export const defaultAxiosConfig: AxiosRequestConfig = {
-  baseURL: SERVER_NEXT_API_URL,
-  timeout: 10000,
-  withCredentials: false,
-};
 
 export const successHandler = (resp: any) => {
   if (resp.status === 200) {

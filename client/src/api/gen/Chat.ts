@@ -19,9 +19,11 @@ import type {
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
   ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession,
+  ApiEntityCommonResponseSchemaMessage,
   ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
+  ApiSchemaMessage,
   ApiSchemaSession,
   ApiSchemaSessionFlagInfo,
 } from "./data-contracts";
@@ -110,6 +112,24 @@ export class Chat<SecurityDataType = unknown> {
       path: `/chat/message/list/${sessionId}`,
       method: "GET",
       query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新消息
+   *
+   * @tags Message
+   * @name MessageUpdatePost
+   * @summary 更新消息
+   * @request POST:/chat/message/{id}/update
+   * @response `200` `ApiEntityCommonResponseSchemaMessage` 返回数据
+   */
+  messageUpdatePost = (id: string, req: ApiSchemaMessage, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaMessage, any>({
+      path: `/chat/message/${id}/update`,
+      method: "POST",
+      body: req,
       type: ContentType.Json,
       format: "json",
       ...params,

@@ -13,6 +13,12 @@
           </template>
           创建
         </t-button>
+        <t-button theme="warning" @click="handleRefreshCache">
+          <template #icon>
+            <delete-icon />
+          </template>
+          缓存
+        </t-button>
       </template>
     </TableTitleArea>
     <TableWrapper v-slot="{ maxHeight }">
@@ -80,11 +86,12 @@ import { useRouteQuery } from '@vueuse/router';
 import DialogCreateModel from '@/pages/admin/system/provider/model/DialogCreateModel.vue';
 import TableWrapper from '@/pages/admin/component/TableWrapper.vue';
 import ActionSet from '@/pages/admin/component/ActionSet.vue';
+import ToastManager from '@/components/toast/ToastManager.ts';
 
 const data = ref<ApiSchemaModel[]>([]);
 const total = ref(0);
 const pageNum = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(15);
 const providerId = useRouteQuery<number, number>('provider_id', 0);
 const pagination = reactive({
   pageSizeOptions: [5, 10, 15, 20],
@@ -134,11 +141,11 @@ onMounted(() => {
 
 const columns: PrimaryTableCol<ApiSchemaModel>[] = [
   { colKey: 'serial-number', title: 'NO', width: '2rem', align: 'center' },
-  { colKey: 'provider', title: 'provider-title' },
-  { colKey: 'name', title: '标识名', minWidth: '10rem', width: '10rem' },
-  { colKey: 'display_name', title: '展示名', minWidth: '10rem', width: '10rem' },
-  { colKey: 'description', title: '描述', minWidth: '10rem', width: '10rem' },
-  { colKey: 'config', title: '默认配置', minWidth: '3rem', width: '3rem'  },
+  { colKey: 'provider', title: 'provider-title', minWidth: '10rem' },
+  { colKey: 'name', title: '标识名', minWidth: '10rem' },
+  { colKey: 'display_name', title: '展示名', minWidth: '10rem' },
+  { colKey: 'description', title: '描述', minWidth: '10rem' },
+  { colKey: 'config', title: '默认配置', minWidth: '5rem', width: '3rem' },
   { colKey: 'operation', title: '操作', fixed: 'right' },
 ];
 
@@ -155,6 +162,24 @@ function getConfigContent(row: ApiSchemaModel) {
 
 const dialogMode = ref<'create' | 'edit'>('edit');
 const dialogData = ref<ApiSchemaModel>({});
+
+function handleRefreshCache() {
+  DialogManager.commonDialog({
+    title: '刷新模型缓存',
+    content: '确定要刷新模型缓存吗？',
+    presetType: 'danger',
+  }).then(async (res) => {
+    if (!res) return;
+    try {
+      const res = await genApi.Manage.modelRefreshPost();
+      if (res.data.data) {
+        ToastManager.success('刷新成功');
+      }
+    } catch (_) {
+      ToastManager.danger('刷新失败');
+    }
+  });
+}
 
 function handleEdit(row: ApiSchemaModel) {
   dialogMode.value = Object.keys(row).length == 0 ? 'create' : 'edit';

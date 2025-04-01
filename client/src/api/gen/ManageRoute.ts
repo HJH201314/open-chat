@@ -14,6 +14,7 @@ import type {
   ApiEntityCommonResponseArraySchemaProvider,
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaBucket,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission,
@@ -22,14 +23,18 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser,
   ApiEntityCommonResponseInt,
   ApiEntityCommonResponseSchemaAPIKey,
+  ApiEntityCommonResponseSchemaBucket,
   ApiEntityCommonResponseSchemaModel,
   ApiEntityCommonResponseSchemaModelCollection,
   ApiEntityCommonResponseSchemaPermission,
   ApiEntityCommonResponseSchemaProvider,
   ApiEntityCommonResponseSchemaRole,
   ApiEntityCommonResponseSchemaUser,
+  ApiEntityReqUpdateBodySchemaBucket,
+  ApiEntityReqUpdateBodySchemaModelCollection,
   ApiEntityReqUpdateBodySchemaRole,
   ApiSchemaAPIKey,
+  ApiSchemaBucket,
   ApiSchemaModel,
   ApiSchemaModelCollection,
   ApiSchemaPermission,
@@ -39,6 +44,102 @@ import type {
 } from "./data-contracts";
 
 export namespace Manage {
+  /**
+   * @description 创建 储存桶
+   * @tags Bucket
+   * @name BucketCreatePost
+   * @summary 创建 储存桶
+   * @request POST:/manage/bucket/create
+   * @response `200` `ApiEntityCommonResponseSchemaBucket` 成功创建的 储存桶
+   */
+  export namespace BucketCreatePost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = ApiSchemaBucket;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaBucket;
+  }
+
+  /**
+   * @description 删除 储存桶
+   * @tags Bucket
+   * @name BucketDeletePost
+   * @summary 删除 储存桶
+   * @request POST:/manage/bucket/{id}/delete
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  export namespace BucketDeletePost {
+    export type RequestParams = {
+      /** 储存桶 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
+   * @description 获取 储存桶
+   * @tags Bucket
+   * @name BucketGet
+   * @summary 获取 储存桶
+   * @request GET:/manage/bucket/{id}
+   * @response `200` `ApiEntityCommonResponseSchemaBucket` 储存桶
+   */
+  export namespace BucketGet {
+    export type RequestParams = {
+      /** 储存桶 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaBucket;
+  }
+
+  /**
+   * @description 批量获取 储存桶
+   * @tags Bucket
+   * @name BucketListGet
+   * @summary 批量获取 储存桶
+   * @request GET:/manage/bucket/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaBucket` 储存桶列表
+   */
+  export namespace BucketListGet {
+    export type RequestParams = {};
+    export type RequestQuery = {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaBucket;
+  }
+
+  /**
+   * @description 更新 储存桶
+   * @tags Bucket
+   * @name BucketUpdatePost
+   * @summary 更新 储存桶
+   * @request POST:/manage/bucket/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  export namespace BucketUpdatePost {
+    export type RequestParams = {
+      /** 储存桶 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiEntityReqUpdateBodySchemaBucket;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
   /**
    * @description 创建模型集合
    * @tags ModelCollection
@@ -60,13 +161,14 @@ export namespace Manage {
    * @tags Model
    * @name CollectionDeletePost
    * @summary 删除模型集合
-   * @request POST:/manage/collection/delete/{collection_id}
+   * @request POST:/manage/collection/{id}/delete
    * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
    */
   export namespace CollectionDeletePost {
     export type RequestParams = {
       /** ModelCollection ID */
       collectionId: number;
+      id: string;
     };
     export type RequestQuery = {};
     export type RequestBody = never;
@@ -79,13 +181,14 @@ export namespace Manage {
    * @tags ModelCollection
    * @name CollectionGet
    * @summary 获取模型集合
-   * @request GET:/manage/collection/{collection_id}
+   * @request GET:/manage/collection/{id}
    * @response `200` `ApiEntityCommonResponseSchemaModelCollection` 模型
    */
   export namespace CollectionGet {
     export type RequestParams = {
       /** ModelCollection ID */
       collectionId: number;
+      id: string;
     };
     export type RequestQuery = {};
     export type RequestBody = never;
@@ -114,6 +217,25 @@ export namespace Manage {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection;
+  }
+
+  /**
+   * @description 更新模型集合
+   * @tags ModelCollection
+   * @name CollectionUpdatePost
+   * @summary 更新模型集合
+   * @request POST:/manage/collection/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 成功更新与否
+   */
+  export namespace CollectionUpdatePost {
+    export type RequestParams = {
+      /** 模型集合 ID */
+      id: number;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiEntityReqUpdateBodySchemaModelCollection;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
   }
 
   /**
@@ -278,6 +400,22 @@ export namespace Manage {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel;
+  }
+
+  /**
+   * @description 更新所有模型缓存，生产环境高危操作
+   * @tags Model
+   * @name ModelRefreshPost
+   * @summary manageModelGroup
+   * @request POST:/manage/model/refresh
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  export namespace ModelRefreshPost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
   }
 
   /**

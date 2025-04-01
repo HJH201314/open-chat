@@ -56,13 +56,12 @@ watchEffect(() => {
 .cus-ratio-button {
   position: relative;
   cursor: pointer;
-  z-index: 1;
   padding: 8px 12px;
   border-radius: 8px;
-  line-height: 1;
+  //line-height: 1.2;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 
   // 圆形 radio 图标样式
   .radio-icon {

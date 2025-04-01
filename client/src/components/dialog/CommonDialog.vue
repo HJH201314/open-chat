@@ -140,13 +140,13 @@ defineExpose<CommonDialogExpose>({
 
 <template>
   <CommonModal
-    :modal-style="{ ...props.modalStyle }"
+    :modal-style="{ ...modalStyle }"
     :show-close="false"
     :close-on-click-mask="closeOnClickMask || showCancel"
     :visible="modalVisible"
     @after-close="afterClose"
   >
-    <div class="dialog">
+    <div class="dialog" :style="{ ...dialogStyle }">
       <header :style="{ marginRight: showClose ? '3rem' : '1rem' }">
         <Component :is="iconElement" v-if="!!(iconElement)" />
         <div v-if="title" class="dialog-title" :style="titleStyle">{{ title }}</div>

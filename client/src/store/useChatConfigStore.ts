@@ -70,6 +70,20 @@ export const useChatConfigStore = defineStore('model', () => {
             }),
           });
         });
+        // 检查设置中的默认模型是否存在，如果不存在则使用第一个模型作为默认模型
+        if (
+          !settingStore.settings.defaultProvider ||
+          !settingStore.settings.defaultModel ||
+          !providerModels.value.find(
+            (p) => p.internalName === settingStore.settings.defaultProvider
+          )?.models.find((m) => m.internalName === settingStore.settings.defaultModel)
+          && providerModels.value.length
+        ) {
+          settingStore.saveSettings({
+            defaultProvider: providerModels.value[0].internalName,
+            defaultModel: providerModels.value[0].models[0].internalName,
+          })
+        }
       }
     } catch (_) {
       console.error('获取模型数据失败');

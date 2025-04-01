@@ -2,7 +2,7 @@
 import useGlobal from '@/commands/useGlobal.ts';
 import useMarkdownIt from '@/commands/useMarkdownIt';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, type VNode, watch } from 'vue';
 import { Down } from '@icon-park/vue-next';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 
@@ -103,6 +103,10 @@ const statusText = computed(() => {
 })
 
 const { isLargeScreen } = useGlobal();
+
+defineSlots<{
+  extra: () => VNode;
+}>()
 </script>
 
 <template>
@@ -134,6 +138,7 @@ const { isLargeScreen } = useGlobal();
           v-text="renderMessage"
         />
         <div v-else class="dialog-message-content-body rendered" :class="{ think: thinking }" v-html="renderMessage" />
+        <slot name="extra" />
       </div>
     </div>
   </div>

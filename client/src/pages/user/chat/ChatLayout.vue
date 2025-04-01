@@ -23,7 +23,7 @@ const userStore = useUserStore();
 // 在 onMounted 后再初始化 entries，否则会报错
 const entries = ref<SidebarEntry[]>([]);
 onMounted(() => {
-  let data = [
+  entries.value = [
     {
       key: 'dialog',
       name: '对话',
@@ -41,12 +41,6 @@ onMounted(() => {
       },
     },
   ];
-  if (userStore.permission != 2) {
-    data = data.filter((v) => {
-      return v.key != 'user';
-    });
-  }
-  entries.value = data;
 });
 
 const { isLargeScreen, isSmallScreen } = useGlobal();
@@ -80,7 +74,7 @@ const { isLargeScreen, isSmallScreen } = useGlobal();
 }
 
 .chat-panel-wrapper {
-  --padding: 0.75rem;
+  --padding: 0.5rem;
   --padding-sidebar: 0;
   flex: 1;
   box-sizing: border-box;

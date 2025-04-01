@@ -195,7 +195,13 @@ $dialog-max-width: 54rem;
     gap: 0.25rem;
     background: rgba(var(--color-white) / 50%);
     opacity: 0.9;
-    padding: 0.25rem;
+    padding: 0.25rem 2rem 0.25rem 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    > * {
+      flex-shrink: 0;
+    }
 
     &-icon {
       width: 30px;

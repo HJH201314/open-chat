@@ -45,9 +45,16 @@ watch(
 const loadingExam = ref(false);
 // 加载考试信息
 const loadExam = async () => {
-  const res = await genApi.Tue.examGet(props.examId);
-  if (res.status == 200) {
-    exam.value = res.data.data!;
+  if (props.examId == 'auto') {
+    const res = await genApi.Tue.examRandomPost();
+    if (res.status == 200) {
+      exam.value = res.data.data!;
+    }
+  } else {
+    const res = await genApi.Tue.examGet(props.examId);
+    if (res.status == 200) {
+      exam.value = res.data.data!;
+    }
   }
 };
 // 处理考试信息加载
@@ -108,11 +115,11 @@ const handleBack = () => {
 const answerRecordId = ref<number>();
 const timeSpent = ref<number>();
 // 提交回答
-const handleAnswerSubmit = async (payload: { answers: Record<number, number[] | string>; timeSpent: number }) => {
-  if (!props.examId) return;
+const handleAnswerSubmit = async (payload: { answers: Record<number, number[] | string | boolean>; timeSpent: number }) => {
+  if (!exam.value?.id) return;
   timeSpent.value = payload.timeSpent;
 
-  const examId = Number(props.examId);
+  const examId = Number(exam.value?.id);
   try {
     const res = await genApi.Tue.examSubmitPost(examId, {
       answers: Object.entries(payload.answers).map(([problemId, answer]) => ({

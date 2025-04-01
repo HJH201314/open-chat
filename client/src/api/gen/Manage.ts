@@ -14,6 +14,7 @@ import type {
   ApiEntityCommonResponseArraySchemaProvider,
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaAPIKey,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaBucket,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission,
@@ -22,14 +23,18 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser,
   ApiEntityCommonResponseInt,
   ApiEntityCommonResponseSchemaAPIKey,
+  ApiEntityCommonResponseSchemaBucket,
   ApiEntityCommonResponseSchemaModel,
   ApiEntityCommonResponseSchemaModelCollection,
   ApiEntityCommonResponseSchemaPermission,
   ApiEntityCommonResponseSchemaProvider,
   ApiEntityCommonResponseSchemaRole,
   ApiEntityCommonResponseSchemaUser,
+  ApiEntityReqUpdateBodySchemaBucket,
+  ApiEntityReqUpdateBodySchemaModelCollection,
   ApiEntityReqUpdateBodySchemaRole,
   ApiSchemaAPIKey,
+  ApiSchemaBucket,
   ApiSchemaModel,
   ApiSchemaModelCollection,
   ApiSchemaPermission,
@@ -47,6 +52,104 @@ export class Manage<SecurityDataType = unknown> {
     this.http = http;
   }
 
+  /**
+   * @description 创建 储存桶
+   *
+   * @tags Bucket
+   * @name BucketCreatePost
+   * @summary 创建 储存桶
+   * @request POST:/manage/bucket/create
+   * @response `200` `ApiEntityCommonResponseSchemaBucket` 成功创建的 储存桶
+   */
+  bucketCreatePost = (bucket: ApiSchemaBucket, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaBucket, any>({
+      path: `/manage/bucket/create`,
+      method: "POST",
+      body: bucket,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 删除 储存桶
+   *
+   * @tags Bucket
+   * @name BucketDeletePost
+   * @summary 删除 储存桶
+   * @request POST:/manage/bucket/{id}/delete
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  bucketDeletePost = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/bucket/${id}/delete`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取 储存桶
+   *
+   * @tags Bucket
+   * @name BucketGet
+   * @summary 获取 储存桶
+   * @request GET:/manage/bucket/{id}
+   * @response `200` `ApiEntityCommonResponseSchemaBucket` 储存桶
+   */
+  bucketGet = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaBucket, any>({
+      path: `/manage/bucket/${id}`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 批量获取 储存桶
+   *
+   * @tags Bucket
+   * @name BucketListGet
+   * @summary 批量获取 储存桶
+   * @request GET:/manage/bucket/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaBucket` 储存桶列表
+   */
+  bucketListGet = (
+    query: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaBucket, any>({
+      path: `/manage/bucket/list`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新 储存桶
+   *
+   * @tags Bucket
+   * @name BucketUpdatePost
+   * @summary 更新 储存桶
+   * @request POST:/manage/bucket/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  bucketUpdatePost = (id: number, bucket: ApiEntityReqUpdateBodySchemaBucket, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/bucket/${id}/update`,
+      method: "POST",
+      body: bucket,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
   /**
    * @description 创建模型集合
    *
@@ -71,12 +174,12 @@ export class Manage<SecurityDataType = unknown> {
    * @tags Model
    * @name CollectionDeletePost
    * @summary 删除模型集合
-   * @request POST:/manage/collection/delete/{collection_id}
+   * @request POST:/manage/collection/{id}/delete
    * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
    */
-  collectionDeletePost = (collectionId: number, params: RequestParams = {}) =>
+  collectionDeletePost = (collectionId: number, id: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
-      path: `/manage/collection/delete/${collectionId}`,
+      path: `/manage/collection/${id}/delete`,
       method: "POST",
       type: ContentType.Json,
       format: "json",
@@ -88,12 +191,12 @@ export class Manage<SecurityDataType = unknown> {
    * @tags ModelCollection
    * @name CollectionGet
    * @summary 获取模型集合
-   * @request GET:/manage/collection/{collection_id}
+   * @request GET:/manage/collection/{id}
    * @response `200` `ApiEntityCommonResponseSchemaModelCollection` 模型
    */
-  collectionGet = (collectionId: number, params: RequestParams = {}) =>
+  collectionGet = (collectionId: number, id: string, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaModelCollection, any>({
-      path: `/manage/collection/${collectionId}`,
+      path: `/manage/collection/${id}`,
       method: "GET",
       type: ContentType.Json,
       format: "json",
@@ -123,6 +226,24 @@ export class Manage<SecurityDataType = unknown> {
       path: `/manage/collection/list`,
       method: "GET",
       query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新模型集合
+   *
+   * @tags ModelCollection
+   * @name CollectionUpdatePost
+   * @summary 更新模型集合
+   * @request POST:/manage/collection/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 成功更新与否
+   */
+  collectionUpdatePost = (id: number, model: ApiEntityReqUpdateBodySchemaModelCollection, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/collection/${id}/update`,
+      method: "POST",
+      body: model,
       type: ContentType.Json,
       format: "json",
       ...params,
@@ -296,6 +417,23 @@ export class Manage<SecurityDataType = unknown> {
       path: `/manage/model/provider/${providerId}`,
       method: "GET",
       query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新所有模型缓存，生产环境高危操作
+   *
+   * @tags Model
+   * @name ModelRefreshPost
+   * @summary manageModelGroup
+   * @request POST:/manage/model/refresh
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  modelRefreshPost = (params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/model/refresh`,
+      method: "POST",
       type: ContentType.Json,
       format: "json",
       ...params,

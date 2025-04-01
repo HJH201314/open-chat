@@ -10,6 +10,9 @@ import type { MessageInfo } from '@/types/data.ts';
 import { scrollToBottom } from '@/utils/element.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import type { DialogDetailEmits, DialogDetailProps } from '@/pages/user/chat/message/components/types.ts';
+import ExamProblem from '@/pages/user/tue/exam/ExamProblem.vue';
+import DialogExamProblem from '@/pages/user/chat/message/components/extension/DialogExamProblem.vue';
+import DiliButton from '@/components/button/DiliButton.vue';
 
 const props = withDefaults(defineProps<DialogDetailProps>(), {
   session: () => ({
@@ -41,8 +44,8 @@ const dialogListRef = useTemplateRef('dialog-list');
 const inputPanelRef = useTemplateRef<HTMLElement>('input-panel');
 
 const { height: panelHeight } = useElementSize(() => inputPanelRef.value);
-const panelPlaceholderPx = computed(() => `${panelHeight.value + 12}px`);
-const fixDialogToBottomPx = computed(() => `${panelHeight.value + 12}px`);
+const panelPlaceholderPx = computed(() => `${panelHeight.value + 16}px`);
+const fixDialogToBottomPx = computed(() => `${panelHeight.value + 16}px`);
 
 const { arrivedState, directions: scrollDirections } = useScroll(dialogListRef, {
   onScroll() {
@@ -138,7 +141,13 @@ defineExpose({
           :role="item.sender"
           :time="new Date(item.time).toLocaleString()"
           @think-expand="handleMessageThinkExpand"
-        />
+        >
+          <template #extra>
+            <DialogExamProblem :item="item" />
+            <t-link v-if="item.extra?.['exam']" size="large" theme="primary" target="_self" :href="`/tue/exam/${item.extra['exam']['id']}`">立即前往</t-link>
+            <div v-if="item.extra?.['tooltip']">{{ item.extra?.['tooltip'] }}</div>
+          </template>
+        </DialogMessage>
         <!--   消息列表   -->
         <DialogMessage
           v-show="!isReceivingMsg && !isEmptySession && inputUserInput"
@@ -147,7 +156,7 @@ defineExpose({
           :markdown-render="false"
           :message="inputUserInput"
           role="user"
-        />
+        ></DialogMessage>
       </div>
       <IconButton
         v-if="!fixDialogToBottom && !arrivedState.bottom && messages.length"

@@ -11,14 +11,18 @@
  */
 
 import type {
+  ApiCourseMakeQuestionRequest,
   ApiEntityCommonResponseAny,
-  ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem,
+  ApiEntityCommonResponseBool,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem,
   ApiEntityCommonResponseExamSubmitExamResponse,
+  ApiEntityCommonResponseExamSubmitProblemResponse,
   ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
   ApiEntityCommonResponseSchemaExamUserRecord,
   ApiEntityCommonResponseSchemaProblem,
+  ApiEntityReqUpdateBodySchemaProblem,
   ApiExamSubmitExamRequest,
   ApiSchemaCourse,
   ApiSchemaExam,
@@ -48,6 +52,23 @@ export class Tue<SecurityDataType = unknown> {
       path: `/tue/course/create`,
       method: "POST",
       body: req,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 删除课程
+   *
+   * @tags Course
+   * @name CourseDeletePost
+   * @summary 删除课程
+   * @request POST:/tue/course/{id}/delete
+   * @response `200` `ApiEntityCommonResponseAny` 返回数据
+   */
+  courseDeletePost = (id: string, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseAny, any>({
+      path: `/tue/course/${id}/delete`,
+      method: "POST",
       type: ContentType.Json,
       format: "json",
       ...params,
@@ -93,23 +114,6 @@ export class Tue<SecurityDataType = unknown> {
       path: `/tue/course/list`,
       method: "GET",
       query: query,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
-  /**
-   * @description 删除课程
-   *
-   * @tags Course
-   * @name CoursePost
-   * @summary 删除课程
-   * @request POST:/tue/course/{id}
-   * @response `200` `ApiEntityCommonResponseAny` 返回数据
-   */
-  coursePost = (id: string, params: RequestParams = {}) =>
-    this.http.request<ApiEntityCommonResponseAny, any>({
-      path: `/tue/course/${id}`,
-      method: "POST",
       type: ContentType.Json,
       format: "json",
       ...params,
@@ -168,6 +172,23 @@ export class Tue<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description 随机测验
+   *
+   * @tags Exam
+   * @name ExamRandomPost
+   * @summary 随机测验
+   * @request POST:/tue/exam/random
+   * @response `200` `ApiEntityCommonResponseSchemaExam` 返回数据
+   */
+  examRandomPost = (params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaExam, any>({
+      path: `/tue/exam/random`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
    * @description 获取用户的考试评分结果
    *
    * @tags 考试
@@ -197,6 +218,24 @@ export class Tue<SecurityDataType = unknown> {
       path: `/tue/exam/${id}/rescore`,
       method: "POST",
       type: ContentType.Json,
+      ...params,
+    });
+  /**
+   * @description 提交单个问题并验证答案
+   *
+   * @tags Exam
+   * @name ExamSingleProblemSubmitPost
+   * @summary 提交单个问题并验证答案
+   * @request POST:/tue/exam/single-problem/submit
+   * @response `200` `ApiEntityCommonResponseExamSubmitProblemResponse` OK
+   */
+  examSingleProblemSubmitPost = (request: ApiExamSubmitExamRequest, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseExamSubmitProblemResponse, any>({
+      path: `/tue/exam/single-problem/submit`,
+      method: "POST",
+      body: request,
+      type: ContentType.Json,
+      format: "json",
       ...params,
     });
   /**
@@ -236,6 +275,23 @@ export class Tue<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description 删除题目
+   *
+   * @tags Problem
+   * @name ProblemDeletePost
+   * @summary 删除题目
+   * @request POST:/tue/problem/{id}/delete
+   * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
+   */
+  problemDeletePost = (id: number, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/tue/problem/${id}/delete`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
    * @description 获取单个题目
    *
    * @tags Problem
@@ -259,7 +315,7 @@ export class Tue<SecurityDataType = unknown> {
    * @name ProblemListGet
    * @summary 分页获取题目列表
    * @request GET:/tue/problem/list
-   * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem` 返回数据
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem` 返回数据
    */
   problemListGet = (
     query: {
@@ -272,10 +328,46 @@ export class Tue<SecurityDataType = unknown> {
     },
     params: RequestParams = {},
   ) =>
-    this.http.request<ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaProblem, any>({
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem, any>({
       path: `/tue/problem/list`,
       method: "GET",
       query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 创建题目
+   *
+   * @tags Problem
+   * @name ProblemMakePost
+   * @summary 创建题目
+   * @request POST:/tue/problem/make
+   * @response `200` `ApiEntityCommonResponseSchemaProblem` 生成的题目
+   */
+  problemMakePost = (req: ApiCourseMakeQuestionRequest, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaProblem, any>({
+      path: `/tue/problem/make`,
+      method: "POST",
+      body: req,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新题目
+   *
+   * @tags Problem
+   * @name ProblemUpdatePost
+   * @summary 更新题目
+   * @request POST:/tue/problem/{id}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  problemUpdatePost = (id: number, problem: ApiEntityReqUpdateBodySchemaProblem, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/tue/problem/${id}/update`,
+      method: "POST",
+      body: problem,
       type: ContentType.Json,
       format: "json",
       ...params,

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from 'vue';
+import { computed, ref, useTemplateRef, type VNode, watch } from 'vue';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
-import { type ApiSchemaExamProblem, type ApiSchemaProblem, ApiSchemaProblemType } from '@/api/gen/data-contracts.ts';
+import {
+  type ApiExamSubmitProblemResponse,
+  type ApiSchemaProblem,
+  ApiSchemaProblemType,
+} from '@/api/gen/data-contracts.ts';
 import CusTextarea from '@/components/textarea/CusTextarea.vue';
 import CusInput from '@/components/input/CusInput.vue';
 import { useElementSize } from '@vueuse/core';
@@ -10,33 +14,60 @@ import CusCheckboxGroup from '@/components/checkbox/CusCheckboxGroup.vue';
 import CusCheckboxButton from '@/components/checkbox/CusCheckboxButton.vue';
 import { getProblemTypeName } from '@/pages/user/tue/exam/utils.ts';
 import type { AnswerType } from '@/pages/user/tue/exam/types.ts';
+import useMarkdownIt from '@/commands/useMarkdownIt';
+import DiliButton from '@/components/button/DiliButton.vue';
+import { Redo } from '@icon-park/vue-next';
+import CusTooltip from '@/components/tooltip/CusTooltip.vue';
+import genApi from '@/api/gen-api.ts';
+import ToastManager from '@/components/toast/ToastManager.ts';
+import CusSpin from '@/components/spinning/CusSpin.vue';
 
-const props = defineProps<{
-  page?: number;
-  examProblem: ApiSchemaExamProblem;
-}>();
+const props = withDefaults(
+  defineProps<{
+    page?: number;
+    score?: number;
+    sortOrder?: number;
+    problem?: ApiSchemaProblem;
+    disabled?: boolean;
+    choiceStyle?: 'icon' | 'background';
+    showSubmit?: boolean;
+    showExplainAfterSubmit?: boolean;
+    showAnswer?: boolean;
+  }>(),
+  {
+    choiceStyle: 'icon',
+    showSubmit: false,
+    showExplainAfterSubmit: false,
+  }
+);
 
 // 双向绑定已选中的答案
 const answerVM = defineModel<AnswerType>('answer');
 
 const emit = defineEmits<{
   (e: 'answer-change', answer: AnswerType): void;
+  (e: 'submitted', result: ApiExamSubmitProblemResponse): void;
 }>();
 
-const problemInfo = computed(() => props.examProblem.problem || ({} as ApiSchemaProblem));
+const problemInfo = computed(() => props.problem || ({} as ApiSchemaProblem));
+const { result: description } = useMarkdownIt(() => problemInfo.value.description || '');
 
-const typeName = computed(() => getProblemTypeName(props.examProblem.problem?.type || ''));
+const typeName = computed(() => getProblemTypeName(props.problem?.type || ''));
 
 const innerTextAnswer = ref('');
 const innerBoolAnswer = ref<boolean>();
 const innerOptionAnswer = ref<number[]>([]);
 
 // 问题变化时，清除保存的选项
-watch(() => problemInfo.value, () => {
-  innerTextAnswer.value = '';
-  innerBoolAnswer.value = undefined;
-  innerOptionAnswer.value = [];
-}, { deep: false });
+watch(
+  () => problemInfo.value,
+  () => {
+    innerTextAnswer.value = '';
+    innerBoolAnswer.value = undefined;
+    innerOptionAnswer.value = [];
+  },
+  { deep: false }
+);
 
 // 观测外部传入 answer 的变化并赋值
 watch(
@@ -76,6 +107,27 @@ watch(
   }
 );
 
+// show answer
+watch(() => props.showAnswer, (newShowAnswer) => {
+  if (newShowAnswer) {
+    switch (problemInfo.value.type) {
+      case ApiSchemaProblemType.EnumSingleChoice:
+      case ApiSchemaProblemType.EnumMultipleChoice:
+        innerOptionAnswer.value = props.problem?.answer?.answer || [] as number[];
+        break;
+      case ApiSchemaProblemType.EnumTrueFalse:
+        innerBoolAnswer.value = props.problem?.answer?.answer as boolean;
+        break;
+      case ApiSchemaProblemType.EnumShortAnswer:
+        innerTextAnswer.value = props.problem?.answer?.answer || '' as string;
+        break;
+      case ApiSchemaProblemType.EnumFillBlank:
+        innerTextAnswer.value = (props.problem?.answer?.answer || [] as string[]).join(', ');
+        break;
+    }
+  }
+}, { immediate: true });
+
 function indexToOption(index: number): string {
   if (index < 0) {
     throw new Error('Index must be a non-negative integer');
@@ -92,22 +144,74 @@ function indexToOption(index: number): string {
 const answerSectionRef = useTemplateRef('answer-section');
 const { height: answerSectionHeight } = useElementSize(answerSectionRef);
 const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}px`);
+
+function handleResetInput() {
+  if (innerTextAnswer.value != '') {
+    innerTextAnswer.value = '';
+    answerVM.value = '';
+  } else if (innerOptionAnswer.value.length > 0) {
+    innerOptionAnswer.value = [];
+    answerVM.value = [];
+  } else if (innerBoolAnswer.value != undefined) {
+    innerBoolAnswer.value = undefined;
+    answerVM.value = undefined;
+  }
+}
+
+const submitLoading = ref(false);
+// 内部单题提交
+async function handleSubmit() {
+  try {
+    if (!problemInfo.value.id) {
+      ToastManager.warning('信息缺失，提交失败');
+      return;
+    }
+    submitLoading.value = true;
+    const res = await genApi.Tue.examSingleProblemSubmitPost({
+      answers: [{
+        answer: answerVM.value,
+        problem_id: problemInfo.value.id,
+      }],
+      time_spent: 0,
+    });
+    if (res.data.data) {
+      emit('submitted', res.data.data);
+    }
+  } finally {
+    submitLoading.value = false;
+  }
+}
+
+defineSlots<{
+  'header-score': () => VNode;
+}>()
 </script>
 
 <template>
-  <div class="exam-problem">
-    <div class="problem-header">
-      <span class="problem-score">{{ page != undefined ? `${page}. ` : '' }}{{ typeName }}&nbsp;&nbsp;&nbsp;{{ (examProblem.score || 0) / 100 }} 分</span>
-    </div>
+  <div class="exam-problem" :class="{ disabled: disabled || showAnswer }">
+    <header class="problem-header">
+      <span class="problem-score">
+        {{ page != undefined ? `${page}. ` : '' }}{{ typeName }}
+        <span v-if="score !== undefined">&nbsp;&nbsp;&nbsp;{{ (score || 0) / 100 }} 分</span>
+        <slot name="header-score"/>
+      </span>
+      <section v-if="showSubmit" class="problem-submit">
+        <CusTooltip v-if="!showAnswer" text="重置输入" position="top"><DiliButton type="normal" @click="handleResetInput"><Redo /></DiliButton></CusTooltip>
+        <DiliButton v-if="!showAnswer" :disabled="innerTextAnswer === '' && innerBoolAnswer == undefined && !innerOptionAnswer.length" type="primary" text="提交" @click="handleSubmit">
+          <CusSpin v-if="submitLoading" :show="true" />
+        </DiliButton>
+        <div v-else class="problem-score">已完成作答</div>
+      </section>
+    </header>
 
-    <div class="problem-content" v-html="problemInfo.description" />
+    <section class="problem-content" v-html="description" />
 
-    <div ref="answer-section" class="answer-section">
+    <section ref="answer-section" class="problem-answer-section">
       <template v-if="problemInfo.type === ApiSchemaProblemType.EnumShortAnswer">
         <CusTextarea
           v-model="innerTextAnswer"
           :textarea-attr="{ placeholder: '请在此输入你的答案...' }"
-          class="answer-section-textarea"
+          class="problem-answer-section-textarea"
         />
       </template>
 
@@ -118,15 +222,16 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
       <template v-else-if="problemInfo.type === ApiSchemaProblemType.EnumSingleChoice">
         <CusRadioGroup
           :model-value="innerOptionAnswer[0]"
-          class="answer-section-select"
+          class="problem-answer-section-select"
           direction="column"
-          display-style="icon"
+          :display-style="choiceStyle"
+          background-mode="transparent"
           @change="(val) => (innerOptionAnswer = [val])"
         >
           <CusRadioButton
             v-for="(option, i) in problemInfo.options"
             :key="option.id"
-            class="answer-section-select-item"
+            class="problem-answer-section-select-item"
             :value="option.id"
             :label="`${indexToOption(i)}. ${option.content}`"
           >
@@ -138,13 +243,14 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
       <template v-else-if="problemInfo.type === ApiSchemaProblemType.EnumTrueFalse">
         <CusRadioGroup
           :model-value="String(innerBoolAnswer)"
-          class="answer-section-select"
+          class="problem-answer-section-select"
           direction="column"
-          display-style="icon"
-          @change="(val) => (innerBoolAnswer = (val === 'true'))"
+          :display-style="choiceStyle"
+          background-mode="transparent"
+          @change="(val) => (innerBoolAnswer = val === 'true')"
         >
-          <CusRadioButton class="answer-section-select-item" value="true" label="A. 正确"> 正确</CusRadioButton>
-          <CusRadioButton class="answer-section-select-item" value="false" label="B. 错误"> 错误</CusRadioButton>
+          <CusRadioButton class="problem-answer-section-select-item" value="true" label="A. 正确"> 正确</CusRadioButton>
+          <CusRadioButton class="problem-answer-section-select-item" value="false" label="B. 错误"> 错误</CusRadioButton>
         </CusRadioGroup>
       </template>
 
@@ -152,14 +258,15 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
         <CusCheckboxGroup
           :model-value="innerOptionAnswer"
           type="highlight"
-          class="answer-section-select"
-          display-style="icon"
+          class="problem-answer-section-select"
+          :display-style="choiceStyle"
+          background-mode="transparent"
           @change="(val) => (innerOptionAnswer = [...val])"
         >
           <CusCheckboxButton
             v-for="(option, i) in problemInfo.options"
             :key="option.id"
-            class="answer-section-select-item"
+            class="problem-answer-section-select-item"
             :value="Number(option.id)"
             :label="`${indexToOption(i)}. ${option.content}`"
           >
@@ -171,7 +278,11 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
       <template v-else>
         <div style="color: var(--color-danger)">【暂不支持此题目的作答】</div>
       </template>
-    </div>
+    </section>
+
+    <section v-if="showAnswer" class="problem-explanation">
+      <span class="problem-explanation-title">解析：</span>{{ problemInfo.explanation }}
+    </section>
   </div>
 </template>
 
@@ -180,48 +291,68 @@ const maxAnswerSectionHeight = computed(() => `${answerSectionHeight.value - 12}
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  user-select: none;
+
+  &.disabled {
+    pointer-events: none;
+  }
 }
 
-.problem-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.problem-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.problem-score {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  white-space: preserve;
-}
-
-.problem-content {
-  line-height: 1.6;
-}
-
-.answer-section {
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
-
-  &-textarea {
-    min-height: 5rem;
-    max-height: v-bind(maxAnswerSectionHeight);
+.problem {
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  &-select {
-    background: transparent;
-    width: 100%;
-    padding: 0;
+  &-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
 
-    &-item {
-      font-size: 1.1rem;
+  &-score {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    white-space: preserve;
+  }
+
+  &-submit {
+    display: flex;
+    gap: 8px;
+  }
+
+  &-content {
+    line-height: 1.5;
+  }
+
+  &-answer-section {
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    &-textarea {
+      min-height: 5rem;
+      max-height: v-bind(maxAnswerSectionHeight);
+
+      .disabled & {
+        min-height: fit-content;
+      }
+    }
+
+    &-select {
+      background: transparent;
       width: 100%;
-      padding: 1rem;
+
+      &-item {
+        font-size: 1rem;
+        width: 100%;
+      }
+    }
+  }
+
+  &-explanation {
+    &-title {
+      color: var(--text-secondary);
     }
   }
 }

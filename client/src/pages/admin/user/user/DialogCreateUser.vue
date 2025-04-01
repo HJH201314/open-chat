@@ -113,7 +113,7 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
 </script>
 
 <template>
-  <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm">
+  <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm" :dialog-style="{ 'width': '789px' }">
     <template #default>
       <t-form ref="form" :data="formData" label-align="top" style="margin-bottom: 1rem">
         <t-form-item label="用户名" name="username" :rules="[{ required: true }]">
@@ -128,6 +128,7 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
             :data="roleList"
             :title="['可选角色', '已选角色']"
             :operation="['移除', '添加']"
+            style="width: 100%;"
             @change="handleChange"
             @checked-change="handleCheckedChange"
           ></t-transfer>

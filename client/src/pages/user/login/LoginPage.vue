@@ -12,6 +12,8 @@ import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import genApi from '@/api/gen-api.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import Logo from '@/components/Logo.vue';
+import { encryptWithPublicKey } from '@/utils/encrypt.ts';
+import CusInput from '@/components/input/CusInput.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -96,13 +98,17 @@ async function handleLogin() {
 async function handleRegister() {
   try {
     submitDisabled.value = true;
+    const keyRes = await genApi.Base.publicKeyGet();
+    if (!keyRes.data.data) {
+      return;
+    }
     const res = await genApi.User.registerPost({
       username: loginForm.username,
-      password: loginForm.password,
+      password: await encryptWithPublicKey(keyRes.data.data, loginForm.password),
     });
     if (res.status === 200 && res.data.data === true) {
       ToastManager.normal('注册成功', { position: 'bottom' });
-      await userStore.login(loginForm.username, loginForm.password);
+      await userStore.login(loginForm.username, loginForm.password, keyRes.data.data);
     } else {
       loginForm.shake += 1;
       ToastManager.danger('注册失败，请重试！', { position: 'bottom' });
@@ -151,7 +157,7 @@ watch(
       showToast({ text: `登录成功，欢迎回来，UID:${userStore.userId}`, position: 'top' });
       setTimeout(() => {
         closePage();
-      }, 1500);
+      }, 750);
     }
   }
 );
@@ -188,30 +194,38 @@ function showUserAgreement() {
     <div class="login-bottom">
       <form class="login-forms" @submit.prevent>
         <div class="login-form">
-          <input
+          <CusInput
             v-model="loginForm.username"
-            :autocomplete="loginForm.type === 'login' ? 'username' : 'off'"
             class="login-form-input"
-            name="username"
+            :input-attrs="{
+              autocomplete: loginForm.type === 'login' ? 'username' : 'off',
+              name: 'username',
+              type: 'text',
+            }"
             placeholder="请输入用户名"
             type="text"
           />
-          <input
+          <CusInput
             v-model="loginForm.password"
-            :autocomplete="loginForm.type === 'login' ? 'password' : 'off'"
             class="login-form-input"
-            name="password"
+            :input-attrs="{
+              autocomplete: loginForm.type === 'login' ? 'password' : 'off',
+              name: 'password',
+              type: 'password',
+            }"
             placeholder="请输入密码"
-            type="password"
           />
-          <input
+          <CusInput
             v-if="loginForm.type == 'register'"
             v-model="loginForm.repeatPassword"
             autocomplete="off"
             class="login-form-input"
-            name="repeat-password"
+            :input-attrs="{
+              autocomplete: 'off',
+              name: 'repeat-password',
+              type: 'password',
+            }"
             placeholder="请再次输入密码"
-            type="password"
           />
         </div>
         <button
@@ -319,19 +333,8 @@ function showUserAgreement() {
     gap: 0.5rem;
 
     &-input {
-      width: 100%;
+      height: 2.5rem;
       font-size: large;
-      border-radius: 0.5rem;
-      padding: 0.25rem 0.5rem;
-      border: 2px solid #ffffff00;
-      background-color: rgba(0, 0, 0, 0.05);
-      outline: none;
-      transition: all 0.2s $ease-out-circ;
-
-      &:focus {
-        background: $color-white;
-        border: 2px solid var(--color-primary);
-      }
     }
 
     &-submit {
