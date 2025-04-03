@@ -32,7 +32,9 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
       useSubscription(
         liveQuery(async () => {
           // 先进行 time 排序，对于相同的 time 使用 remoteId 排序
-          return (await db.messages.where({ sessionId: newSessionId }).sortBy('time')).sort((a, b) => Number(a.remoteId || 0) - Number(b.remoteId || 0));
+          return (await db.messages.where({ sessionId: newSessionId }).sortBy('time')).sort((a, b) => {
+            return a.time - b.time || Number(a.remoteId || 0) - Number(b.remoteId || 0)
+          });
         }).subscribe(toObserver(messages))
       );
     },
@@ -55,6 +57,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
   async function syncMessages(sessionId: string, controller?: AbortController): Promise<boolean> {
     const abortController = controller || new AbortController();
     const remoteMessages: ApiSchemaMessage[] = [];
+    let modelMap: Record<string, string> = {};
     // 获取所有远程数据
     let nextPage = 1;
     while (nextPage) {
@@ -70,6 +73,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
           }
         );
         remoteMessages.push(...(res.data.data?.list || []));
+        if (res.data.data?.model_map) modelMap = { ...modelMap, ...res.data.data.model_map };
         if (res.data.data?.next_page) nextPage = res.data.data?.next_page;
         else break;
       } catch (_) {
@@ -88,6 +92,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
           content: v.content,
           reasoningContent: JSON.parse(`"${v.reasoning_content}"`),
           htmlContent: v.role == 'assistant' ? renderMarkdown(v.content) : v.content,
+          model: v.model_id ? modelMap[v.model_id] : '',
           extra: v.extra,
         }) as MessageInfo
     );

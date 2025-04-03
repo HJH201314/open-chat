@@ -10,6 +10,13 @@
  * ---------------------------------------------------------------
  */
 
+export interface ApiChatChatMessageListResponse {
+  list?: ApiSchemaMessage[];
+  /** 模型 ID -> 模型名称 */
+  model_map?: Record<string, string>;
+  next_page?: number;
+}
+
 export interface ApiChatCompletionStreamUserInput {
   bot_id?: number;
   enable_context?: boolean;
@@ -77,11 +84,11 @@ export interface ApiEntityCommonResponseBool {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage {
+export interface ApiEntityCommonResponseChatChatMessageListResponse {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiEntityPaginatedContinuationResponseSchemaMessage;
+  data?: ApiChatChatMessageListResponse;
   /** 消息 */
   msg?: string;
 }
@@ -363,11 +370,6 @@ export interface ApiEntityCommonResponseString {
   data?: string;
   /** 消息 */
   msg?: string;
-}
-
-export interface ApiEntityPaginatedContinuationResponseSchemaMessage {
-  list?: ApiSchemaMessage[];
-  next_page?: number;
 }
 
 export interface ApiEntityPaginatedContinuationResponseSchemaUserSession {

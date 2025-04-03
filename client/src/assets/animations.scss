@@ -1,8 +1,8 @@
-@use 'variables';
+@use 'variables' as *;
 /* 定义 vue transition 默认切换动画 */
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.2s variables.$ease-out-circ;
+  transition: opacity 0.2s $ease-out-circ;
 }
 
 .v-enter-from,
@@ -44,13 +44,13 @@
   }
 
   &-enter-active, &-leave-active {
-    transition: all 0.2s variables.$ease-out-circ;
+    transition: all 0.2s $ease-out-circ;
   }
 }
 
 /* 定义 渐变出现、立即消失 */
 .ease-in-enter-active {
-  transition: opacity 0.2s variables.$ease-out-circ;
+  transition: opacity 0.2s $ease-out-circ;
 }
 
 .ease-in-leave-active {

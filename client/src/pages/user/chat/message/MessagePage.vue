@@ -35,12 +35,13 @@ watchEffect(() => {
   }
   // 进入对话时侧边栏收起，退出后展开
   else {
-    noPaddingBus.emit(!!props.sessionId);
+    noPaddingBus.emit(true);
+    // noPaddingBus.emit(!!props.sessionId);
   }
 });
 
-// 通过Transition的事件控制 isEmptyTipAvailable，避免应用动画时刷新空空如也和消息列表挤压
-const isEmptyTipAvailable = ref(true);
+// 通过Transition的事件控制 isRightSessionShowing，避免应用动画时刷新空空如也和消息列表挤压
+const isRightSessionShowing = ref(false);
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -61,16 +62,17 @@ watch(
     <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
       <RecordListView
         v-show="showListView"
-        :class="{ 'message-page-record-list-absolute': !isLargeScreen }"
+        :class="{ 'message-page-record-list-full': !isLargeScreen }"
         class="message-page-record-list transition-all-circ"
       />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <section v-show="showDialogView" class="session-right" :class="{ 'session-right-absolute': !isLargeScreen }">
+    <section v-show="showDialogView || isRightSessionShowing" class="session-right" :class="{ 'session-right-full': !isLargeScreen }">
       <Transition
         :name="isLargeScreen ? 'slide-fade-right' : 'slide-in-right-full'"
-        @before-enter="isEmptyTipAvailable = false"
-        @after-leave="isEmptyTipAvailable = true"
+        :type="isLargeScreen ? 'transition' : 'animation'"
+        @before-enter="isRightSessionShowing = true"
+        @after-leave="isRightSessionShowing = false"
       >
         <ChatDetailView
           v-if="showDialogView && props.sessionId"
@@ -82,7 +84,7 @@ watch(
       </Transition>
       <Transition name="ease-in">
         <div
-          v-if="showDialogView && !props.sessionId && isEmptyTipAvailable"
+          v-if="showDialogView && !props.sessionId && !isRightSessionShowing"
           id="dialog-detail-empty-tip"
           class="message-page-empty-tip"
         >
@@ -118,13 +120,13 @@ watch(
   &-record-list {
     height: 100%;
 
-    &:not(&-absolute) {
+    &:not(&-full) {
       flex-grow: 0;
-      width: clamp(13.375rem, 30%, 20rem);
+      width: clamp(12rem, 25%, 20rem);
     }
 
     // 在移动端使用absolute便于展示切换动画，否则会被挤压
-    &-absolute {
+    &-full {
       position: absolute;
       left: 0;
       right: 0;
@@ -132,8 +134,10 @@ watch(
   }
 
   &-dialog-detail {
+    z-index: 1;
     position: absolute;
     inset: 0;
+    background: white;
   }
 
   &-empty-tip {
@@ -154,11 +158,10 @@ watch(
   flex-shrink: 0;
 
   // 在移动端使用absolute便于展示切换动画，否则会被挤压
-  &-absolute {
+  &-full {
     position: absolute;
     left: 0;
     right: 0;
-    background-color: white;
   }
 }
 
@@ -171,17 +174,27 @@ watch(
 .show-leave-to {
   opacity: 0;
 }
+</style>
+
+<style lang="scss">
+@use '@/assets/variables' as *;
 
 .slide-in-right-full {
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
-    transform: translateX(100%);
+  &-enter-active {
+    animation: slide-in-right-full-anim 0.25s $ease-out-circ;
   }
 
-  &-enter-active,
   &-leave-active {
-    transition: all 0.2s $ease-out-circ;
+    animation: slide-in-right-full-anim 0.25s $ease-in-out-circ reverse;
+  }
+
+  @keyframes slide-in-right-full-anim {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
 }
 </style>

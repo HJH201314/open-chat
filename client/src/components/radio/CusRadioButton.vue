@@ -91,7 +91,7 @@ watchEffect(() => {
   &.display-background {
     &.type-normal {
       &.checked {
-        color: black;
+        color: var(--color-primary);
       }
     }
 

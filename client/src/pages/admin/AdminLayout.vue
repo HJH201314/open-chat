@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Logo from '@/components/Logo.vue';
+import Logo from '@/components/logo/Logo.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { computed, provide, ref, useTemplateRef, watch } from 'vue';
 import { useTheme } from '@/components/theme/useTheme.ts';

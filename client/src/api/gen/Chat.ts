@@ -16,7 +16,7 @@ import type {
   ApiEntityCommonResponseArraySchemaModelCache,
   ApiEntityCommonResponseArraySchemaPreset,
   ApiEntityCommonResponseBool,
-  ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
+  ApiEntityCommonResponseChatChatMessageListResponse,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
   ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession,
   ApiEntityCommonResponseSchemaMessage,
@@ -94,7 +94,7 @@ export class Chat<SecurityDataType = unknown> {
    * @name MessageListGet
    * @summary 获取消息
    * @request GET:/chat/message/list/{session_id}
-   * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage` 返回数据
+   * @response `200` `ApiEntityCommonResponseChatChatMessageListResponse` 返回数据
    */
   messageListGet = (
     sessionId: string,
@@ -108,7 +108,7 @@ export class Chat<SecurityDataType = unknown> {
     },
     params: RequestParams = {},
   ) =>
-    this.http.request<ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage, any>({
+    this.http.request<ApiEntityCommonResponseChatChatMessageListResponse, any>({
       path: `/chat/message/list/${sessionId}`,
       method: "GET",
       query: query,

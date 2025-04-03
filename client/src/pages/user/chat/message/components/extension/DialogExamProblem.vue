@@ -49,6 +49,7 @@ async function handleSubmitted(res: ApiExamSubmitProblemResponse) {
     :problem="item.extra?.['question']"
     :show-answer="item.extra?.['question-finished']"
     choice-style="background"
+    choice-type="normal"
     show-submit
     @submitted="handleSubmitted"
   >

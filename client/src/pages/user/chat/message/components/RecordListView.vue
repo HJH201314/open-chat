@@ -7,12 +7,12 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { CloseOne, MenuUnfold, Plus, Search, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, h, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { onClickOutside, until, useEventBus, useIntervalFn, useScroll } from '@vueuse/core';
+import { onClickOutside, until, useEventBus, useScroll } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { goToLogin } from '@/pages/user/login';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
@@ -21,6 +21,10 @@ import { useTheme } from '@/components/theme/useTheme.ts';
 import IconButton from '@/components/IconButton.vue';
 import useGlobal from '@/commands/useGlobal.ts';
 import { toggleSidebarExpandKey } from '@/constants/eventBusKeys.ts';
+import LogoOpenAI from '@/components/logo/LogoOpenAI.vue';
+import LogoDeepSeek from '@/components/logo/LogoDeepSeek.vue';
+import LogoQwen from '@/components/logo/LogoQwen.vue';
+import { formatTime } from '../../../../../utils/string.ts';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -31,18 +35,6 @@ const userStore = useUserStore();
 const settingStore = useSettingStore();
 const currentSessionId = useRouteParams<string>('sessionId');
 
-// 定时同步对话列表
-const { pause: pauseSync, resume: resumeSync } = useIntervalFn(
-  () => {
-    if (userStore.isLogin) {
-      dataStore.syncSessions();
-    }
-  },
-  60000,
-  {
-    immediate: false,
-  }
-);
 onMounted(() => {
   until(() => userStore.isLogin)
     .toBe(true)
@@ -51,13 +43,8 @@ onMounted(() => {
         .toBe(true)
         .then(() => {
           dataStore.syncSessions();
-          resumeSync();
         });
     });
-});
-
-onBeforeUnmount(() => {
-  pauseSync();
 });
 
 async function handleAddRecord(defaultBotId?: number) {
@@ -149,7 +136,12 @@ const router = useRouter();
 // 点击对话列表项
 function handleListItemClick(id: string) {
   const routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
-  routerHandler(`/chat/message/${id}`);
+  routerHandler({
+    name: 'messageDetail',
+    params: {
+      sessionId: id,
+    },
+  });
 }
 
 const roleForm = reactive({
@@ -205,29 +197,29 @@ const { isSmallScreen } = useGlobal();
   <!-- 角色列表 -->
   <div ref="record-list-view" class="dialog-list">
     <div class="dialog-list-bar" :class="{ shadow: !arrivedState.top }">
-      <IconButton type="secondary" color="#999" v-if="isSmallScreen" @click="handleSidebarUnfold">
-        <MenuUnfold />
+      <IconButton v-if="isSmallScreen" type="secondary" color="#999999" no-normal-background @click="handleSidebarUnfold">
+        <MenuUnfold size="1.2rem" />
       </IconButton>
-      <div
-        ref="search-bar"
-        :class="{ 'dialog-list-bar-search': searchForm.inputting, 'dialog-list-action-button': !searchForm.inputting }"
-        @click="handleSearchIconClick"
-      >
-        <Search size="1.2rem" />
-        <input
-          v-show="searchForm.inputting"
-          ref="search-input"
-          v-model="searchForm.searchVal"
-          placeholder="搜索对话内容"
-        />
-        <span
-          v-if="searchForm.inputting && searchForm.searchVal"
-          class="dialog-list-bar-search-reset"
-          @click="searchForm.searchVal = ''"
-        >
-          <CloseOne theme="filled" />
-        </span>
-      </div>
+<!--      <div-->
+<!--        ref="search-bar"-->
+<!--        :class="{ 'dialog-list-bar-search': searchForm.inputting, 'dialog-list-action-button': !searchForm.inputting }"-->
+<!--        @click="handleSearchIconClick"-->
+<!--      >-->
+<!--        <Search size="1.2rem" />-->
+<!--        <input-->
+<!--          v-show="searchForm.inputting"-->
+<!--          ref="search-input"-->
+<!--          v-model="searchForm.searchVal"-->
+<!--          placeholder="搜索对话内容"-->
+<!--        />-->
+<!--        <span-->
+<!--          v-if="searchForm.inputting && searchForm.searchVal"-->
+<!--          class="dialog-list-bar-search-reset"-->
+<!--          @click="searchForm.searchVal = ''"-->
+<!--        >-->
+<!--          <CloseOne theme="filled" />-->
+<!--        </span>-->
+<!--      </div>-->
       <div v-show="!searchForm.inputting" class="dialog-list-new-dialog" @click="handleListAddClick">
         <span>开始新对话</span>
         <Plus size="1.2rem" theme="outline" />
@@ -267,16 +259,25 @@ const { isSmallScreen } = useGlobal();
         class="dialog-list-item"
         @click="handleListItemClick(item.id)"
       >
-        <img :src="item.avatar ? item.avatar : '/chatgpt3.svg'" alt="avatar" />
-        <div class="dialog-list-item-center">
-          <div class="title">
-            {{ item.title || '未命名对话' }}
+        <LogoDeepSeek v-if="item.model?.includes('deepseek')" class="dialog-list-item__logo" />
+        <LogoQwen v-else-if="item.model?.includes('qwen')" class="dialog-list-item__logo" />
+        <LogoOpenAI v-else class="dialog-list-item__logo" />
+        <div class="dialog-list-item__right">
+          <div class="dialog-list-item__top">
+            <div class="title">
+              {{ item.title || '未命名对话' }}
+            </div>
+            <div class="datetime">
+              {{ formatTime(new Date(item.createAt ?? '')) }}
+            </div>
           </div>
-          <div class="datetime">
-            {{ new Date(item.createAt ?? '').toLocaleString() }}
-          </div>
-          <div class="digest">
-            <Star v-if="item.flags?.isStared" :fill="theme.colorWarning" theme="filled" />
+          <div class="dialog-list-item__bottom">
+            <div class="digest">
+              {{ item.model || '-' }}
+            </div>
+            <div class="flags">
+              <Star v-if="item.flags?.isStared" :fill="theme.colorWarning" theme="filled" />
+            </div>
           </div>
         </div>
       </div>
@@ -310,7 +311,7 @@ const { isSmallScreen } = useGlobal();
 
   &-container {
     padding-top: 3rem;
-    padding-inline: 0.5rem;
+    //padding-inline: 0.5rem;
     width: 100%;
     height: 100%;
     display: flex;
@@ -338,8 +339,7 @@ const { isSmallScreen } = useGlobal();
     height: min-content;
     gap: 0.25rem;
     padding: 0.5rem;
-    background-color: color-mix(in srgb, var(--color-white), transparent 50%);
-    backdrop-filter: blur(10px);
+    background-color: var(--color-white);
     transition: box-shadow 0.2s $ease-out-circ;
 
     &.shadow {
@@ -381,7 +381,6 @@ const { isSmallScreen } = useGlobal();
 
   &-new-dialog {
     box-sizing: border-box;
-    box-shadow: $box-shadow;
     cursor: pointer;
     flex: 1;
     height: 2rem;
@@ -389,20 +388,21 @@ const { isSmallScreen } = useGlobal();
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    color: $color-white;
-    background-color: var(--color-primary);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
     opacity: 0.85;
     border-radius: 0.5rem;
-    transition: all 0.1s $ease-out-circ;
+    font-weight: bold;
+    transition: all 0.2s $ease-out-circ;
 
     &:hover {
-      box-shadow: $box-shadow-deeper-right-bottom;
-      transform: translate(-1px, -1px);
+      color: var(--color-white);
+      background: var(--color-primary);
     }
 
     &:active {
-      box-shadow: $box-shadow-shallower;
-      transform: translate(1px, 1px);
+      border-color: var(--color-primary-darker);
+      background: var(--color-primary-darker);
     }
   }
 
@@ -433,7 +433,6 @@ const { isSmallScreen } = useGlobal();
 
   &-item {
     padding: 0.5rem;
-    border-radius: 0.5rem;
     cursor: pointer;
     transition: background-color 0.2s $ease-out-cubic;
     display: flex;
@@ -455,19 +454,25 @@ const { isSmallScreen } = useGlobal();
       border-radius: 20%;
     }
 
-    &-center {
+    &__logo {
+      height: 2.5rem;
+      width: 2.5rem;
+      border-radius: 20%;
+    }
+
+    &__right {
       flex: 1;
-      display: grid;
-      grid-template-areas:
-        'title title title'
-        'datetime datetime digest';
-      overflow: hidden;
+    }
+
+    &__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
 
       .title {
         color: var(--color-black);
-        grid-area: title;
         font-weight: bold;
-        font-size: 1.1rem;
+        font-size: 1rem;
 
         display: -webkit-box;
         word-break: break-all;
@@ -479,18 +484,26 @@ const { isSmallScreen } = useGlobal();
       }
 
       .datetime {
-        grid-area: datetime;
+        flex: 0 0 auto;
         color: $color-grey-500;
         font-size: 0.75rem;
-        text-align: left;
+        text-align: right;
       }
+    }
+
+    &__bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
 
       .digest {
-        grid-area: digest;
-        font-size: 0.75rem;
+        color: $color-grey-500;
+      }
+
+      .flags {
         display: flex;
         align-items: center;
-        flex-direction: row-reverse;
       }
     }
   }

@@ -9,7 +9,7 @@ import { onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import type { SidebarEntry } from '@/components/sidebar/types.ts';
-import Logo from '@/components/Logo.vue';
+import Logo from '@/components/logo/Logo.vue';
 import CusPopover from '@/components/tooltip/CusPopover.vue';
 
 const props = withDefaults(

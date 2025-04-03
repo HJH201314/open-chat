@@ -11,7 +11,7 @@ import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import genApi from '@/api/gen-api.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import Logo from '@/components/Logo.vue';
+import Logo from '@/components/logo/Logo.vue';
 import { encryptWithPublicKey } from '@/utils/encrypt.ts';
 import CusInput from '@/components/input/CusInput.vue';
 

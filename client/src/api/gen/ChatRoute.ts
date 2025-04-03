@@ -16,7 +16,7 @@ import type {
   ApiEntityCommonResponseArraySchemaModelCache,
   ApiEntityCommonResponseArraySchemaPreset,
   ApiEntityCommonResponseBool,
-  ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage,
+  ApiEntityCommonResponseChatChatMessageListResponse,
   ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession,
   ApiEntityCommonResponseEntityPaginatedSyncListResponseSchemaUserSession,
   ApiEntityCommonResponseSchemaMessage,
@@ -85,7 +85,7 @@ export namespace Chat {
    * @name MessageListGet
    * @summary 获取消息
    * @request GET:/chat/message/list/{session_id}
-   * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage` 返回数据
+   * @response `200` `ApiEntityCommonResponseChatChatMessageListResponse` 返回数据
    */
   export namespace MessageListGet {
     export type RequestParams = {
@@ -102,7 +102,7 @@ export namespace Chat {
     };
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaMessage;
+    export type ResponseBody = ApiEntityCommonResponseChatChatMessageListResponse;
   }
 
   /**

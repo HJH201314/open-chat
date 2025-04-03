@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import { type CusRadioGroupProps, RadioGroupInjectionKey } from '@/components/radio/types.ts';
 import { getRandomString } from '@/utils/string.ts';
-import {
-  computed,
-  type CSSProperties,
-  onMounted,
-  onUnmounted,
-  provide,
-  ref,
-  toRefs,
-  useTemplateRef,
-  watch,
-  watchEffect,
-} from 'vue';
+import { computed, type CSSProperties, onMounted, onUnmounted, provide, ref, toRefs, useTemplateRef, watch } from 'vue';
 
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
   name: getRandomString(5),
@@ -119,9 +108,12 @@ function positionBar() {
   }
 }
 
-watch(() => selectedElement.value, () => {
-  requestUpdateBarPosition();
-});
+watch(
+  () => selectedElement.value,
+  () => {
+    requestUpdateBarPosition();
+  }
+);
 
 const radioGroupRef = useTemplateRef('radio-group');
 let resizeObserver: ResizeObserver | null = null;
@@ -183,6 +175,7 @@ onUnmounted(() => {
     &-color {
       background-color: $color-grey-100;
     }
+
     &-transparent {
       background-color: $color-bg-transparent-100;
     }

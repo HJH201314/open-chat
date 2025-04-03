@@ -65,7 +65,8 @@ watchArray(messageList, (newVal, oldVal) => {
   // 消息列表变化时，滚动到底部（消息增加 1/2 时平滑，增加多条时立即）
   if (newVal.length) {
     setTimeout(() => {
-      dialogDetailRef.value?.scrollDialogListToBottom(newVal.length - oldVal.length <= 2 ? 'smooth' : 'instant');
+      console.log(newVal.length - oldVal.length)
+      dialogDetailRef.value?.scrollDialogListToBottom(Math.abs(newVal.length - oldVal.length) == 1 ? 'smooth' : 'instant');
     }, 0);
   }
 });

@@ -306,7 +306,6 @@ export const useDataStore = defineStore('data', () => {
       msg: '',
       think: '',
     });
-    const { commands, commandMap } = useCommandParser(() => rawData.msg, false);
     const { result: renderedMsg } = useMarkdownIt(() => rawData.msg);
     const session = await getSessionInfo(sessionId);
     if (!session) return;
@@ -314,20 +313,11 @@ export const useDataStore = defineStore('data', () => {
 
     let userMsgIndex: number | undefined = undefined;
     let botMsgIndex: number | undefined = undefined;
-    userMsgIndex = await saveMessage(sessionId, message, 'user', 'text', message, '', undefined);
-    botMsgIndex = await saveMessage(sessionId, '', 'bot', 'text', '', '', undefined);
+    userMsgIndex = await saveMessage(sessionId, message, 'user', 'text', '', message, '', undefined);
+    botMsgIndex = await saveMessage(sessionId, '', 'bot', 'text', session.model, '', '', undefined);
     callback?.onPreSaveMsg?.(userMsgIndex, botMsgIndex);
-    // 观测回答数据中的指令
-    watchArray(commands, () => {
-      const titleCmd = commandMap.value['title'];
-      if (titleCmd) {
-        editSessionTitle(sessionId, titleCmd.values[0]);
-        // console.log('findTitle', titleCmd, rawMsg.value);
-        rawData.msg = rawData.msg.replace(titleCmd.raw, '');
-      }
-    });
     // 观测回答的变化
-    watchThrottled(
+    const stopWatchingContent = watchThrottled(
       () => renderedMsg.value,
       (v, ov) => {
         if (v == ov) return;
@@ -336,7 +326,7 @@ export const useDataStore = defineStore('data', () => {
       { throttle: 150 }
     );
     // 观测思考的变化
-    watchThrottled(
+    const stopWatchingReasoning = watchThrottled(
       () => rawData.think,
       (v, ov) => {
         if (v == ov) return;
@@ -391,17 +381,20 @@ export const useDataStore = defineStore('data', () => {
       ctrl.signal,
       async (event) => {
         if (event.event === 'done') {
+          // 停止截流观测
+          stopWatchingContent();
+          stopWatchingReasoning();
           // 当接收到服务器端的结束标记时，数据库保存消息
           saveBotMessage().finally(() => {
             callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
           });
         } else if (event.event === 'msg') {
           const data = JSON.parse(event.data)?.content;
-          console.log('[msg]', event.data, `'${data}'`);
+          console.debug('[msg]', event.data, `'${data}'`);
           rawData.msg += data; // 记录已接收的消息
         } else if (event.event === 'think') {
           const data = JSON.parse(event.data)?.content;
-          console.log('[think]', event.data, `'${data}'`);
+          console.debug('[think]', event.data, `'${data}'`);
           rawData.think += data;
         } else if (event.event === 'cmd') {
           await handleJSONCommand(new CommandParser(event.data, true).parseJSON());
@@ -510,6 +503,7 @@ export const useDataStore = defineStore('data', () => {
     message: string,
     sender: 'user' | 'bot',
     type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other',
+    model: string,
     htmlMessage?: string,
     thinking?: string,
     remoteId?: string
@@ -520,6 +514,7 @@ export const useDataStore = defineStore('data', () => {
         sender,
         type,
         remoteId,
+        model,
         content: message,
         reasoningContent: thinking,
         htmlContent: htmlMessage,

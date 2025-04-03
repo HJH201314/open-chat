@@ -53,7 +53,7 @@ const { isLargeScreen, isSmallScreen } = useGlobal();
       :class="{ 'no-padding': !showPadding, 'left-padding': !sidebarRef?.isShowing || isSmallScreen }"
       class="chat-panel-wrapper"
     >
-      <Panel>
+      <Panel class="panel">
         <RouterView v-slot="{ Component }">
           <Transition name="slide-fade">
             <component :is="Component" class="child-view" />
@@ -86,6 +86,11 @@ const { isLargeScreen, isSmallScreen } = useGlobal();
 
   &.no-padding {
     --padding: 0;
+
+    > .panel {
+      border-radius: 0;
+      box-shadow: none;
+    }
   }
 
   &.left-padding {

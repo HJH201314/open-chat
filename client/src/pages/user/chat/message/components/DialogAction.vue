@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { Back, Control, Delete, Edit, More, Refresh, Share, Star, WrongUser } from '@icon-park/vue-next';
+import { Back, Control, Delete, Edit, More, Refresh, Share, Star } from '@icon-park/vue-next';
 import IconButton from '@/components/IconButton.vue';
 import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import type { DialogActionEmits, DialogActionProps } from '@/pages/user/chat/message/components/types.ts';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = withDefaults(defineProps<DialogActionProps>(), {
   title: '',
@@ -14,58 +14,86 @@ const props = withDefaults(defineProps<DialogActionProps>(), {
   isStarted: false,
   messageSyncing: false,
   menuInMore: false,
+  canShowMenu: true,
+  shadowed: false,
 });
+watch(() => props.canShowMenu, (newShowMenu) => {
+  if (!newShowMenu) innerShowMenu.value = false;
+})
 
 const emit = defineEmits<DialogActionEmits>();
 
-const showMenu = ref(false);
+const innerShowMenu = ref(false);
 </script>
 
 <template>
-  <div class="dialog-action">
+  <div class="dialog-action" :class="{ shadow: shadowed }">
     <div class="dialog-action-area-left">
-      <IconButton type="secondary" style="flex-shrink: 0" @click="$emit('back')">
+      <IconButton
+        type="secondary"
+        color="#00110F"
+        no-normal-background
+        style="flex-shrink: 0; opacity: 0.75"
+        @click="$emit('back')"
+      >
         <Back size="16" />
       </IconButton>
-      <div v-if="!hasPermission" class="dialog-action-tip" @click="$emit('actionTipClick')">
-        <WrongUser />
-        <span v-if="!isLogin">未登录</span>
-        <span v-else>无权限</span>
-      </div>
+      <!--      <div v-if="!hasPermission" class="dialog-action-tip" @click="$emit('actionTipClick')">-->
+      <!--        <WrongUser />-->
+      <!--        <span v-if="!isLogin">未登录</span>-->
+      <!--        <span v-else>无权限</span>-->
+      <!--      </div>-->
       <span class="dialog-action-title">
         {{ title || '未命名对话' }}
       </span>
-      <span class="dialog-action-subtitle"> {{ messageCount }} 条消息 </span>
+      <!--      <span class="dialog-action-subtitle"> {{ messageCount }} 条消息 </span>-->
     </div>
-    <IconButton v-if="menuInMore" type="secondary" color="grey" style="flex-shrink: 0" @click="showMenu = !showMenu">
+    <IconButton
+      v-if="menuInMore"
+      type="secondary"
+      color="#00110F"
+      style="flex-shrink: 0; opacity: 0.75"
+      no-normal-background
+      @click="innerShowMenu = !innerShowMenu"
+    >
       <More size="16" theme="filled" />
     </IconButton>
-    <Transition name="menu-flow-in-out">
-      <section v-if="!menuInMore || showMenu" class="dialog-action-menu" :class="{ 'dialog-action-menu--flow': menuInMore }">
+    <Transition name="action-flow-in-out" type="animation">
+      <section
+        v-if="!menuInMore || innerShowMenu"
+        class="dialog-action-menu"
+        :class="{ 'dialog-action-menu--flow': menuInMore }"
+      >
         <CusTooltip text="收藏对话" position="bottom">
-          <IconButton type="secondary" color="warning" style="flex-shrink: 0" @click="$emit('star')">
+          <IconButton type="secondary" color="warning" no-normal-background style="flex-shrink: 0" @click="$emit('star')">
             <Star size="16" :theme="isStared ? 'filled' : 'outline'" />
           </IconButton>
         </CusTooltip>
         <CusTooltip text="分享对话" position="bottom">
-          <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="$emit('share')">
+          <IconButton type="secondary" color="info" no-normal-background style="flex-shrink: 0" @click="$emit('share')">
             <Share size="16" />
           </IconButton>
         </CusTooltip>
         <CusTooltip text="刷新对话" position="bottom">
-          <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="$emit('sync')">
+          <IconButton type="secondary" color="info" no-normal-background style="flex-shrink: 0" @click="$emit('sync')">
             <cus-spin :show="messageSyncing">
               <Refresh size="16" />
             </cus-spin>
           </IconButton>
         </CusTooltip>
-        <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="$emit('edit')">
+        <IconButton type="secondary" color="info" no-normal-background style="flex-shrink: 0" @click="$emit('edit')">
           <Edit size="16" />
         </IconButton>
-        <IconButton type="secondary" color="info" style="flex-shrink: 0" @click="$emit('editSystemPrompt')">
+        <IconButton
+          type="secondary"
+          color="info"
+          no-normal-background
+          style="flex-shrink: 0"
+          @click="$emit('editSystemPrompt')"
+        >
           <Control size="16" />
         </IconButton>
-        <IconButton type="secondary" color="danger" style="flex-shrink: 0" @click="$emit('delete')">
+        <IconButton type="secondary" color="danger" no-normal-background style="flex-shrink: 0" @click="$emit('delete')">
           <Delete size="16" />
         </IconButton>
       </section>
@@ -89,8 +117,7 @@ const showMenu = ref(false);
   gap: 0.5rem;
   padding: 0.5rem;
   color: var(--color-black);
-  background-color: color-mix(in srgb, var(--color-white), transparent 15%);
-  backdrop-filter: blur(10px);
+  background: var(--color-white);
   z-index: 1;
 
   &.shadow {
@@ -139,30 +166,53 @@ const showMenu = ref(false);
     display: flex;
     gap: 0.5rem;
 
+    > :not(:first-child) {
+      // 定位
+      position: relative;
+
+      // 竖线
+      &:before {
+        content: '';
+        position: absolute;
+        left: -0.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1px;
+        height: 1rem;
+        background: $color-grey-100;
+      }
+    }
+
     &--flow {
-      padding: 0.5rem;
-      background: white;
+      gap: 0.25rem;
+      padding: 0.25rem;
+      background: rgba(255 255 255 / 99%);
       border-radius: 0.5rem;
-      box-shadow: $box-shadow;
+      box-shadow: $box-shadow-right-bottom;
       position: absolute;
-      top: 100%;
+      top: 0.25rem;
+      right: 3rem;
     }
   }
 }
-</style>
-<style lang="scss">
-@use "@/assets/variables" as *;
 
-.menu-flow-in-out {
-  &-enter-active,
-  &-leave-active {
-    transition: all 0.2s $ease-out-circ;
+.action-flow-in-out {
+  &-enter-active {
+    animation: action-flow-in-out-anim 0.2s $ease-in-out-back;
   }
 
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
-    transform: translateX(100%);
+  &-leave-active {
+    animation: action-flow-in-out-anim 0.2s $ease-in-out-back reverse;
+  }
+
+  @keyframes action-flow-in-out-anim {
+    0% {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    100% {
+      opacity: 1;
+    }
   }
 }
 </style>

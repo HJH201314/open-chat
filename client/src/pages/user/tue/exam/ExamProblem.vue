@@ -21,6 +21,7 @@ import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 import genApi from '@/api/gen-api.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import CusSpin from '@/components/spinning/CusSpin.vue';
+import type { CusRadioGroupProps } from '@/components/radio/types.ts';
 
 const props = withDefaults(
   defineProps<{
@@ -29,13 +30,15 @@ const props = withDefaults(
     sortOrder?: number;
     problem?: ApiSchemaProblem;
     disabled?: boolean;
-    choiceStyle?: 'icon' | 'background';
+    choiceStyle?: CusRadioGroupProps['displayStyle'];
+    choiceType?: CusRadioGroupProps['type'];
     showSubmit?: boolean;
     showExplainAfterSubmit?: boolean;
     showAnswer?: boolean;
   }>(),
   {
     choiceStyle: 'icon',
+    choiceType: 'highlight',
     showSubmit: false,
     showExplainAfterSubmit: false,
   }
@@ -224,6 +227,7 @@ defineSlots<{
           :model-value="innerOptionAnswer[0]"
           class="problem-answer-section-select"
           direction="column"
+          :type="choiceType"
           :display-style="choiceStyle"
           background-mode="transparent"
           @change="(val) => (innerOptionAnswer = [val])"
@@ -245,6 +249,7 @@ defineSlots<{
           :model-value="String(innerBoolAnswer)"
           class="problem-answer-section-select"
           direction="column"
+          :type="choiceType"
           :display-style="choiceStyle"
           background-mode="transparent"
           @change="(val) => (innerBoolAnswer = val === 'true')"
@@ -257,8 +262,8 @@ defineSlots<{
       <template v-else-if="problemInfo.type === ApiSchemaProblemType.EnumMultipleChoice">
         <CusCheckboxGroup
           :model-value="innerOptionAnswer"
-          type="highlight"
           class="problem-answer-section-select"
+          :type="choiceType"
           :display-style="choiceStyle"
           background-mode="transparent"
           @change="(val) => (innerOptionAnswer = [...val])"

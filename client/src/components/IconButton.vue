@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
+import { getColorHex, getLighterColor } from '@/utils/color.ts';
 
 const props = withDefaults(
   defineProps<{
     type?: 'normal' | 'secondary';
+    shape?: 'rect' | 'circle';
+    shadow?: boolean;
     color?: 'danger' | 'warning' | 'success' | 'info' | 'primary' | string;
+    noNormalBackground?: boolean;
   }>(),
   {
     type: 'normal',
+    shape: 'rect',
     color: '',
+    shadow: false,
+    noNormalBackground: false,
   }
 );
 
@@ -28,14 +35,23 @@ const color = computed(() => {
 });
 
 // 注意 color-mix 兼容性
-const secondaryColorBackground = computed(() => `color-mix(in srgb, ${color.value}, transparent 85%)`);
-const secondaryColorBackgroundHover = computed(() => `color-mix(in srgb, ${color.value}, transparent 80%)`);
-const secondaryColorBackgroundActive = computed(() => `color-mix(in srgb, ${color.value}, transparent 75%)`);
-const secondaryColorForeground = computed(() => `color-mix(in srgb, ${color.value}, transparent 5%)`);
+const secondaryColorForeground = computed(() => getColorHex(color.value));
+const secondaryColorBackground = computed(
+  () => props.noNormalBackground ? 'transparent' : `color-mix(in srgb, ${getLighterColor(secondaryColorForeground.value, 0.9)}, transparent 30%)`
+);
+const secondaryColorBackgroundHover = computed(
+  () => `color-mix(in srgb, ${getLighterColor(secondaryColorForeground.value, 0.85)}, transparent 20%)`
+);
+const secondaryColorBackgroundActive = computed(
+  () => `color-mix(in srgb, ${getLighterColor(secondaryColorForeground.value, 0.8)}, transparent 10%)`
+);
 </script>
 
 <template>
-  <div class="icon-button" :class="[`icon-button-${type}`]">
+  <div
+    class="icon-button"
+    :class="{ [`icon-button-${type}`]: true, [`icon-button-${shape}`]: true, 'icon-button-shadowed': shadow }"
+  >
     <div class="icon-button-slot" :class="[`icon-button-slot-${type}`]">
       <slot></slot>
     </div>
@@ -50,18 +66,22 @@ const secondaryColorForeground = computed(() => `color-mix(in srgb, ${color.valu
   position: relative;
   height: 2rem;
   width: 2rem;
-  padding: 0.25rem;
   border-radius: 0.5rem;
   cursor: pointer;
   text-align: center;
-  transition: all 0.1s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  line-height: 1; // 避免行高影响居中布局
   color: $color-black;
   background: $color-grey-50;
 
-  &-secondary {
+  &-shadowed {
     box-shadow: $box-shadow-shallower;
+  }
+
+  &-secondary {
     color: v-bind(secondaryColorForeground);
     background: v-bind(secondaryColorBackground);
+    backdrop-filter: blur(5px);
 
     &:hover {
       background: v-bind(secondaryColorBackgroundHover);
@@ -76,6 +96,10 @@ const secondaryColorForeground = computed(() => `color-mix(in srgb, ${color.valu
     &:hover {
       background: $color-grey-200;
     }
+  }
+
+  &-circle {
+    border-radius: 50%;
   }
 
   &-slot {

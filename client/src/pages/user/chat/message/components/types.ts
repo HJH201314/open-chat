@@ -6,8 +6,10 @@ export type DialogActionProps = {
   messageCount: number;
   hasPermission: boolean;
   isLogin: boolean;
+  shadowed?: boolean;
   isStared?: boolean;
   messageSyncing: boolean;
+  canShowMenu?: boolean; // 是否允许展示菜单
   menuInMore?: boolean; // 菜单是否需要通过“更多”按钮打开
 };
 
