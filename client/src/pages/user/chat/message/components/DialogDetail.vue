@@ -104,7 +104,6 @@ function scrollDialogListToBottom(behavior: ScrollBehavior = 'smooth') {
 }
 
 function handleMessageThinkExpand(expand: boolean) {
-  isArrivedBottomWhenExpand = arrivedState.bottom;
   if (expand) {
     dialogListRef.value?.style.setProperty('overflow-y', 'hidden');
     setTimeout(() => {
