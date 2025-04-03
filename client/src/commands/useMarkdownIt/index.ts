@@ -28,7 +28,7 @@ markdownIt.renderer.rules.fence = function (tokens, idx, options, env, slf) {
   const highlighted = highlightJsRender?.(tokens, idx, options, env, slf) || '';
 
   return `<div class="cus-code-container">
-            <section>
+            <section style="user-select: none;">
               <span class="lang-name">${lang}</span>
               <button type="button" class="copy-button">复制</button>
             </section>
