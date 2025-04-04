@@ -5,13 +5,8 @@ import { type ApiSchemaExam } from '@/api/gen/data-contracts.ts';
 import useGlobal from '@/commands/useGlobal.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { DialogManager } from '@/components/dialog';
-import router from '@/plugins/router.ts';
-import ExamAnsweringFragment from '@/pages/user/tue/exam/ExamAnsweringFragment.vue';
-import ExamWelcomeFragment from '@/pages/user/tue/exam/ExamWelcomeFragment.vue';
 import { until, useElementBounding, useStepper } from '@vueuse/core';
-import ExamFinishedFragment from '@/pages/user/tue/exam/ExamFinishedFragment.vue';
-import { useRoute } from 'vue-router';
-import ToastManager from '@/components/toast/ToastManager.ts';
+import { useRoute, useRouter } from 'vue-router';
 import IconButton from '@/components/IconButton.vue';
 import { Back } from '@icon-park/vue-next';
 import ExamAnswerView from '@/pages/user/tue/exam/answer/ExamAnswerView.vue';
@@ -42,6 +37,8 @@ watch(
     }
   }
 );
+
+const router = useRouter();
 
 const loadingExam = ref(false);
 // 加载考试信息
@@ -115,12 +112,7 @@ const { left: buttonbackLeft } = useElementBounding(buttonBackRef);
 <template>
   <div class="exam-page" :class="{ small: isSmallScreen }">
     <LoadingModal :visible="loadingExam" />
-    <IconButton
-      ref="button-back"
-      class="exam-page-back"
-      type="secondary"
-      @click="handleBack"
-    >
+    <IconButton ref="button-back" class="exam-page-back" type="secondary" @click="handleBack">
       <Back />
     </IconButton>
     <ExamAnswerView

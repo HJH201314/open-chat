@@ -2,7 +2,7 @@ import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 import { getActivePinia } from 'pinia';
 import { useUserStore } from '@/store/useUserStore.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import router from '@/plugins/router.ts';
+import { getRouterInstance } from '@/plugins/router.ts';
 
 export const successHandler = (resp: any) => {
   if (resp.status === 200) {
@@ -32,7 +32,7 @@ export const errorHandler = (error: any) => {
         // 之前是登录状态，现在鉴权失败，则提示登录态过期
         ToastManager.danger('登录态已过期，请登录后重试~', {
           onClick() {
-            router.push('/login');
+            getRouterInstance().push('/login');
           },
         });
       }

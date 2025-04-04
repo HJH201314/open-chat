@@ -1,6 +1,6 @@
 import '@icon-park/vue-next/styles/index.css';
 import 'highlight.js/styles/atom-one-dark.css';
-import initPlugins from '@/utils/initPlugins';
+import initPlugins from '@/plugins/initPlugins.ts';
 
 /* Import fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core';

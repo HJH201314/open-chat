@@ -1,10 +1,11 @@
-import { tryOnMounted, useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
+import { tryOnMounted, until, useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 import genApi from '@/api/gen-api.ts';
 import type { ApiSchemaUser } from '@/api/gen/data-contracts.ts';
 import { encryptWithPublicKey } from '@/utils/encrypt.ts';
+import { ping } from '@/api/service/userService.ts';
 
 /* 用户相关 */
 export const useUserStore = defineStore('user', () => {
@@ -24,17 +25,6 @@ export const useUserStore = defineStore('user', () => {
     return roles.value.map((role) => role.name).join('').toLowerCase().includes('admin');
   });
 
-  // 每小时 ping 一下确认登录过期没
-  const { pause: pausePing, resume: resumePing } = useIntervalFn(
-    async () => {
-      await ping();
-    },
-    3600000,
-    {
-      immediate: false,
-    }
-  );
-
   const ping = async () => {
     try {
       if (!accessToken.value) return;
@@ -52,6 +42,18 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  // 每小时 ping 一下确认登录过期没
+  const { pause: pausePing, resume: resumePing } = useIntervalFn(
+    async () => {
+      await ping();
+    },
+    3600000,
+    {
+      immediate: !!accessToken, // 页面加载后若已有 token，则获取当前登录信息
+      immediateCallback: true,
+    }
+  );
+
   const login = async (_username: string, _password: string, _publicKey: string = '') => {
     try {
       let publicKey = '';
@@ -68,6 +70,7 @@ export const useUserStore = defineStore('user', () => {
       if (res.data.code === 200) {
         loginStatus.value = 'login';
         currentUser.value = { ...res.data.data };
+        console.log('[login]', res.data.data)
         resumePing();
         return true;
       } else {
@@ -92,11 +95,6 @@ export const useUserStore = defineStore('user', () => {
     refreshToken.value = '';
     pausePing();
   }
-
-  tryOnMounted(async () => {
-    // 自动登录逻辑
-    await ping();
-  });
 
   return {
     avatar,

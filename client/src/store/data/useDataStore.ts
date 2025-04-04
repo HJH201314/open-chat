@@ -3,10 +3,10 @@ import useMarkdownIt from '@/commands/useMarkdownIt';
 import showToast from '@/components/toast/toast.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { MessageInfo, SessionInfo } from '@/types/data.ts';
-import { CommandParser, useCommandParser } from '@/utils/command-parser';
-import { useLocalStorage, useTimeoutFn, useToggle, watchArray, watchThrottled } from '@vueuse/core';
+import { CommandParser } from '@/utils/command-parser';
+import { useLocalStorage, useTimeoutFn, useToggle, watchThrottled } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { h, reactive, ref, shallowRef, watch } from 'vue';
+import { reactive, ref, shallowRef, watch } from 'vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { toObserver, useSubscription } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
@@ -15,7 +15,6 @@ import genApi from '@/api/gen-api.ts';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import type { ApiSchemaUserSession } from '@/api/gen/data-contracts.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { Correct } from '@icon-park/vue-next';
 
 interface MessageCallback {
   // 预保存数据后的回调
@@ -163,7 +162,7 @@ export const useDataStore = defineStore('data', () => {
       if (flags?.isStared != undefined) {
         await genApi.Chat.sessionFlagPost(sessionId, {
           star: flags.isStared,
-        })
+        });
       }
       return true;
     } catch (_) {
@@ -229,9 +228,11 @@ export const useDataStore = defineStore('data', () => {
       }
     }
     try {
-      const sessionIdsToBeDeleted = deletedSessions.map((session) => session.session_id).filter((sessionId) => !!sessionId) as string[];
+      const sessionIdsToBeDeleted = deletedSessions
+        .map((session) => session.session_id)
+        .filter((sessionId) => !!sessionId) as string[];
       const sessionsToBeCreated = [] as SessionInfo[];
-      const sessionsToBeUpdated = [] as { key: string; changes: Partial<SessionInfo>; }[];
+      const sessionsToBeUpdated = [] as { key: string; changes: Partial<SessionInfo> }[];
       // 组装所有需要缓存的数据
       for (const remoteUserSession of updatedSessions) {
         const remoteSession = remoteUserSession.session;
@@ -254,7 +255,7 @@ export const useDataStore = defineStore('data', () => {
               needSync: true,
               isStared: remoteUserSession.flag_info?.star,
             },
-          })
+          });
         } else if (localSession && remoteSession) {
           // 本地存在且远端存在，更新
           sessionsToBeUpdated.push({
@@ -268,7 +269,7 @@ export const useDataStore = defineStore('data', () => {
                 isStared: remoteUserSession.flag_info?.star,
               },
             },
-          })
+          });
         }
       }
       await db.transaction('rw', db.sessions, async () => {
@@ -276,7 +277,7 @@ export const useDataStore = defineStore('data', () => {
         await db.sessions.bulkAdd(sessionsToBeCreated);
         await db.sessions.bulkUpdate(sessionsToBeUpdated);
         await db.sessions.bulkDelete(sessionIdsToBeDeleted);
-      })
+      });
       // 成功后保存时间戳
       lastSyncTime.value = serverTime;
     } catch (_) {
@@ -342,30 +343,36 @@ export const useDataStore = defineStore('data', () => {
         // 保存远程消息 ID
         const msgIds = [idCmd.data['q'], idCmd.data['a']];
         rawData.msg = rawData.msg.replace(idCmd.raw, '');
-        await updateMessage(sessionId, userMsgIndex, { remoteId: msgIds[0] });
-        await updateMessage(sessionId, botMsgIndex, { remoteId: msgIds[1] });
+        await updateMessage(userMsgIndex, { messageId: msgIds[0] });
+        await updateMessage(botMsgIndex, { messageId: msgIds[1] });
       }
       const tooltipCmd = cp.getCommandByName('tooltip');
       if (tooltipCmd) {
-        await updateMessage(sessionId, botMsgIndex, { extra: { 'tooltip': tooltipCmd.values.join('') } });
+        await updateMessage(botMsgIndex, { extra: { tooltip: tooltipCmd.values.join('') } });
       }
       const problemCmd = cp.getCommandByName('tool:question');
       if (problemCmd) {
-        await updateMessage(sessionId, botMsgIndex, { extra: { 'question': problemCmd.data } });
+        await updateMessage(botMsgIndex, { extra: { question: problemCmd.data } });
       }
       const examCmd = cp.getCommandByName('tool:exam');
       if (examCmd) {
-        await updateMessage(sessionId, botMsgIndex, { extra: { 'exam': examCmd.data } });
+        await updateMessage(botMsgIndex, { extra: { exam: examCmd.data } });
+      }
+      const birthdayCmd = cp.getCommandByName('tool:birthday-gift');
+      if (birthdayCmd) {
+        await updateMessage(botMsgIndex, { extra: { 'birthday-gift': birthdayCmd.values.join('') } });
       }
     };
 
-    const saveBotMessage = async () => {
+    let usage: Record<string, any> = {};
+    const saveBotMessage = async (extra: Record<string, any> = {}) => {
       console.log('[saveBotMessage]', rawData.msg, renderedMsg.value);
       botMsgIndex &&
-        (await updateMessage(sessionId, botMsgIndex, {
+        (await updateMessage(botMsgIndex, {
           content: rawData.msg,
           reasoningContent: JSON.parse(`"${rawData.think}"`),
-          htmlContent: renderedMsg.value,
+          htmlContent: renderedMsg.value || usage['content'] || '', // 如果渲染结果为空，可能是回复太快导致没有处理到数据，此时保存 usage 中的完整数据
+          extra: extra,
         }));
     };
 
@@ -385,7 +392,7 @@ export const useDataStore = defineStore('data', () => {
           stopWatchingContent();
           stopWatchingReasoning();
           // 当接收到服务器端的结束标记时，数据库保存消息
-          saveBotMessage().finally(() => {
+          saveBotMessage(usage['extra'] || {}).finally(() => {
             callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
           });
         } else if (event.event === 'msg') {
@@ -398,6 +405,8 @@ export const useDataStore = defineStore('data', () => {
           rawData.think += data;
         } else if (event.event === 'cmd') {
           await handleJSONCommand(new CommandParser(event.data, true).parseJSON());
+        } else if (event.event === 'usage') {
+          usage = JSON.parse(event.data);
         } else if (event.event === 'error') {
           callback?.onError?.();
         }
@@ -438,12 +447,10 @@ export const useDataStore = defineStore('data', () => {
             isStreaming.value && restartTimeout(msg);
           },
           onFinish(msg) {
-            ToastManager.normal('回答完成', { position: 'top-right', icon: h(Correct) });
             customReceiver?.onFinish?.(msg);
             innerCleanEffects();
           },
           onError() {
-            ToastManager.danger('出错了，换个姿势再试吧~', { position: 'top-right' });
             customReceiver?.onError?.();
             innerCleanEffects();
           },
@@ -459,19 +466,19 @@ export const useDataStore = defineStore('data', () => {
       stopTooLong();
     };
 
-    const {
-      isPending: isTooLongPending,
-      stop: stopTooLong,
-      start: startTooLong,
-    } = useTimeoutFn((msg: string) => {
-      if (!abortController.signal.aborted) {
-        abortController.abort('no data for too long');
-        console.debug('[timeout]', 'no data for too long', msg);
-        ToastManager.danger('服务端超时');
+    const { stop: stopTooLong, start: startTooLong } = useTimeoutFn(
+      (msg: string) => {
+        if (!abortController.signal.aborted) {
+          abortController.abort('no data for too long');
+          console.debug('[timeout]', 'no data for too long', msg);
+          ToastManager.danger('服务端超时');
+        }
+      },
+      60000000,
+      {
+        immediate: false,
       }
-    }, 60000000, {
-      immediate: false,
-    });
+    );
 
     const restartTimeout = (msg: string = '') => {
       stopTooLong();
@@ -506,14 +513,14 @@ export const useDataStore = defineStore('data', () => {
     model: string,
     htmlMessage?: string,
     thinking?: string,
-    remoteId?: string
+    messageId?: string
   ): Promise<number> {
     try {
       return db.messages.add({
+        messageId,
         sessionId,
         sender,
         type,
-        remoteId,
         model,
         content: message,
         reasoningContent: thinking,
@@ -529,10 +536,10 @@ export const useDataStore = defineStore('data', () => {
   /**
    * 更新本地消息数据
    */
-  async function updateMessage(sessionId: string, index: number, updateObj: Partial<MessageInfo>): Promise<boolean> {
+  async function updateMessage(index: number, updateObj: Partial<MessageInfo>): Promise<boolean> {
     try {
       return (
-        (await db.messages.where({ sessionId, id: index }).modify((obj) => {
+        (await db.messages.where({ id: index }).modify((obj) => {
           Object.entries(updateObj).forEach(([key, value]) => {
             obj[key] = value;
           });

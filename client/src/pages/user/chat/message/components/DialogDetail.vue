@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { DoubleDown } from '@icon-park/vue-next';
 import { until, useElementBounding, useEventListener, useScroll } from '@vueuse/core';
-import { computed, ref, useTemplateRef } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 import DialogAction from './DialogAction.vue';
 import DialogInput from './DialogInput.vue';
 import DialogMessage from './DialogMessage.vue';
@@ -11,6 +11,7 @@ import { scrollToBottom } from '@/utils/element.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import type { DialogDetailEmits, DialogDetailProps } from '@/pages/user/chat/message/components/types.ts';
 import DialogExamProblem from '@/pages/user/chat/message/components/extension/DialogExamProblem.vue';
+import Birthday from '@/components/extra/Birthday.vue';
 
 const props = withDefaults(defineProps<DialogDetailProps>(), {
   session: () => ({
@@ -135,6 +136,7 @@ useEventListener(dialogDetailRef, 'mousemove', (e: MouseEvent) => {
 
 defineExpose({
   scrollDialogListToBottom,
+  isDialogListReachedBottom: arrivedState.bottom,
 });
 </script>
 
@@ -164,8 +166,10 @@ defineExpose({
         @action-tip-click="$emit('actionTipClick')"
       />
     </Transition>
-    <!-- 空空提示 -->
-    <div v-if="isEmptySession" class="dialog-detail-empty">随便问点啥？</div>
+    <Transition>
+      <!-- 空空提示 -->
+      <div v-if="isEmptySession" class="dialog-detail-empty">随便问点啥？</div>
+    </Transition>
     <!-- 对话区域 -->
     <div ref="dialog-list" class="dialog-detail-display-area">
       <!-- 对话列表固定中间 -->
@@ -186,14 +190,14 @@ defineExpose({
         >
           <template #extra>
             <DialogExamProblem :item="item" />
-            <t-link
+            <a
               v-if="item.extra?.['exam']"
               size="large"
-              theme="primary"
               target="_self"
               :href="`/tue/exam/${item.extra['exam']['id']}`"
               >立即前往
-            </t-link>
+            </a>
+            <Birthday v-if="item.extra?.['birthday-gift'] && typeof item.extra?.['birthday-gift'] == 'string' && item.extra?.['birthday-gift']?.startsWith('gift:')" :info="item.extra?.['birthday-gift']" />
             <div v-if="item.extra?.['tooltip']">{{ item.extra?.['tooltip'] }}</div>
           </template>
         </DialogMessage>

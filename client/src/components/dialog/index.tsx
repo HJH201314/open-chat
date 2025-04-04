@@ -1,4 +1,4 @@
-import initPlugins from '@/utils/initPlugins';
+import initPlugins from '@/plugins/initPlugins.ts';
 import { getRandomString } from '@/utils/string';
 import { type App, createApp, defineComponent, h, onMounted, ref, type VNode } from 'vue';
 import CommonDialog from '@/components/dialog/CommonDialog.vue';
@@ -157,7 +157,7 @@ export class DialogManager {
    * @param props
    * @param inputProps
    */
-  public static inputDialog = (props?: CommonDialogProps & { placeholder: string }, inputProps?: CusInputProps) =>
+  public static inputDialog = (props?: CommonDialogProps & { placeholder?: string }, inputProps?: CusInputProps) =>
     new Promise<{
       status: boolean;
       value: string;

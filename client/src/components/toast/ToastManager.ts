@@ -2,7 +2,7 @@ import type { ToastProps } from './types';
 import type { App } from 'vue';
 import { createApp, h } from 'vue';
 import CusToast from './CusToast.vue';
-import initPlugins from '@/utils/initPlugins.ts';
+import initPlugins from '@/plugins/initPlugins.ts';
 import CusThemeProvider from '@/components/theme/CusThemeProvider.ts';
 
 /**

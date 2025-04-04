@@ -81,7 +81,7 @@ import type { PrimaryTableCol } from 'tdesign-vue-next/es/table/type';
 import { DialogManager } from '@/components/dialog';
 import TableTitleArea from '@/pages/admin/component/TableTitleArea.vue';
 import { AddIcon, DeleteIcon, EditIcon, RefreshIcon } from 'tdesign-icons-vue-next';
-import router from '@/plugins/router.ts';
+import { getRouterInstance } from '@/plugins/router.ts';
 import { useRouteQuery } from '@vueuse/router';
 import DialogCreateModel from '@/pages/admin/system/provider/model/DialogCreateModel.vue';
 import TableWrapper from '@/pages/admin/component/TableWrapper.vue';
@@ -217,7 +217,7 @@ function handleDelete(row: ApiSchemaModel) {
 }
 
 function handleUnselectProvider() {
-  router.replace({
+  getRouterInstance().replace({
     name: 'ManageSystemModel',
     query: {},
   });
@@ -225,7 +225,7 @@ function handleUnselectProvider() {
 
 function handleClickProvider(row: ApiSchemaModel) {
   if (row.provider_id) {
-    router.replace({
+    getRouterInstance().replace({
       name: 'ManageSystemModel',
       query: {
         provider_id: row.provider_id,

@@ -5,12 +5,11 @@ import { type ApiSchemaExam } from '@/api/gen/data-contracts.ts';
 import useGlobal from '@/commands/useGlobal.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { DialogManager } from '@/components/dialog';
-import router from '@/plugins/router.ts';
 import ExamAnsweringFragment from '@/pages/user/tue/exam/ExamAnsweringFragment.vue';
 import ExamWelcomeFragment from '@/pages/user/tue/exam/ExamWelcomeFragment.vue';
 import { until, useElementBounding, useStepper } from '@vueuse/core';
 import ExamFinishedFragment from '@/pages/user/tue/exam/ExamFinishedFragment.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import IconButton from '@/components/IconButton.vue';
 import { Back } from '@icon-park/vue-next';
@@ -41,6 +40,8 @@ watch(
     }
   }
 );
+
+const router = useRouter();
 
 const loadingExam = ref(false);
 // 加载考试信息
@@ -115,7 +116,10 @@ const handleBack = () => {
 const answerRecordId = ref<number>();
 const timeSpent = ref<number>();
 // 提交回答
-const handleAnswerSubmit = async (payload: { answers: Record<number, number[] | string | boolean>; timeSpent: number }) => {
+const handleAnswerSubmit = async (payload: {
+  answers: Record<number, number[] | string | boolean>;
+  timeSpent: number;
+}) => {
   if (!exam.value?.id) return;
   timeSpent.value = payload.timeSpent;
 

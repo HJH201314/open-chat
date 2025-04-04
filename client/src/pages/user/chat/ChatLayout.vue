@@ -18,8 +18,6 @@ noPaddingBus.on((v) => {
   showPadding.value = !v;
 });
 
-const userStore = useUserStore();
-
 // 在 onMounted 后再初始化 entries，否则会报错
 const entries = ref<SidebarEntry[]>([]);
 onMounted(() => {

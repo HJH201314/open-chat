@@ -8,8 +8,10 @@ import vueDevTools from 'vite-plugin-vue-devtools';
 import sassDts from 'vite-plugin-sass-dts';
 import mkcert from 'vite-plugin-mkcert';
 import path from 'path';
-import * as fs from 'node:fs';
 import { createHtmlPlugin } from 'vite-plugin-html';
+import AutoImport from 'unplugin-auto-import/vite';
+import Components from 'unplugin-vue-components/vite';
+import { TDesignResolver } from 'unplugin-vue-components/resolvers';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }): UserConfig => {
@@ -26,6 +28,24 @@ export default defineConfig(({ mode }): UserConfig => {
       vueJsx(),
       vueDevTools({
         launchEditor: 'goland',
+      }),
+      // ...
+      AutoImport({
+        resolvers: [
+          TDesignResolver({
+            library: 'vue-next',
+          }),
+        ],
+      }),
+      Components({
+        resolvers: [
+          TDesignResolver({
+            library: 'vue-next',
+          }),
+        ],
+        globsExclude: [
+          'src/components/**/*.vue',
+        ],
       }),
       sassDts({
         enabledMode: ['development', 'production'],

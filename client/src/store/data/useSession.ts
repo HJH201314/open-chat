@@ -31,9 +31,9 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
       // 订阅 message
       useSubscription(
         liveQuery(async () => {
-          // 先进行 time 排序，对于相同的 time 使用 remoteId 排序
+          // 先进行 time 排序，对于相同的 time 使用 id 排序
           return (await db.messages.where({ sessionId: newSessionId }).sortBy('time')).sort((a, b) => {
-            return a.time - b.time || Number(a.remoteId || 0) - Number(b.remoteId || 0)
+            return a.time - b.time || Number(a.id || 0) - Number(b.id || 0);
           });
         }).subscribe(toObserver(messages))
       );
@@ -46,7 +46,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
   }
 
   async function deleteMessage(msgId: number) {
-    return db.messages.delete(msgId);
+    return db.messages.delete(String(msgId));
   }
 
   /**
@@ -55,6 +55,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
    * @param controller AbortController
    */
   async function syncMessages(sessionId: string, controller?: AbortController): Promise<boolean> {
+    console.log('syncMessages', sessionId)
     const abortController = controller || new AbortController();
     const remoteMessages: ApiSchemaMessage[] = [];
     let modelMap: Record<string, string> = {};
@@ -85,7 +86,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
       (v) =>
         ({
           sessionId,
-          remoteId: v.id,
+          messageId: v.id ? String(v.id) : undefined,
           time: new Date(v.created_at!).getTime(),
           sender: v.role === 'user' ? 'user' : 'bot',
           type: 'text',

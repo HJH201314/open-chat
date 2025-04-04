@@ -325,7 +325,7 @@ defineExpose({
       background-color: $color-success;
 
       &--offline {
-        background-color: orange;
+        background-color: $color-warning;
       }
 
       &--logout {

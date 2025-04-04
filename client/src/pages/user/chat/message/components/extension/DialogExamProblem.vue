@@ -28,7 +28,7 @@ async function handleSubmitted(res: ApiExamSubmitProblemResponse) {
           'score': score,
         };
       });
-      props.item.remoteId && await genApi.Chat.messageUpdatePost(props.item.remoteId, {
+      props.item.messageId && await genApi.Chat.messageUpdatePost(props.item.messageId, {
         extra: {
           'question-finished': true,
           'score': score,

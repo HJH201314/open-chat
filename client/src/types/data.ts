@@ -60,9 +60,8 @@ export type SessionFlags = {
 };
 
 export type MessageInfo = {
-  id: number; // 本地ID
   sessionId: string; // 关联 session_id
-  remoteId?: string; // 服务器消息 ID
+  messageId?: string; // 服务器消息ID
   time: number; // 消息发送/接收时间
   sender: 'user' | 'bot'; // 消息发送者
   type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'other' | 'problem'; // 消息类型

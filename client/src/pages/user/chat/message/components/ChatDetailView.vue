@@ -13,7 +13,7 @@ import genApi from '@/api/gen-api.ts';
 import ShareDialog from '@/pages/user/chat/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
-import { Control, Edit, Refresh } from '@icon-park/vue-next';
+import { Control, Correct, Edit, Refresh } from '@icon-park/vue-next';
 
 interface Props {
   dialogId: string;
@@ -65,8 +65,9 @@ watchArray(messageList, (newVal, oldVal) => {
   // 消息列表变化时，滚动到底部（消息增加 1/2 时平滑，增加多条时立即）
   if (newVal.length) {
     setTimeout(() => {
-      console.log(newVal.length - oldVal.length)
-      dialogDetailRef.value?.scrollDialogListToBottom(Math.abs(newVal.length - oldVal.length) == 1 ? 'smooth' : 'instant');
+      dialogDetailRef.value?.scrollDialogListToBottom(
+        Math.abs(newVal.length - oldVal.length) <= 1 ? 'smooth' : 'instant'
+      );
     }, 0);
   }
 });
@@ -83,16 +84,9 @@ watch(
       if (!userStore.isLogin || (newSession.userId && newSession.userId != userStore.userId)) {
         return;
       }
-      messageSyncing.value = true;
-      syncMessages(newSessionId)
-        .then((res) => {
-          if (res) {
-            dataStore.updateSessionFlags(newSessionId, { needSync: false });
-          }
-        })
-        .finally(() => {
-          messageSyncing.value = false;
-        });
+      doSyncDialog(newSessionId).then(() => {
+        dataStore.updateSessionFlags(newSessionId, { needSync: false });
+      });
     }
   },
   { deep: false }
@@ -185,12 +179,18 @@ async function handleSendMessage() {
       onMessage() {
         form.fixDialogToBottom && dialogDetailRef.value?.scrollDialogListToBottom('smooth');
       },
-      onFinish() {
-        if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
-          dataStore.editDialogTitle(form.sessionId, savedInputValue);
-        }
+      onError() {
+        ToastManager.danger('出错了，换个姿势再试吧~', { position: 'top-right' });
       },
     });
+    // 若未到达底部，则提示用户生成完成
+    if (!dialogDetailRef.value?.isDialogListReachedBottom) {
+      ToastManager.normal('回答完成', { position: 'top', icon: h(Correct) });
+    }
+    // 若消息数量小于 3 且第一个消息为用户消息，则自动修改对话标题
+    if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
+      await dataStore.editDialogTitle(form.sessionId, savedInputValue);
+    }
   } catch (e) {
     if (typeof e == 'string') {
       ToastManager.danger(e);
@@ -240,6 +240,15 @@ function handleShareDialog() {
 
 // 从服务器同步数据
 const messageSyncing = ref(false);
+async function doSyncDialog(sessionId: string, controller?: AbortController) {
+  if (messageSyncing.value) return;
+  try {
+    messageSyncing.value = true;
+    await syncMessages(sessionId, controller);
+  } finally {
+    messageSyncing.value = false;
+  }
+}
 
 async function handleSyncDialog() {
   if (!checkPermission()) return;
@@ -247,12 +256,7 @@ async function handleSyncDialog() {
   const currentSessionId = form.sessionId;
   // 消息列表为空，直接进行同步
   if (!messageList.value.length) {
-    messageSyncing.value = true;
-    try {
-      await syncMessages(currentSessionId);
-    } finally {
-      messageSyncing.value = false;
-    }
+    await doSyncDialog(currentSessionId);
     return;
   }
   DialogManager.createDialog({
@@ -260,7 +264,7 @@ async function handleSyncDialog() {
     title: '刷新对话',
     content: '即将从服务器重新获取数据，如遇客户端渲染异常，可尝试执行。',
     async confirmHandler(controller) {
-      await syncMessages(currentSessionId, controller);
+      await doSyncDialog(currentSessionId, controller);
     },
   });
 }

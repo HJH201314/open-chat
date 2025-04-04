@@ -43,9 +43,9 @@ const innerShowMenu = ref(false);
       <!--        <span v-if="!isLogin">未登录</span>-->
       <!--        <span v-else>无权限</span>-->
       <!--      </div>-->
-      <span class="dialog-action-title">
+      <div class="dialog-action-title">
         {{ title || '未命名对话' }}
-      </span>
+      </div>
       <!--      <span class="dialog-action-subtitle"> {{ messageCount }} 条消息 </span>-->
     </div>
     <IconButton
@@ -65,7 +65,7 @@ const innerShowMenu = ref(false);
         :class="{ 'dialog-action-menu--flow': menuInMore }"
       >
         <CusTooltip text="收藏对话" position="bottom">
-          <IconButton type="secondary" color="warning" no-normal-background style="flex-shrink: 0" @click="$emit('star')">
+          <IconButton type="secondary" color="warning" :no-normal-background="!isStared" style="flex-shrink: 0" @click="$emit('star')">
             <Star size="16" :theme="isStared ? 'filled' : 'outline'" />
           </IconButton>
         </CusTooltip>
@@ -134,7 +134,6 @@ const innerShowMenu = ref(false);
   }
 
   &-title {
-    text-align: center;
     font-weight: bold;
     font-size: 20px;
 

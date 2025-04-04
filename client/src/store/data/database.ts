@@ -9,21 +9,29 @@ export const db = new Dexie('ChatDatabase') as Dexie & {
 
 const defineDatabase = () => {
   // Schema declaration:
-  db.version(1).stores({
+  db.version(8).stores({
     sessions: 'id, *userId, [id+userId], title, avatar, botRole, createAt, withContext, provider, model, flags',
-    messages: '++id, *sessionId, [id+sessionId], remoteId, time, sender, type, content, reasoningContent, htmlContent',
+    messages: '++id, *messageId, *sessionId, [messageId+sessionId], time, sender, type, content, reasoningContent, htmlContent',
   });
 };
 
 export const initDatabase = async () => {
-  defineDatabase();
-  await db.open();
-  console.log('[IndexedDB] Database opened.');
+  try {
+    defineDatabase();
+    await db.open();
+    console.log('[IndexedDB] Database opened.');
+  } catch (_) {
+    await destroyDatabase();
+  }
 };
 
 export const destroyDatabase = async () => {
-  await db.delete();
-  console.log('[IndexedDB] Database deleted.');
+  try {
+    await db.delete();
+    console.log('[IndexedDB] Database deleted.');
+  } catch (_) {
+    // do nothing
+  }
 };
 
 export const resetDatabase = async () => {

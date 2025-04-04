@@ -96,7 +96,7 @@ const router = createRouter({
             //   meta: { title: '课程' },
             //   component: () => import('@/pages/admin/tue/problem/ManageTueCourse.vue'),
             // },
-          ]
+          ],
         },
         {
           path: 'manage/user',
@@ -123,7 +123,7 @@ const router = createRouter({
               meta: { title: '权限' },
               component: () => import('@/pages/admin/user/permission/ManageUserPermission.vue'),
             },
-          ]
+          ],
         },
         {
           path: 'manage/system',
@@ -156,7 +156,7 @@ const router = createRouter({
               meta: { title: '储存桶' },
               component: () => import('@/pages/admin/system/bucket/ManageSystemBucket.vue'),
             },
-          ]
+          ],
         },
       ],
     },
@@ -169,12 +169,11 @@ const router = createRouter({
   ],
 });
 
-export default router;
-
 const siteLoadingBus = useEventBus(siteLoadingKey);
-
 router.beforeEach((to, from, next) => {
+  // 访问新页面时展示加载
   to !== from && siteLoadingBus.emit('start');
+
   next();
 });
 
@@ -182,3 +181,7 @@ router.afterEach(() => {
   // 关闭加载动画
   siteLoadingBus.emit('finish');
 });
+
+export default router;
+
+export const getRouterInstance = () => router!;

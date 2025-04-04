@@ -28,6 +28,7 @@ const emit = defineEmits<{
   (event: 'close'): void;
 }>();
 
+const router = useRouter();
 onMounted(() => {
   if (userStore.isLogin) {
     if (props.isModal) emit('close');
@@ -66,8 +67,6 @@ function initPage() {
   // @ts-ignore EasyTyper 没有类型声明
   typer.value = new EasyTyper(typerObj, ['即刻启航']);
 }
-
-const router = useRouter();
 
 function closePage() {
   if (props.isModal) {

@@ -27,7 +27,7 @@ const inputUserInput = defineModel<string>('inputUserInput', { default: '' });
 
 const emit = defineEmits<DialogInputEmits>();
 
-const smallInput = ref(false);
+const smallInput = ref(true);
 
 function handleInputKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.isComposing) {

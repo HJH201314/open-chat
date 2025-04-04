@@ -482,6 +482,11 @@ export interface ApiExamSubmitProblemResponse {
   score?: number;
 }
 
+export interface ApiManageUpdateSystemConfigParams {
+  name?: string;
+  value?: Record<string, string>;
+}
+
 export interface ApiSchemaAPIKey {
   created_at?: string;
   id?: number;
@@ -631,6 +636,8 @@ export interface ApiSchemaMessage {
 }
 
 export interface ApiSchemaModel {
+  /** 是否启用 */
+  active?: boolean;
   /** 使用 JSON 储存配置 */
   config?: ApiSchemaModelConfig;
   created_at?: string;
@@ -650,6 +657,8 @@ export interface ApiSchemaModel {
 }
 
 export interface ApiSchemaModelCache {
+  /** 是否启用 */
+  active?: boolean;
   /** 使用 JSON 储存配置 */
   config?: ApiSchemaModelConfig;
   created_at?: string;
