@@ -101,6 +101,11 @@ function scrollDialogListToBottom(behavior: ScrollBehavior = 'smooth') {
     .toMatch((v) => v > 0)
     .then(() => {
       dialogListRef.value && scrollToBottom(dialogListRef.value, behavior);
+      // 平滑完全滚动到底部的关键操作：
+      setTimeout(() => {
+        // scroll again, because 某些情况下（如拉取新数据后） panelPlaceHolderPx 下一刻才会生效；此时固定使用 smooth 避免闪烁
+        dialogListRef.value && scrollToBottom(dialogListRef.value, 'smooth');
+      }, 0);
     });
 }
 
