@@ -10,7 +10,7 @@ export const db = new Dexie('ChatDatabase') as Dexie & {
 const defineDatabase = () => {
   // Schema declaration:
   db.version(8).stores({
-    sessions: 'id, *userId, [id+userId], title, avatar, botRole, createAt, withContext, provider, model, flags',
+    sessions: 'id, *userId, [id+userId], title, avatar, botRole, createAt, withContext, model, flags',
     messages: '++id, *messageId, *sessionId, [messageId+sessionId], time, sender, type, content, reasoningContent, htmlContent',
   });
 };

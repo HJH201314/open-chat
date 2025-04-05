@@ -13,7 +13,7 @@
 import type {
   ApiChatCompletionStreamUserInput,
   ApiChatShareSessionShareRequest,
-  ApiEntityCommonResponseArraySchemaModelCache,
+  ApiEntityCommonResponseArrayEntityConfigChatModel,
   ApiEntityCommonResponseArraySchemaPreset,
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseChatChatMessageListResponse,
@@ -69,14 +69,14 @@ export namespace Chat {
    * @name ConfigModelsGet
    * @summary 获取模型配置
    * @request GET:/chat/config/models
-   * @response `200` `ApiEntityCommonResponseArraySchemaModelCache` OK
+   * @response `200` `ApiEntityCommonResponseArrayEntityConfigChatModel` OK
    */
   export namespace ConfigModelsGet {
     export type RequestParams = {};
     export type RequestQuery = {};
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseArraySchemaModelCache;
+    export type ResponseBody = ApiEntityCommonResponseArrayEntityConfigChatModel;
   }
 
   /**

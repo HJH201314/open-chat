@@ -18,7 +18,6 @@ export type ChatSetting = {
   roleDefaultId?: string; // 默认角色
   timeDisplayInDialogList?: string;
   timeDisplayInMessageList?: string;
-  defaultProvider?: string; // 默认 API 提供商
   defaultModel?: string; // 默认模型，比如 gpt-4o
   // 添加索引签名，允许使用字符串索引
   [key: string]: any;
@@ -35,7 +34,6 @@ const defaultSetting: ChatSetting = {
   roleDefaultId: '1',
   timeDisplayInDialogList: 'yyyy-MM-dd hh:mm:ss',
   timeDisplayInMessageList: 'yyyy-MM-dd hh:mm:ss',
-  defaultProvider: '',
   defaultModel: '',
 };
 

@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { DoubleDown } from '@icon-park/vue-next';
 import { until, useElementBounding, useEventListener, useScroll } from '@vueuse/core';
-import { computed, ref, useTemplateRef, watch } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 import DialogAction from './DialogAction.vue';
 import DialogInput from './DialogInput.vue';
 import DialogMessage from './DialogMessage.vue';
 import IconButton from '@/components/IconButton.vue';
 import type { MessageInfo } from '@/types/data.ts';
-import { scrollToBottom } from '@/utils/element.ts';
+import { nextFrame, scrollToBottom } from '@/utils/element.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import type { DialogDetailEmits, DialogDetailProps } from '@/pages/user/chat/message/components/types.ts';
 import DialogExamProblem from '@/pages/user/chat/message/components/extension/DialogExamProblem.vue';
@@ -28,7 +28,7 @@ const props = withDefaults(defineProps<DialogDetailProps>(), {
   answerMsg: '',
   thinkMsg: '',
   isSmallScreen: false,
-  providerDropdown: () => [],
+  modelDropdown: () => [],
 });
 
 const inputModelName = defineModel<string>('inputModelName', { default: '' });
@@ -47,16 +47,15 @@ const inputPanelRef = useTemplateRef<HTMLElement>('input-panel');
 
 const { height: panelHeight, y: panelY } = useElementBounding(() => inputPanelRef.value);
 const { height: detailHeight, y: detailY } = useElementBounding(() => dialogDetailRef.value);
-const panelPlaceholderPx = computed(() => `${detailHeight.value + detailY.value - panelY.value + 16}px`);
-const fixDialogToBottomPx = computed(() => `${detailHeight.value + detailY.value - panelY.value + 8}px`);
+const panelPlaceholderPx = computed(() => `${panelHeight.value + 16}px`);
+const fixDialogToBottomPx = computed(() => `${panelHeight.value + 8}px`);
 
 const {
   arrivedState,
   directions: scrollDirections,
-  y: scrollY,
 } = useScroll(dialogListRef, {
   throttle: 200,
-  onScroll(e) {
+  onScroll() {
     if (scrollDirections.top) {
       fixDialogToBottom.value = false;
       hideDialogAction.value = false;
@@ -102,10 +101,10 @@ function scrollDialogListToBottom(behavior: ScrollBehavior = 'smooth') {
     .then(() => {
       dialogListRef.value && scrollToBottom(dialogListRef.value, behavior);
       // 平滑完全滚动到底部的关键操作：
-      setTimeout(() => {
+      nextFrame(() => {
         // scroll again, because 某些情况下（如拉取新数据后） panelPlaceHolderPx 下一刻才会生效；此时固定使用 smooth 避免闪烁
         dialogListRef.value && scrollToBottom(dialogListRef.value, 'smooth');
-      }, 0);
+      });
     });
 }
 
@@ -195,14 +194,17 @@ defineExpose({
         >
           <template #extra>
             <DialogExamProblem :item="item" />
-            <a
-              v-if="item.extra?.['exam']"
-              size="large"
-              target="_self"
-              :href="`/tue/exam/${item.extra['exam']['id']}`"
+            <a v-if="item.extra?.['exam']" size="large" target="_self" :href="`/tue/exam/${item.extra['exam']['id']}`"
               >立即前往
             </a>
-            <Birthday v-if="item.extra?.['birthday-gift'] && typeof item.extra?.['birthday-gift'] == 'string' && item.extra?.['birthday-gift']?.startsWith('gift:')" :info="item.extra?.['birthday-gift']" />
+            <Birthday
+              v-if="
+                item.extra?.['birthday-gift'] &&
+                typeof item.extra?.['birthday-gift'] == 'string' &&
+                item.extra?.['birthday-gift']?.startsWith('gift:')
+              "
+              :info="item.extra?.['birthday-gift']"
+            />
             <div v-if="item.extra?.['tooltip']">{{ item.extra?.['tooltip'] }}</div>
           </template>
         </DialogMessage>
@@ -234,7 +236,7 @@ defineExpose({
         v-model:input-with-context="inputWithContext"
         :input-model-name="inputModelName"
         :input-bot-id="inputBotId"
-        :provider-dropdown="providerDropdown"
+        :model-dropdown="modelDropdown"
         :bot-dropdown="botDropdown"
         :display-in-middle="isEmptySession && !isSmallScreen"
         :is-streaming="isReceivingMsg"

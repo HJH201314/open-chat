@@ -20,10 +20,8 @@ export interface ApiChatChatMessageListResponse {
 export interface ApiChatCompletionStreamUserInput {
   bot_id?: number;
   enable_context?: boolean;
-  /** Model.Name 准确的模型名称 */
+  /** 模型集合名称 */
   model_name: string;
-  /** Provider.Name 准确的供应商名称 */
-  provider_name: string;
   question: string;
   /** 系统提示词 */
   system_prompt?: string;
@@ -48,11 +46,11 @@ export interface ApiEntityCommonResponseAny {
   msg?: string;
 }
 
-export interface ApiEntityCommonResponseArraySchemaModelCache {
+export interface ApiEntityCommonResponseArrayEntityConfigChatModel {
   /** 代码 */
   code?: number;
   /** 数据 */
-  data?: ApiSchemaModelCache[];
+  data?: ApiEntityConfigChatModel[];
   /** 消息 */
   msg?: string;
 }
@@ -372,6 +370,13 @@ export interface ApiEntityCommonResponseString {
   msg?: string;
 }
 
+export interface ApiEntityConfigChatModel {
+  display_name?: string;
+  is_default?: boolean;
+  name?: string;
+  order?: number;
+}
+
 export interface ApiEntityPaginatedContinuationResponseSchemaUserSession {
   list?: ApiSchemaUserSession[];
   next_page?: number;
@@ -653,31 +658,6 @@ export interface ApiSchemaModel {
   provider?: ApiSchemaProvider;
   /** 关联的 Provider ID */
   provider_id?: number;
-  updated_at?: string;
-}
-
-export interface ApiSchemaModelCache {
-  /** 是否启用 */
-  active?: boolean;
-  /** 使用 JSON 储存配置 */
-  config?: ApiSchemaModelConfig;
-  created_at?: string;
-  /** 额外模型描述 */
-  description?: string;
-  /** 对外展示模型名称 */
-  display_name?: string;
-  /** 原始数据 */
-  id?: number;
-  /** 模型名称 */
-  name?: string;
-  /** 组装数据 */
-  provider?: ApiSchemaProvider;
-  /** 关联的 Provider DisplayName */
-  provider_display_name?: string;
-  /** 关联的 Provider ID */
-  provider_id?: number;
-  /** 关联的 Provider FileName */
-  provider_name?: string;
   updated_at?: string;
 }
 

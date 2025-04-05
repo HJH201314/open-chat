@@ -22,7 +22,7 @@ const { isModal = false } = defineProps<{
 
 const settingStore = useSettingStore();
 const roleStore = useRoleStore();
-const { providerDropdown, botsDropdown } = storeToRefs(useChatConfigStore());
+const { modelDropdown, botsDropdown } = storeToRefs(useChatConfigStore());
 // 解构赋值editingValue避免使用proxy，此处并不希望未点击保存前生效
 const editingValue = ref({ ...toValue(settingStore.settings) });
 const { theme } = useTheme();
@@ -164,13 +164,8 @@ defineExpose({
               <span class="setting-list-item__value">
                 <CusSelect
                   v-model="editingValue.defaultModel"
-                  :options="
-                    addChildrenDropdownOptions(providerDropdown, () => ({
-                      position: isLargeScreen ? 'right' : 'left',
-                    }))
-                  "
+                  :options="modelDropdown"
                   :position="isLargeScreen ? 'bottom' : 'left'"
-                  @select="(option, value, path) => (editingValue.defaultProvider = path[0] || '')"
                 />
               </span>
             </div>

@@ -26,7 +26,7 @@ export type DialogActionEmits = {
 
 export type DialogInputProps = {
   // 数据参数
-  providerDropdown?: DropdownOption[];
+  modelDropdown?: DropdownOption[];
   botDropdown?: DropdownOption[];
 
   // 控制参数
@@ -40,7 +40,7 @@ export type DialogInputProps = {
 
 export type DialogInputEmits = {
   (e: 'send'): void;
-  (e: 'modelSelect', path: string[]): void;
+  (e: 'modelSelect', value: string): void;
   (e: 'botSelect', value: number): void;
 };
 
@@ -55,7 +55,7 @@ export type DialogDetailProps = {
 } & Omit<DialogActionProps, 'title' | 'menuInMore'> & // 透传操作模块参数
   Pick<
     DialogInputProps,
-    'providerDropdown' | 'botDropdown' | 'showModelSelector' | 'showBotSelector' | 'showContextToggle'
+    'modelDropdown' | 'botDropdown' | 'showModelSelector' | 'showBotSelector' | 'showContextToggle'
   >; // 透传输入模块参数
 
 export type DialogDetailEmits = DialogActionEmits & // 透传操作模块事件

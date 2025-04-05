@@ -49,7 +49,6 @@ export type SessionInfo = {
   botId?: number; // bot角色 ID
   withContext?: boolean; // 是否启用上下文
   userId?: number; // 用户 ID
-  provider?: string; // 模型供应商
   model?: string; // 模型名称
   flags?: SessionFlags;
 };

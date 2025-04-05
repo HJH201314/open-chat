@@ -29,13 +29,12 @@ const emit = defineEmits<{
 
 const dataStore = useDataStore();
 const userStore = useUserStore();
-const { providerDropdown, botsDropdown: botDropdown } = storeToRefs(useChatConfigStore());
+const { modelDropdown, botsDropdown: botDropdown } = storeToRefs(useChatConfigStore());
 const { theme } = useTheme();
 
 const form = reactive({
   sessionId: props.dialogId,
   withContext: false,
-  providerName: '',
   modelName: '',
   botRoleId: 0, // 角色 ID
   inputValue: '',
@@ -50,7 +49,7 @@ const hasPermission = computed(
   () => userStore.isLogin && (!sessionInfo.value.userId || sessionInfo.value.userId == userStore.userId)
 );
 
-const { session: sessionInfo, messages: messageList, syncMessages } = useSession(() => form.sessionId);
+const { session: sessionInfo, messages: messageList, syncMessages, useSendMessageText } = useSession(() => form.sessionId);
 
 // 如果需要响应 props 的变化
 watch(
@@ -98,7 +97,6 @@ watch(
   (newSession) => {
     if (newSession) {
       form.withContext = newSession.withContext ?? false;
-      form.providerName = newSession.provider || '';
       form.modelName = newSession.model || '';
       form.botRoleId = newSession.botId || 0;
     }
@@ -117,10 +115,10 @@ watch(
 
 // 保存使用的模型
 watch(
-  () => [form.providerName, form.modelName],
+  () => form.modelName,
   (newVal, oldVal) => {
-    if (newVal[0] !== oldVal[0] || newVal[1] !== oldVal[1]) {
-      dataStore.changeDialogModel(form.sessionId, newVal[0], newVal[1]);
+    if (newVal !== oldVal) {
+      dataStore.changeDialogModel(form.sessionId, newVal);
     }
   }
 );
@@ -144,7 +142,7 @@ const {
   answer: answerMsg,
   think: thinkMsg,
   isStreaming: isReceivingMsg,
-} = dataStore.useSendMessageText();
+} = useSendMessageText();
 
 async function handleSendMessage() {
   if (isReceivingMsg.value) {
@@ -167,7 +165,7 @@ async function handleSendMessage() {
   const savedInputValue = form.inputValue;
   // 发送消息
   try {
-    await startReceivingMsg(form.sessionId, form.inputValue, {
+    await startReceivingMsg(form.inputValue, {
       onPreSaveMsg() {
         form.inputValue = '';
         form.fixDialogToBottom = true;
@@ -363,7 +361,7 @@ const { isSmallScreen } = useGlobal();
     :answer-msg="answerMsg"
     :think-msg="thinkMsg"
     :is-small-screen="isSmallScreen"
-    :provider-dropdown="providerDropdown"
+    :model-dropdown="modelDropdown"
     :bot-dropdown="botDropdown"
     :input-model-name="form.modelName"
     :input-bot-id="form.botRoleId"
@@ -380,9 +378,8 @@ const { isSmallScreen } = useGlobal();
     @action-tip-click="handleActionTipClick"
     @send="handleSendMessage"
     @model-select="
-      (path) => {
-        form.providerName = path[0];
-        form.modelName = path[1];
+      (value) => {
+        form.modelName = value;
       }
     "
     @bot-select="(v) => (form.botRoleId = v)"

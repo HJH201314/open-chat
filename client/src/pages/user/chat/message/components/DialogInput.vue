@@ -8,7 +8,7 @@ import { computed, ref } from 'vue';
 import type { DialogInputEmits, DialogInputProps } from '@/pages/user/chat/message/components/types.ts';
 
 const props = withDefaults(defineProps<DialogInputProps>(), {
-  providerDropdown: () => [],
+  modelDropdown: () => [],
   botDropdown: () => [],
   displayInMiddle: false,
   isStreaming: false,
@@ -38,10 +38,8 @@ function handleInputKeydown(e: KeyboardEvent) {
   }
 }
 
-function handleModelSelect(selectPath: string[]) {
-  if (selectPath.length == 2) {
-    emit('modelSelect', selectPath);
-  }
+function handleModelSelect(selectValue: string) {
+  emit('modelSelect', selectValue);
 }
 
 function handleBotRoleSelect(selectValue: string) {
@@ -64,11 +62,11 @@ function handleBotRoleSelect(selectValue: string) {
           v-if="showModelSelector"
           :model-value="inputModelName"
           :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
-          :options="providerDropdown"
+          :options="modelDropdown"
           background-mode="transparent"
           position="top"
           style="font-size: 0.75rem"
-          @select="(v, o, path) => handleModelSelect(path)"
+          @select="(v, o, path) => handleModelSelect(v)"
         />
         <CusSelect
           v-if="showBotSelector"
@@ -100,6 +98,7 @@ function handleBotRoleSelect(selectValue: string) {
     <CusTextarea
       v-model="inputUserInput"
       class="dialog-input-textarea"
+      :textarea-attr="{ placeholder: '有问题，尽管问' }"
       :preset="false"
       @keydown="handleInputKeydown"
     />
@@ -122,23 +121,33 @@ $dialog-max-width: 54rem;
   bottom: 0;
   width: calc(100% - 1rem);
   max-width: $dialog-max-width;
-  transform: translateX(-50%);
+  transform: translate(-50%, 0);
   display: flex;
   flex-direction: column;
   background-color: $color-grey-50;
   border-radius: 0.5rem 0.5rem 0 0;
   box-shadow: $box-shadow;
   transition: all 0.2s $ease-out-circ;
+  animation: input-flow-out-bottom-anim 0.2s $ease-out-circ reverse;
   overflow: hidden;
+
+  &.hide {
+    animation: input-flow-out-bottom-anim 0.2s $ease-out-circ;
+  }
+
+  @keyframes input-flow-out-bottom-anim {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(-50%) translateY(100%);
+    }
+  }
 
   &:focus-within {
     bottom: 0.35rem;
     border-radius: 0.75rem;
     box-shadow: $next-box-shadow-medium;
-  }
-
-  &.hide {
-    height: 0;
   }
 
   &.small-input {
@@ -165,7 +174,7 @@ $dialog-max-width: 54rem;
     .small-input & {
       width: calc(100% - 4rem);
       min-height: 1.75rem;
-      max-height: 1.75rem;
+      max-height: calc(50 * var(--vh));
       display: flex;
       align-items: center;
     }
@@ -174,11 +183,11 @@ $dialog-max-width: 54rem;
   &-toggle {
     cursor: pointer;
     position: absolute;
+    line-height: 1;
 
     &--expand {
       right: 0.5rem;
-      top: 50%;
-      transform: translateY(-50%);
+      bottom: 0.875rem;
     }
 
     &--collapse {
@@ -235,9 +244,10 @@ $dialog-max-width: 54rem;
     overflow: hidden;
 
     .small-input & {
-      transform: scale(0.875);
+      width: 1.75rem;
+      height: 1.75rem;
       right: 2rem;
-      bottom: 0.35rem;
+      bottom: 0.5rem;
     }
 
     &:hover,
@@ -286,5 +296,23 @@ $dialog-max-width: 54rem;
   //right: 0;
   //bottom: 100%;
   transition: all 0.2s $ease-out-circ;
+}
+
+.show-flow-in-bottom {
+  &-enter-active {
+    animation: show-flow-in-bottom-anim 0.2s $ease-out-circ;
+  }
+  &-leave-active {
+    animation: show-flow-in-bottom-anim 0.2s $ease-out-circ reverse;
+  }
+
+  @keyframes show-flow-in-bottom-anim {
+    0% {
+      transform: translateY(100%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
 }
 </style>

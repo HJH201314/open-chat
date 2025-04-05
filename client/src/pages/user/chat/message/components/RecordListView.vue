@@ -325,7 +325,8 @@ const { isSmallScreen } = useGlobal();
 
     &:focus-visible {
       border-radius: 0.75rem;
-      outline: var(--color-primary) auto 1px;
+      background: $color-teal-20;
+      outline: none;
     }
   }
 

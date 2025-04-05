@@ -13,7 +13,7 @@
 import type {
   ApiChatCompletionStreamUserInput,
   ApiChatShareSessionShareRequest,
-  ApiEntityCommonResponseArraySchemaModelCache,
+  ApiEntityCommonResponseArrayEntityConfigChatModel,
   ApiEntityCommonResponseArraySchemaPreset,
   ApiEntityCommonResponseBool,
   ApiEntityCommonResponseChatChatMessageListResponse,
@@ -77,10 +77,10 @@ export class Chat<SecurityDataType = unknown> {
    * @name ConfigModelsGet
    * @summary 获取模型配置
    * @request GET:/chat/config/models
-   * @response `200` `ApiEntityCommonResponseArraySchemaModelCache` OK
+   * @response `200` `ApiEntityCommonResponseArrayEntityConfigChatModel` OK
    */
   configModelsGet = (params: RequestParams = {}) =>
-    this.http.request<ApiEntityCommonResponseArraySchemaModelCache, any>({
+    this.http.request<ApiEntityCommonResponseArrayEntityConfigChatModel, any>({
       path: `/chat/config/models`,
       method: "GET",
       type: ContentType.Json,
