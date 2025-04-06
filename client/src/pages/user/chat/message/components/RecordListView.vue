@@ -5,7 +5,7 @@ import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
-import { CloseOne, MenuUnfold, Plus, Search, Star } from '@icon-park/vue-next';
+import { MenuUnfold, Plus, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
 import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
@@ -24,7 +24,8 @@ import { toggleSidebarExpandKey } from '@/constants/eventBusKeys.ts';
 import LogoOpenAI from '@/components/logo/LogoOpenAI.vue';
 import LogoDeepSeek from '@/components/logo/LogoDeepSeek.vue';
 import LogoQwen from '@/components/logo/LogoQwen.vue';
-import { formatTime } from '../../../../../utils/string.ts';
+import { formatTime } from '@/utils/string.ts';
+import CusPullRefresh from '@/components/pull-refresh/CusPullRefresh.vue';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -186,7 +187,7 @@ const displayList = computed(() => {
   }
 });
 
-const dialogListRef = useTemplateRef('dialog-list');
+const dialogListRef = useTemplateRef<HTMLDivElement>('dialog-list');
 const recordListViewRef = useTemplateRef('record-list-view');
 const { arrivedState } = useScroll(dialogListRef);
 
@@ -197,29 +198,35 @@ const { isSmallScreen } = useGlobal();
   <!-- 角色列表 -->
   <div ref="record-list-view" class="dialog-list">
     <div class="dialog-list-bar" :class="{ shadow: !arrivedState.top }">
-      <IconButton v-if="isSmallScreen" type="secondary" color="#999999" no-normal-background @click="handleSidebarUnfold">
+      <IconButton
+        v-if="isSmallScreen"
+        type="secondary"
+        color="#999999"
+        no-normal-background
+        @click="handleSidebarUnfold"
+      >
         <MenuUnfold size="1.2rem" />
       </IconButton>
-<!--      <div-->
-<!--        ref="search-bar"-->
-<!--        :class="{ 'dialog-list-bar-search': searchForm.inputting, 'dialog-list-action-button': !searchForm.inputting }"-->
-<!--        @click="handleSearchIconClick"-->
-<!--      >-->
-<!--        <Search size="1.2rem" />-->
-<!--        <input-->
-<!--          v-show="searchForm.inputting"-->
-<!--          ref="search-input"-->
-<!--          v-model="searchForm.searchVal"-->
-<!--          placeholder="搜索对话内容"-->
-<!--        />-->
-<!--        <span-->
-<!--          v-if="searchForm.inputting && searchForm.searchVal"-->
-<!--          class="dialog-list-bar-search-reset"-->
-<!--          @click="searchForm.searchVal = ''"-->
-<!--        >-->
-<!--          <CloseOne theme="filled" />-->
-<!--        </span>-->
-<!--      </div>-->
+      <!--      <div-->
+      <!--        ref="search-bar"-->
+      <!--        :class="{ 'dialog-list-bar-search': searchForm.inputting, 'dialog-list-action-button': !searchForm.inputting }"-->
+      <!--        @click="handleSearchIconClick"-->
+      <!--      >-->
+      <!--        <Search size="1.2rem" />-->
+      <!--        <input-->
+      <!--          v-show="searchForm.inputting"-->
+      <!--          ref="search-input"-->
+      <!--          v-model="searchForm.searchVal"-->
+      <!--          placeholder="搜索对话内容"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="searchForm.inputting && searchForm.searchVal"-->
+      <!--          class="dialog-list-bar-search-reset"-->
+      <!--          @click="searchForm.searchVal = ''"-->
+      <!--        >-->
+      <!--          <CloseOne theme="filled" />-->
+      <!--        </span>-->
+      <!--      </div>-->
       <div v-show="!searchForm.inputting" class="dialog-list-new-dialog" @click="handleListAddClick">
         <span>开始新对话</span>
         <Plus size="1.2rem" theme="outline" />
@@ -251,37 +258,39 @@ const { isSmallScreen } = useGlobal();
         </CommonDialog>
       </div>
     </div>
-    <div ref="dialog-list" class="dialog-list-container">
-      <div
-        v-for="item in displayList"
-        :key="item.id"
-        :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
-        class="dialog-list-item"
-        @click="handleListItemClick(item.id)"
-      >
-        <LogoDeepSeek v-if="item.model?.includes('deepseek')" class="dialog-list-item__logo" />
-        <LogoQwen v-else-if="item.model?.includes('qwen')" class="dialog-list-item__logo" />
-        <LogoOpenAI v-else class="dialog-list-item__logo" />
-        <div class="dialog-list-item__right">
-          <div class="dialog-list-item__top">
-            <div class="title">
-              {{ item.title || '未命名对话' }}
+    <CusPullRefresh ref="dialog-list" class="dialog-list-container" @refresh="dataStore.syncSessions">
+      <div>
+        <div
+          v-for="item in displayList"
+          :key="item.id"
+          :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
+          class="dialog-list-item"
+          @click="handleListItemClick(item.id)"
+        >
+          <LogoDeepSeek v-if="item.model?.includes('deepseek')" class="dialog-list-item__logo" />
+          <LogoQwen v-else-if="item.model?.includes('qwen')" class="dialog-list-item__logo" />
+          <LogoOpenAI v-else class="dialog-list-item__logo" />
+          <div class="dialog-list-item__right">
+            <div class="dialog-list-item__top">
+              <div class="title">
+                {{ item.title || '未命名对话' }}
+              </div>
+              <div class="datetime">
+                {{ formatTime(new Date(item.createAt ?? '')) }}
+              </div>
             </div>
-            <div class="datetime">
-              {{ formatTime(new Date(item.createAt ?? '')) }}
-            </div>
-          </div>
-          <div class="dialog-list-item__bottom">
-            <div class="digest">
-              {{ item.model || '-' }}
-            </div>
-            <div class="flags">
-              <Star v-if="item.flags?.isStared" :fill="theme.colorWarning" theme="filled" />
+            <div class="dialog-list-item__bottom">
+              <div class="digest">
+                {{ item.model || '-' }}
+              </div>
+              <div class="flags">
+                <Star v-if="item.flags?.isStared" :fill="theme.colorWarning" theme="filled" />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </CusPullRefresh>
     <div v-if="!displayList.length" class="dialog-list-empty">
       <DiliButton
         v-if="!userStore.isLogin"
@@ -332,6 +341,7 @@ const { isSmallScreen } = useGlobal();
 
   &-bar {
     position: absolute;
+    z-index: 1;
     top: 0;
     left: 0;
     right: 0;
