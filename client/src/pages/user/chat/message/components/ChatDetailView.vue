@@ -61,8 +61,8 @@ watch(
 
 const dialogDetailRef = useTemplateRef<InstanceType<typeof DialogDetail>>('dialog-detail');
 watchArray(messageList, (newVal, oldVal) => {
-  // 消息列表变化时，滚动到底部（消息增加 1/2 时平滑，增加多条时立即）
-  if (newVal.length) {
+  // 消息列表变化时，滚动到底部（消息增加 1 时平滑，增加多条时立即）
+  if (newVal.length && newVal.length != oldVal.length) {
     setTimeout(() => {
       dialogDetailRef.value?.scrollDialogListToBottom(
         Math.abs(newVal.length - oldVal.length) <= 1 ? 'smooth' : 'instant'
@@ -183,7 +183,7 @@ async function handleSendMessage() {
     });
     // 若未到达底部，则提示用户生成完成
     if (!dialogDetailRef.value?.isDialogListReachedBottom) {
-      ToastManager.normal('回答完成', { position: 'top', icon: h(Correct) });
+      ToastManager.normal('回答结束', { position: 'top', icon: h(Correct) });
     }
     // 若消息数量小于 3 且第一个消息为用户消息，则自动修改对话标题
     if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {

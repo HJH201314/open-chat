@@ -68,8 +68,8 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
     return db.messages.add(msg);
   }
 
-  async function deleteMessage(msgId: number) {
-    return db.messages.delete(String(msgId));
+  async function deleteMessage(msgIndex: number) {
+    return db.messages.delete(msgIndex);
   }
 
   /**
@@ -160,105 +160,115 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
       else return;
     }
 
-    let userMsgIndex: number | undefined = undefined;
-    let botMsgIndex: number | undefined = undefined;
-    userMsgIndex = await saveMessage(sessionId, message, 'user', 'text', '', message, '', undefined);
-    botMsgIndex = await saveMessage(sessionId, '', 'bot', 'text', session.value.model, '', '', undefined);
-    callback?.onPreSaveMsg?.(userMsgIndex, botMsgIndex);
-    // 观测回答的变化
-    const stopWatchingContent = watchThrottled(
-      () => renderedMsg.value,
-      (v, ov) => {
-        if (v == ov) return;
-        callback?.onMessage?.(v, rawData.msg); // 消息接收回调
-      },
-      { throttle: 150 }
-    );
-    // 观测思考的变化
-    const stopWatchingReasoning = watchThrottled(
-      () => rawData.think,
-      (v, ov) => {
-        if (v == ov) return;
-        callback?.onThinkMessage?.(JSON.parse(`"${v}"`)); // 消息接收回调
-      },
-      { throttle: 150 }
-    );
+    let userMsgIndex: number = 0;
+    let botMsgIndex: number = 0;
+    try {
+      // 预插入消息
+      userMsgIndex = await saveMessage(sessionId, message, 'user', 'text', '', message, '', undefined);
+      botMsgIndex = await saveMessage(sessionId, '', 'bot', 'text', session.value.model, '', '', undefined);
+      callback?.onPreSaveMsg?.(userMsgIndex, botMsgIndex);
 
-    // 处理指令
-    const handleJSONCommand = async (cp: CommandParser) => {
-      const idCmd = cp.getCommandByName('ID');
-      if (idCmd) {
-        // 保存远程消息 ID
-        const msgIds = [idCmd.data['q'], idCmd.data['a']];
-        rawData.msg = rawData.msg.replace(idCmd.raw, '');
-        await updateMessage(userMsgIndex, { messageId: msgIds[0] });
-        await updateMessage(botMsgIndex, { messageId: msgIds[1] });
-      }
-      const tooltipCmd = cp.getCommandByName('tooltip');
-      if (tooltipCmd) {
-        await updateMessage(botMsgIndex, { extra: { tooltip: tooltipCmd.values.join('') } });
-      }
-      const problemCmd = cp.getCommandByName('tool:question');
-      if (problemCmd) {
-        await updateMessage(botMsgIndex, { extra: { question: problemCmd.data } });
-      }
-      const examCmd = cp.getCommandByName('tool:exam');
-      if (examCmd) {
-        await updateMessage(botMsgIndex, { extra: { exam: examCmd.data } });
-      }
-      const birthdayCmd = cp.getCommandByName('tool:birthday-gift');
-      if (birthdayCmd) {
-        await updateMessage(botMsgIndex, { extra: { 'birthday-gift': birthdayCmd.values.join('') } });
-      }
-    };
+      // 观测回答的变化
+      const stopWatchingContent = watchThrottled(
+        () => renderedMsg.value,
+        (v, ov) => {
+          if (v == ov) return;
+          callback?.onMessage?.(v, rawData.msg); // 消息接收回调
+        },
+        { throttle: 150 }
+      );
+      // 观测思考的变化
+      const stopWatchingReasoning = watchThrottled(
+        () => rawData.think,
+        (v, ov) => {
+          if (v == ov) return;
+          callback?.onThinkMessage?.(JSON.parse(`"${v}"`)); // 消息接收回调
+        },
+        { throttle: 150 }
+      );
 
-    let usage: Record<string, any> = {};
-    const saveBotMessage = async (extra: Record<string, any> = {}) => {
-      console.log('[saveBotMessage]', rawData.msg, renderedMsg.value);
-      botMsgIndex &&
-      (await updateMessage(botMsgIndex, {
-        content: rawData.msg,
-        reasoningContent: JSON.parse(`"${rawData.think}"`),
-        htmlContent: renderedMsg.value || usage['content'] || '', // 如果渲染结果为空，可能是回复太快导致没有处理到数据，此时保存 usage 中的完整数据
-        extra: extra,
-      }));
-    };
-
-    return api.chat.completionStream(
-      {
-        model_name: session.value.model,
-        bot_id: session.value.botId,
-        session_id: sessionId,
-        question: message,
-        enable_context: session.value.withContext,
-      },
-      ctrl.signal,
-      async (event) => {
-        if (event.event === 'done') {
-          // 停止截流观测
-          stopWatchingContent();
-          stopWatchingReasoning();
-          // 当接收到服务器端的结束标记时，数据库保存消息
-          saveBotMessage(usage['extra'] || {}).finally(() => {
-            callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
-          });
-        } else if (event.event === 'msg') {
-          const data = JSON.parse(event.data)?.content;
-          console.debug('[msg]', event.data, `'${data}'`);
-          rawData.msg += data; // 记录已接收的消息
-        } else if (event.event === 'think') {
-          const data = JSON.parse(event.data)?.content;
-          console.debug('[think]', event.data, `'${data}'`);
-          rawData.think += data;
-        } else if (event.event === 'cmd') {
-          await handleJSONCommand(new CommandParser(event.data, true).parseJSON());
-        } else if (event.event === 'usage') {
-          usage = JSON.parse(event.data);
-        } else if (event.event === 'error') {
-          callback?.onError?.();
+      // 处理指令
+      const handleJSONCommand = async (cp: CommandParser) => {
+        const idCmd = cp.getCommandByName('ID');
+        if (idCmd) {
+          // 保存远程消息 ID
+          const msgIds = [idCmd.data['q'], idCmd.data['a']];
+          rawData.msg = rawData.msg.replace(idCmd.raw, '');
+          await updateMessage(userMsgIndex, { messageId: msgIds[0] });
+          await updateMessage(botMsgIndex, { messageId: msgIds[1] });
         }
-      }
-    );
+        const tooltipCmd = cp.getCommandByName('tooltip');
+        if (tooltipCmd) {
+          await updateMessage(botMsgIndex, { extra: { tooltip: tooltipCmd.values.join('') } });
+        }
+        const problemCmd = cp.getCommandByName('tool:question');
+        if (problemCmd) {
+          await updateMessage(botMsgIndex, { extra: { question: problemCmd.data } });
+        }
+        const examCmd = cp.getCommandByName('tool:exam');
+        if (examCmd) {
+          await updateMessage(botMsgIndex, { extra: { exam: examCmd.data } });
+        }
+        const birthdayCmd = cp.getCommandByName('tool:birthday-gift');
+        if (birthdayCmd) {
+          await updateMessage(botMsgIndex, { extra: { 'birthday-gift': birthdayCmd.values.join('') } });
+        }
+      };
+
+      let usage: Record<string, any> = {};
+      const saveBotMessage = async (extra: Record<string, any> = {}) => {
+        console.log('[saveBotMessage]', rawData.msg, renderedMsg.value);
+        botMsgIndex &&
+        (await updateMessage(botMsgIndex, {
+          content: rawData.msg,
+          reasoningContent: JSON.parse(`"${rawData.think}"`),
+          htmlContent: renderedMsg.value || usage['content'] || '', // 如果渲染结果为空，可能是回复太快导致没有处理到数据，此时保存 usage 中的完整数据
+          extra: extra,
+        }));
+      };
+
+      // 提交处理
+      return await api.chat.completionStream(
+        {
+          model_name: session.value.model,
+          bot_id: session.value.botId,
+          session_id: sessionId,
+          question: message,
+          enable_context: session.value.withContext,
+        },
+        ctrl.signal,
+        async (event) => {
+          if (event.event === 'done') {
+            // 停止截流观测
+            stopWatchingContent();
+            stopWatchingReasoning();
+            // 当接收到服务器端的结束标记时，数据库保存消息
+            saveBotMessage(usage['extra'] || {}).finally(() => {
+              callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
+            });
+          } else if (event.event === 'msg') {
+            const data = JSON.parse(event.data)?.content || '';
+            console.debug('[msg]', event.data, `'${data}'`);
+            rawData.msg += data; // 记录已接收的消息
+          } else if (event.event === 'think') {
+            const data = JSON.parse(event.data)?.content || '';
+            console.debug('[think]', event.data, `'${data}'`);
+            rawData.think += data;
+          } else if (event.event === 'cmd') {
+            await handleJSONCommand(new CommandParser(event.data, true).parseJSON());
+          } else if (event.event === 'usage') {
+            usage = JSON.parse(event.data);
+          } else if (event.event === 'error') {
+            callback?.onError?.();
+          }
+        }
+      );
+    } catch (err) {
+      // 发生错误时，删除消息并继续抛出异常
+      deleteMessage(userMsgIndex);
+      deleteMessage(botMsgIndex);
+      throw err;
+    }
   };
 
   const useSendMessageText = () => {
@@ -275,7 +285,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
         innerCleanEffects();
       });
       clearMessage();
-      return sendMessageText(
+      await sendMessageText(
         message,
         {
           onPreSaveMsg(userMsgId, botMsgId) {

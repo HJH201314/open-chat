@@ -1,7 +1,6 @@
 import MarkdownIt from 'markdown-it';
 import MarkdownItHighlightJs from 'markdown-it-highlightjs';
-// @ts-ignore
-import MarkdownItKatex from 'markdown-it-katex';
+import MarkdownItKatex from './mditKatex.ts';
 import type { MaybeRefOrGetter } from 'vue';
 import { computed, toValue } from 'vue';
 // @ts-ignore
@@ -19,7 +18,10 @@ const markdownIt = MarkdownIt({
       vue: highlightJsVueDefiner,
     },
   })
-  .use(MarkdownItKatex);
+  .use(MarkdownItKatex, {
+    output: 'mathml',
+  });
+
 // 获取 MarkdownItHighlightJs 设置的渲染函数并替换
 const highlightJsRender = markdownIt.renderer.rules.fence;
 markdownIt.renderer.rules.fence = function (tokens, idx, options, env, slf) {
@@ -39,9 +41,8 @@ markdownIt.renderer.rules.fence = function (tokens, idx, options, env, slf) {
 export const renderMarkdown = (text?: string) => {
   if (!text) return '';
 
-  // console.log(value)
-  text = text.replace(/<br>/g, '\n');
-  // console.log(value)
+  console.log('[renderMarkdown1]', text);
+  text = text.replaceAll(/<br>/g, '\n');
   let res = markdownIt.render(text);
   res = res.substring(0, res.length - 1); // 删除最后一个莫名其妙的字符
   return res;
