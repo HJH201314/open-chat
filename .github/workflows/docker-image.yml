@@ -6,13 +6,48 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+  REPOSITORY: hjh201314/open-chat
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag open-chat:$(date +%s)
-          
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Build the Docker image
+        run: |
+          docker build . --file Dockerfile --tag $REPOSITORY:${{ github.sha }}
+
+      - name: Extract files from Docker image
+        run: |
+          mkdir -p build_artifacts
+          docker create --name temp_container $REPOSITORY:${{ github.sha }}
+          docker cp temp_container:/app/main ./build_artifacts/main
+          docker cp temp_container:/usr/share/nginx/html ./build_artifacts/html
+          docker rm temp_container
+
+      - name: Compress extracted files
+        run: |
+          tar -czvf build_artifacts.tar.gz -C ./build_artifacts .
+
+      - name: Upload artifacts to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build_artifacts.tar.gz
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Push to Docker Hub
+        run: |
+          docker tag $REPOSITORY:${{ github.sha }} $REPOSITORY:latest
+          docker push $REPOSITORY:latest
