@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag open-chat:$(date +%s)
           
