@@ -42,7 +42,7 @@ A chatbot platform with flexibility
 Run the project with Docker:
 
 ```shell
-docker run -d --name open-chat -p 9035:9035 -e fcraft/open-chat
+docker run -d --name open-chat -p 9035:9035 fcraft/open-chat
 ```
 
 ## Developing
