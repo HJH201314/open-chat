@@ -50,4 +50,5 @@ jobs:
       - name: Push to Docker Hub
         run: |
           docker tag $REPOSITORY:${{ github.sha }} $REPOSITORY:latest
+          docker push $REPOSITORY:${{ github.sha }}
           docker push $REPOSITORY:latest
