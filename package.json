@@ -2,7 +2,7 @@
   "name": "open-chat",
   "version": "1.0.0",
   "description": "OpenChat - Next Generation AI Chatbot Interface",
-  "packageManager": "pnpm@9.0.0+",
+  "packageManager": "pnpm@10.4.1",
   "scripts": {
     "dev": "concurrently \"pnpm run dev:client\" \"pnpm run dev:server\"",
     "dev:client": "cd client && pnpm run dev",
@@ -40,6 +40,7 @@
     }
   },
   "requirements": {
-    "node": ">=20.0.0"
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
   }
 }

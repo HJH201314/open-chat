@@ -4,7 +4,7 @@ import useMarkdownIt from '@/commands/useMarkdownIt';
 import { computed, ref, type VNode, watch } from 'vue';
 import { Down } from '@icon-park/vue-next';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import LogoDeepseek from '@/components/logo/LogoDeepseek.vue';
+import LogoDeepseek from '@/components/logo/LogoDeepSeek.vue';
 import LogoQwen from '@/components/logo/LogoQwen.vue';
 import LogoOpenAI from '@/components/logo/LogoOpenAI.vue';
 

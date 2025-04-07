@@ -1,0 +1,67 @@
+# vcs
+.git/
+.gitignore
+.gitmodules
+.svn/
+
+# deps
+**/node_modules/
+venv/
+__pycache__/
+*.egg-info/
+.pnpm-store/
+
+# environment
+.env
+.env.local
+.env.development
+.env.test
+docker-compose*.yml
+
+# dist
+**/dist/
+**/build/
+**/out/
+*.exe
+*.dll
+*.so
+*.a
+*.o
+*.zip
+*.tar.gz
+
+# debug logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.pid
+*.seed
+*.pid.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# test
+coverage/
+.nyc_output/
+*.lcov
+junit.xml
+
+# docs
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+examples/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
