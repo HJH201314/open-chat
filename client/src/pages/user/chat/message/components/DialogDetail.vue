@@ -340,19 +340,19 @@ $dialog-max-width: 54rem;
 
 .scroll-flow-in-out {
   &-enter-active {
-    animation: scroll-flow-in-out-anim 0.2s ease-out;
+    animation: scroll-flow-in-out-anim 0.2s $ease-out-circ;
   }
 
   &-leave-active {
-    animation: scroll-flow-in-out-anim 0.2s ease-in reverse;
+    animation: scroll-flow-in-out-anim 0.2s $ease-out-circ reverse;
   }
 
   @keyframes scroll-flow-in-out-anim {
     0% {
-      transform: translateX(120%);
+      transform: translateY(120%);
     }
     100% {
-      transform: translateX(0);
+      transform: translateY(0);
     }
   }
 }

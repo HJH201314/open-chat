@@ -5,6 +5,9 @@
       @touchstart="onTouchStart"
       @touchmove="onTouchMove"
       @touchend="onTouchEnd"
+      @mousedown="onTouchStart"
+      @mousemove="onTouchMove"
+      @mouseup="onTouchEnd"
     >
       <div ref="refresh-tip" :style="{ transform: `translateY(${pullDistance}px)`, transitionDuration: transitionDuration }" class="refresh-tip">{{ statusText }}</div>
       <div :style="{ transform: `translateY(${pullDistance}px)`, transitionDuration: transitionDuration }" class="content">
@@ -69,25 +72,33 @@ const statusText = computed(() => {
   return pullDistance.value >= props.threshold ? '释放立即刷新' : '下拉刷新';
 });
 
-const onTouchStart = (e: TouchEvent) => {
-  console.log('[touchstart]', e);
+const onTouchStart = (e: TouchEvent | MouseEvent) => {
   if (isLoading.value || (refreshContainerRef.value?.scrollTop ?? 1) != 0) {
     startY.value = 0;
     currentY.value = 0;
     return;
   }
-  startY.value = e.touches[0].pageY;
+  if (e instanceof TouchEvent) {
+    startY.value = e.touches[0].pageY;
+  } else if (e instanceof MouseEvent) {
+    startY.value = e.pageY;
+  }
   currentY.value = startY.value;
 };
 
-const onTouchMove = (e: TouchEvent) => {
-  console.log('[touchmove]', e);
+const onTouchMove = (e: TouchEvent | MouseEvent) => {
   if (isLoading.value || (refreshContainerRef.value?.scrollTop ?? 1) != 0) {
     startY.value = 0;
     currentY.value = 0;
     return;
   }
-  currentY.value = e.touches[0].pageY;
+  if (startY.value == 0) return;
+
+  if (e instanceof TouchEvent) {
+    currentY.value = e.touches[0].pageY;
+  } else if (e instanceof MouseEvent) {
+    currentY.value = e.pageY;
+  }
 };
 
 const onTouchEnd = async () => {

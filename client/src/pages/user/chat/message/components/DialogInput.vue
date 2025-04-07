@@ -53,6 +53,7 @@ function handleBotRoleSelect(selectValue: string) {
       'dialog-input--first': displayInMiddle,
       'small-input': smallInput,
       hide: hideSelf,
+      typing: !!inputUserInput,
     }"
     class="dialog-input"
   >
@@ -144,7 +145,7 @@ $dialog-max-width: 54rem;
     }
   }
 
-  &:focus-within {
+  &:focus-within, &.typing {
     bottom: 0.35rem;
     border-radius: 0.75rem;
     box-shadow: $next-box-shadow-medium;
