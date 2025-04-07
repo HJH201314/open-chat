@@ -1,32 +1,26 @@
 <template>
-  <transition name="dropdown">
-    <ul v-show="isOpen" ref="menu" :class="[`dropdown-menu--${position}`]" class="dropdown-menu">
-      <dropdown-menu-item
-        v-for="option in options"
-        :key="option.value"
-        v-model:current-showing-path="currentShowingPath"
-        :_depth="_depth"
-        :_value-path="_valuePath"
-        :class="{
-          selected:
-            option.value === dropdownCurrent?.currentValue || dropdownCurrent?.currentOptionPath?.includes(option),
-        }"
-        :option="option"
-        class="dropdown-menu-item"
-      />
-    </ul>
-  </transition>
+  <Teleport to="body">
+    <Transition name="dropdown">
+      <ul v-show="isOpen" ref="menu" :class="[`dropdown-menu--${position}`]" class="dropdown-menu">
+        <dropdown-menu-item
+          v-for="option in options"
+          :key="option.value"
+          v-model:current-showing-path="currentShowingPath"
+          :_depth="_depth"
+          :_value-path="_valuePath"
+          :option="option"
+          class="dropdown-menu-item"
+        />
+      </ul>
+    </Transition>
+  </Teleport>
 </template>
 
 <script lang="ts" setup>
 import DropdownMenuItem from '@/components/dropdown/DropdownMenuItem.vue';
-import {
-  DropdownCurrentInfoInjectionKey,
-  type DropdownMenuInnerProps,
-  type DropdownOption,
-} from '@/components/dropdown/types';
+import { type DropdownMenuInnerProps, type DropdownOption } from '@/components/dropdown/types';
 import { useElementBounding } from '@vueuse/core';
-import { computed, defineProps, inject, reactive, useTemplateRef } from 'vue';
+import { computed, defineProps, reactive, useTemplateRef } from 'vue';
 
 const props = withDefaults(
   defineProps<
@@ -41,10 +35,7 @@ const props = withDefaults(
   }
 );
 
-const currentShowingPath = defineModel<string[]>('currentShowingPath');
-
-// 注入当前选中项信息
-const dropdownCurrent = inject(DropdownCurrentInfoInjectionKey);
+const currentShowingPath = defineModel<string[]>('currentShowingPath', { default: () => [] });
 
 const selfRef = useTemplateRef('menu');
 
@@ -76,11 +67,11 @@ const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `uns
 
 .dropdown-menu {
   position: fixed;
-  border-radius: 0.5em;
   background-color: white;
   list-style: none;
   padding: 0;
   box-shadow: $box-shadow;
+  border-radius: 8px;
   z-index: calc(2000 + 2 * v-bind(_depth));
   min-width: v-bind(minWidth);
 
@@ -120,25 +111,6 @@ const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `uns
     left: v-bind('pos.right');
     top: v-bind('pos.top');
     //transform: translateY(-50%);
-  }
-
-  &-item {
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    padding: 0.25em 0.5em;
-    cursor: pointer;
-    transition: background-color 0.2s $ease-out-circ;
-    background-color: white;
-    color: initial;
-
-    &:hover {
-      background-color: $color-grey-200;
-    }
-
-    &.selected {
-      color: var(--color-primary);
-    }
   }
 }
 </style>

@@ -57,7 +57,7 @@ export const useDataStore = defineStore('data', () => {
       // 获取session_id
       const { status, data } = await genApi.Chat.sessionNewPost();
       const sessionId = data.data;
-      console.log(data);
+      console.debug(data);
       if (status === 200 && data.data) {
         await db.sessions.add({
           id: sessionId,
@@ -86,7 +86,10 @@ export const useDataStore = defineStore('data', () => {
     });
     // 远程修改
     try {
-      await genApi.Chat.sessionUpdatePost(sessionId, { name: newTitle });
+      await genApi.Chat.sessionUpdatePost(sessionId, {
+        data: { name: newTitle },
+        updates: ['name'],
+      });
     } catch (_) {
       ToastManager.danger('未能成功修改服务器数据');
     }
@@ -95,7 +98,10 @@ export const useDataStore = defineStore('data', () => {
   async function editSessionSystemPrompt(sessionId: string, newSystemPrompt: string) {
     // 远程修改
     try {
-      const res = await genApi.Chat.sessionUpdatePost(sessionId, { system_prompt: newSystemPrompt });
+      const res = await genApi.Chat.sessionUpdatePost(sessionId, {
+        data: { system_prompt: newSystemPrompt },
+        updates: ['system_prompt'],
+      });
       return !!res.data.data;
     } catch (_) {
       ToastManager.danger('修改失败，请稍后再试~');

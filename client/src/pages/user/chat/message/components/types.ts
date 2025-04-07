@@ -19,7 +19,6 @@ export type DialogActionEmits = {
   (e: 'share'): void;
   (e: 'sync'): void;
   (e: 'edit'): void;
-  (e: 'editSystemPrompt'): void;
   (e: 'delete'): void;
   (e: 'actionTipClick'): void;
 };

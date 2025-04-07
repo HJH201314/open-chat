@@ -81,7 +81,7 @@ function hide(e?: MouseEvent) {
 
   const triggerRect = triggerRef.value?.getBoundingClientRect();
   const popoverRect = popoverRef.value?.getBoundingClientRect();
-  // console.log(JSON.stringify(triggerRect), JSON.stringify(popoverRect));
+  // console.debug(JSON.stringify(triggerRect), JSON.stringify(popoverRect));
   if (!triggerRect || !popoverRect) return;
   const isOutsideByEvent = !e
     ? false

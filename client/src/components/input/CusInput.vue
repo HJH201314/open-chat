@@ -48,7 +48,7 @@ function handleInput(e: any) {
   transition: background-color .2s $ease-out-circ, border .2s $ease-out-circ;
   background-color: $color-grey-100;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border: 2px solid var(--color-primary-lighter);
   }
 

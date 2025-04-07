@@ -117,7 +117,7 @@ async function getUsers(page?: number, size?: number) {
       data.value = res.data.data.list || [];
     }
   } catch (error) {
-    console.log(error);
+    console.debug(error);
   } finally {
     loading.value = false;
   }
@@ -184,7 +184,7 @@ function handleDelete(row: ApiSchemaUser) {
           getUsers();
         }
       } catch (error) {
-        console.log(error);
+        console.debug(error);
       }
     }
   });

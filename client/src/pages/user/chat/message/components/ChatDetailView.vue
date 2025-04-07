@@ -14,6 +14,7 @@ import ShareDialog from '@/pages/user/chat/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import { Control, Correct, Edit, Refresh } from '@icon-park/vue-next';
+import EditDialog from '@/pages/user/chat/message/components/EditDialog.vue';
 
 interface Props {
   dialogId: string;
@@ -270,51 +271,14 @@ async function handleSyncDialog() {
 function handleEditDialog() {
   if (!checkPermission()) return;
 
-  DialogManager.inputDialog(
-    {
-      icon: h(Edit),
-      title: '编辑会话',
-      content: '修改会话名称为',
+  DialogManager.renderDialog(h(EditDialog, {
+    cancelButtonProps: {
+      text: '关闭',
     },
-    {
-      placeholder: '新对话名称',
-      value: sessionInfo.value.title,
-    }
-  ).then((res) => {
-    if (res.status && res.value) {
-      // 确认修改
-      dataStore.editDialogTitle(form.sessionId, res.value);
-    }
-  });
-}
-
-async function handleEditSystemPrompt() {
-  if (!checkPermission()) return;
-
-  // 请求远程 system_prompt
-  try {
-    const remoteSessionInfo = await genApi.Chat.sessionGet(form.sessionId);
-    const res = await DialogManager.inputDialog(
-      {
-        icon: h(Control),
-        title: '编辑系统提示词',
-        subtitle: '注意：部分模型可能对系统提示词不敏感',
-        content: '修改系统提示词为',
-      },
-      {
-        placeholder: '系统提示词',
-        value: remoteSessionInfo.data.data?.system_prompt || '',
-      }
-    );
-    if (res.status && res.value) {
-      // 确认修改
-      const editResp = await dataStore.editDialogSystemPrompt(form.sessionId, res.value);
-      if (editResp) ToastManager.normal('修改成功！');
-      else ToastManager.danger('修改失败！');
-    }
-  } catch (_) {
-    ToastManager.danger('请求失败，请稍后重试！');
-  }
+    showConfirm: false,
+    sessionId: sessionInfo.value.id,
+    session: sessionInfo.value,
+  }))
 }
 
 function handleDeleteDialog() {
@@ -373,7 +337,6 @@ const { isSmallScreen } = useGlobal();
     @share="handleShareDialog"
     @sync="handleSyncDialog"
     @edit="handleEditDialog"
-    @edit-system-prompt="handleEditSystemPrompt"
     @delete="handleDeleteDialog"
     @action-tip-click="handleActionTipClick"
     @send="handleSendMessage"

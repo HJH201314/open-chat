@@ -29,7 +29,7 @@ watch(
   () => modelValue.value,
   (newModelValue) => {
     if (newModelValue !== selectedValue.value) {
-      console.log('setSelectedValue by model value', newModelValue);
+      console.debug('setSelectedValue by model value', newModelValue);
       setSelectedValue(modelValue.value);
       // 若值为空，则重置选中元素
       if (!modelValue.value) setSelectedElement(undefined);

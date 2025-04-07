@@ -51,6 +51,8 @@ export type SessionInfo = {
   userId?: number; // 用户 ID
   model?: string; // 模型名称
   flags?: SessionFlags;
+
+  [key: string]: any;
 };
 
 export type SessionFlags = {

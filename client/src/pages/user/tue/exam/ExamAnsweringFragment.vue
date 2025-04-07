@@ -144,7 +144,7 @@ function getPaginationItemStyle(pageNum: number) {
 watch(
   () => answers.value,
   (newAnswers) => {
-    console.log(newAnswers);
+    console.debug(newAnswers);
   },
   { deep: true }
 );

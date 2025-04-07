@@ -71,7 +71,7 @@ watch(
 );
 
 watchEffect(() => {
-  console.log(props);
+  console.debug(props);
 });
 
 const route = useRoute();

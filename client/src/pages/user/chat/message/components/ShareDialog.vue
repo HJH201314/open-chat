@@ -62,7 +62,7 @@ async function refreshSessionShareInfo(type: 'refresh' | 'get' = 'get') {
     const shareInfo = sessionRes.data.data?.share_info;
     if (shareInfo) {
       savedRemoteUserSessionShare.value = JSON.parse(JSON.stringify(shareInfo)) as ApiSchemaShareInfo;
-      console.log(savedRemoteUserSessionShare.value);
+      console.debug(savedRemoteUserSessionShare.value);
       form.isActive = shareInfo.permanent || new Date(shareInfo.expired_at || 0).getTime() > Date.now();
       form.code = shareInfo.code || '';
       type == 'get' && (form.title = shareInfo.title || '');

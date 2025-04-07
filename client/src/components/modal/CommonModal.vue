@@ -111,7 +111,6 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 function handleMaskClick() {
-  console.log('click mask')
   if (!props.closeOnClickMask) return;
   close();
 }

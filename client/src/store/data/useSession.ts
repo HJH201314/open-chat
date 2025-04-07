@@ -78,7 +78,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
    * @param controller AbortController
    */
   async function syncMessages(sessionId: string, controller?: AbortController): Promise<boolean> {
-    console.log('syncMessages', sessionId)
+    console.debug('syncMessages', sessionId)
     const abortController = controller || new AbortController();
     const remoteMessages: ApiSchemaMessage[] = [];
     let modelMap: Record<string, string> = {};
@@ -217,7 +217,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
 
       let usage: Record<string, any> = {};
       const saveBotMessage = async (extra: Record<string, any> = {}) => {
-        console.log('[saveBotMessage]', rawData.msg, renderedMsg.value);
+        console.debug('[saveBotMessage]', rawData.msg, renderedMsg.value);
         botMsgIndex &&
         (await updateMessage(botMsgIndex, {
           content: rawData.msg,

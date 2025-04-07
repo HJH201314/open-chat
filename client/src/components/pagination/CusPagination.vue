@@ -50,7 +50,7 @@ watch(
 watch(
   () => props.pageItemStyle,
   (newValue) => {
-    console.log('newPageItemStyle', newValue);
+    console.debug('newPageItemStyle', newValue);
   },
   { deep: true }
 );

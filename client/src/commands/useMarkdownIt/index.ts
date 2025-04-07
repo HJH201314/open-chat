@@ -41,7 +41,6 @@ markdownIt.renderer.rules.fence = function (tokens, idx, options, env, slf) {
 export const renderMarkdown = (text?: string) => {
   if (!text) return '';
 
-  console.log('[renderMarkdown1]', text);
   text = text.replaceAll(/<br>/g, '\n');
   let res = markdownIt.render(text);
   res = res.substring(0, res.length - 1); // 删除最后一个莫名其妙的字符

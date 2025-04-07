@@ -49,7 +49,7 @@ export const provideTheme = () => {
       theme[key] = cssValue;
       theme[cssKey] = cssValue;
     });
-    console.log(theme);
+    console.debug(theme);
   };
   // 初始化时立即同步 CSS 变量
   syncCssVars();

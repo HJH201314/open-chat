@@ -50,10 +50,7 @@ const { height: detailHeight, y: detailY } = useElementBounding(() => dialogDeta
 const panelPlaceholderPx = computed(() => `${panelHeight.value + 16}px`);
 const fixDialogToBottomPx = computed(() => `${panelHeight.value + 8}px`);
 
-const {
-  arrivedState,
-  directions: scrollDirections,
-} = useScroll(dialogListRef, {
+const { arrivedState, directions: scrollDirections } = useScroll(dialogListRef, {
   throttle: 200,
   onScroll() {
     if (scrollDirections.top) {
@@ -119,7 +116,7 @@ function handleMessageThinkExpand(expand: boolean) {
 
 // 当思考内容展开结束后，将思考内容滚动到顶部
 function handleMessageThinkExpanded(index: number, expanded: boolean) {
-  console.log(index, expanded);
+  console.debug(index, expanded);
   if (expanded) {
     const msgEle = document.querySelector<HTMLDivElement>(`#dialog-detail-message-${index}`);
     if (msgEle) {
@@ -165,7 +162,6 @@ defineExpose({
         @share="$emit('share')"
         @sync="$emit('sync')"
         @edit="$emit('edit')"
-        @edit-system-prompt="$emit('editSystemPrompt')"
         @delete="$emit('delete')"
         @action-tip-click="$emit('actionTipClick')"
       />

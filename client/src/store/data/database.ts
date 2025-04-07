@@ -19,7 +19,7 @@ export const initDatabase = async () => {
   try {
     defineDatabase();
     await db.open();
-    console.log('[IndexedDB] Database opened.');
+    console.debug('[IndexedDB] Database opened.');
   } catch (_) {
     await destroyDatabase();
   }
@@ -28,7 +28,7 @@ export const initDatabase = async () => {
 export const destroyDatabase = async () => {
   try {
     await db.delete();
-    console.log('[IndexedDB] Database deleted.');
+    console.debug('[IndexedDB] Database deleted.');
   } catch (_) {
     // do nothing
   }

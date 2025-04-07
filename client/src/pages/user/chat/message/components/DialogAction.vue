@@ -84,15 +84,6 @@ const innerShowMenu = ref(false);
         <IconButton type="secondary" color="info" no-normal-background style="flex-shrink: 0" @click="$emit('edit')">
           <Edit size="16" />
         </IconButton>
-        <IconButton
-          type="secondary"
-          color="info"
-          no-normal-background
-          style="flex-shrink: 0"
-          @click="$emit('editSystemPrompt')"
-        >
-          <Control size="16" />
-        </IconButton>
         <IconButton type="secondary" color="danger" no-normal-background style="flex-shrink: 0" @click="$emit('delete')">
           <Delete size="16" />
         </IconButton>

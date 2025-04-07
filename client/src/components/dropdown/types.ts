@@ -1,8 +1,8 @@
-import type { CSSProperties, InjectionKey, VNode } from 'vue';
+import type { CSSProperties, InjectionKey, Ref, VNode } from 'vue';
 
 export const DropdownCurrentInfoInjectionKey: InjectionKey<{
-  currentOptionPath: DropdownOption[];
-  currentValue: string | undefined;
+  currentOptionPath: Ref<DropdownOption[]>;
+  currentValue: Ref<string | undefined>;
   onSelect: (option: DropdownOption, valuePath: string[]) => void;
 }> = Symbol('DropdownCurrentInfo');
 

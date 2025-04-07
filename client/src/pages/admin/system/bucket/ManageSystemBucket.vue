@@ -105,7 +105,7 @@ async function getBuckets(page?: number, size?: number) {
       data.value = res.data.data.list || [];
     }
   } catch (error) {
-    console.log(error);
+    console.debug(error);
   } finally {
     loading.value = false;
   }
@@ -157,7 +157,7 @@ function handleDelete(row: ApiSchemaBucket) {
           getBuckets();
         }
       } catch (error) {
-        console.log(error);
+        console.debug(error);
       }
     }
   });

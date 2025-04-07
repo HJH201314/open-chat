@@ -70,7 +70,7 @@ export const useUserStore = defineStore('user', () => {
       if (res.data.code === 200) {
         loginStatus.value = 'login';
         currentUser.value = { ...res.data.data };
-        console.log('[login]', res.data.data)
+        console.debug('[login]', res.data.data)
         resumePing();
         return true;
       } else {

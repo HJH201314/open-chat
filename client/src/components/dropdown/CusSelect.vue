@@ -10,11 +10,15 @@
       {{ labelRenderText?.(selectedOption, selectedOptionPath) || selectedLabel }}
       <span class="arrow"></span>
     </div>
-    <Teleport to="body">
+    <CommonModal
+      v-model:visible="isOpen"
+      :show-close="false"
+      close-on-click-mask
+      :mask-style="{ backgroundColor: 'transparent' }"
+    >
       <dropdown-menu
         ref="root-menu"
         v-model:current-showing-path="currentShowingPath"
-        :_current-option-path="selectedOptionPath"
         :_depth="1"
         :_value-path="[]"
         :is-open="isOpen"
@@ -22,7 +26,7 @@
         :parent-bounding="toggleBounding"
         :position="position"
       ></dropdown-menu>
-    </Teleport>
+    </CommonModal>
   </div>
 </template>
 
@@ -34,11 +38,13 @@ import {
   DropdownCurrentInfoInjectionKey,
   type DropdownOption,
 } from '@/components/dropdown/types';
-import { onClickOutside, useElementBounding } from '@vueuse/core';
-import { computed, provide, reactive, ref, useTemplateRef, watch } from 'vue';
+import { useElementBounding } from '@vueuse/core';
+import { computed, provide, ref, useTemplateRef, watch } from 'vue';
+import { treeEach } from '@liuli-util/tree';
+import CommonModal from '@/components/modal/CommonModal.vue';
 
 // 双向绑定 modelValue: 当前选中项的 value
-const modelValue = defineModel<string>('modelValue');
+const selectedValue = defineModel<string>('modelValue');
 const props = withDefaults(defineProps<CusSelectProps>(), {
   backgroundMode: 'color',
   placeholder: '请选择',
@@ -56,7 +62,7 @@ const toggleRef = useTemplateRef('dropdown-toggle');
 const toggleBounding = useElementBounding(toggleRef);
 
 watch(
-  () => modelValue.value,
+  () => selectedValue.value,
   (newVal) => {
     // v-model 更新时手动更新选中项
     receiveModelValue(newVal);
@@ -66,12 +72,11 @@ watch(
   () => props.options,
   () => {
     // 选项更新时重新更新选中项
-    receiveModelValue(modelValue.value);
+    receiveModelValue(selectedValue.value);
   }
 );
 
 const receiveModelValue = (newVal?: string) => {
-  selectedValue.value = newVal;
   selectedOption.value = findCurrentValueOption(props.options, newVal);
 };
 
@@ -79,16 +84,27 @@ const isOpen = ref(false);
 
 const findCurrentValueOption = (options: DropdownOption[], target: string | undefined): DropdownOption | undefined => {
   if (!target) return undefined;
-  return options
-    .flatMap((opt) => {
-      return [opt, ...(opt.children ?? [])];
-    })
-    .find((opt) => opt.value === target);
+  try {
+    treeEach(
+      options,
+      (opt) => {
+        if (opt.value === target) {
+          // 这里使用 throw 来中断 treeEach 直接返回
+          throw opt;
+        }
+      },
+      {
+        id: 'value',
+        children: 'children',
+      }
+    );
+  } catch (opt) {
+    return opt as DropdownOption;
+  }
+  return undefined;
 };
-// 当前选中值
-const selectedValue = ref(modelValue.value);
 // 当前选中项
-const selectedOption = ref(findCurrentValueOption(props.options, modelValue.value));
+const selectedOption = ref(findCurrentValueOption(props.options, selectedValue.value));
 // 当前选中项的 label
 const selectedLabel = computed(() => {
   return selectedOption.value ? selectedOption.value.label : props.placeholder;
@@ -101,7 +117,7 @@ const getTargetPath = (
 ): DropdownOption[] | null => {
   for (const option of options) {
     // 包含当前 level 的 value
-    const currentPath = path.concat(option);
+    const currentPath = [...path, option];
     // 如果找到了目标，返回当前路径
     if (option.value === target.value) {
       return currentPath;
@@ -117,6 +133,7 @@ const getTargetPath = (
   // 未找到返回 null
   return null;
 };
+
 // 当前选中项的路径
 const selectedOptionPath = computed(() => {
   if (selectedOption.value) {
@@ -126,18 +143,34 @@ const selectedOptionPath = computed(() => {
   }
 });
 
-// 提供当前选中项的信息
-provide(
-  DropdownCurrentInfoInjectionKey,
-  reactive({
-    currentOptionPath: selectedOptionPath,
-    currentValue: selectedValue,
-    onSelect: selectOption,
-  })
-);
+function onSelectOption(option: DropdownOption, valuePath: string[]) {
+  console.debug('selected', option, valuePath);
+  selectedValue.value = option.value;
+  selectedOption.value = option;
+  emit('select', option.value, option, valuePath);
+  isOpen.value = false;
+  currentShowingPath.value = [];
+}
 
-// 当前展开的路径
+// 提供当前选中项的信息
+provide(DropdownCurrentInfoInjectionKey, {
+  currentOptionPath: selectedOptionPath,
+  currentValue: selectedValue,
+  onSelect: onSelectOption,
+});
+
+// 当前展开的路径（子菜单是否展示依赖此变量）
 const currentShowingPath = ref<string[]>([]);
+
+watch(
+  () => isOpen.value,
+  (newVal) => {
+    // 当关闭时重置当前展开路径
+    if (!newVal) {
+      currentShowingPath.value = [];
+    }
+  }
+);
 
 // 切换 Dropdown 展示状态
 function toggleDropdown() {
@@ -145,29 +178,6 @@ function toggleDropdown() {
     isOpen.value = !isOpen.value;
     currentShowingPath.value = [];
   }
-}
-
-// 点击 Dropdown 外部则关闭
-onClickOutside(
-  useTemplateRef<HTMLElement>('root-menu'),
-  () => {
-    // console.log('root-menu-click-outside', event.target);
-    isOpen.value = false;
-    currentShowingPath.value = [];
-  },
-  {
-    ignore: [selfRef, toggleRef],
-  }
-);
-
-function selectOption(option: DropdownOption, valuePath: string[]) {
-  console.log('selected', option, valuePath);
-  selectedValue.value = option.value;
-  selectedOption.value = option;
-  modelValue.value = option.value;
-  emit('select', option.value, option, valuePath);
-  isOpen.value = false;
-  currentShowingPath.value = [];
 }
 </script>
 
@@ -196,6 +206,7 @@ function selectOption(option: DropdownOption, valuePath: string[]) {
       &-color {
         background-color: $color-grey-100;
       }
+
       &-transparent {
         background-color: $color-bg-transparent-100;
       }
@@ -206,12 +217,12 @@ function selectOption(option: DropdownOption, valuePath: string[]) {
         &-color {
           background-color: $color-grey-300;
         }
+
         &-transparent {
           background-color: $color-bg-transparent-300;
         }
       }
     }
-
 
     &:hover {
       border-color: var(--color-primary);

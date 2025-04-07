@@ -50,7 +50,7 @@ const handleCheckedChange: TransferProps['onCheckedChange'] = ({
   targetChecked,
   type,
 }) => {
-  console.log('handleCheckedChange', {
+  console.debug('handleCheckedChange', {
     checkedVal,
     sourceChecked,
     targetChecked,
@@ -94,7 +94,7 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
     prevent();
     return;
   }
-  console.log(permissionIds.value);
+  console.debug(permissionIds.value);
   if (props.mode == 'create') {
     await genApi.Manage.roleCreatePost({
       ...formData,

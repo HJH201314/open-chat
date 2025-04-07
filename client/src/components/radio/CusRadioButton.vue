@@ -18,7 +18,7 @@ const directionClassName = computed(() => `direction-${groupInject?.direction?.v
 const displayStyle = computed(() => groupInject?.displayStyle?.value || 'background');
 
 function handleClick() {
-  console.log('setSelectedValue by click', radioValue.value || '');
+  console.debug('setSelectedValue by click', radioValue.value || '');
   groupInject?.setValue(radioValue.value || '');
 }
 

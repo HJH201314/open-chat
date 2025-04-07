@@ -27,7 +27,7 @@ const selectedValues = ref<any[]>(modelValue.value || []);
 watch(
   () => modelValue.value,
   (newModelValue) => {
-    console.log('[checkbox] newModelValue', newModelValue);
+    console.debug('[checkbox] newModelValue', newModelValue);
     if (
       newModelValue?.length !== selectedValues.value?.length ||
       !newModelValue?.every((v) => selectedValues.value.includes(v))

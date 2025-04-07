@@ -44,7 +44,7 @@ const transitionDuration = computed(() => startY.value ? '0.2s' : '0.4s')
 
 // 当前下拉距离
 const pullDistance = computed(() => {
-  console.log(refreshContainerRef.value?.scrollTop)
+  console.debug(refreshContainerRef.value?.scrollTop)
   if (isLoading.value) {
     return props.threshold;
   }

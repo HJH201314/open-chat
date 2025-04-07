@@ -117,7 +117,7 @@ async function getProviders(page?: number, size?: number) {
       data.value = res.data.data.list || [];
     }
   } catch (error) {
-    console.log(error);
+    console.debug(error);
   } finally {
     loading.value = false;
   }
@@ -152,7 +152,7 @@ function handleEdit(row: ApiSchemaProvider) {
 const router = useRouter();
 
 function handleModel(row: ApiSchemaProvider) {
-  console.log('handleModel', row);
+  console.debug('handleModel', row);
   if (row.id) {
     router.replace({
       name: 'ManageSystemModel',
@@ -185,7 +185,7 @@ function handleDelete(row: ApiSchemaProvider) {
           getProviders();
         }
       } catch (error) {
-        console.log(error);
+        console.debug(error);
       }
     }
   });

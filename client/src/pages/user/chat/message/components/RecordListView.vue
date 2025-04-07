@@ -78,7 +78,7 @@ const handleSessionRefresh = async () => {
     return;
   }
   if (dataStore.isSessionsEmpty) {
-    console.log('fetch user trigger immediately');
+    console.debug('fetch user trigger immediately');
     await dataStore.syncSessions();
     return;
   }
@@ -92,7 +92,7 @@ const handleSessionRefresh = async () => {
           ToastManager.danger('暂未支持');
           return;
         }
-        console.log('fetch use trigger confirmed');
+        console.debug('fetch use trigger confirmed');
         const syncRes = await dataStore.syncSessions(controller);
         if (!syncRes) {
           ToastManager.danger('同步失败，请稍后再试~', { position: 'top-left' });

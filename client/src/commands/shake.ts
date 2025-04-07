@@ -8,7 +8,6 @@ import type { DirectiveBinding } from "vue";
  */
 function shake(el: HTMLElement, binding: DirectiveBinding<boolean>) {
   if (binding.value !== binding.oldValue) {
-    // console.log(binding)
     el.classList.add("shake");
     setTimeout(() => {
       el.classList.remove("shake");

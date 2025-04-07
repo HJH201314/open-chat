@@ -230,8 +230,7 @@ defineSlots<{
       color: $color-teal-900;
 
       & div::selection {
-        background-color: $color-teal-300 !important;
-        color: $color-teal-50;
+        background-color: rgba(0 0 0 / 5%);
         border-radius: 0.5rem;
       }
     }

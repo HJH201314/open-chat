@@ -124,7 +124,7 @@ async function getModels(page?: number, size?: number, provider?: number) {
       data.value = res.data.data.list || [];
     }
   } catch (error) {
-    console.log(error);
+    console.debug(error);
   } finally {
     loading.value = false;
   }
@@ -210,7 +210,7 @@ function handleDelete(row: ApiSchemaModel) {
           getModels();
         }
       } catch (error) {
-        console.log(error);
+        console.debug(error);
       }
     }
   });

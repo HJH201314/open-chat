@@ -99,7 +99,7 @@ watch(
 watch(
   () => [innerTextAnswer.value, innerBoolAnswer.value, innerOptionAnswer.value],
   (newAns, oldAns) => {
-    console.log(`[ExamProblem:${props.page}] answer change`, newAns);
+    console.debug(`[ExamProblem:${props.page}] answer change`, newAns);
     for (let i = 0; i < newAns.length; i++) {
       if (newAns[i] !== oldAns[i]) {
         answerVM.value = newAns[i];

@@ -100,7 +100,7 @@ async function getRoles(page?: number, size?: number) {
       data.value = res.data.data.list || [];
     }
   } catch (error) {
-    console.log(error);
+    console.debug(error);
   } finally {
     loading.value = false;
   }
@@ -140,7 +140,7 @@ async function handleActiveChange(row: ApiSchemaRole, v: boolean) {
       row.active = v;
     }
   } catch (error) {
-    console.log(error);
+    console.debug(error);
   }
 }
 
@@ -172,7 +172,7 @@ function handleDelete(row: ApiSchemaRole) {
           getRoles();
         }
       } catch (error) {
-        console.log(error);
+        console.debug(error);
       }
     }
   });

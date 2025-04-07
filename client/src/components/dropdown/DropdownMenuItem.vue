@@ -1,6 +1,14 @@
 <template>
   <li ref="menu-item" v-element-hover="(state) => handleHover(state)" class="menu-item">
-    <div ref="menu-item-body" class="menu-item-body" @click="handleClick">
+    <div
+      ref="menu-item-body"
+      class="menu-item-body"
+      :class="{
+        selected:
+          option.value === dropdownCurrent?.currentValue.value || dropdownCurrent?.currentOptionPath?.value?.includes(option),
+      }"
+      @click="handleClick"
+    >
       <Component :is="iconComponent" v-if="iconComponent" />
       <div style="flex: 1">
         <span>{{ option.label }}</span>
@@ -21,7 +29,6 @@
 </template>
 
 <script lang="ts" setup>
-import useGlobal from '@/commands/useGlobal';
 import DropdownMenu from '@/components/dropdown/DropdownMenu.vue';
 import {
   DropdownCurrentInfoInjectionKey,
@@ -31,7 +38,8 @@ import {
 import { Right } from '@icon-park/vue-next';
 import { vElementHover } from '@vueuse/components';
 import { useArrayFilter, useArrayIncludes, useElementBounding } from '@vueuse/core';
-import { computed, defineProps, h, inject, useTemplateRef } from 'vue';
+import { computed, defineProps, h, inject, useTemplateRef, watch, watchEffect } from 'vue';
+import useGlobal from '@/commands/useGlobal.ts';
 
 const props = withDefaults(
   defineProps<
@@ -50,11 +58,12 @@ const iconComponent = computed(() => {
   } else {
     return props.option.icon ? h(props.option.icon, { style: 'width: 1em; height: 1em;' }) : null;
   }
-})
+});
 
-const currentDropdownInfo = inject(DropdownCurrentInfoInjectionKey);
+// 注入当前选中项信息
+const dropdownCurrent = inject(DropdownCurrentInfoInjectionKey);
 
-const currentShowingPath = defineModel<string[]>('currentShowingPath');
+const currentShowingPath = defineModel<string[]>('currentShowingPath', { default: () => [] });
 const frontPath = useArrayFilter(
   () => currentShowingPath.value ?? [],
   (_, i) => {
@@ -78,18 +87,21 @@ const isSubMenuOpen = useArrayIncludes(
   () => props.option.value
 );
 
+watch(() => currentShowingPath.value, (newVal) => {
+  console.log('currentShowingPath', props.option, newVal)
+})
+
 const showSubMenu = () => {
-  // console.log('showSubMenu', props.option, [...frontPath.value, props.option.value]);
   currentShowingPath.value = [...frontPath.value, props.option.value];
 };
 const hideSubMenu = () => {
-  // console.log('hideSubMenu', props.option, [...frontPath.value]);
   currentShowingPath.value = [...frontPath.value];
 };
 
 // 处理鼠标悬停，切换子菜单显示状态
 function handleHover(state: boolean) {
   if (currentShowingPath.value && state) {
+    console.log('hover1')
     showSubMenu();
   }
 }
@@ -98,32 +110,29 @@ const { isLargeScreen } = useGlobal();
 
 // 处理菜单项点击
 function handleClick() {
-  if (props.option.children && props.option.children.length) {
+  if (props.option.children?.length) {
+    console.log('click1', isSubMenuOpen.value)
     isLargeScreen.value && isSubMenuOpen.value ? hideSubMenu() : showSubMenu();
   } else {
-    currentDropdownInfo?.onSelect(props.option, [...props._valuePath, props.option.value]);
+    console.log('click2')
+    dropdownCurrent?.onSelect(props.option, [...props._valuePath, props.option.value]);
   }
 }
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/variables' as *;
+
 .menu-item {
   min-width: 5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  white-space: nowrap;
+  cursor: pointer;
+  color: var(--text-primary);
+  padding-inline: 0.25rem;
+  padding-top: 0.25rem;
+  line-height: 1;
 
-  &:not(:last-child):first-child {
-    border-radius: 8px 8px 0 0;
-  }
-
-  &:not(:first-child):last-child {
-    border-radius: 0 0 8px 8px;
-  }
-
-  &:is(:first-child):last-child {
-    border-radius: 8px;
+  &:last-child {
+    padding-bottom: 0.25rem;
   }
 
   &-body {
@@ -132,6 +141,18 @@ function handleClick() {
     align-items: center;
     justify-content: space-between;
     gap: 0.25em;
+    white-space: nowrap;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.2s $ease-out-circ;
+
+    &:hover {
+      background-color: $color-grey-200;
+    }
+
+    &.selected {
+      color: var(--color-primary);
+    }
   }
 }
 </style>

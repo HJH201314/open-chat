@@ -151,7 +151,7 @@ const options = {
 };
 
 const handleLoaded = () => {
-  console.log('Particles loaded');
+  console.debug('Particles loaded');
 };
 
 const id = useId();

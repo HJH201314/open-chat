@@ -40,7 +40,7 @@ watch(
 );
 
 function handleSave() {
-  console.log(editingValue);
+  console.debug(editingValue);
   const result = settingStore.saveSettings(editingValue.value);
   showToast({ text: `保存${result}个设置成功` });
 }

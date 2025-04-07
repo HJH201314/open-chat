@@ -7,11 +7,11 @@ const selectedFruits = ref<string[]>(['apple']);
 const selectedColors = ref<string[]>(['red', 'blue']);
 
 function handleFruitsChange(values: string[]) {
-  console.log('水果选择变化:', values);
+  console.debug('水果选择变化:', values);
 }
 
 function handleColorsChange(values: string[]) {
-  console.log('颜色选择变化:', values);
+  console.debug('颜色选择变化:', values);
 }
 </script>
 
