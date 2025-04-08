@@ -462,6 +462,12 @@ export interface ApiEntityReqUpdateBodySchemaRole {
   updates: string[];
 }
 
+export interface ApiEntityReqUpdateBodySchemaSession {
+  data: ApiSchemaSession;
+  /** @minItems 1 */
+  updates: string[];
+}
+
 export interface ApiExamSubmitExamRequest {
   /**
    * 答案列表
@@ -837,6 +843,8 @@ export interface ApiSchemaSession {
   /** 组装数据 */
   messages?: ApiSchemaMessage[];
   name?: string;
+  /** 标题来源 */
+  name_type?: ApiSchemaSessionNameType;
   /** 系统提示词 */
   system_prompt?: string;
   updated_at?: string;
@@ -845,6 +853,11 @@ export interface ApiSchemaSession {
 export interface ApiSchemaSessionFlagInfo {
   /** 标星 */
   star?: boolean;
+}
+
+export enum ApiSchemaSessionNameType {
+  EnumSessionNameTypeWIP = 1,
+  EnumSessionNameTypeSystem = 2,
 }
 
 export interface ApiSchemaSessionShareInfo {
@@ -883,8 +896,8 @@ export interface ApiSchemaUserSession {
 }
 
 export enum ApiSchemaUserSessionType {
-  Enum_OWNER = 1,
-  Enum_INVITEE = 2,
+  EnumUserSessionTypeOwner = 1,
+  EnumUserSessionTypeInvitee = 2,
 }
 
 export interface ApiUserLoginLoginRequest {

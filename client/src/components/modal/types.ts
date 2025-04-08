@@ -10,6 +10,7 @@ export type CommonModalProps = {
   maskStyle?: CSSProperties;
   modalStyle?: CSSProperties;
   presetBody?: boolean; // 是否预设body样式（默认 false）
+  zIndex?: number; // 强行指定 z-index，这会破坏多级弹窗的 z-index 顺序
 }
 
 export type CommonModalFunc = {

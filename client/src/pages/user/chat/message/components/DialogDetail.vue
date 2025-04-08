@@ -1,19 +1,23 @@
 <script lang="ts" setup>
-import { DoubleDown } from '@icon-park/vue-next';
+import { DoubleDown, DoubleUp } from '@icon-park/vue-next';
 import { until, useElementBounding, useEventListener, useScroll } from '@vueuse/core';
-import { computed, ref, useTemplateRef } from 'vue';
-import DialogAction from './DialogAction.vue';
-import DialogInput from './DialogInput.vue';
+import { computed, provide, ref, useTemplateRef } from 'vue';
 import DialogMessage from './DialogMessage.vue';
 import IconButton from '@/components/IconButton.vue';
 import type { MessageInfo } from '@/types/data.ts';
-import { nextFrame, scrollToBottom } from '@/utils/element.ts';
+import { nextFrame, scrollToBottom, scrollToTop } from '@/utils/element.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
-import type { DialogDetailEmits, DialogDetailProps } from '@/pages/user/chat/message/components/types.ts';
+import {
+  type DialogDetailEmits,
+  type DialogDetailProps,
+  type DialogDetailSlots,
+  DialogDetailSlotsInjectionKey,
+} from '@/pages/user/chat/message/components/types.ts';
 import DialogExamProblem from '@/pages/user/chat/message/components/extension/DialogExamProblem.vue';
 import Birthday from '@/components/extra/Birthday.vue';
 
 const props = withDefaults(defineProps<DialogDetailProps>(), {
+  emptyTip: '随便问点啥？',
   session: () => ({
     id: '',
     createAt: 0,
@@ -28,34 +32,46 @@ const props = withDefaults(defineProps<DialogDetailProps>(), {
   answerMsg: '',
   thinkMsg: '',
   isSmallScreen: false,
+  userInput: '',
   modelDropdown: () => [],
 });
-
-const inputModelName = defineModel<string>('inputModelName', { default: '' });
-const inputBotId = defineModel<number>('inputBotId', { default: 0 });
-const inputWithContext = defineModel<boolean>('inputWithContext', { default: true });
-const inputUserInput = defineModel<string>('inputUserInput', { default: '' });
+const showAction = defineModel<boolean>('showAction', { default: true });
+const showInput = defineModel<boolean>('showInput', { default: true });
 
 const emit = defineEmits<DialogDetailEmits>();
 
-const hideDialogAction = ref(false);
-
 const dialogDetailRef = useTemplateRef('dialog-detail');
-const dialogActionRef = useTemplateRef<HTMLDivElement>('dialog-action');
 const dialogListRef = useTemplateRef('dialog-list');
-const inputPanelRef = useTemplateRef<HTMLElement>('input-panel');
+// 插槽类型定义，并通过依赖注入获取插槽 DOM 实例
+defineSlots<DialogDetailSlots>();
+const dialogActionSlot = ref<HTMLDivElement>();
+const dialogInputSlot = ref<HTMLDivElement>();
+provide(DialogDetailSlotsInjectionKey, {
+  action: dialogActionSlot,
+  input: dialogInputSlot,
+  setActionRef(el) {
+    dialogActionSlot.value = el.value;
+  },
+  setInputRef(el) {
+    dialogInputSlot.value = el.value;
+  },
+});
 
-const { height: panelHeight, y: panelY } = useElementBounding(() => inputPanelRef.value);
+
+const { height: panelHeight, y: panelY } = useElementBounding(() => dialogInputSlot.value);
+const { height: actionHeight } = useElementBounding(() => dialogActionSlot.value);
+const detailPaddingTop = computed(() => `${actionHeight.value + 8}px`);
 const { height: detailHeight, y: detailY } = useElementBounding(() => dialogDetailRef.value);
 const panelPlaceholderPx = computed(() => `${panelHeight.value + 16}px`);
 const fixDialogToBottomPx = computed(() => `${panelHeight.value + 8}px`);
+const scrollDialogToTopPx = computed(() => `${actionHeight.value + 8}px`);
 
 const { arrivedState, directions: scrollDirections } = useScroll(dialogListRef, {
   throttle: 200,
   onScroll() {
     if (scrollDirections.top) {
       fixDialogToBottom.value = false;
-      hideDialogAction.value = false;
+      showAction.value = true;
     } else if (scrollDirections.bottom) {
       // 向下滚动时隐藏 dialog-action
       // scrollY.value > (dialogActionRef.value?.offsetHeight || 48) && (hideDialogAction.value = true);
@@ -87,22 +103,26 @@ function getMsgStreaming(item: MessageInfo) {
 
 function handleFixDialogToBottom() {
   fixDialogToBottom.value = true;
-  scrollDialogListToBottom('smooth');
+  scrollDialogListToBottom('smooth', false);
+}
+
+function handleScrollDialogToTop() {
+  fixDialogToBottom.value = false;
+  dialogListRef.value && scrollToTop(dialogListRef.value, 'smooth');
 }
 
 // 滚动容器到最底部
-function scrollDialogListToBottom(behavior: ScrollBehavior = 'smooth') {
-  // 确保 panelHeight 已经被计算出来
-  until(panelHeight)
-    .toMatch((v) => v > 0)
-    .then(() => {
-      dialogListRef.value && scrollToBottom(dialogListRef.value, behavior);
-      // 平滑完全滚动到底部的关键操作：
-      nextFrame(() => {
-        // scroll again, because 某些情况下（如拉取新数据后） panelPlaceHolderPx 下一刻才会生效；此时固定使用 smooth 避免闪烁
-        dialogListRef.value && scrollToBottom(dialogListRef.value, 'smooth');
-      });
-    });
+async function scrollDialogListToBottom(behavior: ScrollBehavior = 'smooth', waitForPanel = true) {
+  if (waitForPanel) {
+    // 确保 panelHeight 已经被计算出来
+    await until(panelHeight).toMatch((v) => v > 0);
+  }
+  dialogListRef.value && scrollToBottom(dialogListRef.value, behavior);
+  // 平滑完全滚动到底部的关键操作：
+  nextFrame(() => {
+    // scroll again, because 某些情况下（如拉取新数据后） panelPlaceHolderPx 下一刻才会生效；此时固定使用 smooth 避免闪烁
+    dialogListRef.value && scrollToBottom(dialogListRef.value, 'smooth');
+  });
 }
 
 function handleMessageThinkExpand(expand: boolean) {
@@ -122,7 +142,7 @@ function handleMessageThinkExpanded(index: number, expanded: boolean) {
     if (msgEle) {
       // 展开时将思考内容滚动到顶部；若空间不足以展开，也会尽量滚动
       dialogListRef.value?.scrollTo({
-        top: msgEle.offsetTop - 56,
+        top: msgEle.offsetTop - actionHeight.value - 8,
         behavior: 'smooth',
       });
     }
@@ -130,8 +150,8 @@ function handleMessageThinkExpanded(index: number, expanded: boolean) {
 }
 
 useEventListener(dialogDetailRef, 'mousemove', (e: MouseEvent) => {
-  if (e.clientY < 56) {
-    hideDialogAction.value = false;
+  if (e.clientY < actionHeight.value) {
+    showAction.value = true;
   }
 });
 
@@ -144,31 +164,16 @@ defineExpose({
 <template>
   <div ref="dialog-detail" :class="{ small: isSmallScreen }" class="dialog-detail">
     <Transition name="action-flow-in-out" type="animation">
-      <DialogAction
-        v-show="!hideDialogAction"
-        id="dialog-action"
-        ref="dialog-action"
-        :title="session.title || '未命名对话'"
-        :message-count="messageCount"
-        :has-permission="hasPermission"
-        :is-login="isLogin"
-        :is-stared="session.flags?.isStared"
-        :message-syncing="messageSyncing"
-        :menu-in-more="isSmallScreen"
-        :shadowed="!arrivedState.top"
-        :can-show-menu="!hideDialogAction || !isSmallScreen"
-        @back="$emit('back')"
-        @star="$emit('star')"
-        @share="$emit('share')"
-        @sync="$emit('sync')"
-        @edit="$emit('edit')"
-        @delete="$emit('delete')"
-        @action-tip-click="$emit('actionTipClick')"
-      />
+      <div v-if="showAction" class="dialog-action">
+        <slot name="action" :detail-arrived-state="arrivedState" />
+      </div>
     </Transition>
     <Transition>
       <!-- 空空提示 -->
-      <div v-if="isEmptySession" class="dialog-detail-empty">随便问点啥？</div>
+      <div v-if="isEmptySession" class="dialog-detail-empty">
+        <div>{{ emptyTip }}</div>
+        <slot name="empty" />
+      </div>
     </Transition>
     <!-- 对话区域 -->
     <div ref="dialog-list" class="dialog-detail-display-area">
@@ -206,44 +211,42 @@ defineExpose({
         </DialogMessage>
         <!--   消息列表   -->
         <DialogMessage
-          v-show="!isReceivingMsg && !isEmptySession && inputUserInput"
+          v-show="!isReceivingMsg && !isEmptySession && userInput"
           id="user-typing-box"
           key="user-typing-box"
           :markdown-render="false"
-          :message="inputUserInput"
+          :message="userInput"
           role="user"
         ></DialogMessage>
       </div>
-      <Transition name="scroll-flow-in-out" type="animation">
+      <Transition name="scroll-flow-in-out-top" type="animation">
+        <IconButton
+          v-if="!arrivedState.top && messages.length"
+          class="dialog-detail-scroll-to-top"
+          color="#666666"
+          type="secondary"
+          shadow
+          @click="handleScrollDialogToTop"
+        >
+          <DoubleUp size="16" />
+        </IconButton>
+      </Transition>
+      <Transition name="scroll-flow-in-out-bottom" type="animation">
         <IconButton
           v-if="!fixDialogToBottom && !arrivedState.bottom && messages.length"
           class="dialog-detail-scroll-to-bottom"
-          color="#000000"
+          color="#666666"
           type="secondary"
+          shadow
           @click="handleFixDialogToBottom"
         >
           <DoubleDown size="16" />
         </IconButton>
       </Transition>
+      <div v-if="showInput">
+        <slot name="input" :detail-arrived-state="arrivedState" />
+      </div>
       <!-- 输入面板 -->
-      <DialogInput
-        ref="input-panel"
-        v-model:input-user-input="inputUserInput"
-        v-model:input-with-context="inputWithContext"
-        :input-model-name="inputModelName"
-        :input-bot-id="inputBotId"
-        :model-dropdown="modelDropdown"
-        :bot-dropdown="botDropdown"
-        :display-in-middle="isEmptySession && !isSmallScreen"
-        :is-streaming="isReceivingMsg"
-        :hide-self="messageSyncing"
-        :show-model-selector="showModelSelector"
-        :show-bot-selector="showBotSelector"
-        :show-context-toggle="showContextToggle"
-        @send="$emit('send')"
-        @model-select="$emit('modelSelect', $event)"
-        @bot-select="$emit('botSelect', $event)"
-      />
     </div>
     <LoadingModal
       :visible="messageSyncing"
@@ -263,6 +266,14 @@ $dialog-max-width: 54rem;
 .dialog-detail {
   position: relative;
 
+  .dialog-action {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+  }
+
   &-display-area {
     width: 100%;
     height: 100%;
@@ -279,7 +290,7 @@ $dialog-max-width: 54rem;
     max-width: $dialog-max-width;
     margin-inline: auto;
     padding-inline: 0.25rem;
-    padding-top: 3rem;
+    padding-top: v-bind(detailPaddingTop);
     display: flex;
     flex-direction: column;
     margin-bottom: v-bind(panelPlaceholderPx);
@@ -302,13 +313,31 @@ $dialog-max-width: 54rem;
     text-align: center;
     top: calc(50%);
     transform: translateY(calc(-50% - 2.5em));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &-scroll-to-top {
+    position: absolute;
+    right: 0.5rem;
+    top: v-bind(scrollDialogToTopPx);
+    z-index: 3;
   }
 
   &-scroll-to-bottom {
     position: absolute;
     right: 0.5rem;
     bottom: v-bind(fixDialogToBottomPx);
+    z-index: 3;
     //transform: scale(0.9) translateX(-50%);
+  }
+
+  :global(.cus-code-container > section) {
+    position: sticky;
+    top: 2.75rem;
+    z-index: 1;
   }
 }
 
@@ -334,18 +363,37 @@ $dialog-max-width: 54rem;
   }
 }
 
-.scroll-flow-in-out {
+.scroll-flow-in-out-bottom {
   &-enter-active {
-    animation: scroll-flow-in-out-anim 0.2s $ease-out-circ;
+    animation: scroll-flow-in-out-bottom-anim 0.2s $ease-out-circ;
   }
 
   &-leave-active {
-    animation: scroll-flow-in-out-anim 0.2s $ease-out-circ reverse;
+    animation: scroll-flow-in-out-bottom-anim 0.2s $ease-out-circ reverse;
   }
 
-  @keyframes scroll-flow-in-out-anim {
+  @keyframes scroll-flow-in-out-bottom-anim {
     0% {
       transform: translateY(120%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+}
+
+.scroll-flow-in-out-top {
+  &-enter-active {
+    animation: scroll-flow-in-out-top-anim 0.2s $ease-out-circ;
+  }
+
+  &-leave-active {
+    animation: scroll-flow-in-out-top-anim 0.2s $ease-out-circ reverse;
+  }
+
+  @keyframes scroll-flow-in-out-top-anim {
+    0% {
+      transform: translateY(-120%);
     }
     100% {
       transform: translateY(0);

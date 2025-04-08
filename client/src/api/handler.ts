@@ -23,7 +23,7 @@ export const successHandler = (resp: any) => {
 };
 
 export const errorHandler = (error: any) => {
-  console.log(error);
+  console.debug(error);
   if (error.status === 401) {
     // 后端返回登录失效，登出并提示登录态过期
     if (getActivePinia()) {

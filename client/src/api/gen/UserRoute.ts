@@ -19,6 +19,22 @@ import type {
 
 export namespace User {
   /**
+   * @description 后门登录
+   * @tags User
+   * @name BackdoorLoginPost
+   * @summary 后门登录
+   * @request POST:/user/backdoor/login
+   * @response `200` `ApiEntityCommonResponseSchemaUser` login successfully
+   */
+  export namespace BackdoorLoginPost {
+    export type RequestParams = {};
+    export type RequestQuery = {};
+    export type RequestBody = ApiUserLoginLoginRequest;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaUser;
+  }
+
+  /**
    * @description 获取当前用户信息
    * @tags User
    * @name CurrentGet

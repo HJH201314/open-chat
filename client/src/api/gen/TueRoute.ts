@@ -97,7 +97,7 @@ export namespace Tue {
     export type RequestQuery = {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -313,7 +313,7 @@ export namespace Tue {
     export type RequestQuery = {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;

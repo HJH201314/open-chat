@@ -23,8 +23,8 @@ import type {
   ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
+  ApiEntityReqUpdateBodySchemaSession,
   ApiSchemaMessage,
-  ApiSchemaSession,
   ApiSchemaSessionFlagInfo,
 } from "./data-contracts";
 
@@ -95,7 +95,34 @@ export namespace Chat {
     export type RequestQuery = {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseChatChatMessageListResponse;
+  }
+
+  /**
+   * @description 获取分享过的消息
+   * @tags Message
+   * @name MessageListSharedGet
+   * @summary 获取分享过的消息
+   * @request GET:/chat/message/list/{session_id}/shared
+   * @response `200` `ApiEntityCommonResponseChatChatMessageListResponse` 返回数据
+   */
+  export namespace MessageListSharedGet {
+    export type RequestParams = {
+      /** 会话 ID */
+      sessionId: string;
+    };
+    export type RequestQuery = {
+      code?: string;
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -194,7 +221,7 @@ export namespace Chat {
     export type RequestQuery = {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -218,6 +245,29 @@ export namespace Chat {
     export type RequestBody = never;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseString;
+  }
+
+  /**
+   * @description 获取已分享的用户会话信息（仅返回 Name）
+   * @tags Session
+   * @name SessionSharedGet
+   * @summary 获取已分享的用户会话信息
+   * @request GET:/chat/session/{session_id}/shared
+   * @response `200` `ApiEntityCommonResponseSchemaSession` 返回数据
+   */
+  export namespace SessionSharedGet {
+    export type RequestParams = {
+      /** 会话 ID */
+      sessionId: string;
+    };
+    export type RequestQuery = {
+      code?: string;
+      /** 尝试获取而不抛出错误 */
+      touch?: boolean;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaSession;
   }
 
   /**
@@ -253,7 +303,7 @@ export namespace Chat {
       /** 客户端上次同步时间戳 */
       last_sync_time: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
     };
     export type RequestBody = never;
@@ -275,7 +325,7 @@ export namespace Chat {
       sessionId: string;
     };
     export type RequestQuery = {};
-    export type RequestBody = ApiSchemaSession;
+    export type RequestBody = ApiEntityReqUpdateBodySchemaSession;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseBool;
   }

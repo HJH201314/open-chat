@@ -5,7 +5,8 @@
       class="menu-item-body"
       :class="{
         selected:
-          option.value === dropdownCurrent?.currentValue.value || dropdownCurrent?.currentOptionPath?.value?.includes(option),
+          option.value === dropdownCurrent?.currentValue.value ||
+          dropdownCurrent?.currentOptionPath?.value?.includes(option),
       }"
       @click="handleClick"
     >
@@ -38,7 +39,7 @@ import {
 import { Right } from '@icon-park/vue-next';
 import { vElementHover } from '@vueuse/components';
 import { useArrayFilter, useArrayIncludes, useElementBounding } from '@vueuse/core';
-import { computed, defineProps, h, inject, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, defineProps, h, inject, useTemplateRef } from 'vue';
 import useGlobal from '@/commands/useGlobal.ts';
 
 const props = withDefaults(
@@ -87,10 +88,6 @@ const isSubMenuOpen = useArrayIncludes(
   () => props.option.value
 );
 
-watch(() => currentShowingPath.value, (newVal) => {
-  console.log('currentShowingPath', props.option, newVal)
-})
-
 const showSubMenu = () => {
   currentShowingPath.value = [...frontPath.value, props.option.value];
 };
@@ -101,7 +98,6 @@ const hideSubMenu = () => {
 // 处理鼠标悬停，切换子菜单显示状态
 function handleHover(state: boolean) {
   if (currentShowingPath.value && state) {
-    console.log('hover1')
     showSubMenu();
   }
 }
@@ -111,10 +107,8 @@ const { isLargeScreen } = useGlobal();
 // 处理菜单项点击
 function handleClick() {
   if (props.option.children?.length) {
-    console.log('click1', isSubMenuOpen.value)
     isLargeScreen.value && isSubMenuOpen.value ? hideSubMenu() : showSubMenu();
   } else {
-    console.log('click2')
     dropdownCurrent?.onSelect(props.option, [...props._valuePath, props.option.value]);
   }
 }

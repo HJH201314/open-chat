@@ -8,7 +8,7 @@ export type CusButtonProps = {
   backgroundColor?: string; // 强制指定按钮背景色
   fontColor?: string; // 强制指定按钮文字色
   minWidth?: CSSProperties['min-width'];
-  shadow?: boolean;
+  shadow?: boolean | CSSProperties['box-shadow'];
   disabled?: boolean;
 
   // 自定义样式

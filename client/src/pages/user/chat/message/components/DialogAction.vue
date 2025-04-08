@@ -1,55 +1,80 @@
 <script lang="ts" setup>
-import { Back, Control, Delete, Edit, More, Refresh, Share, Star } from '@icon-park/vue-next';
+import { Back, Delete, Edit, More, Refresh, ShareOne, Star } from '@icon-park/vue-next';
 import IconButton from '@/components/IconButton.vue';
 import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import type { DialogActionEmits, DialogActionProps } from '@/pages/user/chat/message/components/types.ts';
-import { ref, watch } from 'vue';
+import {
+  type DialogActionEmits,
+  type DialogActionProps,
+  DialogDetailSlotsInjectionKey,
+} from '@/pages/user/chat/message/components/types.ts';
+import { inject, ref, watch, watchEffect } from 'vue';
 
 const props = withDefaults(defineProps<DialogActionProps>(), {
   title: '',
   messageCount: 0,
   hasPermission: true,
   isLogin: false,
-  isStarted: false,
+  isStared: false,
+  isShared: false,
   messageSyncing: false,
   menuInMore: false,
-  canShowMenu: true,
+  showMenu: true,
+  canExpandMenu: true,
   shadowed: false,
 });
-watch(() => props.canShowMenu, (newShowMenu) => {
-  if (!newShowMenu) innerShowMenu.value = false;
-})
+watch(
+  () => props.canExpandMenu,
+  (newShowMenu) => {
+    if (!newShowMenu) innerShowMenu.value = false;
+  }
+);
 
 const emit = defineEmits<DialogActionEmits>();
 
+// 向父组件传递根元素 ref
+const detailSlots = inject(DialogDetailSlotsInjectionKey);
+const actionRef = ref<HTMLDivElement>();
+watchEffect(() => {
+  detailSlots?.setActionRef(actionRef);
+});
+
 const innerShowMenu = ref(false);
+
+defineSlots<{
+  back: () => any;
+  title: () => any;
+}>();
 </script>
 
 <template>
-  <div class="dialog-action" :class="{ shadow: shadowed }">
+  <div ref="actionRef" class="dialog-action" :class="{ shadow: shadowed }">
     <div class="dialog-action-area-left">
       <IconButton
+        v-if="!$slots.back"
         type="secondary"
         color="#00110F"
+        :blur="false"
+        style="flex-shrink: 0"
         no-normal-background
-        style="flex-shrink: 0; opacity: 0.75"
         @click="$emit('back')"
       >
         <Back size="16" />
       </IconButton>
+      <slot v-else name="back" />
       <!--      <div v-if="!hasPermission" class="dialog-action-tip" @click="$emit('actionTipClick')">-->
       <!--        <WrongUser />-->
       <!--        <span v-if="!isLogin">未登录</span>-->
       <!--        <span v-else>无权限</span>-->
       <!--      </div>-->
-      <div class="dialog-action-title">
+      <div v-if="!$slots.title" class="dialog-action-title">
         {{ title || '未命名对话' }}
       </div>
+      <slot v-else name="title"/>
       <!--      <span class="dialog-action-subtitle"> {{ messageCount }} 条消息 </span>-->
     </div>
     <IconButton
-      v-if="menuInMore"
+      v-if="menuInMore && showMenu"
       type="secondary"
       color="#00110F"
       style="flex-shrink: 0; opacity: 0.75"
@@ -60,18 +85,24 @@ const innerShowMenu = ref(false);
     </IconButton>
     <Transition name="action-flow-in-out" type="animation">
       <section
-        v-if="!menuInMore || innerShowMenu"
+        v-if="showMenu && (!menuInMore || innerShowMenu)"
         class="dialog-action-menu"
         :class="{ 'dialog-action-menu--flow': menuInMore }"
       >
         <CusTooltip text="收藏对话" position="bottom">
-          <IconButton type="secondary" color="warning" :no-normal-background="!isStared" style="flex-shrink: 0" @click="$emit('star')">
+          <IconButton
+            type="secondary"
+            color="warning"
+            :no-normal-background="!isStared"
+            style="flex-shrink: 0"
+            @click="$emit('star')"
+          >
             <Star size="16" :theme="isStared ? 'filled' : 'outline'" />
           </IconButton>
         </CusTooltip>
         <CusTooltip text="分享对话" position="bottom">
-          <IconButton type="secondary" color="info" no-normal-background style="flex-shrink: 0" @click="$emit('share')">
-            <Share size="16" />
+          <IconButton type="secondary" color="info" :no-normal-background="!isShared" style="flex-shrink: 0" @click="$emit('share')">
+            <ShareOne size="16" :theme="isShared ? 'filled' : 'outline'"/>
           </IconButton>
         </CusTooltip>
         <CusTooltip text="刷新对话" position="bottom">
@@ -84,7 +115,13 @@ const innerShowMenu = ref(false);
         <IconButton type="secondary" color="info" no-normal-background style="flex-shrink: 0" @click="$emit('edit')">
           <Edit size="16" />
         </IconButton>
-        <IconButton type="secondary" color="danger" no-normal-background style="flex-shrink: 0" @click="$emit('delete')">
+        <IconButton
+          type="secondary"
+          color="danger"
+          no-normal-background
+          style="flex-shrink: 0"
+          @click="$emit('delete')"
+        >
           <Delete size="16" />
         </IconButton>
       </section>
@@ -97,31 +134,25 @@ const innerShowMenu = ref(false);
 @use '@/assets/variables' as *;
 
 .dialog-action {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  // 作为纯渲染组件，此处不添加 position 定位方式
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
   color: var(--color-black);
   background: var(--color-white);
-  z-index: 1;
 
   &.shadow {
     box-shadow: $box-shadow-shallower;
   }
 
   &-area-left {
-    margin-right: auto;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-end;
     gap: 0.5rem;
+    flex: auto;
   }
 
   &-title {

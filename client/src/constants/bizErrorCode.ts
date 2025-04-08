@@ -17,12 +17,26 @@ export type BizErrorMapType = {
   msg: string;
 };
 
+export const BizErrNoPermission: BizErrorType = {
+  httpCode: 400,
+  bizCode: 10001,
+  msg: 'no permission',
+};
+export const BizErrNoRecord: BizErrorType = {
+  httpCode: 400,
+  bizCode: 10002,
+  msg: 'no record',
+};
+export const BizErrOutdated: BizErrorType = {
+  httpCode: 400,
+  bizCode: 10003,
+  msg: 'outdated',
+};
+
 export const BIZ_ERROR: Record<string, BizErrorType> = {
-  ErrNoPermission: {
-    httpCode: 400,
-    bizCode: 10001,
-    msg: 'no permission',
-  },
+  ErrNoPermission: BizErrNoPermission,
+  ErrNoRecord: BizErrNoRecord,
+  ErrOutdated: BizErrOutdated,
 };
 
 export const BIZ_ERROR_MAP = Object.entries(BIZ_ERROR).reduce(

@@ -10,10 +10,13 @@ code.hljs {
 :is(pre) > code.hljs {
   font-size: .8em;
   border-radius: 0 0 .5em .5em;
+  // 单行超长则换行
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .cus-code-container {
-  background-color: rgba(23 27 36 / 90%) !important;
+  background-color: rgb(29, 35, 47) ;
   border-radius: 8px;
   margin: 2px 0;
 
@@ -25,6 +28,8 @@ code.hljs {
     height: 2.2em;
     font-size: .8em;
     padding-inline: 0.8em;
+    background-color: rgb(29, 35, 47) !important;
+    border-radius: 8px;
 
     .lang-name {
     }

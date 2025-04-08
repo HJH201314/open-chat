@@ -1,12 +1,9 @@
-import api from '@/api';
-import useMarkdownIt from '@/commands/useMarkdownIt';
 import showToast from '@/components/toast/toast.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
-import type { MessageInfo, SessionInfo } from '@/types/data.ts';
-import { CommandParser } from '@/utils/command-parser';
-import { useLocalStorage, useTimeoutFn, useToggle, watchThrottled } from '@vueuse/core';
+import type { SessionInfo } from '@/types/data.ts';
+import { useLocalStorage, useToggle } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, ref, shallowRef, watch } from 'vue';
+import { ref, watch } from 'vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { toObserver, useSubscription } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
@@ -141,6 +138,7 @@ export const useDataStore = defineStore('data', () => {
           ...flags,
         };
       });
+      // 远程更新 stared
       if (flags?.isStared != undefined) {
         await genApi.Chat.sessionFlagPost(sessionId, {
           star: flags.isStared,
@@ -235,6 +233,8 @@ export const useDataStore = defineStore('data', () => {
             flags: {
               needSync: true,
               isStared: remoteUserSession.flag_info?.star,
+              isShared:
+                remoteUserSession.share_info?.permanent || (remoteUserSession.share_info?.expired_at || 0) > Date.now(),
             },
           });
         } else if (localSession && remoteSession) {
@@ -248,6 +248,7 @@ export const useDataStore = defineStore('data', () => {
               flags: {
                 ...(localSession.flags || {}), // 保持本地数据
                 isStared: remoteUserSession.flag_info?.star,
+                isShared: remoteUserSession.share_info?.permanent || (remoteUserSession.share_info?.expired_at || 0) > Date.now(),
               },
             },
           });

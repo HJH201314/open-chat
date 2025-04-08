@@ -20,6 +20,7 @@ const buttonRef = ref<HTMLButtonElement>();
 const buttonStyle = computed(() => {
   const calcStyle: CSSProperties = {
     padding: props.text ? '0.375em 1em' : '.375em',
+    boxShadow: typeof props.shadow != 'boolean' ? props.shadow : undefined,
     ...props.buttonStyle,
   };
   return calcStyle;
@@ -70,7 +71,7 @@ function handleClick() {
 
 <template>
   <div class="dili-button" @click="handleClick">
-    <button ref="buttonRef" :style="buttonStyle" :class="{ disabled: props.disabled, shadowed: props.shadow }">
+    <button ref="buttonRef" :style="buttonStyle" :class="{ disabled: props.disabled, shadowed: props.shadow === true }">
       <slot></slot>
       <span v-if="props.text" class="button-text">{{ props.text }}</span>
     </button>

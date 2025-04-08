@@ -5,7 +5,7 @@
 import type { CommonModalFunc, CommonModalProps } from '@/components/modal/types.ts';
 import { useCommonModalStore } from '@/components/modal/store.ts';
 import { Close } from '@icon-park/vue-next';
-import { computed, nextTick, ref, toRef, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, toRef, useTemplateRef, watch, watchEffect } from 'vue';
 
 defineOptions({
   // CommonModal 通过 teleport 传递到 body 上，不继承父级的属性
@@ -31,10 +31,11 @@ const emit = defineEmits<{
   (event: 'update:visible', v: boolean): void;
 }>();
 
-const store = useCommonModalStore();
+const { modalMap, openModal, closeModal } = useCommonModalStore();
 
-const myDepth = ref(0);
-const zIndex = computed(() => myDepth.value * 2 + 1000);
+const myId = ref('');
+const myDepth = computed(() => modalMap[myId.value] || 0)
+const zIndex = computed(() => props.zIndex || myDepth.value * 2 + 1000);
 
 const showModal = ref(false);
 
@@ -53,20 +54,23 @@ watch(
 
 /* 展示模态框（暴露的方法，配合ref使用） */
 function open() {
-  if (showModal.value) return;
+  if (showModal.value || myId.value) return;
 
-  myDepth.value = store.openModal();
+  myId.value = openModal();
   showModal.value = true;
   emit('open');
 }
 
 /* 关闭模态框（暴露的方法，配合ref使用） */
 function close() {
-  if (!showModal.value) return;
+  if (!showModal.value || !myId.value) return;
 
-  showModal.value = false;
-  store.closeModal();
+  showModal.value = false; // 先开始关闭动画
+  closeModal(myId.value); // 再移除模态框数据，否则可能会导致层级变化
+  myId.value = '';
 }
+
+onBeforeUnmount(() => close());
 
 function afterClose() {
   emit('after-close');

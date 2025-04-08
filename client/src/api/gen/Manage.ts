@@ -114,10 +114,10 @@ export class Manage<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaBucket` 储存桶列表
    */
   bucketListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -212,10 +212,10 @@ export class Manage<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModelCollection` 模型集合列表
    */
   collectionListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -294,10 +294,10 @@ export class Manage<SecurityDataType = unknown> {
    */
   keyListProviderGet = (
     id: number,
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -374,10 +374,10 @@ export class Manage<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaModel` 模型列表
    */
   modelListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -403,10 +403,10 @@ export class Manage<SecurityDataType = unknown> {
    */
   modelProviderGet = (
     providerId: number,
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -483,10 +483,10 @@ export class Manage<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission` 权限列表
    */
   permissionListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -598,10 +598,10 @@ export class Manage<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider` API 提供商列表
    */
   providerListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -696,10 +696,10 @@ export class Manage<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole` 角色列表
    */
   roleListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -794,10 +794,10 @@ export class Manage<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser` 用户列表
    */
   userListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;

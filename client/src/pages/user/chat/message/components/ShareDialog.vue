@@ -3,24 +3,26 @@ import CommonDialog from '@/components/dialog/CommonDialog.vue';
 import { useModalVisible } from '@/components/modal/util/useModalVisible.ts';
 import useSession from '@/store/data/useSession.ts';
 import CusInput from '@/components/input/CusInput.vue';
-import { computed, h, reactive, ref, watch, watchEffect } from 'vue';
+import { computed, h, onMounted, reactive, ref, watch, watchEffect } from 'vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import genApi from '@/api/gen-api.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import DiliButton from '@/components/button/DiliButton.vue';
-import { useClipboard } from '@vueuse/core';
-import type { ApiSchemaShareInfo } from '@/api/gen/data-contracts.ts';
-import { Share } from '@icon-park/vue-next';
+import { useClipboard, useTimestamp } from '@vueuse/core';
+import type { ApiSchemaSessionShareInfo } from '@/api/gen/data-contracts.ts';
+import { ShareOne, Whirlwind } from '@icon-park/vue-next';
+import CusTooltip from '@/components/tooltip/CusTooltip.vue';
+import { getRandomString } from '@/utils/string.ts';
 
 const props = defineProps<{
   sessionId: string;
 }>();
 
-const { session: sessionInfo } = useSession(props.sessionId);
+const { session: sessionInfo, updateSessionFlags } = useSession(props.sessionId);
 
-const savedRemoteUserSessionShare = ref({} as ApiSchemaShareInfo);
+const savedRemoteUserSessionShare = ref({} as ApiSchemaSessionShareInfo);
 const expiredTimeText = computed(() =>
   savedRemoteUserSessionShare.value.permanent
     ? ' (永久)'
@@ -44,9 +46,10 @@ const form: {
   expireDays: 1,
 });
 
-watchEffect(() => {
-  form.title = sessionInfo.value.title;
+onMounted(() => {
+  form.title = sessionInfo.value.title || '';
 });
+
 watchEffect(() => {
   if (form.expireDays < 1) {
     form.expireDays = 1;
@@ -61,11 +64,16 @@ async function refreshSessionShareInfo(type: 'refresh' | 'get' = 'get') {
     const sessionRes = await genApi.Chat.sessionUserGet(props.sessionId);
     const shareInfo = sessionRes.data.data?.share_info;
     if (shareInfo) {
-      savedRemoteUserSessionShare.value = JSON.parse(JSON.stringify(shareInfo)) as ApiSchemaShareInfo;
+      savedRemoteUserSessionShare.value = JSON.parse(JSON.stringify(shareInfo)) as ApiSchemaSessionShareInfo;
       console.debug(savedRemoteUserSessionShare.value);
       form.isActive = shareInfo.permanent || new Date(shareInfo.expired_at || 0).getTime() > Date.now();
       form.code = shareInfo.code || '';
-      type == 'get' && (form.title = shareInfo.title || '');
+      form.title = shareInfo.title || sessionInfo.value.title || '';
+
+      // 本地修改 shared
+      await updateSessionFlags({
+        isShared: form.isActive,
+      });
     }
   } catch (_) {
     ToastManager.danger('加载失败，请稍后重试~');
@@ -83,37 +91,44 @@ watch(
   { immediate: true }
 );
 
+const timestamp = useTimestamp({ interval: 1000 });
+
+const getExpireTime = (timestamp?: number) => {
+  // 计算到期时间
+  const expiredTime = timestamp ? new Date(timestamp) : new Date();
+  switch (form.expirePeriod) {
+    case '1hour':
+      expiredTime.setHours(expiredTime.getHours() + 1);
+      break;
+    case '1day':
+      expiredTime.setDate(expiredTime.getDate() + 1);
+      break;
+    case '7day':
+      expiredTime.setDate(expiredTime.getDate() + 7);
+      break;
+    case '30day':
+      expiredTime.setDate(expiredTime.getDate() + 30);
+      break;
+    case 'any':
+      expiredTime.setDate(expiredTime.getDate() + form.expireDays);
+      break;
+    default:
+      expiredTime.setTime(0);
+  }
+  return expiredTime;
+};
+
 async function handleToggleActive(active: boolean) {
   try {
     let res: Awaited<ReturnType<typeof genApi.Chat.sessionSharePost>>;
     if (active) {
-      // 计算到期时间
-      const expiredTime = new Date();
-      switch (form.expirePeriod) {
-        case '1hour':
-          expiredTime.setHours(expiredTime.getHours() + 1);
-          break;
-        case '1day':
-          expiredTime.setDate(expiredTime.getDate() + 1);
-          break;
-        case '7day':
-          expiredTime.setDate(expiredTime.getDate() + 7);
-          break;
-        case '30day':
-          expiredTime.setDate(expiredTime.getDate() + 30);
-          break;
-        case 'any':
-          expiredTime.setDate(expiredTime.getDate() + form.expireDays);
-          break;
-        default:
-          expiredTime.setTime(0);
-      }
       res = await genApi.Chat.sessionSharePost(props.sessionId, {
         active: true,
         share_info: {
           permanent: form.expirePeriod == 'forever',
-          expired_at: expiredTime.getTime() || 0,
+          expired_at: getExpireTime().getTime() || 0,
           title: form.title,
+          code: form.code,
         },
       });
     } else {
@@ -130,11 +145,18 @@ async function handleToggleActive(active: boolean) {
   }
 }
 
-const { isSupported, copied, copy } = useClipboard({ source: form.link });
+const { isSupported: isSupportCopy, copied: linkCopied, copy: copyLink } = useClipboard({ source: form.link });
+const { copied: linkWithCodeCopied, copy: copyLinkWithCode } = useClipboard({
+  source: () => `为你分享了一个对话记录： ${form.link}?code=${form.code} ，快来看！\n分享码：${form.code}`,
+});
 
-function handleLinkCopy() {
-  if (isSupported) {
-    copy();
+function handleLinkCopy(type: 'link' | 'linkWithCode') {
+  if (isSupportCopy) {
+    if (type == 'link') {
+      copyLink();
+    } else if (type == 'linkWithCode') {
+      copyLinkWithCode();
+    }
   } else {
     ToastManager.info('您的浏览器不支持复制，请手动复制');
   }
@@ -151,16 +173,16 @@ defineExpose({
   <CommonDialog
     :visible="visible"
     title="分享对话"
-    :icon="h(Share)"
+    :icon="h(ShareOne)"
     :subtitle="form.isActive ? `取消分享后可修改设置` : '分享对话将生成一个链接，通过此链接可以查看此对话的聊天记录'"
     :show-confirm="false"
     :cancel-button-props="{ text: '关闭' }"
   >
     <template #default>
       <div v-if="loadFinished" class="share-dialog__body">
-        <CusInput v-model="form.title" placeholder="分享名称（默认为对话标题）" :disabled="form.isActive" />
+        <CusInput v-model="form.title" placeholder="分享名称 (默认为对话标题)" :disabled="form.isActive" />
         <Transition mode="out-in">
-          <div v-if="!form.isActive" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <div v-if="!form.isActive" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap">
             <CusRadioGroup v-model="form.expirePeriod" style="flex-shrink: 0">
               <CusRadioButton value="forever" label="永久" />
               <CusRadioButton value="1hour" label="1小时" />
@@ -169,7 +191,7 @@ defineExpose({
               <CusRadioButton value="30day" label="30天" />
               <CusRadioButton value="any" label="自定义" />
             </CusRadioGroup>
-            <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
+            <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end">
               <CusInput
                 v-if="form.expirePeriod == 'any'"
                 v-model.number="form.expireDays"
@@ -179,26 +201,51 @@ defineExpose({
               />
               <span v-if="form.expirePeriod == 'any'">天</span>
             </div>
+            <span v-if="form.expirePeriod != 'forever'" style="color: var(--color-primary); font-size: 0.8rem"
+              >有效期至{{ getExpireTime(timestamp).toLocaleString() }}</span
+            >
           </div>
           <div v-else style="display: flex; gap: 0.5rem; align-items: center">
             <CusInput v-model="form.link" placeholder="分享链接" disabled />
-            <DiliButton
-              :button-style="{ width: '4rem' }"
-              :text="copied ? '✔' : '复制'"
-              type="secondary"
-              background-color="#e3f1f1"
-              font-color="#52a49a"
-              @click="handleLinkCopy"
-            />
           </div>
         </Transition>
+        <div style="display: flex; gap: 0.5rem; align-items: center">
+          <CusInput
+            v-model="form.code"
+            :placeholder="`分享码${form.isActive ? ' (空)' : ''}`"
+            :validate="[{ length: 5 }]"
+            :disabled="form.isActive"
+          />
+          <CusTooltip v-if="!form.isActive" text="随机分享码">
+            <DiliButton
+              type="secondary"
+              @click="form.code = getRandomString(5)"
+            >
+              <Whirlwind theme="outline"/>
+            </DiliButton>
+          </CusTooltip>
+          <DiliButton
+            v-if="form.isActive && form.code"
+            :button-style="{ width: '8rem' }"
+            :text="linkWithCodeCopied ? '✔' : '复制含分享码'"
+            type="secondary"
+            @click="handleLinkCopy('linkWithCode')"
+          />
+          <DiliButton
+            v-if="form.isActive"
+            :button-style="{ width: '4rem' }"
+            :text="linkCopied ? '✔' : '复制'"
+            type="secondary"
+            @click="handleLinkCopy('link')"
+          />
+        </div>
       </div>
     </template>
     <template #action>
-      <div v-if="loadFinished" style="display: flex; gap: 0.5rem; align-items: center;">
+      <div v-if="loadFinished" style="display: flex; gap: 0.5rem; align-items: center">
         <CusToggle
           v-model="form.isActive"
-          :label="form.isActive ? `已公开${expiredTimeText}` : '未公开'"
+          :label="form.isActive ? `已分享${expiredTimeText}` : '未分享'"
           :highlight="form.isActive"
           style="flex-shrink: 0"
           @change="handleToggleActive"

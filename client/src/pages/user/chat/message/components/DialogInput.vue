@@ -4,8 +4,12 @@ import CusSelect from '@/components/dropdown/CusSelect.vue';
 import CusTextarea from '@/components/textarea/CusTextarea.vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import { computed, ref } from 'vue';
-import type { DialogInputEmits, DialogInputProps } from '@/pages/user/chat/message/components/types.ts';
+import { computed, ref, inject, watchEffect } from 'vue';
+import {
+  DialogDetailSlotsInjectionKey,
+  type DialogInputEmits,
+  type DialogInputProps,
+} from '@/pages/user/chat/message/components/types.ts';
 
 const props = withDefaults(defineProps<DialogInputProps>(), {
   modelDropdown: () => [],
@@ -45,10 +49,18 @@ function handleModelSelect(selectValue: string) {
 function handleBotRoleSelect(selectValue: string) {
   emit('botSelect', Number(selectValue));
 }
+
+// 向父组件传递根元素 ref
+const detailSlots = inject(DialogDetailSlotsInjectionKey);
+const inputRef = ref<HTMLDivElement>();
+watchEffect(() => {
+  detailSlots?.setInputRef(inputRef);
+});
 </script>
 
 <template>
   <div
+    ref="inputRef"
     :class="{
       'dialog-input--first': displayInMiddle,
       'small-input': smallInput,
@@ -131,6 +143,7 @@ $dialog-max-width: 54rem;
   transition: all 0.2s $ease-out-circ;
   animation: input-flow-out-bottom-anim 0.2s $ease-out-circ reverse;
   overflow: hidden;
+  z-index: 2; // 配合 DialogDetail 中的布局
 
   &.hide {
     animation: input-flow-out-bottom-anim 0.2s $ease-out-circ;

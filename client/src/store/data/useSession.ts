@@ -64,6 +64,17 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
     { immediate: true }
   );
 
+  const dataStore = useDataStore();
+  async function editSessionTitle(newTitle: string) {
+    return dataStore.editDialogTitle(resolvedSessionId.value, newTitle);
+  }
+  async function editSessionSystemPrompt(newSystemPrompt: string) {
+    return dataStore.editDialogSystemPrompt(resolvedSessionId.value, newSystemPrompt);
+  }
+  async function updateSessionFlags(flags: SessionInfo['flags']) {
+    return dataStore.updateSessionFlags(resolvedSessionId.value, flags);
+  }
+
   async function addMessage(msg: MessageInfo) {
     return db.messages.add(msg);
   }
@@ -133,7 +144,6 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
   }
 
   const chatConfigStore = useChatConfigStore();
-  const dataStore = useDataStore();
   /**
    * 发送文本信息
    * @param message 发送的文本消息
@@ -409,6 +419,9 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
   return {
     session,
     messages,
+    editSessionTitle,
+    editSessionSystemPrompt,
+    updateSessionFlags,
     addMessage,
     deleteMessage,
     syncMessages,

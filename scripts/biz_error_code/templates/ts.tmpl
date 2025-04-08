@@ -17,13 +17,17 @@ export type BizErrorMapType = {
   msg: string;
 };
 
+{% for entry in entries -%}
+export const Biz{{ entry.name }}: BizErrorType = {
+  httpCode: {{ entry.httpCode }},
+  bizCode: {{ entry.bizCode }},
+  msg: '{{ entry.msg }}',
+};{% unless forloop.last %}
+{% endunless %}{% endfor %}
+
 export const BIZ_ERROR: Record<string, BizErrorType> = {
   {% for entry in entries -%}
-  {{ entry.name }}: {
-    httpCode: {{ entry.httpCode }},
-    bizCode: {{ entry.bizCode }},
-    msg: '{{ entry.msg }}',
-  },{% unless forloop.last %}
+  {{ entry.name }}: Biz{{ entry.name }},{% unless forloop.last %}
   {% endunless %}{% endfor %}
 };
 

@@ -5,7 +5,7 @@ import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
-import { MenuUnfold, Plus, Star } from '@icon-park/vue-next';
+import { MenuUnfold, Plus, ShareOne, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
 import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
@@ -21,11 +21,9 @@ import { useTheme } from '@/components/theme/useTheme.ts';
 import IconButton from '@/components/IconButton.vue';
 import useGlobal from '@/commands/useGlobal.ts';
 import { toggleSidebarExpandKey } from '@/constants/eventBusKeys.ts';
-import LogoOpenAI from '@/components/logo/LogoOpenAI.vue';
-import LogoDeepSeek from '@/components/logo/LogoDeepSeek.vue';
-import LogoQwen from '@/components/logo/LogoQwen.vue';
 import { formatTime } from '@/utils/string.ts';
 import CusPullRefresh from '@/components/pull-refresh/CusPullRefresh.vue';
+import CusAvatar from '@/components/avatar/CusAvatar.vue';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -196,7 +194,7 @@ const { isSmallScreen } = useGlobal();
 </script>
 <template>
   <!-- 角色列表 -->
-  <div ref="record-list-view" class="dialog-list">
+  <div ref="record-list-view" class="dialog-list" :class="{ larger: isSmallScreen }">
     <div class="dialog-list-bar" :class="{ shadow: !arrivedState.top }">
       <IconButton
         v-if="isSmallScreen"
@@ -205,7 +203,7 @@ const { isSmallScreen } = useGlobal();
         no-normal-background
         @click="handleSidebarUnfold"
       >
-        <MenuUnfold size="1.2rem" />
+        <MenuUnfold size="1.2em" />
       </IconButton>
       <!--      <div-->
       <!--        ref="search-bar"-->
@@ -258,7 +256,14 @@ const { isSmallScreen } = useGlobal();
         </CommonDialog>
       </div>
     </div>
-    <CusPullRefresh ref="dialog-list" class="dialog-list-container" @refresh="dataStore.syncSessions">
+    <CusPullRefresh
+      ref="dialog-list"
+      class="dialog-list-container"
+      tip-pulling="继续下拉同步"
+      tip-release="释放立即同步"
+      tip-refreshing="同步中..."
+      @refresh="dataStore.syncSessions"
+    >
       <div>
         <div
           v-for="item in displayList"
@@ -267,9 +272,7 @@ const { isSmallScreen } = useGlobal();
           class="dialog-list-item"
           @click="handleListItemClick(item.id)"
         >
-          <LogoDeepSeek v-if="item.model?.includes('deepseek')" class="dialog-list-item__logo" />
-          <LogoQwen v-else-if="item.model?.includes('qwen')" class="dialog-list-item__logo" />
-          <LogoOpenAI v-else class="dialog-list-item__logo" />
+          <CusAvatar style="opacity: 0.5;" :name="item.title?.trim() || ''" size="2.5em" shape="circle" />
           <div class="dialog-list-item__right">
             <div class="dialog-list-item__top">
               <div class="title">
@@ -285,6 +288,7 @@ const { isSmallScreen } = useGlobal();
               </div>
               <div class="flags">
                 <Star v-if="item.flags?.isStared" :fill="theme.colorWarning" theme="filled" />
+                <ShareOne v-if="item.flags?.isShared" :fill="theme.colorInfo" theme="filled" />
               </div>
             </div>
           </div>
@@ -318,8 +322,13 @@ const { isSmallScreen } = useGlobal();
 .dialog-list {
   position: relative;
 
+  &.larger {
+    // 通过 font-size 来控制字体和组件大小，移动端放大一点
+    font-size: 1.1rem;
+  }
+
   &-container {
-    padding-top: 3rem;
+    padding-top: 3em;
     //padding-inline: 0.5rem;
     width: 100%;
     height: 100%;
@@ -347,9 +356,10 @@ const { isSmallScreen } = useGlobal();
     right: 0;
     display: flex;
     flex-direction: row;
+    align-items: center;
     height: min-content;
     gap: 0.25rem;
-    padding: 0.5rem;
+    padding: 0.5em;
     background-color: var(--color-white);
     transition: box-shadow 0.2s $ease-out-circ;
 
@@ -359,7 +369,7 @@ const { isSmallScreen } = useGlobal();
 
     &-search {
       flex: 1;
-      height: 2rem;
+      height: 2em;
       border-radius: 0.5rem;
       // 此处 padding 让搜索图标位置不变
       padding-inline: calc(0.4rem - 2px);
@@ -394,7 +404,7 @@ const { isSmallScreen } = useGlobal();
     box-sizing: border-box;
     cursor: pointer;
     flex: 1;
-    height: 2rem;
+    height: 2em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -418,8 +428,8 @@ const { isSmallScreen } = useGlobal();
   }
 
   &-action-button {
-    height: 2rem;
-    width: 2rem;
+    height: 2em;
+    width: 2em;
     color: color.scale($color-primary, $alpha: -5%);
     background-color: color.scale($color-primary, $alpha: -85%);
     border-radius: 0.5rem;
@@ -443,12 +453,12 @@ const { isSmallScreen } = useGlobal();
   }
 
   &-item {
-    padding: 0.5rem;
+    padding: 0.5em;
     cursor: pointer;
     transition: background-color 0.2s $ease-out-cubic;
     display: flex;
     flex-direction: row;
-    gap: 0.5rem;
+    gap: 0.5em;
 
     &:not(&-selected):hover {
       // border-radius: 0;
@@ -460,14 +470,14 @@ const { isSmallScreen } = useGlobal();
     }
 
     & img {
-      height: 3rem;
-      width: 3rem;
+      height: 3em;
+      width: 3em;
       border-radius: 20%;
     }
 
     &__logo {
-      height: 2.5rem;
-      width: 2.5rem;
+      height: 2.5em;
+      width: 2.5em;
       border-radius: 20%;
     }
 
@@ -497,7 +507,7 @@ const { isSmallScreen } = useGlobal();
       .datetime {
         flex: 0 0 auto;
         color: $color-grey-500;
-        font-size: 0.75rem;
+        font-size: 0.75em;
         text-align: right;
       }
     }
@@ -506,7 +516,7 @@ const { isSmallScreen } = useGlobal();
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.75rem;
+      font-size: 0.75em;
 
       .digest {
         color: $color-grey-500;
@@ -515,6 +525,7 @@ const { isSmallScreen } = useGlobal();
       .flags {
         display: flex;
         align-items: center;
+        gap: 0.1rem;
       }
     }
   }

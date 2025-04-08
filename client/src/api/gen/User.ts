@@ -28,6 +28,24 @@ export class User<SecurityDataType = unknown> {
   }
 
   /**
+   * @description 后门登录
+   *
+   * @tags User
+   * @name BackdoorLoginPost
+   * @summary 后门登录
+   * @request POST:/user/backdoor/login
+   * @response `200` `ApiEntityCommonResponseSchemaUser` login successfully
+   */
+  backdoorLoginPost = (req: ApiUserLoginLoginRequest, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaUser, any>({
+      path: `/user/backdoor/login`,
+      method: "POST",
+      body: req,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
    * @description 获取当前用户信息
    *
    * @tags User

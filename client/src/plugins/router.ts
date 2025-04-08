@@ -27,6 +27,12 @@ const router = createRouter({
           component: () => import('@/pages/user/chat/message/MessagePage.vue'),
         },
         {
+          path: 'share/:sessionId',
+          name: 'SharedMessageDetail',
+          props: true,
+          component: () => import('@/pages/user/chat/share/SharePage.vue'),
+        },
+        {
           path: 'setting',
           name: 'settingDialog',
           component: () => import('@/pages/user/chat/setting/SettingDialog.vue'),

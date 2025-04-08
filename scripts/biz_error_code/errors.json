@@ -3,5 +3,15 @@
     "BizCode": 10001,
     "HttpCode": 400,
     "Msg": "no permission"
+  },
+  "ErrNoRecord": {
+    "BizCode": 10002,
+    "HttpCode": 400,
+    "Msg": "no record"
+  },
+  "ErrOutdated": {
+    "BizCode": 10003,
+    "HttpCode": 400,
+    "Msg": "outdated"
   }
 }

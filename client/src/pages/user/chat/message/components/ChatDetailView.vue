@@ -9,12 +9,13 @@ import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import { storeToRefs } from 'pinia';
 import useSession from '@/store/data/useSession.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import genApi from '@/api/gen-api.ts';
 import ShareDialog from '@/pages/user/chat/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
-import { Control, Correct, Edit, Refresh } from '@icon-park/vue-next';
+import { Correct, Refresh } from '@icon-park/vue-next';
 import EditDialog from '@/pages/user/chat/message/components/EditDialog.vue';
+import DialogAction from '@/pages/user/chat/message/components/DialogAction.vue';
+import DialogInput from '@/pages/user/chat/message/components/DialogInput.vue';
 
 interface Props {
   dialogId: string;
@@ -50,7 +51,12 @@ const hasPermission = computed(
   () => userStore.isLogin && (!sessionInfo.value.userId || sessionInfo.value.userId == userStore.userId)
 );
 
-const { session: sessionInfo, messages: messageList, syncMessages, useSendMessageText } = useSession(() => form.sessionId);
+const {
+  session: sessionInfo,
+  messages: messageList,
+  syncMessages,
+  useSendMessageText,
+} = useSession(() => form.sessionId);
 
 // 如果需要响应 props 的变化
 watch(
@@ -63,11 +69,14 @@ watch(
 const dialogDetailRef = useTemplateRef<InstanceType<typeof DialogDetail>>('dialog-detail');
 watchArray(messageList, (newVal, oldVal) => {
   // 消息列表变化时，滚动到底部（消息增加 1 时平滑，增加多条时立即）
-  if (newVal.length && newVal.length != oldVal.length) {
+  let scrollBehavior: ScrollBehavior | '' = '';
+  if (newVal[0]?.sessionId != oldVal[0]?.sessionId) scrollBehavior = 'instant';
+  else if (newVal.length > oldVal.length)
+    scrollBehavior = Math.abs(newVal.length - oldVal.length) <= 1 ? 'smooth' : 'instant';
+
+  if (newVal.length && scrollBehavior) {
     setTimeout(() => {
-      dialogDetailRef.value?.scrollDialogListToBottom(
-        Math.abs(newVal.length - oldVal.length) <= 1 ? 'smooth' : 'instant'
-      );
+      dialogDetailRef.value?.scrollDialogListToBottom(scrollBehavior);
     }, 0);
   }
 });
@@ -239,6 +248,7 @@ function handleShareDialog() {
 
 // 从服务器同步数据
 const messageSyncing = ref(false);
+
 async function doSyncDialog(sessionId: string, controller?: AbortController) {
   if (messageSyncing.value) return;
   try {
@@ -271,14 +281,16 @@ async function handleSyncDialog() {
 function handleEditDialog() {
   if (!checkPermission()) return;
 
-  DialogManager.renderDialog(h(EditDialog, {
-    cancelButtonProps: {
-      text: '关闭',
-    },
-    showConfirm: false,
-    sessionId: sessionInfo.value.id,
-    session: sessionInfo.value,
-  }))
+  DialogManager.renderDialog(
+    h(EditDialog, {
+      cancelButtonProps: {
+        text: '关闭',
+      },
+      showConfirm: false,
+      sessionId: sessionInfo.value.id,
+      session: sessionInfo.value,
+    })
+  );
 }
 
 function handleDeleteDialog() {
@@ -310,8 +322,6 @@ const { isSmallScreen } = useGlobal();
   <DialogDetail
     ref="dialog-detail"
     v-model:fix-dialog-to-bottom="form.fixDialogToBottom"
-    v-model:input-user-input="form.inputValue"
-    v-model:input-with-context="form.withContext"
     class="dialog-detail-view"
     :dialog-id="form.sessionId"
     :session="sessionInfo"
@@ -324,29 +334,59 @@ const { isSmallScreen } = useGlobal();
     :answer-msg-id="answerMsgId"
     :answer-msg="answerMsg"
     :think-msg="thinkMsg"
+    :user-input="form.inputValue"
     :is-small-screen="isSmallScreen"
     :model-dropdown="modelDropdown"
     :bot-dropdown="botDropdown"
-    :input-model-name="form.modelName"
-    :input-bot-id="form.botRoleId"
-    :show-model-selector="inputCtrl.modelSelector"
-    :show-bot-selector="inputCtrl.botSelector"
-    :show-context-toggle="inputCtrl.contextToggle"
-    @back="$emit('back')"
-    @star="handleStarDialog"
-    @share="handleShareDialog"
-    @sync="handleSyncDialog"
-    @edit="handleEditDialog"
-    @delete="handleDeleteDialog"
-    @action-tip-click="handleActionTipClick"
-    @send="handleSendMessage"
-    @model-select="
+  >
+    <template #action="{ detailArrivedState }">
+      <DialogAction
+        id="dialog-action"
+        ref="dialog-action"
+        :title="sessionInfo.title || '未命名对话'"
+        :message-count="messageList.length"
+        :has-permission="hasPermission"
+        :is-login="userStore.isLogin"
+        :is-stared="sessionInfo.flags?.isStared"
+        :is-shared="sessionInfo.flags?.isShared"
+        :message-syncing="messageSyncing"
+        :menu-in-more="isSmallScreen"
+        :shadowed="!detailArrivedState.top"
+        :can-expand-menu="!isSmallScreen"
+        @back="$emit('back')"
+        @star="handleStarDialog"
+        @share="handleShareDialog"
+        @sync="handleSyncDialog"
+        @edit="handleEditDialog"
+        @delete="handleDeleteDialog"
+        @action-tip-click="handleActionTipClick"
+      />
+    </template>
+    <template #input>
+      <DialogInput
+        ref="input-panel"
+        v-model:input-user-input="form.inputValue"
+        v-model:input-with-context="form.withContext"
+        :input-model-name="form.modelName"
+        :input-bot-id="form.botRoleId"
+        :model-dropdown="modelDropdown"
+        :bot-dropdown="botDropdown"
+        :display-in-middle="messageList.length == 0 && !isSmallScreen"
+        :is-streaming="isReceivingMsg"
+        :hide-self="messageSyncing"
+        :show-model-selector="inputCtrl.modelSelector"
+        :show-bot-selector="inputCtrl.botSelector"
+        :show-context-toggle="inputCtrl.contextToggle"
+        @send="handleSendMessage"
+        @model-select="
       (value) => {
         form.modelName = value;
       }
     "
-    @bot-select="(v) => (form.botRoleId = v)"
-  />
+        @bot-select="(v) => (form.botRoleId = v)"
+      />
+    </template>
+  </DialogDetail>
 </template>
 
 <style lang="scss" scoped>

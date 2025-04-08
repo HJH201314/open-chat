@@ -100,10 +100,10 @@ export class Tue<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse` 返回数据
    */
   courseListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -318,10 +318,10 @@ export class Tue<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem` 返回数据
    */
   problemListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;

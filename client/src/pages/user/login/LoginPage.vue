@@ -5,7 +5,7 @@ import showToast from '@/components/toast/toast.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { Close, Right } from '@icon-park/vue-next';
 import EasyTyper from 'easy-typer-js';
-import { onMounted, reactive, ref, watch } from 'vue';
+import { onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
@@ -14,6 +14,7 @@ import ToastManager from '@/components/toast/ToastManager.ts';
 import Logo from '@/components/logo/Logo.vue';
 import { encryptWithPublicKey } from '@/utils/encrypt.ts';
 import CusInput from '@/components/input/CusInput.vue';
+import { onStartTyping } from '@vueuse/core';
 
 const props = withDefaults(
   defineProps<{
@@ -50,6 +51,14 @@ const typerObj = reactive({
   type: 'normal',
   backSpeed: 40,
   sentencePause: false,
+});
+
+// 输入框自动聚焦
+const inputUsernameRef = useTemplateRef('input-username');
+onStartTyping(() => {
+  if ((inputUsernameRef.value?.element as any) != document.activeElement) {
+    inputUsernameRef.value?.focus();
+  }
 });
 
 const loginForm = reactive({
@@ -194,6 +203,7 @@ function showUserAgreement() {
       <form class="login-forms" @submit.prevent>
         <div class="login-form">
           <CusInput
+            ref="input-username"
             v-model="loginForm.username"
             class="login-form-input"
             :input-attrs="{

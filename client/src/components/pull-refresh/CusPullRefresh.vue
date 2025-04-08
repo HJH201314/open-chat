@@ -2,12 +2,13 @@
   <div ref="refresh-container">
     <div
       class="pull-refresh"
-      @touchstart="onTouchStart"
-      @touchmove="onTouchMove"
-      @touchend="onTouchEnd"
+      @touchstart.passive="onTouchStart"
+      @touchmove.passive="onTouchMove"
+      @touchend.passive="onTouchEnd"
       @mousedown="onTouchStart"
       @mousemove="onTouchMove"
       @mouseup="onTouchEnd"
+      @mouseleave="onTouchEnd"
     >
       <div ref="refresh-tip" :style="{ transform: `translateY(${pullDistance}px)`, transitionDuration: transitionDuration }" class="refresh-tip">{{ statusText }}</div>
       <div :style="{ transform: `translateY(${pullDistance}px)`, transitionDuration: transitionDuration }" class="content">
@@ -24,10 +25,16 @@ const props = withDefaults(
   defineProps<{
     threshold?: number; // 触发刷新的下拉阈值（像素）
     resetTime?: number; // 加载完成后复位时间（毫秒）
+    tipPulling?: string;
+    tipRefreshing?: string;
+    tipRelease?: string;
   }>(),
   {
     threshold: 48,
     resetTime: 500,
+    tipPulling: '继续下拉刷新',
+    tipRefreshing: '加载中...',
+    tipRelease: '释放立即刷新',
   }
 );
 
@@ -44,7 +51,6 @@ const transitionDuration = computed(() => startY.value ? '0.2s' : '0.4s')
 
 // 当前下拉距离
 const pullDistance = computed(() => {
-  console.debug(refreshContainerRef.value?.scrollTop)
   if (isLoading.value) {
     return props.threshold;
   }
@@ -68,8 +74,8 @@ const pullDistance = computed(() => {
 
 // 状态提示文字
 const statusText = computed(() => {
-  if (isLoading.value) return '加载中...';
-  return pullDistance.value >= props.threshold ? '释放立即刷新' : '下拉刷新';
+  if (isLoading.value) return props.tipRefreshing;
+  return pullDistance.value >= props.threshold ? props.tipRelease : props.tipPulling;
 });
 
 const onTouchStart = (e: TouchEvent | MouseEvent) => {

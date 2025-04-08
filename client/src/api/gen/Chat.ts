@@ -23,8 +23,8 @@ import type {
   ApiEntityCommonResponseSchemaSession,
   ApiEntityCommonResponseSchemaUserSession,
   ApiEntityCommonResponseString,
+  ApiEntityReqUpdateBodySchemaSession,
   ApiSchemaMessage,
-  ApiSchemaSession,
   ApiSchemaSessionFlagInfo,
 } from "./data-contracts";
 import type { HttpClient, RequestParams } from "./http-client";
@@ -98,10 +98,10 @@ export class Chat<SecurityDataType = unknown> {
    */
   messageListGet = (
     sessionId: string,
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -110,6 +110,36 @@ export class Chat<SecurityDataType = unknown> {
   ) =>
     this.http.request<ApiEntityCommonResponseChatChatMessageListResponse, any>({
       path: `/chat/message/list/${sessionId}`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取分享过的消息
+   *
+   * @tags Message
+   * @name MessageListSharedGet
+   * @summary 获取分享过的消息
+   * @request GET:/chat/message/list/{session_id}/shared
+   * @response `200` `ApiEntityCommonResponseChatChatMessageListResponse` 返回数据
+   */
+  messageListSharedGet = (
+    sessionId: string,
+    query?: {
+      code?: string;
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseChatChatMessageListResponse, any>({
+      path: `/chat/message/list/${sessionId}/shared`,
       method: "GET",
       query: query,
       type: ContentType.Json,
@@ -196,10 +226,10 @@ export class Chat<SecurityDataType = unknown> {
    * @response `200` `ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession` 返回数据
    */
   sessionListGet = (
-    query: {
+    query?: {
       end_time?: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
       sort_expr?: string;
       start_time?: number;
@@ -227,6 +257,32 @@ export class Chat<SecurityDataType = unknown> {
     this.http.request<ApiEntityCommonResponseString, any>({
       path: `/chat/session/new`,
       method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取已分享的用户会话信息（仅返回 Name）
+   *
+   * @tags Session
+   * @name SessionSharedGet
+   * @summary 获取已分享的用户会话信息
+   * @request GET:/chat/session/{session_id}/shared
+   * @response `200` `ApiEntityCommonResponseSchemaSession` 返回数据
+   */
+  sessionSharedGet = (
+    sessionId: string,
+    query?: {
+      code?: string;
+      /** 尝试获取而不抛出错误 */
+      touch?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseSchemaSession, any>({
+      path: `/chat/session/${sessionId}/shared`,
+      method: "GET",
+      query: query,
       type: ContentType.Json,
       format: "json",
       ...params,
@@ -263,7 +319,7 @@ export class Chat<SecurityDataType = unknown> {
       /** 客户端上次同步时间戳 */
       last_sync_time: number;
       /** 分页参数 */
-      page_num: number;
+      page_num?: number;
       page_size?: number;
     },
     params: RequestParams = {},
@@ -285,7 +341,7 @@ export class Chat<SecurityDataType = unknown> {
    * @request POST:/chat/session/update/{session_id}
    * @response `200` `ApiEntityCommonResponseBool` OK
    */
-  sessionUpdatePost = (sessionId: string, req: ApiSchemaSession, params: RequestParams = {}) =>
+  sessionUpdatePost = (sessionId: string, req: ApiEntityReqUpdateBodySchemaSession, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/chat/session/update/${sessionId}`,
       method: "POST",

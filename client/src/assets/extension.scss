@@ -24,6 +24,16 @@
   @include transition-all-circ;
 }
 
+@mixin line-clamp-1 {
+  display: -webkit-box;
+  word-break: break-all;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  line-clamp: 1;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+
 @mixin button-like {
   border-radius: .5rem;
   padding: .5rem;

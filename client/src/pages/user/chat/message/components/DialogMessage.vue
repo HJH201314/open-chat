@@ -188,6 +188,7 @@ defineSlots<{
   }
 
   &-body {
+    width: 100%; // 默认情况下占满盒子
     max-width: 100%; // 限制消息盒子宽度
     display: flex;
     gap: 0.5rem;
@@ -202,6 +203,7 @@ defineSlots<{
   }
 
   &-avatar {
+    flex-shrink: 0;
     min-width: 2rem;
     max-width: 2rem;
     min-height: 2rem;
@@ -217,11 +219,11 @@ defineSlots<{
   }
 
   &-content {
+    max-width: 100%; // 避免被内容撑大
     user-select: text;
     white-space: pre-wrap;
     word-break: break-word;
-    overflow-x: auto; // 让代码块不会撑大容器
-    overflow-y: hidden; // 隐藏意外溢出的部分
+    //overflow-x: auto; // 让代码块不会撑大容器
 
     &__user {
       padding: 0.4em 0.8em;
@@ -236,6 +238,7 @@ defineSlots<{
     }
 
     &__bot {
+      flex: 1; // 模型的回复默认占满剩余空间
       padding: 0;
       background-color: transparent;
       color: $color-black;

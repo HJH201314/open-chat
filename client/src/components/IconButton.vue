@@ -9,6 +9,7 @@ const props = withDefaults(
     shape?: 'rect' | 'circle';
     shadow?: boolean;
     color?: 'danger' | 'warning' | 'success' | 'info' | 'primary' | string;
+    blur?: boolean;
     noNormalBackground?: boolean;
   }>(),
   {
@@ -16,6 +17,7 @@ const props = withDefaults(
     shape: 'rect',
     color: '',
     shadow: false,
+    blur: true,
     noNormalBackground: false,
   }
 );
@@ -50,7 +52,7 @@ const secondaryColorBackgroundActive = computed(
 <template>
   <div
     class="icon-button"
-    :class="{ [`icon-button-${type}`]: true, [`icon-button-${shape}`]: true, 'icon-button-shadowed': shadow }"
+    :class="{ [`icon-button-${type}`]: true, [`icon-button-${shape}`]: true, 'icon-button-shadowed': shadow, [`icon-button-${type}--blur`]: blur }"
   >
     <div class="icon-button-slot" :class="[`icon-button-slot-${type}`]">
       <slot></slot>
@@ -75,13 +77,16 @@ const secondaryColorBackgroundActive = computed(
   background: $color-grey-50;
 
   &-shadowed {
-    box-shadow: $box-shadow-shallower;
+    box-shadow: $box-shadow;
   }
 
   &-secondary {
     color: v-bind(secondaryColorForeground);
     background: v-bind(secondaryColorBackground);
-    backdrop-filter: blur(5px);
+
+    &--blur {
+      backdrop-filter: blur(10px);
+    }
 
     &:hover {
       background: v-bind(secondaryColorBackgroundHover);
