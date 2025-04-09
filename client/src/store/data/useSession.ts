@@ -65,8 +65,8 @@ const useSession = (sessionId: MaybeRefOrGetter<string>) => {
   );
 
   const dataStore = useDataStore();
-  async function editSessionTitle(newTitle: string) {
-    return dataStore.editDialogTitle(resolvedSessionId.value, newTitle);
+  async function editSessionTitle(newTitle: string, syncToRemote: boolean = true) {
+    return dataStore.editDialogTitle(resolvedSessionId.value, newTitle, syncToRemote);
   }
   async function editSessionSystemPrompt(newSystemPrompt: string) {
     return dataStore.editDialogSystemPrompt(resolvedSessionId.value, newSystemPrompt);

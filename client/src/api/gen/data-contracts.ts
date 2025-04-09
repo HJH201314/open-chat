@@ -856,7 +856,8 @@ export interface ApiSchemaSessionFlagInfo {
 }
 
 export enum ApiSchemaSessionNameType {
-  EnumSessionNameTypeWIP = 1,
+  EnumSessionNameTypeNone = 0,
+  EnumSessionNameTypeTemp = 1,
   EnumSessionNameTypeSystem = 2,
 }
 

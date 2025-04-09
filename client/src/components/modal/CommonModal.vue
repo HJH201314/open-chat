@@ -192,8 +192,10 @@ defineExpose<CommonModalFunc>({
     outline: none;
 
     &.preset {
-      // preset 情况下，高度由内容撑起，加个默认宽度
+      // preset 情况下，高度由内容撑起
       width: 512px;
+      max-height: calc(100vh - 2rem);
+      max-width: calc(100vw - 2rem);
       height: unset;
       background-color: $color-white;
       border-radius: 0.5rem;

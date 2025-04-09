@@ -76,13 +76,15 @@ export const useDataStore = defineStore('data', () => {
     return '';
   }
 
-  async function editSessionTitle(sessionId: string, newTitle: string) {
+  async function editSessionTitle(sessionId: string, newTitle: string, syncToRemote: boolean = true) {
     // 本地修改
     await db.sessions.where({ id: sessionId }).modify((session) => {
       session.title = newTitle;
     });
+
     // 远程修改
     try {
+      if (!syncToRemote) return;
       await genApi.Chat.sessionUpdatePost(sessionId, {
         data: { name: newTitle },
         updates: ['name'],

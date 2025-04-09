@@ -3,7 +3,7 @@ import useGlobal from '@/commands/useGlobal.ts';
 import { DialogManager } from '@/components/dialog';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { watchArray } from '@vueuse/core';
+import { useIntervalFn, watchArray } from '@vueuse/core';
 import { computed, h, reactive, ref, useTemplateRef, watch } from 'vue';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import { storeToRefs } from 'pinia';
@@ -16,6 +16,8 @@ import { Correct, Refresh } from '@icon-park/vue-next';
 import EditDialog from '@/pages/user/chat/message/components/EditDialog.vue';
 import DialogAction from '@/pages/user/chat/message/components/DialogAction.vue';
 import DialogInput from '@/pages/user/chat/message/components/DialogInput.vue';
+import genApi from '@/api/gen-api.ts';
+import { ApiSchemaSessionNameType } from '@/api/gen/data-contracts.ts';
 
 interface Props {
   dialogId: string;
@@ -56,6 +58,7 @@ const {
   messages: messageList,
   syncMessages,
   useSendMessageText,
+  editSessionTitle,
 } = useSession(() => form.sessionId);
 
 // 如果需要响应 props 的变化
@@ -145,6 +148,34 @@ watch(
   }
 );
 
+const { resume: startSessionFetcher, pause: stopSessionFetcher } = useIntervalFn(
+  async () => {
+    try {
+      const { data } = await genApi.Chat.sessionGet(form.sessionId);
+      if (!data.data) {
+        // data 不应为空，此时视为出现异常
+        stopSessionFetcher();
+        return;
+      }
+      if (data.data.name) {
+        // 修改本地标题
+        await editSessionTitle(data.data.name, false);
+      }
+      if (data.data.name_type == ApiSchemaSessionNameType.EnumSessionNameTypeSystem) {
+        // 标题生成完成
+        stopSessionFetcher();
+      }
+    } catch (_) {
+      stopSessionFetcher();
+    }
+  },
+  10000,
+  {
+    immediate: false,
+    immediateCallback: true,
+  }
+);
+
 const {
   msgId: answerMsgId,
   start: startReceivingMsg,
@@ -195,9 +226,11 @@ async function handleSendMessage() {
     if (!dialogDetailRef.value?.isDialogListReachedBottom) {
       ToastManager.normal('回答结束', { position: 'top', icon: h(Correct) });
     }
-    // 若消息数量小于 3 且第一个消息为用户消息，则自动修改对话标题
+    // 若消息数量小于 3 且第一个消息为用户消息，则启动定时任务来获取会话标题
     if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
-      await dataStore.editDialogTitle(form.sessionId, savedInputValue);
+      // 临时修改标题为第一条消息的内容
+      editSessionTitle(savedInputValue, false).finally();
+      startSessionFetcher();
     }
   } catch (e) {
     if (typeof e == 'string') {
@@ -379,10 +412,10 @@ const { isSmallScreen } = useGlobal();
         :show-context-toggle="inputCtrl.contextToggle"
         @send="handleSendMessage"
         @model-select="
-      (value) => {
-        form.modelName = value;
-      }
-    "
+          (value) => {
+            form.modelName = value;
+          }
+        "
         @bot-select="(v) => (form.botRoleId = v)"
       />
     </template>

@@ -179,7 +179,7 @@ function showUserAgreement() {
 </script>
 
 <template>
-  <div :class="{ 'in-page': !isModal }" class="login">
+  <div :class="{ 'in-page': !isModal || !isLargeScreen }" class="login">
     <div class="login-right-top">
       <CusRadioGroup v-model="loginForm.type" class="login-type" name="loginType" background-mode="transparent">
         <CusRadioButton value="login" label="登录"></CusRadioButton>
