@@ -34,6 +34,7 @@
     "@vueuse/integrations": "^12.8.2",
     "@vueuse/router": "^12.8.2",
     "@vueuse/rxjs": "^12.8.2",
+    "animejs": "^4.0.1",
     "axios": "1.7.9",
     "dexie": "^4.0.11",
     "easy-typer-js": "^2.1.0",
