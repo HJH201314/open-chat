@@ -2,6 +2,7 @@
 import { type CSSProperties, computed } from 'vue';
 
 import { getRandomInt } from '@/utils/string.ts';
+import { getColorHex, getDarkerColor } from '@/utils/color.ts';
 
 const defaultColors = [
   '#eb5181', '#9031aa', '#613cb0', '#4350af',
@@ -26,20 +27,30 @@ const props = withDefaults(
     name?: string;
     color?: CSSProperties['color'];
     shape?: 'circle' | 'square';
+    gradient?: boolean;
   }>(),
   {
     size: '2rem',
     name: '',
     color: '',
     shape: 'circle',
+    gradient: false,
   }
 );
 
-const backgroundColor = computed(() => {
+const background = computed(() => {
+  let color = 'transparent';
   if (props.color) {
-    return props.color;
+    color = getColorHex(props.color);
+  } else {
+    color = defaultColors[getRandomInt(0, defaultColors.length - 1)];
   }
-  return defaultColors[getRandomInt(0, defaultColors.length - 1)];
+
+  if (props.gradient) {
+    return `linear-gradient(-45deg, ${color} 0%, ${getDarkerColor(color, 0.2)} 100%)`;
+  } else {
+    return color;
+  }
 });
 </script>
 
@@ -57,7 +68,7 @@ const backgroundColor = computed(() => {
   position: relative;
   width: v-bind('props.size');
   height: v-bind('props.size');
-  background-color: v-bind(backgroundColor);
+  background: v-bind(background);
 
   &__shape-circle {
     border-radius: 50%;

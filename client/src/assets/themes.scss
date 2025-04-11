@@ -12,9 +12,9 @@
   --color-grey-300: #{$color-grey-300};
   --color-grey-400: #{$color-grey-400};
   --color-grey-500: #{$color-grey-500};
-  --color-primary: #{$color-primary};
-  --color-primary-darker: #{$color-primary-darker};
-  --color-primary-lighter: #{$color-primary-lighter};
+  --color-primary: var(--color-primary-400);
+  --color-primary-darker: var(--color-primary-500);
+  --color-primary-lighter: var(--color-primary-200);
   --color-secondary: #{$color-secondary};
   --color-secondary-darker: #{$color-secondary-darker};
   --color-secondary-lighter: #{$color-secondary-lighter};
@@ -25,16 +25,16 @@
 
 // 覆写 TDesign 样式
 :root {
-  --td-brand-color-1: #{$color-teal-40};
-  --td-brand-color-2: #{$color-teal-50};
-  --td-brand-color-3: #{$color-teal-80};
-  --td-brand-color-4: #{$color-teal-100};
-  --td-brand-color-5: #{$color-teal-200};
-  --td-brand-color-6: #{$color-teal-300};
-  --td-brand-color-7: #{$color-teal-400};
-  --td-brand-color-8: #{$color-teal-500};
-  --td-brand-color-9: #{$color-teal-600};
-  --td-brand-color-10: #{$color-teal-700};
+  --td-brand-color-1: var(--color-primary-40);
+  --td-brand-color-2: var(--color-primary-50);
+  --td-brand-color-3: var(--color-primary-80);
+  --td-brand-color-4: var(--color-primary-100);
+  --td-brand-color-5: var(--color-primary-200);
+  --td-brand-color-6: var(--color-primary-300);
+  --td-brand-color-7: var(--color-primary-400);
+  --td-brand-color-8: var(--color-primary-500);
+  --td-brand-color-9: var(--color-primary-600);
+  --td-brand-color-10: var(--color-primary-700);
   --td-radius-small: 7px;
   --td-radius-default: 8px;
   --td-radius-medium: 11px;

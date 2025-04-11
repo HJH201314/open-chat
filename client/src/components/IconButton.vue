@@ -32,7 +32,7 @@ const color = computed(() => {
     case 'info':
       return theme[`--color-${props.color}`];
     default:
-      return props.color || theme.colorPrimary;
+      return getColorHex(props.color) || theme['--color-primary'];
   }
 });
 

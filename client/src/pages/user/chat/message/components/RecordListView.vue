@@ -134,9 +134,9 @@ const router = useRouter();
 
 // 点击对话列表项
 function handleListItemClick(id: string) {
-  const routerHandler = router.currentRoute.value.name === 'messageList' ? router.push : router.replace;
+  const routerHandler = router.currentRoute.value.name === 'MessageList' ? router.push : router.replace;
   routerHandler({
-    name: 'messageDetail',
+    name: 'MessageDetail',
     params: {
       sessionId: id,
     },
@@ -343,7 +343,7 @@ const { isSmallScreen } = useGlobal();
 
     &:focus-visible {
       border-radius: 0.75rem;
-      background: $color-teal-20;
+      background: var(--color-primary-20);
       outline: none;
     }
   }
@@ -466,7 +466,7 @@ const { isSmallScreen } = useGlobal();
     }
 
     &-selected {
-      background-color: $color-teal-50;
+      background-color: var(--color-primary-50);
     }
 
     & img {
@@ -565,7 +565,7 @@ const { isSmallScreen } = useGlobal();
       border-radius: 0.5rem;
       cursor: pointer;
       text-align: center;
-      background-color: $color-teal-50;
+      background-color: var(--color-primary-50);
     }
   }
 

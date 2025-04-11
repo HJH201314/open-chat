@@ -54,19 +54,25 @@ $color-info: #1c5cd9;
 $color-warning: #da884b;
 $color-danger: #cb665c;
 
-$color-hover: $color-grey-300;
-$color-active: $color-grey-400;
-$color-primary-lighter: $color-teal-200;
+$color-hover: $color-grey-300; // @deprecated
+$color-active: $color-grey-400; // @deprecated
+
+// primary color
 $color-primary: $color-teal-400;
+$color-primary-lighter: $color-teal-200;
 $color-primary-darker: $color-teal-500;
+
 $color-secondary-lighter: $color-pink-200;
 $color-secondary: $color-pink-400;
 $color-secondary-darker: $color-pink-500;
 
 $body-background: linear-gradient(135deg, $color-teal-30, $color-teal-20);
-$linear-gradient-primary: linear-gradient(180deg, $color-teal-300, $color-primary-darker);
-$linear-gradient-primary-2: linear-gradient(150deg, $color-teal-300, $color-primary-darker);
-$linear-gradient-primary-3: linear-gradient(330deg, $color-teal-300, $color-primary-darker);
+:root {
+  --body-background: linear-gradient(135deg, var(--color-primary-30), var(--color-primary-20));
+}
+$linear-gradient-primary: linear-gradient(180deg, $color-primary-lighter, $color-primary-darker);
+$linear-gradient-primary-2: linear-gradient(150deg, $color-primary-lighter, $color-primary-darker);
+$linear-gradient-primary-3: linear-gradient(330deg, $color-primary-lighter, $color-primary-darker);
 
 $ease-out-circ: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 $ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);

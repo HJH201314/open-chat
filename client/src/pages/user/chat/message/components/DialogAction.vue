@@ -9,7 +9,6 @@ import {
   DialogDetailSlotsInjectionKey,
 } from '@/pages/user/chat/message/components/types.ts';
 import { inject, onMounted, ref, watch, watchEffect } from 'vue';
-import { animate } from 'animejs';
 
 const props = withDefaults(defineProps<DialogActionProps>(), {
   title: '',
@@ -41,25 +40,6 @@ watchEffect(() => {
 });
 
 const innerShowMenu = ref(false);
-
-onMounted(() => {
-  animate('.dialog-action-title-v', {
-    // Property keyframes
-    y: [
-      { to: '-2.75rem', ease: 'outExpo', duration: 600 },
-      { to: 0, ease: 'outBounce', duration: 800, delay: 100 }
-    ],
-    // Property specific parameters
-    rotate: {
-      from: '-1turn',
-      delay: 0
-    },
-    delay: (_, i) => i * 50, // Function based value
-    ease: 'inOutCirc',
-    loopDelay: 1000,
-    loop: true
-  });
-})
 
 defineSlots<{
   back: () => any;
@@ -121,18 +101,18 @@ defineSlots<{
           </IconButton>
         </CusTooltip>
         <CusTooltip text="分享对话" position="bottom">
-          <IconButton type="secondary" color="info" :no-normal-background="!isShared" style="flex-shrink: 0" @click="$emit('share')">
+          <IconButton type="secondary" color="primary" :no-normal-background="!isShared" style="flex-shrink: 0" @click="$emit('share')">
             <ShareOne size="16" :theme="isShared ? 'filled' : 'outline'"/>
           </IconButton>
         </CusTooltip>
         <CusTooltip text="刷新对话" position="bottom">
-          <IconButton type="secondary" color="info" no-normal-background style="flex-shrink: 0" @click="$emit('sync')">
+          <IconButton type="secondary" color="primary" no-normal-background style="flex-shrink: 0" @click="$emit('sync')">
             <cus-spin :show="messageSyncing">
               <Refresh size="16" />
             </cus-spin>
           </IconButton>
         </CusTooltip>
-        <IconButton type="secondary" color="info" no-normal-background style="flex-shrink: 0" @click="$emit('edit')">
+        <IconButton type="secondary" color="primary" no-normal-background style="flex-shrink: 0" @click="$emit('edit')">
           <Edit size="16" />
         </IconButton>
         <IconButton

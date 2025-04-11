@@ -17,12 +17,12 @@ const router = createRouter({
       children: [
         {
           path: 'message',
-          name: 'messageList',
+          name: 'MessageList',
           component: () => import('@/pages/user/chat/message/MessagePage.vue'),
         },
         {
           path: 'message/:sessionId',
-          name: 'messageDetail',
+          name: 'MessageDetail',
           props: true,
           component: () => import('@/pages/user/chat/message/MessagePage.vue'),
         },

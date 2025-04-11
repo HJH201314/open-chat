@@ -64,7 +64,7 @@ const toggleClasses = computed(() => {
     }
 
     &.on {
-      background-color: $color-primary-lighter;
+      background-color: var(--color-primary-lighter);
 
       .toggle-container:active & {
         width: 1.25em;

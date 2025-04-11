@@ -372,6 +372,7 @@ export interface ApiEntityCommonResponseString {
 
 export interface ApiEntityConfigChatModel {
   display_name?: string;
+  icon?: string;
   is_default?: boolean;
   name?: string;
   order?: number;
@@ -656,6 +657,8 @@ export interface ApiSchemaModel {
   description?: string;
   /** 对外展示模型名称 */
   display_name?: string;
+  /** 模型图标 */
+  icon?: string;
   /** 原始数据 */
   id?: number;
   /** 模型名称 */
@@ -673,6 +676,8 @@ export interface ApiSchemaModelCollection {
   description?: string;
   /** 展示名称 */
   display_name?: string;
+  /** 图标 */
+  icon?: string;
   id?: number;
   /** 关联的模型 */
   models?: ApiSchemaModel[];
@@ -786,6 +791,8 @@ export interface ApiSchemaProvider {
   description?: string;
   /** 对外展示提供商名称 */
   display_name?: string;
+  /** 供应商图标 */
+  icon?: string;
   id?: number;
   /** 一对多关系，与 Model 模型关联 */
   models?: ApiSchemaModel[];

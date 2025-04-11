@@ -228,8 +228,8 @@ defineSlots<{
     &__user {
       padding: 0.4em 0.8em;
       border-radius: 0.5rem;
-      background-color: $color-teal-100;
-      color: $color-teal-900;
+      background-color: var(--color-primary-100);
+      color: var(--color-primary-900);
 
       & div::selection {
         background-color: rgba(0 0 0 / 5%);

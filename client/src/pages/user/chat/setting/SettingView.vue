@@ -8,13 +8,13 @@ import showToast from '@/components/toast/toast.ts';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
-import { ref, toValue, watch } from 'vue';
+import { ref, toValue, watch, onBeforeUnmount } from 'vue';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
-import { addChildrenDropdownOptions } from '@/components/dropdown/utils.ts';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import { useTheme } from '@/components/theme/useTheme.ts';
+import { registerThemeColor, resetThemeColor, saveThemeColor, useTheme } from '@/components/theme/useTheme.ts';
+import CusAvatar from '@/components/avatar/CusAvatar.vue';
 
 const { isModal = false } = defineProps<{
   isModal?: boolean;
@@ -41,6 +41,10 @@ watch(
 
 function handleSave() {
   console.debug(editingValue);
+  // 额外的保存操作
+  if (editingValue.value.themeColor && editingValue.value.themeColor != settingStore.settings.themeColor) {
+    saveThemeColor(editingValue.value.themeColor);
+  }
   const result = settingStore.saveSettings(editingValue.value);
   showToast({ text: `保存${result}个设置成功` });
 }
@@ -102,6 +106,22 @@ function forceReloadPage() {
   // @ts-ignore lib 类型标注错误
   window.location.reload(true);
 }
+
+// 颜色预览
+watch(
+  () => editingValue.value.themeColor,
+  (newValue) => {
+    // regex 校验 newValue 是否为合法的十六进制颜色值
+    if (!newValue || !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(newValue)) {
+      return;
+    }
+    registerThemeColor(newValue, 'preview');
+  }
+);
+// 关闭前清除预览
+onBeforeUnmount(() => {
+  resetThemeColor();
+});
 
 defineExpose({
   save: handleSave,
@@ -172,15 +192,10 @@ defineExpose({
           </div>
           <div class="setting-list-section">
             <div class="setting-list-item">
-              <span class="setting-list-item__title">显示日期/时间</span>
-              <span class="setting-list-item__value">
-                <CusSelect
-                  v-model="editingValue.timeDisplayInDialogList"
-                  :options="[
-                    { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
-                    { value: 'yyyy-MM-dd hh:mm:ss', label: 'yyyy-MM-dd hh:mm:ss' },
-                  ]"
-                />
+              <span class="setting-list-item__title">主题色</span>
+              <span class="setting-list-item__value" style="flex-direction: row; align-items: center;">
+                <CusInput v-model="editingValue.themeColor" />
+                <CusAvatar size="1.5rem" :color="editingValue.themeColor" style="flex-shrink: 0" />
               </span>
             </div>
           </div>
@@ -298,7 +313,7 @@ defineExpose({
       border-bottom: none;
       flex-direction: row;
       border-radius: 0.5rem;
-      background-color: $color-teal-20;
+      background-color: var(--color-primary-20);
       padding: 0.5rem;
     }
   }

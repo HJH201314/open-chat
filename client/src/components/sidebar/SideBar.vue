@@ -12,6 +12,7 @@ import type { SidebarEntry } from '@/components/sidebar/types.ts';
 import Logo from '@/components/logo/Logo.vue';
 import CusPopover from '@/components/tooltip/CusPopover.vue';
 import CommonModal from '@/components/modal/CommonModal.vue';
+import CusAvatar from '@/components/avatar/CusAvatar.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -208,7 +209,7 @@ defineExpose({
         @click="!userStore.isLogin ? handleLogin() : void 0"
       >
         <div class="sidebar-avatar-img">
-          <img alt="avatar" src="/favicon.ico" />
+          <CusAvatar :name="userStore.username" size="2.25rem" alt="avatar" gradient />
           <div
             :class="{
               'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
@@ -256,8 +257,8 @@ defineExpose({
     left: 0;
     top: 0;
     bottom: 0;
-    // 融入 body 渐变
-    background: $body-background;
+    // 使用 body 渐变并放大以融入
+    background: var(--body-background);
     background-size: calc(100 * var(--vh)) 100vw;
     width: 3.5rem;
     padding: 0.5rem 0.5rem 1rem 0.5rem;
@@ -310,17 +311,14 @@ defineExpose({
     cursor: pointer;
     padding: 0.5rem 0 !important; // 取消sidebar-entry的padding
 
-    &:hover &-img > img {
+    &:hover &-img > :deep(.cus-avatar) {
       transform: rotate(-360deg); // 头像旋转
     }
 
     &-img {
       position: relative;
 
-      > img {
-        width: 2.25rem;
-        height: 2.25rem;
-        border-radius: 50%;
+      > :deep(.cus-avatar) {
         transition: transform 0.2s $ease-out-circ;
       }
     }
@@ -333,7 +331,7 @@ defineExpose({
       height: 0.5rem;
       border-radius: 50%;
       box-sizing: content-box;
-      border: 2px solid $color-teal-20;
+      border: 2px solid var(--color-primary-20);
       background-color: $color-success;
 
       &--offline {
@@ -375,15 +373,15 @@ defineExpose({
     gap: 1rem;
 
     &:not(&--active):hover {
-      background: shade-color($color-teal-20, 5%);
+      background: var(--color-primary-50);
     }
 
     &:not(&--active):active {
-      background: shade-color($color-teal-20, 10%);
+      background: var(--color-primary-100);
     }
 
     &--active {
-      background: $color-teal-50;
+      background: var(--color-primary-70);
       color: var(--color-primary);
     }
 

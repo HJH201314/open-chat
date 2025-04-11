@@ -9,7 +9,7 @@ export const DropdownCurrentInfoInjectionKey: InjectionKey<{
 export type DropdownOption = {
   label: string;
   value: string;
-  icon?: string | VNode;
+  icon?: string | VNode | (() => VNode);
   children?: DropdownOption[];
   childrenMenuOption?: DropdownMenuProps;
 };

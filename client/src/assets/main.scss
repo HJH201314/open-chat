@@ -41,7 +41,7 @@ body {
 
 body, html {
   height: 100%;
-  background: variables.$body-background;
+  background: var(--body-background);
 }
 
 /* 定义链接样式 */
@@ -82,8 +82,8 @@ a:not(.t-link) {
 
 /* 划词样式 */
 ::selection {
-  background-color: variables.$color-teal-80;
-  color: variables.$color-black;
+  background-color: var(--color-primary-80);
+  color: var(--color-black);
 }
 
 /* 重置 textarea 滚动条样式 */

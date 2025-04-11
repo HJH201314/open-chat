@@ -1,13 +1,14 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useArrayMap, useLocalStorage } from '@vueuse/core';
-import { computed, watch } from 'vue';
+import { computed, h, watch } from 'vue';
 import genApi from '@/api/gen-api.ts';
 import type { ApiEntityConfigChatModel, ApiSchemaPreset } from '@/api/gen/data-contracts.ts';
 import type { DropdownOption } from '@/components/dropdown/types.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
+import LogoDeepSeek from '@/components/logo/LogoDeepSeek.vue';
 
-export const useChatConfigStore = defineStore('model', () => {
+export const useChatConfigStore = defineStore('chat-config', () => {
   // 供应商及模型数据
   const chatModels = useLocalStorage<ApiEntityConfigChatModel[]>('chat-models', []);
   // 转换为下拉菜单结果fix
@@ -119,10 +120,12 @@ export const useChatConfigStore = defineStore('model', () => {
 });
 
 const convertModelConfigDropdown = (model: ApiEntityConfigChatModel) => {
+  const modelLogo = model.icon == 'deepseek' ? h(LogoDeepSeek, { showBackground: false }) : model.icon;
   // 基础映射：display_name -> label，name -> value
   const dropdownOption: DropdownOption = {
     value: model.name || '',
     label: model.display_name || '',
+    icon: modelLogo,
   };
 
   return dropdownOption;

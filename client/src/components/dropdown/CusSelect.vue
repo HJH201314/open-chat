@@ -7,6 +7,7 @@
       class="dropdown-toggle"
       @click="toggleDropdown"
     >
+      <Component :is="currentIconComponent" v-if="currentIconComponent" />
       {{ labelRenderText?.(selectedOption, selectedOptionPath) || selectedLabel }}
       <span class="arrow"></span>
     </div>
@@ -39,7 +40,7 @@ import {
   type DropdownOption,
 } from '@/components/dropdown/types';
 import { useElementBounding } from '@vueuse/core';
-import { computed, provide, ref, useTemplateRef, watch } from 'vue';
+import { computed, h, provide, ref, useTemplateRef, watch } from 'vue';
 import { treeEach } from '@liuli-util/tree';
 import CommonModal from '@/components/modal/CommonModal.vue';
 
@@ -108,6 +109,14 @@ const selectedOption = ref(findCurrentValueOption(props.options, selectedValue.v
 // 当前选中项的 label
 const selectedLabel = computed(() => {
   return selectedOption.value ? selectedOption.value.label : props.placeholder;
+});
+const currentIconComponent = computed(() => {
+  if (!selectedOption.value) return null;
+  if (typeof selectedOption.value.icon == 'string') {
+    return h('img', { style: 'width: 1em; height: 1em;', src: selectedOption.value.icon });
+  } else {
+    return selectedOption.value.icon ? h(selectedOption.value.icon, { style: 'width: 1em; height: 1em; scale: 1.25;' }) : null;
+  }
 });
 // 计算目标路径
 const getTargetPath = (
@@ -197,8 +206,9 @@ function toggleDropdown() {
     border-radius: 0.5em;
     cursor: pointer;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.25em;
     background-color: $color-grey-100;
     transition: background-color 0.2s $ease-out-circ;
 

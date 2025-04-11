@@ -3,6 +3,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { tryOnMounted, useLocalStorage } from '@vueuse/core';
 import { computed, onMounted } from 'vue';
 import { SERVER_NEXT_API_URL } from '@/constants';
+import { DEFAULT_COLOR } from '@/components/theme/useTheme.ts';
 
 // 聊天设置的配置版本号，用于实现自动升级
 const currentChatSettingVersion = 1;
@@ -19,6 +20,7 @@ export type ChatSetting = {
   timeDisplayInDialogList?: string;
   timeDisplayInMessageList?: string;
   defaultModel?: string; // 默认模型，比如 gpt-4o
+  themeColor?: string; // 主题色
   // 添加索引签名，允许使用字符串索引
   [key: string]: any;
 };
@@ -35,6 +37,7 @@ const defaultSetting: ChatSetting = {
   timeDisplayInDialogList: 'yyyy-MM-dd hh:mm:ss',
   timeDisplayInMessageList: 'yyyy-MM-dd hh:mm:ss',
   defaultModel: '',
+  themeColor: DEFAULT_COLOR,
 };
 
 /* 设置相关 */

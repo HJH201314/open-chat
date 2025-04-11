@@ -57,7 +57,7 @@ const iconComponent = computed(() => {
   if (typeof props.option.icon == 'string') {
     return h('img', { style: 'width: 1em; height: 1em;', src: props.option.icon });
   } else {
-    return props.option.icon ? h(props.option.icon, { style: 'width: 1em; height: 1em;' }) : null;
+    return props.option.icon ? h(props.option.icon, { style: 'width: 1em; height: 1em; scale: 1.5;' }) : null;
   }
 });
 
@@ -134,7 +134,7 @@ function handleClick() {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.25em;
+    gap: 0.5em;
     white-space: nowrap;
     padding: 0.5rem;
     border-radius: 6px;

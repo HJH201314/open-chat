@@ -79,7 +79,7 @@ watch(
           id="dialog-detail-view"
           :dialog-id="props.sessionId"
           class="message-page-dialog-detail transition-all-circ"
-          @back="() => $router.back()"
+          @back="() => $router.replace('/chat')"
         />
       </Transition>
       <Transition name="ease-in">
