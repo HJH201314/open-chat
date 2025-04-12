@@ -315,11 +315,11 @@ defineExpose({
     cursor: pointer;
 
     &:not(&--active):hover {
-      background: shade-color($color-teal-20, 5%);
+      background: var(--color-trans-50);
     }
 
     &:not(&--active):active {
-      background: shade-color($color-teal-20, 10%);
+      background: var(--color-trans-100);
     }
   }
 

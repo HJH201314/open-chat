@@ -1,6 +1,6 @@
 @use 'sass:color';
 
-$color-white: #fff;
+$color-white: #fdfdfd;
 $color-grey: #e5e7eb;
 $color-grey-50: #fafafa;
 $color-grey-100: #f5f5f5;
@@ -17,30 +17,6 @@ $color-bg-transparent-300: rgba(0 0 0 / 0.09);
 $color-black-lighter: #3d3d3d;
 $color-black: #252525;
 $color-black-lighter: #424242;
-$color-emerald-50: rgb(236, 253, 245);
-$color-emerald-100: rgb(209, 250, 229);
-$color-emerald-200: rgb(167, 243, 208);
-$color-emerald-300: rgb(110, 231, 183);
-$color-emerald-400: rgb(52, 211, 153);
-$color-emerald-500: rgb(5, 150, 105);
-$color-teal-10: #f8fcfc;
-$color-teal-20: #f5fbfb;
-$color-teal-30: #ecf7f7;
-$color-teal-40: #e6f5f4;
-$color-teal-50: #e0f2f1;
-$color-teal-80: #c4e7e4;
-$color-teal-100: #b2dfdb;
-$color-teal-200: #80cbc4;
-$color-teal-300: #4db6ac;
-$color-teal-400: #26a69a;
-$color-teal-500: #009688;
-$color-teal-600: #00897b;
-$color-teal-700: #00796b;
-$color-teal-800: #00695c;
-$color-teal-900: #004d40;
-$color-teal-1000: color.scale($color-teal-800, $whiteness: 20%, $blackness: 20%);
-
-$color-blue-400: #3877f3;
 
 $color-pink-100: #fff0f6;
 $color-pink-200: #ffd6e7;
@@ -57,9 +33,9 @@ $color-hover: $color-grey-300; // @deprecated
 $color-active: $color-grey-400; // @deprecated
 
 // primary color
-$color-primary: $color-teal-400;
-$color-primary-lighter: $color-teal-200;
-$color-primary-darker: $color-teal-500;
+$color-primary: var(--color-primary-400);
+$color-primary-lighter: var(--color-primary-200);
+$color-primary-darker: var(--color-primary-500);
 
 $color-secondary-lighter: $color-pink-200;
 $color-secondary: $color-pink-400;

@@ -368,7 +368,7 @@ const { isSmallScreen } = useGlobal();
       border-radius: 0.5rem;
       // 此处 padding 让搜索图标位置不变
       padding-inline: calc(0.4rem - 2px);
-      color: color.scale($color-primary, $alpha: -5%);
+      color: var(--color-primary);
       border: 2px solid var(--color-primary);
       box-sizing: border-box;
       display: flex;
@@ -425,8 +425,8 @@ const { isSmallScreen } = useGlobal();
   &-action-button {
     height: 2em;
     width: 2em;
-    color: color.scale($color-primary, $alpha: -5%);
-    background-color: color.scale($color-primary, $alpha: -85%);
+    color: var(--color-primary);
+    background-color: var(--color-primary-30);
     border-radius: 0.5rem;
     display: grid;
     justify-content: center;
@@ -439,11 +439,11 @@ const { isSmallScreen } = useGlobal();
     box-shadow: $box-shadow-shallower;
 
     &:hover {
-      background-color: color.scale($color-primary, $alpha: -80%);
+      background-color: var(--color-primary-20);
     }
 
     &:active {
-      background-color: color.scale($color-primary, $alpha: -75%);
+      background-color: var(--color-primary-10);
     }
   }
 

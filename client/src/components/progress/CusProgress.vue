@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import variables from '@/assets/variables.module.scss';
+import { getColorHex } from '@/utils/color.ts';
 
 type ProgressProps = {
   // 进度值 (0-100)
@@ -24,8 +24,8 @@ type ProgressProps = {
 const props = withDefaults(defineProps<ProgressProps>(), {
   value: 0,
   height: '8px',
-  backgroundColor: variables.colorGrey200,
-  foregroundColor: variables.colorPrimary,
+  backgroundColor: '--color-grey-200',
+  foregroundColor: '--color-primary',
   showText: false,
   rounded: true,
   duration: 300,
@@ -43,7 +43,7 @@ watch(
   }
 );
 
-// 确保进度在0-100范围内
+// 确保进度在 0-100 范围内
 const normalizedProgress = computed(() => {
   return Math.min(100, Math.max(0, progress.value));
 });
@@ -53,7 +53,7 @@ const progressStyle = computed(() => {
   return {
     width: `${normalizedProgress.value}%`,
     height: props.height,
-    backgroundColor: props.foregroundColor,
+    backgroundColor: getColorHex(props.foregroundColor),
     borderRadius: props.rounded ? '100px' : '0',
     transition: `width ${props.duration}ms ease-in-out`,
   };
@@ -62,7 +62,7 @@ const progressStyle = computed(() => {
 // 容器样式
 const containerStyle = computed(() => {
   return {
-    backgroundColor: props.backgroundColor,
+    backgroundColor: getColorHex(props.backgroundColor),
     height: props.height,
     borderRadius: props.rounded ? '100px' : '0',
   };

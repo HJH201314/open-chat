@@ -78,12 +78,12 @@ function handleClick() {
     width: 1em;
     height: 1em;
     border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--color-trans-200);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s $ease-out-circ;
-    background-color: $color-white;
+    background-color: var(--color-white);
     flex-shrink: 0;
 
     svg {

@@ -82,7 +82,10 @@ provide(CheckboxGroupInjectionKey, {
 </script>
 
 <template>
-  <fieldset class="cus-checkbox-group" :class="[displayStyleClassName, backgroundModeClassName, `direction-${props.direction}`]">
+  <fieldset
+    class="cus-checkbox-group"
+    :class="[displayStyleClassName, backgroundModeClassName, `direction-${props.direction}`]"
+  >
     <slot></slot>
   </fieldset>
 </template>
@@ -101,10 +104,10 @@ provide(CheckboxGroupInjectionKey, {
 
   &.bg-mode {
     &-color {
-      background-color: $color-grey-100;
+      background-color: var(--color-grey-100);
     }
     &-transparent {
-      background-color: $color-bg-transparent-100;
+      background-color: var(--color-trans-100);
     }
   }
 

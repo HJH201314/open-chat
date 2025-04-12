@@ -11,8 +11,8 @@ import { until, useElementBounding, useStepper } from '@vueuse/core';
 import ExamFinishedFragment from '@/pages/user/tue/exam/ExamFinishedFragment.vue';
 import { useRoute, useRouter } from 'vue-router';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import IconButton from '@/components/IconButton.vue';
 import { Back } from '@icon-park/vue-next';
+import DiliButton from '@/components/button/DiliButton.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -143,22 +143,22 @@ const handleAnswerSubmit = async (payload: {
 
 const { isSmallScreen } = useGlobal();
 
-const buttonBackRef = useTemplateRef('button-back');
-const { left: buttonbackLeft } = useElementBounding(buttonBackRef);
+const buttonBackRef = useTemplateRef<HTMLDivElement>('button-back');
+const { left: buttonBackLeft } = useElementBounding(buttonBackRef);
 </script>
 
 <template>
   <div class="exam-page" :class="{ small: isSmallScreen }">
     <LoadingModal :visible="loadingExam" />
-    <IconButton
+    <DiliButton
       ref="button-back"
       class="exam-page-back"
       type="secondary"
-      :color="currentStep == 'answering' ? 'danger' : ''"
+      :color="currentStep == 'answering' ? '--color-danger' : ''"
       @click="handleBack"
     >
       <Back />
-    </IconButton>
+    </DiliButton>
     <ExamWelcomeFragment
       v-if="currentStep == 'welcome'"
       class="exam-page-fragment-full"
@@ -171,7 +171,7 @@ const { left: buttonbackLeft } = useElementBounding(buttonBackRef);
       class="exam-page-fragment-full"
       :exam="exam"
       :single-problem="true"
-      :button-back-left="buttonbackLeft"
+      :button-back-left="buttonBackLeft"
       @submit="handleAnswerSubmit"
     />
     <ExamFinishedFragment

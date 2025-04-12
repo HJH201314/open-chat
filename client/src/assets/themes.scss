@@ -33,7 +33,7 @@
 
 :root.theme-dark {
   // 在这里添加深色模式颜色
-  --color-black: #f0f0f0;
+  --color-black: #{$color-white};
   --color-white: #{$color-black};
   --color-grey-50: #2a2a2a;
   --color-grey-100: #303030;

@@ -13,7 +13,6 @@ import { createApp } from 'vue';
 
 /* 我方样式 */
 import '@/assets/main.scss';
-import '@/assets/variables.module.scss';
 
 import App from './App.vue';
 import '@/assets/code.scss';

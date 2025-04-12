@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed, type CSSProperties, ref, watch } from 'vue';
-import variables from '@/assets/variables.module.scss';
 import { TransitionPresets, useTransition } from '@vueuse/core';
 import { size } from 'liquidjs/dist/filters/array';
 import { useTheme } from '@/components/theme/useTheme.ts';
