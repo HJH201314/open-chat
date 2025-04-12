@@ -28,7 +28,7 @@ export const registerThemeColor = (colorPrimary?: string, name: string = 'defaul
     const lightLevelList = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
     // 暗色模式下色阶等级，与亮色模式一一对应
     const darkLevelList = [
-      950, 930, 910, 890, 870, 850, 830, 810, 790, 770, 750, 600, 550, 400, 300, 200, 100, 50, 20, 10,
+      2700, 2500, 2300, 2100, 1900, 1700, 1500, 1300, 1100, 900, 700, 600, 500, 400, 300, 200, 100, 50, 20, 10,
     ];
     // 升序，用于辅助计算
     const darkLevelListAsc = darkLevelList.slice().toReversed();
