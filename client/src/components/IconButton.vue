@@ -38,8 +38,10 @@ const color = computed(() => {
 
 // 注意 color-mix 兼容性
 const secondaryColorForeground = computed(() => getColorHex(color.value));
-const secondaryColorBackground = computed(
-  () => props.noNormalBackground ? 'transparent' : `color-mix(in srgb, ${getLighterColor(secondaryColorForeground.value, 0.9)}, transparent 30%)`
+const secondaryColorBackground = computed(() =>
+  props.noNormalBackground
+    ? 'transparent'
+    : `color-mix(in srgb, ${getLighterColor(secondaryColorForeground.value, 0.9)}, transparent 30%)`
 );
 const secondaryColorBackgroundHover = computed(
   () => `color-mix(in srgb, ${getLighterColor(secondaryColorForeground.value, 0.85)}, transparent 20%)`
@@ -52,7 +54,12 @@ const secondaryColorBackgroundActive = computed(
 <template>
   <div
     class="icon-button"
-    :class="{ [`icon-button-${type}`]: true, [`icon-button-${shape}`]: true, 'icon-button-shadowed': shadow, [`icon-button-${type}--blur`]: blur }"
+    :class="{
+      [`icon-button-${type}`]: true,
+      [`icon-button-${shape}`]: true,
+      'icon-button-shadowed': shadow,
+      [`icon-button-${type}--blur`]: blur,
+    }"
   >
     <div class="icon-button-slot" :class="[`icon-button-slot-${type}`]">
       <slot></slot>
@@ -74,7 +81,7 @@ const secondaryColorBackgroundActive = computed(
   transition: all 0.2s ease-in-out;
   line-height: 1; // 避免行高影响居中布局
   color: $color-black;
-  background: $color-grey-50;
+  background: var(--color-grey-50);
 
   &-shadowed {
     box-shadow: $box-shadow;
@@ -99,7 +106,7 @@ const secondaryColorBackgroundActive = computed(
 
   &-normal {
     &:hover {
-      background: $color-grey-200;
+      background: var(--color-grey-200);
     }
   }
 

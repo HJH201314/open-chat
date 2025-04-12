@@ -8,12 +8,12 @@ import showToast from '@/components/toast/toast.ts';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import useRoleStore from '@/store/useRoleStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
-import { ref, toValue, watch, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, ref, toValue, watch } from 'vue';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
-import { registerThemeColor, resetThemeColor, saveThemeColor, useTheme } from '@/components/theme/useTheme.ts';
+import { useTheme } from '@/components/theme/useTheme.ts';
 import CusAvatar from '@/components/avatar/CusAvatar.vue';
 
 const { isModal = false } = defineProps<{
@@ -25,7 +25,7 @@ const roleStore = useRoleStore();
 const { modelDropdown, botsDropdown } = storeToRefs(useChatConfigStore());
 // 解构赋值editingValue避免使用proxy，此处并不希望未点击保存前生效
 const editingValue = ref({ ...toValue(settingStore.settings) });
-const { theme } = useTheme();
+const theme = useTheme();
 
 defineEmits<{
   (event: 'cancel'): void;
@@ -40,10 +40,11 @@ watch(
 );
 
 function handleSave() {
-  console.debug(editingValue);
+  console.debug('[new-setting]', editingValue);
   // 额外的保存操作
   if (editingValue.value.themeColor && editingValue.value.themeColor != settingStore.settings.themeColor) {
-    saveThemeColor(editingValue.value.themeColor);
+    // 将主题色配置写入
+    theme.saveThemeColor(editingValue.value.themeColor);
   }
   const result = settingStore.saveSettings(editingValue.value);
   showToast({ text: `保存${result}个设置成功` });
@@ -51,15 +52,13 @@ function handleSave() {
 
 function handleReset() {
   DialogManager.commonDialog({
+    presetType: 'danger',
     title: '重置设置',
     content: '此操作不可逆，确定要重置设置吗？',
-    confirmButtonProps: {
-      backgroundColor: theme.colorDanger,
-    },
   }).then((res) => {
     if (res) {
       settingStore.resetSetting();
-      showToast({ text: `重置成功` });
+      showToast({ text: '重置成功' });
     }
   });
 }
@@ -69,11 +68,9 @@ const { isLargeScreen } = useGlobal();
 // 角色相关
 function handleClearRoleCache() {
   DialogManager.commonDialog({
+    presetType: 'danger',
     title: '清除缓存',
     content: '此操作不可逆，清除后需要重新获取数据，是否继续？',
-    confirmButtonProps: {
-      backgroundColor: theme.colorDanger,
-    },
   }).then((res) => {
     if (res) {
       roleStore.reset();
@@ -84,11 +81,9 @@ function handleClearRoleCache() {
 // 对话相关
 async function handleClearMessageCache() {
   const confirmRes = await DialogManager.commonDialog({
+    presetType: 'danger',
     title: '清除对话缓存',
     content: '此操作不可逆，清除后需要重新获取数据，是否继续？',
-    confirmButtonProps: {
-      backgroundColor: theme.colorDanger,
-    },
   });
   if (confirmRes) {
     const dataStore = useDataStore();
@@ -115,12 +110,14 @@ watch(
     if (!newValue || !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(newValue)) {
       return;
     }
-    registerThemeColor(newValue, 'preview');
+    theme.saveThemeColor(newValue);
   }
 );
 // 关闭前清除预览
 onBeforeUnmount(() => {
-  resetThemeColor();
+  if (editingValue.value.themeColor != settingStore.settings.themeColor) {
+    settingStore.settings.themeColor && theme.saveThemeColor(settingStore.settings.themeColor);
+  }
 });
 
 defineExpose({
@@ -180,7 +177,7 @@ defineExpose({
           </div>
           <div class="setting-list-section">
             <div class="setting-list-item">
-              <span class="setting-list-item__title">默认 API 服务模型</span>
+              <span class="setting-list-item__title">默认模型</span>
               <span class="setting-list-item__value">
                 <CusSelect
                   v-model="editingValue.defaultModel"
@@ -192,9 +189,31 @@ defineExpose({
           </div>
           <div class="setting-list-section">
             <div class="setting-list-item">
+              <span class="setting-list-item__title">主题</span>
+              <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
+                <CusSelect
+                  v-model="editingValue.theme"
+                  :options="[
+                    {
+                      value: 'auto',
+                      label: '跟随系统',
+                    },
+                    {
+                      value: 'light',
+                      label: '浅色',
+                    },
+                    {
+                      value: 'dark',
+                      label: '深色',
+                    },
+                  ]"
+                />
+              </span>
+            </div>
+            <div class="setting-list-item">
               <span class="setting-list-item__title">主题色</span>
-              <span class="setting-list-item__value" style="flex-direction: row; align-items: center;">
-                <CusInput v-model="editingValue.themeColor" />
+              <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
+                <CusInput v-model="editingValue.themeColor" style="width: 7.5rem" />
                 <CusAvatar size="1.5rem" :color="editingValue.themeColor" style="flex-shrink: 0" />
               </span>
             </div>
@@ -219,13 +238,13 @@ defineExpose({
               <span class="setting-list-item__title">清除缓存</span>
               <span class="setting-list-item__value">
                 <DiliButton
-                  :background-color="theme.colorDanger"
+                  background-color="var(--color-danger)"
                   text="清除角色缓存"
                   type="primary"
                   @click="handleClearRoleCache"
                 />
                 <DiliButton
-                  :background-color="theme.colorDanger"
+                  background-color="var(--color-danger)"
                   text="清除对话缓存"
                   type="primary"
                   @click="handleClearMessageCache"
@@ -236,7 +255,7 @@ defineExpose({
               <span class="setting-list-item__title">强制刷新页面</span>
               <span class="setting-list-item__value">
                 <DiliButton
-                  :background-color="theme.colorDanger"
+                  background-color="var(--color-danger)"
                   text="立即重启"
                   type="primary"
                   @click="forceReloadPage"
@@ -306,7 +325,7 @@ defineExpose({
 
     // 除了最后一个 section，都添加下边框
     &:not(:nth-last-child(2)) {
-      border-bottom: 1px solid $color-grey-100;
+      border-bottom: 1px solid var(--color-grey-100);
     }
 
     .large & {
@@ -326,6 +345,7 @@ defineExpose({
       'subtitle value';
     grid-auto-rows: auto;
     justify-content: space-between;
+    column-gap: 0.25rem;
 
     .large & {
       column-gap: 0.5rem;
@@ -339,7 +359,7 @@ defineExpose({
         transform: translate(-50%, -50%);
         width: 1px;
         height: 60%;
-        background: $color-grey-300;
+        background: var(--color-grey-300);
       }
     }
 

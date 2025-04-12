@@ -9,7 +9,6 @@ import { Message, SettingTwo } from '@icon-park/vue-next';
 import { DialogManager } from '@/components/dialog';
 import SettingDialog from '@/pages/user/chat/setting/SettingDialog.vue';
 import type { SidebarEntry } from '@/components/sidebar/types.ts';
-import { useUserStore } from '@/store/useUserStore.ts';
 
 const sidebarRef = useTemplateRef('sidebar');
 const showPadding = ref(true);
@@ -86,7 +85,7 @@ const { isLargeScreen, isSmallScreen } = useGlobal();
     --padding: 0;
 
     > .panel {
-      border-radius: 0;
+      border-radius: 0 !important;
       box-shadow: none;
     }
   }

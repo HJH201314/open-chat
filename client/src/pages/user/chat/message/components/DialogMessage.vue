@@ -232,7 +232,7 @@ defineSlots<{
       color: var(--color-primary-900);
 
       & div::selection {
-        background-color: rgba(0 0 0 / 5%);
+        background-color: var(--color-trans-500);
         border-radius: 0.5rem;
       }
     }
@@ -262,7 +262,8 @@ defineSlots<{
       display: grid;
       border-radius: 0 0.5rem 0.5rem 0.5rem;
       padding: 0.5rem 0.75rem;
-      background-color: $color-grey-200;
+      color: var(--color-black);
+      background-color: var(--color-grey-100);
 
       .content {
         overflow: hidden;
@@ -275,7 +276,8 @@ defineSlots<{
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        background-color: $color-grey-200;
+        color: var(--color-black);
+        background-color: var(--color-grey-100);
         font-size: 0.75em;
         cursor: pointer;
         text-align: right;
@@ -291,7 +293,7 @@ defineSlots<{
   }
 
   &-time {
-    color: $color-grey;
+    color: var(--color-grey-100);
     font-size: 12px;
     margin-left: 0.5rem;
   }
@@ -321,7 +323,7 @@ defineSlots<{
 
   li {
     &::marker {
-      color: $color-grey-500;
+      color: var(--color-grey-500);
     }
 
     p {
@@ -353,7 +355,7 @@ defineSlots<{
     border-collapse: collapse;
 
     tr {
-      border: 1px solid $color-grey-300;
+      border: 1px solid var(--color-grey-300);
       border-left: none;
       border-right: none;
     }

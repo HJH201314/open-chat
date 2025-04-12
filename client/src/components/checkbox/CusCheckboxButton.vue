@@ -39,7 +39,13 @@ function handleClick() {
     }"
     @click="handleClick"
   >
-    <input :value="checkboxValue" :name="checkboxName" type="checkbox" :checked="checkboxChecked" :disabled="props.disabled" />
+    <input
+      :value="checkboxValue"
+      :name="checkboxName"
+      type="checkbox"
+      :checked="checkboxChecked"
+      :disabled="props.disabled"
+    />
     <div v-if="displayStyle === 'icon' || displayStyle === 'both'" class="checkbox-icon">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
@@ -77,7 +83,7 @@ function handleClick() {
     align-items: center;
     justify-content: center;
     transition: all 0.2s $ease-out-circ;
-    background-color: white;
+    background-color: $color-white;
     flex-shrink: 0;
 
     svg {
@@ -110,7 +116,7 @@ function handleClick() {
           background-color: var(--color-primary);
 
           svg {
-            fill: white;
+            fill: $color-white;
           }
         }
       }
@@ -133,7 +139,7 @@ function handleClick() {
     &.type-highlight {
       &.checked {
         background-color: var(--color-primary);
-        color: white;
+        color: $color-white;
       }
     }
   }

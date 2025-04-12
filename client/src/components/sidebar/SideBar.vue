@@ -13,6 +13,8 @@ import Logo from '@/components/logo/Logo.vue';
 import CusPopover from '@/components/tooltip/CusPopover.vue';
 import CommonModal from '@/components/modal/CommonModal.vue';
 import CusAvatar from '@/components/avatar/CusAvatar.vue';
+import { useSettingStore } from '@/store/useSettingStore.ts';
+import { storeToRefs } from 'pinia';
 
 const props = withDefaults(
   defineProps<{
@@ -27,6 +29,7 @@ const props = withDefaults(
   }
 );
 const userStore = useUserStore();
+const settingStore = useSettingStore();
 
 const showSideBar = ref(props.defaultShow);
 const expandBar = ref(false);
@@ -41,7 +44,14 @@ watch(
 
 const toggleSideBarBus = useEventBus(toggleSidebarKey);
 const toggleSidebarExpandBus = useEventBus(toggleSidebarExpandKey);
-const { toggleTheme, currentTheme } = useTheme();
+const { currentTheme } = storeToRefs(useTheme());
+const toggleTheme = () => {
+  if (currentTheme.value === 'dark') {
+    settingStore.saveSetting('theme', 'light');
+  } else if (currentTheme.value === 'light') {
+    settingStore.saveSetting('theme', 'dark');
+  }
+};
 
 onMounted(() => {
   toggleSideBarBus.on((e) => {
@@ -190,7 +200,7 @@ defineExpose({
         </div>
       </CusTooltip>
       <div class="sidebar-footer">
-        <CusTooltip position="right" text="切换主题">
+        <CusTooltip position="right" :text="`切换${currentTheme == 'dark' ? '浅色' : '深色'}`">
           <div class="sidebar-entry sidebar-footer-item">
             <SunOne
               v-if="currentTheme == 'dark'"
@@ -209,7 +219,13 @@ defineExpose({
         @click="!userStore.isLogin ? handleLogin() : void 0"
       >
         <div class="sidebar-avatar-img">
-          <CusAvatar :name="userStore.username" size="2.25rem" alt="avatar" gradient />
+          <CusAvatar
+            :name="userStore.isLogin ? userStore.username : '?'"
+            color="var(--color-primary)"
+            size="2.25rem"
+            alt="avatar"
+            gradient
+          />
           <div
             :class="{
               'sidebar-avatar-status--logout': userStore.loginStatus == 'logout',
@@ -361,6 +377,7 @@ defineExpose({
   }
 
   &-entry {
+    color: var(--color-black);
     padding: 0.5rem;
     width: 100%;
     border-radius: 0.5rem;
@@ -431,17 +448,20 @@ defineExpose({
 
   &-user-action {
     padding: 0.25rem;
+    border-radius: 0.4rem;
+    background-color: var(--color-white);
 
     &-item {
       cursor: pointer;
-      border-radius: 0.4rem;
       padding: 0.25rem 0.5rem;
+      border-radius: 0.4rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      color: var(--color-black);
 
       &:hover {
-        background-color: $color-grey-100;
+        background-color: var(--color-grey-100);
       }
     }
   }

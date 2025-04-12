@@ -194,12 +194,12 @@ const { isSmallScreen } = useGlobal();
 </script>
 <template>
   <!-- 角色列表 -->
-  <div ref="record-list-view" class="dialog-list" :class="{ larger: isSmallScreen }">
+  <div ref="record-list-view" class="dialog-list">
     <div class="dialog-list-bar" :class="{ shadow: !arrivedState.top }">
       <IconButton
         v-if="isSmallScreen"
         type="secondary"
-        color="#999999"
+        color="var(--color-grey-500)"
         no-normal-background
         @click="handleSidebarUnfold"
       >
@@ -272,7 +272,7 @@ const { isSmallScreen } = useGlobal();
           class="dialog-list-item"
           @click="handleListItemClick(item.id)"
         >
-          <CusAvatar style="opacity: 0.5;" :name="item.title?.trim() || ''" size="2.5em" shape="circle" />
+          <CusAvatar style="opacity: 0.5" :name="item.title?.trim() || ''" size="2.5em" shape="circle" />
           <div class="dialog-list-item__right">
             <div class="dialog-list-item__top">
               <div class="title">
@@ -321,11 +321,6 @@ const { isSmallScreen } = useGlobal();
 
 .dialog-list {
   position: relative;
-
-  &.larger {
-    // 通过 font-size 来控制字体和组件大小，移动端放大一点
-    font-size: 1.1rem;
-  }
 
   &-container {
     padding-top: 3em;
@@ -462,7 +457,7 @@ const { isSmallScreen } = useGlobal();
 
     &:not(&-selected):hover {
       // border-radius: 0;
-      background-color: $color-grey-100;
+      background-color: var(--color-grey-100);
     }
 
     &-selected {
@@ -506,7 +501,7 @@ const { isSmallScreen } = useGlobal();
 
       .datetime {
         flex: 0 0 auto;
-        color: $color-grey-500;
+        color: var(--color-grey-500);
         font-size: 0.75em;
         text-align: right;
       }
@@ -519,7 +514,7 @@ const { isSmallScreen } = useGlobal();
       font-size: 0.75em;
 
       .digest {
-        color: $color-grey-500;
+        color: var(--color-grey-500);
       }
 
       .flags {
@@ -592,7 +587,7 @@ const { isSmallScreen } = useGlobal();
     cursor: pointer;
     line-height: 1.5rem;
     transition: all 0.2s $ease-out-circ;
-    background-color: $color-grey-100;
+    background-color: var(--color-grey-100);
 
     &:hover {
       font-size: 1.1rem;

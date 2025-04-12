@@ -111,25 +111,29 @@ watch(
 );
 
 // show answer
-watch(() => props.showAnswer, (newShowAnswer) => {
-  if (newShowAnswer) {
-    switch (problemInfo.value.type) {
-      case ApiSchemaProblemType.EnumSingleChoice:
-      case ApiSchemaProblemType.EnumMultipleChoice:
-        innerOptionAnswer.value = props.problem?.answer?.answer || [] as number[];
-        break;
-      case ApiSchemaProblemType.EnumTrueFalse:
-        innerBoolAnswer.value = props.problem?.answer?.answer as boolean;
-        break;
-      case ApiSchemaProblemType.EnumShortAnswer:
-        innerTextAnswer.value = props.problem?.answer?.answer || '' as string;
-        break;
-      case ApiSchemaProblemType.EnumFillBlank:
-        innerTextAnswer.value = (props.problem?.answer?.answer || [] as string[]).join(', ');
-        break;
+watch(
+  () => props.showAnswer,
+  (newShowAnswer) => {
+    if (newShowAnswer) {
+      switch (problemInfo.value.type) {
+        case ApiSchemaProblemType.EnumSingleChoice:
+        case ApiSchemaProblemType.EnumMultipleChoice:
+          innerOptionAnswer.value = props.problem?.answer?.answer || ([] as number[]);
+          break;
+        case ApiSchemaProblemType.EnumTrueFalse:
+          innerBoolAnswer.value = props.problem?.answer?.answer as boolean;
+          break;
+        case ApiSchemaProblemType.EnumShortAnswer:
+          innerTextAnswer.value = props.problem?.answer?.answer || ('' as string);
+          break;
+        case ApiSchemaProblemType.EnumFillBlank:
+          innerTextAnswer.value = (props.problem?.answer?.answer || ([] as string[])).join(', ');
+          break;
+      }
     }
-  }
-}, { immediate: true });
+  },
+  { immediate: true }
+);
 
 function indexToOption(index: number): string {
   if (index < 0) {
@@ -171,10 +175,12 @@ async function handleSubmit() {
     }
     submitLoading.value = true;
     const res = await genApi.Tue.examSingleProblemSubmitPost({
-      answers: [{
-        answer: answerVM.value,
-        problem_id: problemInfo.value.id,
-      }],
+      answers: [
+        {
+          answer: answerVM.value,
+          problem_id: problemInfo.value.id,
+        },
+      ],
       time_spent: 0,
     });
     if (res.data.data) {
@@ -187,7 +193,7 @@ async function handleSubmit() {
 
 defineSlots<{
   'header-score': () => VNode;
-}>()
+}>();
 </script>
 
 <template>
@@ -196,11 +202,19 @@ defineSlots<{
       <span class="problem-score">
         {{ page != undefined ? `${page}. ` : '' }}{{ typeName }}
         <span v-if="score !== undefined">&nbsp;&nbsp;&nbsp;{{ (score || 0) / 100 }} 分</span>
-        <slot name="header-score"/>
+        <slot name="header-score" />
       </span>
       <section v-if="showSubmit" class="problem-submit">
-        <CusTooltip v-if="!showAnswer" text="重置输入" position="top"><DiliButton type="normal" @click="handleResetInput"><Redo /></DiliButton></CusTooltip>
-        <DiliButton v-if="!showAnswer" :disabled="innerTextAnswer === '' && innerBoolAnswer == undefined && !innerOptionAnswer.length" type="primary" text="提交" @click="handleSubmit">
+        <CusTooltip v-if="!showAnswer" text="重置输入" position="top"
+          ><DiliButton type="normal" @click="handleResetInput"><Redo /></DiliButton
+        ></CusTooltip>
+        <DiliButton
+          v-if="!showAnswer"
+          :disabled="innerTextAnswer === '' && innerBoolAnswer == undefined && !innerOptionAnswer.length"
+          type="primary"
+          text="提交"
+          @click="handleSubmit"
+        >
           <CusSpin v-if="submitLoading" :show="true" />
         </DiliButton>
         <div v-else class="problem-score">已完成作答</div>
@@ -255,7 +269,9 @@ defineSlots<{
           @change="(val) => (innerBoolAnswer = val === 'true')"
         >
           <CusRadioButton class="problem-answer-section-select-item" value="true" label="A. 正确"> 正确</CusRadioButton>
-          <CusRadioButton class="problem-answer-section-select-item" value="false" label="B. 错误"> 错误</CusRadioButton>
+          <CusRadioButton class="problem-answer-section-select-item" value="false" label="B. 错误">
+            错误</CusRadioButton
+          >
         </CusRadioGroup>
       </template>
 
@@ -356,6 +372,8 @@ defineSlots<{
   }
 
   &-explanation {
+    color: var(--color-black);
+
     &-title {
       color: var(--text-secondary);
     }

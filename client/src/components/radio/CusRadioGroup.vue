@@ -173,11 +173,11 @@ onUnmounted(() => {
 
   &.bg-mode {
     &-color {
-      background-color: $color-grey-100;
+      background-color: var(--color-grey-100);
     }
 
     &-transparent {
-      background-color: $color-bg-transparent-100;
+      background-color: var(--color-trans-100);
     }
   }
 
@@ -196,7 +196,7 @@ onUnmounted(() => {
     }
 
     &.type-normal {
-      background-color: white;
+      background-color: var(--color-white);
     }
 
     &.type-highlight {

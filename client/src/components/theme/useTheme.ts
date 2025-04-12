@@ -1,40 +1,41 @@
-import {
-  inject,
-  type InjectionKey,
-  type MaybeRefOrGetter,
-  provide,
-  reactive,
-  type Ref,
-  toValue,
-  watchEffect,
-} from 'vue';
-import { tryOnMounted, useLocalStorage } from '@vueuse/core';
+import { computed, reactive, watch, watchEffect } from 'vue';
+import { tryOnMounted, useLocalStorage, useMediaQuery } from '@vueuse/core';
 import tinycolor from 'tinycolor2';
+import { nextFrame } from '@/utils/element.ts';
+import { useSettingStore } from '@/store/useSettingStore.ts';
+import { DEFAULT_COLOR } from '@/constants';
+import { defineStore } from 'pinia';
 
 type Theme = 'light' | 'dark';
 
-const THEME_KEY: InjectionKey<{
-  currentTheme: Ref<Theme>;
-  toggleTheme: () => void;
-  setThemeColor: (color1000: string) => void;
-  theme: Record<string, string>;
-}> = Symbol('UseTheme');
-const DEFAULT_THEME: Theme = 'light';
-export const DEFAULT_COLOR: string = '#757cbd';
+const defaultTheme: Theme = 'light';
+const themeColorStorageKey = 'theme-color';
 
 /**
- * 设置主题色
- * @param colorPrimary 主题色
+ * 将主题色应用于 html 元素
+ * @param colorPrimary 主题色，若不指定，则使用储存在 localStorage 中的颜色，默认 DEFAULT_COLOR 兜底
  * @param name 名称
  */
-export const registerThemeColor = (colorPrimary: string, name?: string) => {
+export const registerThemeColor = (colorPrimary?: string, name: string = 'default') => {
   if (typeof window !== 'undefined') {
-    const baseColor = tinycolor(colorPrimary);
+    const baseColor = tinycolor(colorPrimary || localStorage.getItem(themeColorStorageKey) || DEFAULT_COLOR);
     if (!baseColor.isValid()) return;
 
     const root = document.documentElement;
-    const baseLevel = 400; // 输入的主题色是 400
-    const levelList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+    // 输入的主题色是 400
+    const baseLevel = 400;
+    // 亮色模式下色阶等级，对应 var(--color-primary-x)
+    const lightLevelList = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+    // 暗色模式下色阶等级，与亮色模式一一对应
+    const darkLevelList = [
+      950, 930, 910, 890, 870, 850, 830, 810, 790, 770, 750, 600, 550, 400, 300, 200, 100, 50, 20, 10,
+    ];
+    // 升序，用于辅助计算
+    const darkLevelListAsc = darkLevelList.slice().toReversed();
+    if (lightLevelList.length != darkLevelList.length) throw new Error('Invalid color level list');
+
+    const isDark = localStorage.getItem('theme') == 'dark';
+    const levelList = isDark ? darkLevelListAsc : lightLevelList;
     const result: string[] = [];
     levelList.forEach((level, index) => {
       let tintedColor: string = '';
@@ -44,44 +45,44 @@ export const registerThemeColor = (colorPrimary: string, name?: string) => {
         if (index < 1) throw new Error('Invalid color level');
         // 颜色加深时，以上一个色阶为基准进行加深
         tintedColor = tinycolor
-          .mix(result[index - 1], '#000', ((level - levelList[index - 1]) / levelList[index - 1]) * 100)
+          .mix(result[index - 1], '#252525', ((level - levelList[index - 1]) / levelList[index - 1]) * 100)
           .toHexString();
       }
-      root.style.setProperty(`--color-primary-${level}`, tintedColor);
-      name && root.style.setProperty(`--color-${name}-${level}`, tintedColor);
       result.push(tintedColor);
+    });
+
+    if (isDark) {
+      result.reverse();
+    }
+    result.forEach((color, index) => {
+      root.style.setProperty(`--color-primary-${lightLevelList[index]}`, color);
+      name && root.style.setProperty(`--color-${name}-${lightLevelList[index]}`, color);
     });
   }
 };
 
 /**
- * 将主题色重置为默认值
+ * 将主题色重置为已保存的主题色，默认值兜底
  */
 export const resetThemeColor = () => {
-  registerThemeColor(localStorage.getItem('theme-color') || DEFAULT_COLOR, 'default');
-}
-
-export const saveThemeColor = (colorPrimary: string) => {
-  localStorage.setItem('theme-color', colorPrimary);
-}
-
-export const useThemeColor = (colorPrimary?: MaybeRefOrGetter<string>, name?: string) => {
-  const colorStorage = useLocalStorage<string>('theme-color', toValue(colorPrimary || DEFAULT_COLOR), {
-    listenToStorageChanges: true,
-  });
-
-  tryOnMounted(() => {
-    watchEffect(() => {
-      registerThemeColor(colorStorage.value, name);
-    });
-  });
+  registerThemeColor(undefined, 'default');
 };
 
-export const provideTheme = () => {
-  const currentTheme = useLocalStorage<Theme>('theme', DEFAULT_THEME);
+/**
+ * 使用 pinia 实现全局单例的主题管理
+ * @description 当组件只需要引用主题色时，可以使用 `const { theme } = useTheme()`，theme 内的属性是 reactive 响应式更新的
+ * @description 如果需要使用其它属性， 比如 currentTheme，需要使用 const { currentTheme } = storeToRefs(useTheme()) 来解构
+ * @description 或不解构，const themeStore = useTheme() 后使用 themeStore.currentTheme 来访问
+ */
+export const useTheme = defineStore('theme', () => {
+  const systemPreferDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const currentTheme = useLocalStorage<Theme>('theme', defaultTheme);
+  const currentThemeColor = useLocalStorage<string>(themeColorStorageKey, DEFAULT_COLOR, {
+    listenToStorageChanges: true,
+  });
   const theme: Record<string, string> = reactive({
     colorPrimary: '#26a69a',
-    colorBlack: '#000',
+    colorBlack: '#252525',
     colorWhite: '#fff',
     colorSuccess: '#52c41a',
     colorInfo: '#1890ff',
@@ -98,15 +99,24 @@ export const provideTheme = () => {
     currentTheme.value = currentTheme.value === 'light' ? 'dark' : 'light';
   };
 
-  const setThemeColor = (colorPrimary: string) => {
-    localStorage.setItem('theme-color', colorPrimary);
+  const saveThemeColor = (color: string) => {
+    currentThemeColor.value = color;
+    registerThemeColor(color);
   };
 
-  watchEffect(() => {
-    document.documentElement.classList.remove('theme-light', 'theme-dark');
-    document.documentElement.classList.add(`theme-${currentTheme.value}`);
-  });
+  watch(
+    () => currentTheme.value,
+    () => {
+      document.documentElement.classList.remove('theme-light', 'theme-dark');
+      document.documentElement.classList.add(`theme-${currentTheme.value}`);
+      nextFrame(() => {
+        registerThemeColor();
+      });
+    },
+    { immediate: true }
+  );
 
+  // 将 CSS 变量同步到 theme 对象中
   const syncCssVars = () => {
     const rootStyles = getComputedStyle(document.documentElement);
     // 获取相应变量并更新到 theme 对象中
@@ -120,37 +130,55 @@ export const provideTheme = () => {
     });
     console.debug('[syncCssVars]', theme);
   };
-  // 初始化时立即同步 CSS 变量
-  syncCssVars();
 
-  // 自动监听窗口变化
+  // 监听变化
   if (typeof window !== 'undefined') {
-    watchEffect((onCleanup) => {
-      const observer = new MutationObserver(syncCssVars);
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class'],
+    // 初始化时立即注册并同步 CSS 变量
+    registerThemeColor();
+    syncCssVars();
+
+    const settingStore = useSettingStore();
+
+    tryOnMounted(() => {
+      watchEffect((onCleanup) => {
+        const observer = new MutationObserver(syncCssVars);
+        observer.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['class'],
+        });
+        onCleanup(() => observer.disconnect());
       });
-      onCleanup(() => observer.disconnect());
+
+      watchEffect(() => {
+        if (settingStore.settings.theme == 'auto') {
+          if (systemPreferDark.value) {
+            currentTheme.value = 'dark';
+          } else {
+            currentTheme.value = 'light';
+          }
+        } else {
+          currentTheme.value = settingStore.settings.theme;
+        }
+      });
+
+      watch(
+        () => currentThemeColor.value,
+        (newColor) => {
+          if (newColor) {
+            registerThemeColor();
+            syncCssVars();
+          }
+        }
+      );
     });
   }
 
-  provide(THEME_KEY, {
+  return {
     currentTheme,
+    isLight: computed(() => currentTheme.value === 'light'),
+    isDark: computed(() => currentTheme.value === 'dark'),
     toggleTheme,
-    setThemeColor,
+    saveThemeColor,
     theme,
-  });
-
-  return {};
-};
-
-export const useTheme = () => {
-  const themes = inject(THEME_KEY);
-
-  if (!themes) {
-    throw new Error('useTheme can only use in provide theme scopes!');
-  }
-
-  return themes;
-};
+  };
+});

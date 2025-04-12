@@ -14,7 +14,11 @@ const form = reactive({
     <div class="page-wrapper">
       <h1>今天有什么疑惑？</h1>
       <div class="input-container">
-        <CusTextarea class="input-textarea" v-model="form.content" :textarea-attr="{ placeholder: '试试输入你的问题' }" />
+        <CusTextarea
+          class="input-textarea"
+          v-model="form.content"
+          :textarea-attr="{ placeholder: '试试输入你的问题' }"
+        />
       </div>
       <div class="suggest-container">
         <CusRadioGroup name="suggest-type" type="normal">
@@ -54,15 +58,15 @@ const form = reactive({
         width: 100%;
         padding: 0.25rem 0.5rem;
         border-radius: 1rem;
-        border: 2px solid $color-grey-200;
+        border: 2px solid var(--color-grey-200);
         transition: all 0.2s $ease-out-circ;
 
         &:hover {
-          border: 2px solid $color-grey-400;
+          border: 2px solid var(--color-grey-400);
         }
 
         &:focus-within {
-          border: 2px solid $color-grey-400;
+          border: 2px solid var(--color-grey-400);
           box-shadow: $next-box-shadow-medium;
         }
       }
@@ -82,6 +86,5 @@ const form = reactive({
       }
     }
   }
-
 }
 </style>

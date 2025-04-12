@@ -3,10 +3,11 @@
 import DiliButton from '@/components/button/DiliButton.vue';
 import type { CommonDialogEmits, CommonDialogExpose, CommonDialogProps } from '@/components/dialog/types.ts';
 import CommonModal from '@/components/modal/CommonModal.vue';
-import { computed, h, ref, shallowRef, watch } from 'vue';
+import { computed, h, reactive, ref, shallowRef, watch } from 'vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import { Alarm, Caution, Close, Info, Success } from '@icon-park/vue-next';
 import { useTheme } from '@/components/theme/useTheme.ts';
+import { storeToRefs } from 'pinia';
 
 const props = withDefaults(defineProps<CommonDialogProps>(), {
   type: 'none',
@@ -58,13 +59,16 @@ async function handleConfirm() {
     confirming.value = true;
     confirmAbortCtrl = new AbortController();
     // 向 handler 传递信号
-    const res = props.confirmHandler({
-      signal: confirmAbortCtrl.signal,
-      abort() {
-        confirmAbortCtrl.abort('handler abort');
-        confirming.value = false;
+    const res = props.confirmHandler(
+      {
+        signal: confirmAbortCtrl.signal,
+        abort() {
+          confirmAbortCtrl.abort('handler abort');
+          confirming.value = false;
+        },
       },
-    }, () => preventClose = true);
+      () => (preventClose = true)
+    );
     try {
       if (res instanceof Promise) {
         await res;
@@ -88,13 +92,16 @@ async function handleCancel() {
     canceling.value = true;
     cancelAbortCtrl = new AbortController();
     // 向 handler 传递信号
-    const res = props.cancelHandler({
-      signal: cancelAbortCtrl.signal,
-      abort() {
-        cancelAbortCtrl.abort('handler abort');
-        canceling.value = false;
+    const res = props.cancelHandler(
+      {
+        signal: cancelAbortCtrl.signal,
+        abort() {
+          cancelAbortCtrl.abort('handler abort');
+          canceling.value = false;
+        },
       },
-    }, () => preventClose = true);
+      () => (preventClose = true)
+    );
     try {
       if (res instanceof Promise) {
         await res;
@@ -110,7 +117,7 @@ async function handleCancel() {
   close(); // 不存在回调函数时默认自动关闭
 }
 
-const { theme } = useTheme();
+const { theme } = reactive(storeToRefs(useTheme()));
 const iconElement = computed(() => {
   const baseIconProps = {
     size: '1.25rem',
@@ -148,7 +155,7 @@ defineExpose<CommonDialogExpose>({
   >
     <div class="dialog" :style="{ ...dialogStyle }">
       <header :style="{ marginRight: showClose ? '3rem' : '1rem' }">
-        <Component :is="iconElement" v-if="!!(iconElement)" />
+        <Component :is="iconElement" v-if="!!iconElement" />
         <div v-if="title" class="dialog-title" :style="titleStyle">{{ title }}</div>
         <div v-if="subtitle" class="dialog-sub-title" :style="subtitleStyle">{{ subtitle }}</div>
         <DiliButton v-if="showClose" class="header-close" @click="handleCancel">
@@ -159,7 +166,8 @@ defineExpose<CommonDialogExpose>({
       <main>
         <div class="dialog-content" v-html="content"></div>
         <slot></slot>
-        <div style="height: 0.5rem;"></div><!-- 高度占位 -->
+        <div style="height: 0.5rem"></div>
+        <!-- 高度占位 -->
       </main>
       <footer v-if="$slots.action || showCancel || showConfirm">
         <div style="flex: 1">

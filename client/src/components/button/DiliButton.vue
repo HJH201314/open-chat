@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { CusButtonEmits, CusButtonProps } from '@/components/button/DiliButton';
-import type { CSSProperties } from 'vue';
-import { computed, ref } from 'vue';
-import { getColorHex, getDarkerColor, getLighterColor } from '@/utils/color';
+import { computed, type CSSProperties, ref } from 'vue';
+import { getAutoDeltaColor, getColorHex } from '@/utils/color';
 import { useTheme } from '@/components/theme/useTheme.ts';
+import tinycolor from 'tinycolor2';
 
 const props = withDefaults(defineProps<CusButtonProps>(), {
   text: '',
@@ -30,17 +30,17 @@ const backgroundColor = computed(() => {
   if (props.backgroundColor) return getColorHex(props.backgroundColor);
   if (props.type == 'primary') {
     return getColorHex(props.color) || theme.colorPrimary;
-  } else if (props.type == 'secondary')  {
-    return getLighterColor(getColorHex(props.color) || theme.colorPrimary, 0.9);
+  } else if (props.type == 'secondary') {
+    return tinycolor.mix(getColorHex(props.color) || theme.colorPrimary, theme.colorWhite, 80).toHexString();
   } else {
-    return '#FFFFFF';
+    return theme.colorWhite;
   }
 });
 const hoverBackgroundColor = computed(() => {
-  return getDarkerColor(backgroundColor.value, 0.05);
+  return getAutoDeltaColor(backgroundColor.value, 0.05);
 });
 const activeBackgroundColor = computed(() => {
-  return getDarkerColor(backgroundColor.value, 0.1);
+  return getAutoDeltaColor(backgroundColor.value, 0.1);
 });
 
 const fontColor = computed(() => {
@@ -49,6 +49,7 @@ const fontColor = computed(() => {
     case 'primary':
       return '#FFFFFF';
     case 'secondary':
+    case 'tertiary':
       return getColorHex(props.color) || theme.colorPrimary;
     case 'text':
       return getColorHex(props.color) || theme.colorPrimary;
@@ -57,10 +58,10 @@ const fontColor = computed(() => {
   }
 });
 const hoverFontColor = computed(() => {
-  return getDarkerColor(fontColor.value, 0.05);
+  return getAutoDeltaColor(fontColor.value, 0.05);
 });
 const activeFontColor = computed(() => {
-  return getDarkerColor(fontColor.value, 0.1);
+  return getAutoDeltaColor(fontColor.value, 0.1);
 });
 
 function handleClick() {

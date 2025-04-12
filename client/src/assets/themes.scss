@@ -7,20 +7,49 @@
   --color-danger: #{$color-danger};
   --color-black: #{$color-black};
   --color-white: #{$color-white};
-  --color-grey-100: #{$color-grey-100};
-  --color-grey-200: #{$color-grey-200};
-  --color-grey-300: #{$color-grey-300};
-  --color-grey-400: #{$color-grey-400};
-  --color-grey-500: #{$color-grey-500};
+  --color-grey-50: #f9f9f9;
+  --color-grey-100: #f2f2f2;
+  --color-grey-200: #e5e5e5;
+  --color-grey-300: #d9d9d9;
+  --color-grey-400: #cccccc;
+  --color-grey-500: #bfbfbf;
+  --color-trans-50: rgba(0 0 0 / 2.5%);
+  --color-trans-100: rgba(0 0 0 / 5%);
+  --color-trans-200: rgba(0 0 0 / 10%);
+  --color-trans-300: rgba(0 0 0 / 15%);
+  --color-trans-400: rgba(0 0 0 / 20%);
+  --color-trans-500: rgba(0 0 0 / 25%);
   --color-primary: var(--color-primary-400);
   --color-primary-darker: var(--color-primary-500);
   --color-primary-lighter: var(--color-primary-200);
   --color-secondary: #{$color-secondary};
   --color-secondary-darker: #{$color-secondary-darker};
   --color-secondary-lighter: #{$color-secondary-lighter};
+  --body-background: linear-gradient(135deg, var(--color-primary-30), var(--color-primary-20));
 
   --text-primary: var(--color-black);
   --text-secondary: var(--color-grey-500);
+}
+
+:root.theme-dark {
+  // 在这里添加深色模式颜色
+  --color-black: #f0f0f0;
+  --color-white: #{$color-black};
+  --color-grey-50: #2a2a2a;
+  --color-grey-100: #303030;
+  --color-grey-200: #3b3b3b;
+  --color-grey-300: #464646;
+  --color-grey-400: #515151;
+  --color-grey-500: #5c5c5c;
+  --color-trans-50: rgba(255 255 255 / 2.5%);
+  --color-trans-100: rgba(255 255 255 / 5%);
+  --color-trans-200: rgba(255 255 255 / 10%);
+  --color-trans-300: rgba(255 255 255 / 15%);
+  --color-trans-400: rgba(255 255 255 / 20%);
+  --color-trans-500: rgba(255 255 255 / 25%);
+  --color-primary-darker: var(--color-primary-300);
+  --color-primary-lighter: var(--color-primary-500);
+  --body-background: linear-gradient(135deg, var(--color-primary-30), var(--color-primary-20));
 }
 
 // 覆写 TDesign 样式
@@ -47,10 +76,6 @@
   --td-shadow-2: #{$box-shadow};
   --td-shadow-3: #{$box-shadow-deeper};
   --td-bg-color-specialcomponent: #{$color-bg-transparent-100}; // 输入框、outline 按钮等的背景色
-}
-
-.theme-dark {
-  // 在这里添加
 }
 
 // 覆写 TDesign 样式

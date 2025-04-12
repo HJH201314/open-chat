@@ -10,6 +10,15 @@ export function getLighterColor(color: string, level: number) {
   return tinycolor.mix(color, '#fff', level * 100).toHexString();
 }
 
+export function getAutoDeltaColor(color: string, level: number) {
+  const colorObj = tinycolor(color);
+  if (colorObj.isDark()) {
+    return getLighterColor(color, level);
+  } else {
+    return getDarkerColor(color, level);
+  }
+}
+
 /**
  * 获取颜色变量对应的 hex 颜色值
  * @param hexOrVar hex 颜色值或颜色变量

@@ -14,7 +14,7 @@
 
 .panel {
   position: relative;
-  background-color: white;
+  background-color: var(--color-white);
   box-sizing: border-box;
   height: 100%;
   overflow: hidden;

@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue';
 export type CusButtonProps = {
   text?: string;
   icon?: string;
-  type?: 'normal' | 'primary' | 'secondary' | 'text'; // 按钮的强调样式
+  type?: 'normal' | 'primary' | 'secondary' | 'tertiary' | 'text'; // 按钮的强调样式
   color?: string; // 按钮的主色
   backgroundColor?: string; // 强制指定按钮背景色
   fontColor?: string; // 强制指定按钮文字色

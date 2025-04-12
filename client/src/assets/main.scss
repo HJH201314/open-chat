@@ -11,11 +11,15 @@
 
 html {
   font-size: 16px;
+
+  @media screen and (max-width: variables.$screen-sm) {
+    font-size: 17px;
+  }
 }
 
 body {
-  background-color: var(--white);
-  color: var(--black);
+  background-color: var(--color-white);
+  color: var(--color-black);
   margin: 0;
   padding: 0;
   width: 100vw;
@@ -33,10 +37,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  // 临时用强制深色模式
-  &[data-theme="dark"], .theme-dark & {
-    filter: invert(1) hue-rotate(180deg);
-  }
+  // 强制深色模式
+  //&[data-theme="dark"], .theme-dark & {
+  //  filter: invert(1) hue-rotate(180deg);
+  //}
 }
 
 body, html {
@@ -82,8 +86,7 @@ a:not(.t-link) {
 
 /* 划词样式 */
 ::selection {
-  background-color: var(--color-primary-80);
-  color: var(--color-black);
+  background-color: var(--color-primary-lighter);
 }
 
 /* 重置 textarea 滚动条样式 */

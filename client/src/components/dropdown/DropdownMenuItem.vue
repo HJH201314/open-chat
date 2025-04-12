@@ -141,7 +141,7 @@ function handleClick() {
     transition: background-color 0.2s $ease-out-circ;
 
     &:hover {
-      background-color: $color-grey-200;
+      background-color: var(--color-grey-200);
     }
 
     &.selected {

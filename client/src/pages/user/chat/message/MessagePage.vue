@@ -67,7 +67,11 @@ watch(
       />
     </Transition>
     <div v-if="showListView && showDialogView" class="split"></div>
-    <section v-show="showDialogView || isRightSessionShowing" class="session-right" :class="{ 'session-right-full': !isLargeScreen }">
+    <section
+      v-show="showDialogView || isRightSessionShowing"
+      class="session-right"
+      :class="{ 'session-right-full': !isLargeScreen }"
+    >
       <Transition
         :name="isLargeScreen ? 'slide-fade-right' : 'slide-in-right-full'"
         :type="isLargeScreen ? 'transition' : 'animation'"
@@ -105,7 +109,6 @@ watch(
   display: flex;
   flex-direction: row;
   box-sizing: border-box;
-  border-radius: 0.5rem;
   overflow: hidden;
   align-items: center;
 
@@ -113,7 +116,7 @@ watch(
     flex-shrink: 0;
     width: 2px;
     height: 100%;
-    background-color: $color-grey;
+    background-color: var(--color-grey-100);
     opacity: 0.233;
   }
 
@@ -137,7 +140,7 @@ watch(
     z-index: 1;
     position: absolute;
     inset: 0;
-    background: white;
+    background: var(--color-white);
   }
 
   &-empty-tip {

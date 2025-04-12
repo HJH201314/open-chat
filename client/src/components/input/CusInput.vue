@@ -3,7 +3,7 @@ import { ref, useTemplateRef, watch } from 'vue';
 import type { CusInputProps } from '@/components/input/CusInput';
 
 const props = withDefaults(defineProps<CusInputProps>(), {
-  validate: () => ([]),
+  validate: () => [],
   inputAttrs: () => {
     return {
       autocomplete: 'off',
@@ -48,24 +48,21 @@ function handleValidate() {
         } else {
           v.error = false;
         }
-      }
-      else if (v.length) {
+      } else if (v.length) {
         if (inputVal.length != v.length) {
           v.error = true;
           v.errorMsg = v.errorMsg || '长度错误';
         } else {
           v.error = false;
         }
-      }
-      else if (v.minLength) {
+      } else if (v.minLength) {
         if (inputVal.length < v.minLength) {
           v.error = true;
           v.errorMsg = v.errorMsg || '长度太短';
         } else {
           v.error = false;
         }
-      }
-      else if (v.maxLength) {
+      } else if (v.maxLength) {
         if (inputVal.length > v.maxLength) {
           v.error = true;
           v.errorMsg = v.errorMsg || '长度太长';
@@ -120,33 +117,34 @@ defineOptions({
 .cus-input {
   outline: none;
   resize: none;
-  border: 2px solid $color-grey-100;
+  border: 2px solid transparent;
   width: 100%;
-  height: 2rem;
+  //height: 2rem;
   box-sizing: border-box;
   border-radius: 0.5rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.125em 0.5em;
   transition:
     background-color 0.2s $ease-out-circ,
     border 0.2s $ease-out-circ;
-  background-color: $color-grey-100;
+  background-color: var(--color-grey-100);
 
   &:hover:not(:disabled) {
     border: 2px solid var(--color-primary-lighter);
   }
 
   &:focus {
-    background-color: color-mix(in srgb, $color-white, var(--color-primary) 5%) !important;
+    // TODO: color-mix compatibility
+    background-color: color-mix(in srgb, var(--color-white), var(--color-primary) 5%) !important;
     border: 2px solid var(--color-primary) !important;
   }
 
   &.danger {
-    background-color: color-mix(in srgb, $color-white, $color-danger 5%) !important;
+    background-color: color-mix(in srgb, var(--color-white), $color-danger 5%) !important;
     border: 2px solid var(--color-danger) !important;
   }
 
   &:disabled {
-    color: $color-grey-400;
+    color: var(--color-grey-400);
   }
 }
 </style>

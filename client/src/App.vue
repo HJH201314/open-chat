@@ -3,10 +3,10 @@ import { siteLoadingKey } from '@/constants/eventBusKeys';
 import { useEventBus, useWindowSize } from '@vueuse/core';
 import { useTemplateRef, watchEffect } from 'vue';
 import CusFullSiteProgress from '@/components/progress/CusFullSiteProgress.vue';
-import { provideTheme, registerThemeColor, useThemeColor } from '@/components/theme/useTheme.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
+import { useTheme } from '@/components/theme/useTheme.ts';
 
-provideTheme();
+useTheme();
 useUserStore();
 
 const siteProgressRef = useTemplateRef('site-progress');
@@ -27,9 +27,6 @@ watchEffect(() => {
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   }
 });
-
-// registerThemeColor('#7b6dd5', 'purple');
-useThemeColor();
 </script>
 
 <template>

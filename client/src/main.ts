@@ -19,6 +19,7 @@ import App from './App.vue';
 import '@/assets/code.scss';
 import '@/assets/themes.scss';
 import { initDatabase } from '@/store/data/database.ts';
+import { registerThemeColor } from '@/components/theme/useTheme.ts';
 
 initDatabase();
 
@@ -27,6 +28,8 @@ library.add(faGithub, faBars, fasComment, farComment, fasGear);
 const app = createApp(App);
 
 initPlugins(app);
+// 注册主题色
+registerThemeColor();
 
 app.mount('#app');
 

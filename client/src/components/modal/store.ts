@@ -17,7 +17,6 @@ export const useCommonModalStore = defineStore('CusUI-CommonModal', () => {
    */
   function openModal() {
     currentDepth.value += 1;
-    console.log('openModal', currentDepth.value);
     const modalId = getRandomString(10);
     modalMap[modalId] = currentDepth.value;
     return modalId;

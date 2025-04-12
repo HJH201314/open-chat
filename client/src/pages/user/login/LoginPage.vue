@@ -15,6 +15,7 @@ import Logo from '@/components/logo/Logo.vue';
 import { encryptWithPublicKey } from '@/utils/encrypt.ts';
 import CusInput from '@/components/input/CusInput.vue';
 import { onStartTyping } from '@vueuse/core';
+import DiliButton from '@/components/button/DiliButton.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -185,12 +186,9 @@ function showUserAgreement() {
         <CusRadioButton value="login" label="登录"></CusRadioButton>
         <CusRadioButton value="register" label="注册"></CusRadioButton>
       </CusRadioGroup>
-      <Close
-        v-if="isModal"
-        class="login-close transition-all-circ enable-hover enable-active"
-        size="20"
-        @click="closePage"
-      />
+      <DiliButton v-if="isModal" @click="closePage">
+        <Close size="20px" />
+      </DiliButton>
     </div>
     <Logo style="font-size: 32px"></Logo>
     <div class="login-top">
@@ -207,6 +205,7 @@ function showUserAgreement() {
             v-model="loginForm.username"
             class="login-form-input"
             :input-attrs="{
+              style: 'font-size: 1.1rem',
               autocomplete: loginForm.type === 'login' ? 'username' : 'off',
               name: 'username',
               type: 'text',
@@ -218,6 +217,7 @@ function showUserAgreement() {
             v-model="loginForm.password"
             class="login-form-input"
             :input-attrs="{
+              style: 'font-size: 1.1rem',
               autocomplete: loginForm.type === 'login' ? 'password' : 'off',
               name: 'password',
               type: 'password',
@@ -230,6 +230,7 @@ function showUserAgreement() {
             autocomplete="off"
             class="login-form-input"
             :input-attrs="{
+              style: 'font-size: 1.1rem',
               autocomplete: 'off',
               name: 'repeat-password',
               type: 'password',
@@ -268,12 +269,6 @@ function showUserAgreement() {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-  }
-
-  &-close {
-    padding: 0.5rem;
-    cursor: pointer;
-    border-radius: 0.5rem;
   }
 
   &-top {
@@ -321,7 +316,7 @@ function showUserAgreement() {
 
   &-footer {
     margin-top: 0.5rem;
-    color: $color-grey-500;
+    color: var(--color-grey-500);
     text-align: center;
   }
 

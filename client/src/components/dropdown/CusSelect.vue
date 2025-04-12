@@ -115,7 +115,9 @@ const currentIconComponent = computed(() => {
   if (typeof selectedOption.value.icon == 'string') {
     return h('img', { style: 'width: 1em; height: 1em;', src: selectedOption.value.icon });
   } else {
-    return selectedOption.value.icon ? h(selectedOption.value.icon, { style: 'width: 1em; height: 1em; scale: 1.25;' }) : null;
+    return selectedOption.value.icon
+      ? h(selectedOption.value.icon, { style: 'width: 1em; height: 1em; scale: 1.25;' })
+      : null;
   }
 });
 // 计算目标路径
@@ -209,27 +211,27 @@ function toggleDropdown() {
     align-items: center;
     justify-content: space-between;
     gap: 0.25em;
-    background-color: $color-grey-100;
+    background-color: var(--color-grey-100);
     transition: background-color 0.2s $ease-out-circ;
 
     &.bg-mode {
       &-color {
-        background-color: $color-grey-100;
+        background-color: var(--color-grey-100);
       }
 
       &-transparent {
-        background-color: $color-bg-transparent-100;
+        background-color: var(--color-trans-100);
       }
     }
 
     &--active {
       &.bg-mode {
         &-color {
-          background-color: $color-grey-300;
+          background-color: var(--color-grey-300);
         }
 
         &-transparent {
-          background-color: $color-bg-transparent-300;
+          background-color: var(--color-trans-300);
         }
       }
     }
@@ -242,7 +244,7 @@ function toggleDropdown() {
 
 .arrow {
   margin-left: 0.25em;
-  border: solid $color-grey-500;
+  border: solid var(--color-grey-500);
   border-width: 0 0.125em 0.125em 0;
   display: inline-block;
   padding: 0.175em;

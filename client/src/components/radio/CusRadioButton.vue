@@ -10,7 +10,9 @@ const groupInject = inject(RadioGroupInjectionKey);
 
 const radioName = computed(() => groupInject?.name?.value || props.name);
 const radioValue = computed(() => props.value);
-const radioChecked = computed(() => (groupInject ? groupInject?.value?.value === radioValue.value : innerChecked.value));
+const radioChecked = computed(() =>
+  groupInject ? groupInject?.value?.value === radioValue.value : innerChecked.value
+);
 
 const radioButtonRef = ref<HTMLElement | undefined>(undefined);
 const typeClassName = computed(() => `type-${groupInject?.type?.value || 'highlight'}`);
@@ -33,12 +35,12 @@ watchEffect(() => {
   <div
     ref="radioButtonRef"
     class="cus-ratio-button"
-    :class="{ 
-      checked: radioChecked, 
-      [CheckedClassName]: radioChecked, 
-      [typeClassName]: !!typeClassName, 
+    :class="{
+      checked: radioChecked,
+      [CheckedClassName]: radioChecked,
+      [typeClassName]: !!typeClassName,
       [directionClassName]: !!directionClassName,
-      [`display-${displayStyle}`]: true
+      [`display-${displayStyle}`]: true,
     }"
     @click="handleClick"
   >
@@ -54,6 +56,7 @@ watchEffect(() => {
 @use '@/assets/variables' as *;
 
 .cus-ratio-button {
+  color: var(--color-black);
   position: relative;
   cursor: pointer;
   padding: 8px 12px;
@@ -74,13 +77,15 @@ watchEffect(() => {
     justify-content: center;
     flex-shrink: 0;
     transition: border-color 0.2s $ease-out-circ;
-    
+
     &-inner {
       width: 0.5em;
       height: 0.5em;
       border-radius: 50%;
       transform: scale(0);
-      transition: transform 0.2s $ease-out-circ, background-color 0.2s $ease-out-circ;
+      transition:
+        transform 0.2s $ease-out-circ,
+        background-color 0.2s $ease-out-circ;
     }
   }
 
@@ -97,7 +102,7 @@ watchEffect(() => {
 
     &.type-highlight {
       &.checked {
-        color: white;
+        color: $color-white;
       }
     }
   }
@@ -107,7 +112,7 @@ watchEffect(() => {
       &.checked {
         .radio-icon {
           border-color: var(--color-primary);
-          
+
           &-inner {
             background-color: var(--color-primary);
             transform: scale(1);
@@ -120,7 +125,7 @@ watchEffect(() => {
       &.checked {
         .radio-icon {
           border-color: var(--color-primary);
-          
+
           &-inner {
             background-color: var(--color-primary);
             transform: scale(1);

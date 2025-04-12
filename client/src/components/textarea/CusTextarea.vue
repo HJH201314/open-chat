@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, type TextareaHTMLAttributes, watch, watchEffect } from 'vue';
-import { useStyleTag, useTextareaAutosize } from '@vueuse/core';
+import { ref, type TextareaHTMLAttributes, watch } from 'vue';
+import { useTextareaAutosize } from '@vueuse/core';
 
 const props = withDefaults(
   defineProps<{
@@ -21,11 +21,14 @@ const emit = defineEmits<{
 
 const modelValue = defineModel<string>('modelValue', { default: '' });
 
-watch(() => modelValue.value, (newVal) => {
-  if (newVal != undefined) {
-    emit('change', newVal);
+watch(
+  () => modelValue.value,
+  (newVal) => {
+    if (newVal != undefined) {
+      emit('change', newVal);
+    }
   }
-})
+);
 
 // 自适应高度
 const textareaRef = ref<HTMLTextAreaElement>();
@@ -90,20 +93,20 @@ defineExpose({
 
   &.preset {
     padding-inline: 0.25rem;
-    border: 2px solid $color-grey-100;
+    border: 2px solid var(--color-grey-100);
     border-radius: 0.5rem;
     transition:
       background-color 0.2s $ease-out-circ,
       border 0.2s $ease-out-circ;
-    background-color: $color-grey-100;
+    background-color: var(--color-grey-100);
 
     &:focus-within {
-      background-color: $color-white;
+      background-color: var(--color-white);
       border: 2px solid var(--color-primary);
     }
 
     &:disabled {
-      color: $color-grey-400;
+      color: var(--color-grey-400);
     }
   }
 }

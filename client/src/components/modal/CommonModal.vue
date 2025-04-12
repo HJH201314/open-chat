@@ -34,7 +34,7 @@ const emit = defineEmits<{
 const { modalMap, openModal, closeModal } = useCommonModalStore();
 
 const myId = ref('');
-const myDepth = computed(() => modalMap[myId.value] || 0)
+const myDepth = computed(() => modalMap[myId.value] || 0);
 const zIndex = computed(() => props.zIndex || myDepth.value * 2 + 1000);
 
 const showModal = ref(false);
@@ -99,8 +99,8 @@ watchEffect(() => {
   // 下一帧更新 ModalBody 的展示，以支持动画入场
   nextTick(() => {
     showModalBody.value = collectShowModal;
-  })
-})
+  });
+});
 
 function handleClose() {
   close();
@@ -134,7 +134,13 @@ defineExpose<CommonModalFunc>({
 <template>
   <Teleport :to="teleportTo" :disabled="!teleportTo" :defer="true">
     <Transition name="show" @after-leave="afterClose">
-      <div v-if="showModal" ref="modal" :style="{ ...props.maskStyle, 'z-index': zIndex }" class="modal-mask" @click="handleMaskClick">
+      <div
+        v-if="showModal"
+        ref="modal"
+        :style="{ ...props.maskStyle, 'z-index': zIndex }"
+        class="modal-mask"
+        @click="handleMaskClick"
+      >
         <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
       </div>
     </Transition>
@@ -167,7 +173,7 @@ defineExpose<CommonModalFunc>({
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,7 +203,7 @@ defineExpose<CommonModalFunc>({
       max-height: calc(100vh - 2rem);
       max-width: calc(100vw - 2rem);
       height: unset;
-      background-color: $color-white;
+      background-color: var(--color-white);
       border-radius: 0.5rem;
       box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.1);
     }

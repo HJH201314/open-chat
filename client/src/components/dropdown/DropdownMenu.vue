@@ -67,7 +67,7 @@ const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `uns
 
 .dropdown-menu {
   position: fixed;
-  background-color: white;
+  background-color: var(--color-white);
   list-style: none;
   padding: 0;
   box-shadow: $box-shadow;

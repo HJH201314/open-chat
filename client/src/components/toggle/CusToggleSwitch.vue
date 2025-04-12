@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const props = withDefaults(defineProps<{
-  isActive: boolean;
-}>(), {
-  isActive: false,
-})
+const props = withDefaults(
+  defineProps<{
+    isActive: boolean;
+  }>(),
+  {
+    isActive: false,
+  }
+);
 
 const toggleClasses = computed(() => {
   const classes = [];
@@ -16,7 +19,6 @@ const toggleClasses = computed(() => {
   }
   return classes;
 });
-
 </script>
 
 <template>
@@ -35,7 +37,7 @@ const toggleClasses = computed(() => {
     cursor: pointer;
     width: 2.5em;
     height: 1.5em;
-    background-color: $color-grey-400;
+    background-color: var(--color-grey-400);
     transition: background-color 0.2s $ease-out-circ;
     display: flex;
     align-items: center;
@@ -54,7 +56,7 @@ const toggleClasses = computed(() => {
     height: 1em;
     width: 1em;
     border-radius: 0.25em;
-    background-color: $color-grey-200;
+    background-color: var(--color-grey-200);
     transition: all 0.2s $ease-out-circ;
 
     &.off {

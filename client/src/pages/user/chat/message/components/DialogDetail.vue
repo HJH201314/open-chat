@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import { DoubleDown, DoubleUp } from '@icon-park/vue-next';
+import { DoubleDown } from '@icon-park/vue-next';
 import { until, useElementBounding, useEventListener, useScroll } from '@vueuse/core';
 import { computed, provide, ref, useTemplateRef } from 'vue';
 import DialogMessage from './DialogMessage.vue';
-import IconButton from '@/components/IconButton.vue';
 import type { MessageInfo } from '@/types/data.ts';
 import { nextFrame, scrollToBottom, scrollToTop } from '@/utils/element.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
@@ -15,6 +14,7 @@ import {
 } from '@/pages/user/chat/message/components/types.ts';
 import DialogExamProblem from '@/pages/user/chat/message/components/extension/DialogExamProblem.vue';
 import Birthday from '@/components/extra/Birthday.vue';
+import DiliButton from '@/components/button/DiliButton.vue';
 
 const props = withDefaults(defineProps<DialogDetailProps>(), {
   emptyTip: '随便问点啥？',
@@ -56,7 +56,6 @@ provide(DialogDetailSlotsInjectionKey, {
     dialogInputSlot.value = el.value;
   },
 });
-
 
 const { height: panelHeight, y: panelY } = useElementBounding(() => dialogInputSlot.value);
 const { height: actionHeight } = useElementBounding(() => dialogActionSlot.value);
@@ -219,29 +218,27 @@ defineExpose({
           role="user"
         ></DialogMessage>
       </div>
-      <Transition name="scroll-flow-in-out-top" type="animation">
-        <IconButton
-          v-if="!arrivedState.top && messages.length"
-          class="dialog-detail-scroll-to-top"
-          color="#666666"
-          type="secondary"
-          shadow
-          @click="handleScrollDialogToTop"
-        >
-          <DoubleUp size="16" />
-        </IconButton>
-      </Transition>
+      <!--      <Transition name="scroll-flow-in-out-top" type="animation">-->
+      <!--        <DiliButton-->
+      <!--          v-if="!arrivedState.top && messages.length"-->
+      <!--          class="dialog-detail-scroll-to-top"-->
+      <!--          type="normal"-->
+      <!--          shadow-->
+      <!--          @click="handleScrollDialogToTop"-->
+      <!--        >-->
+      <!--          <DoubleUp size="16" />-->
+      <!--        </DiliButton>-->
+      <!--      </Transition>-->
       <Transition name="scroll-flow-in-out-bottom" type="animation">
-        <IconButton
+        <DiliButton
           v-if="!fixDialogToBottom && !arrivedState.bottom && messages.length"
           class="dialog-detail-scroll-to-bottom"
-          color="#666666"
-          type="secondary"
+          type="normal"
           shadow
           @click="handleFixDialogToBottom"
         >
           <DoubleDown size="16" />
-        </IconButton>
+        </DiliButton>
       </Transition>
       <div v-if="showInput">
         <slot name="input" :detail-arrived-state="arrivedState" />

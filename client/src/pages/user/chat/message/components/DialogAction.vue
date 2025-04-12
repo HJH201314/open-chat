@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { Back, Delete, Edit, More, Refresh, ShareOne, Star } from '@icon-park/vue-next';
-import IconButton from '@/components/IconButton.vue';
 import CusTooltip from '@/components/tooltip/CusTooltip.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import {
@@ -8,7 +7,8 @@ import {
   type DialogActionProps,
   DialogDetailSlotsInjectionKey,
 } from '@/pages/user/chat/message/components/types.ts';
-import { inject, onMounted, ref, watch, watchEffect } from 'vue';
+import { inject, ref, watch, watchEffect } from 'vue';
+import DiliButton from '@/components/button/DiliButton.vue';
 
 const props = withDefaults(defineProps<DialogActionProps>(), {
   title: '',
@@ -50,17 +50,15 @@ defineSlots<{
 <template>
   <div ref="actionRef" class="dialog-action" :class="{ shadow: shadowed }">
     <div class="dialog-action-area-left">
-      <IconButton
+      <DiliButton
         v-if="!$slots.back"
-        type="secondary"
-        color="#00110F"
-        :blur="false"
+        type="normal"
+        color="var(--color-black)"
         style="flex-shrink: 0"
-        no-normal-background
         @click="$emit('back')"
       >
         <Back size="16" />
-      </IconButton>
+      </DiliButton>
       <slot v-else name="back" />
       <!--      <div v-if="!hasPermission" class="dialog-action-tip" @click="$emit('actionTipClick')">-->
       <!--        <WrongUser />-->
@@ -70,19 +68,18 @@ defineSlots<{
       <div v-if="!$slots.title" class="dialog-action-title">
         {{ title || '未命名对话' }}
       </div>
-      <slot v-else name="title"/>
+      <slot v-else name="title" />
       <!--      <span class="dialog-action-subtitle"> {{ messageCount }} 条消息 </span>-->
     </div>
-    <IconButton
+    <DiliButton
       v-if="menuInMore && showMenu"
-      type="secondary"
-      color="#00110F"
+      type="normal"
       style="flex-shrink: 0; opacity: 0.75"
       no-normal-background
       @click="innerShowMenu = !innerShowMenu"
     >
       <More size="16" theme="filled" />
-    </IconButton>
+    </DiliButton>
     <Transition name="action-flow-in-out" type="animation">
       <section
         v-if="showMenu && (!menuInMore || innerShowMenu)"
@@ -90,40 +87,33 @@ defineSlots<{
         :class="{ 'dialog-action-menu--flow': menuInMore }"
       >
         <CusTooltip text="收藏对话" position="bottom">
-          <IconButton
-            type="secondary"
-            color="warning"
-            :no-normal-background="!isStared"
+          <DiliButton
+            :type="isStared ? 'secondary' : 'tertiary'"
+            color="var(--color-warning)"
             style="flex-shrink: 0"
             @click="$emit('star')"
           >
             <Star size="16" :theme="isStared ? 'filled' : 'outline'" />
-          </IconButton>
+          </DiliButton>
         </CusTooltip>
         <CusTooltip text="分享对话" position="bottom">
-          <IconButton type="secondary" color="primary" :no-normal-background="!isShared" style="flex-shrink: 0" @click="$emit('share')">
-            <ShareOne size="16" :theme="isShared ? 'filled' : 'outline'"/>
-          </IconButton>
+          <DiliButton :type="isShared ? 'secondary' : 'tertiary'" style="flex-shrink: 0" @click="$emit('share')">
+            <ShareOne size="16" :theme="isShared ? 'filled' : 'outline'" />
+          </DiliButton>
         </CusTooltip>
         <CusTooltip text="刷新对话" position="bottom">
-          <IconButton type="secondary" color="primary" no-normal-background style="flex-shrink: 0" @click="$emit('sync')">
+          <DiliButton type="tertiary" style="flex-shrink: 0" @click="$emit('sync')">
             <cus-spin :show="messageSyncing">
               <Refresh size="16" />
             </cus-spin>
-          </IconButton>
+          </DiliButton>
         </CusTooltip>
-        <IconButton type="secondary" color="primary" no-normal-background style="flex-shrink: 0" @click="$emit('edit')">
+        <DiliButton type="tertiary" style="flex-shrink: 0" @click="$emit('edit')">
           <Edit size="16" />
-        </IconButton>
-        <IconButton
-          type="secondary"
-          color="danger"
-          no-normal-background
-          style="flex-shrink: 0"
-          @click="$emit('delete')"
-        >
+        </DiliButton>
+        <DiliButton type="tertiary" color="var(--color-danger)" style="flex-shrink: 0" @click="$emit('delete')">
           <Delete size="16" />
-        </IconButton>
+        </DiliButton>
       </section>
     </Transition>
   </div>
@@ -200,14 +190,14 @@ defineSlots<{
         transform: translateY(-50%);
         width: 1px;
         height: 1rem;
-        background: $color-grey-100;
+        background: var(--color-grey-100);
       }
     }
 
     &--flow {
       gap: 0.25rem;
       padding: 0.25rem;
-      background: rgba(255 255 255 / 99%);
+      background: var(--color-white);
       border-radius: 0.5rem;
       box-shadow: $box-shadow-right-bottom;
       position: absolute;

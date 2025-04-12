@@ -4,7 +4,7 @@ import CusSelect from '@/components/dropdown/CusSelect.vue';
 import CusTextarea from '@/components/textarea/CusTextarea.vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import { computed, ref, inject, watchEffect } from 'vue';
+import { computed, inject, ref, watchEffect } from 'vue';
 import {
   DialogDetailSlotsInjectionKey,
   type DialogInputEmits,
@@ -137,9 +137,9 @@ $dialog-max-width: 54rem;
   transform: translate(-50%, 0);
   display: flex;
   flex-direction: column;
-  background-color: $color-grey-50;
+  background-color: var(--color-grey-50);
+  border: 1px solid var(--color-trans-50);
   border-radius: 0.5rem 0.5rem 0 0;
-  box-shadow: $box-shadow;
   transition: all 0.2s $ease-out-circ;
   animation: input-flow-out-bottom-anim 0.2s $ease-out-circ reverse;
   overflow: hidden;
@@ -158,9 +158,11 @@ $dialog-max-width: 54rem;
     }
   }
 
-  &:focus-within, &.typing {
+  &:focus-within,
+  &.typing {
     bottom: 0.35rem;
     border-radius: 0.75rem;
+    border: 1px solid transparent;
     box-shadow: $next-box-shadow-medium;
   }
 
@@ -195,6 +197,7 @@ $dialog-max-width: 54rem;
   }
 
   &-toggle {
+    color: var(--color-black);
     cursor: pointer;
     position: absolute;
     line-height: 1;
@@ -234,7 +237,7 @@ $dialog-max-width: 54rem;
       border-radius: 0.5rem;
 
       &:hover {
-        background-color: $color-grey-200;
+        background-color: var(--color-grey-200);
       }
     }
   }
@@ -247,7 +250,7 @@ $dialog-max-width: 54rem;
     height: 2rem;
     margin-left: auto;
     background: var(--color-primary);
-    color: white;
+    color: $color-white;
     border-radius: 35%;
     display: flex;
     justify-content: center;

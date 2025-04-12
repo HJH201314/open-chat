@@ -14,8 +14,7 @@ const props = withDefaults(
   {
     tip: '加载中...',
     color: () => {
-      const { theme } = useTheme();
-      return theme.colorPrimary;
+      return useTheme().theme.colorPrimary;
     },
   }
 );

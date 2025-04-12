@@ -1,24 +1,66 @@
 <script setup lang="ts">
-import { type CSSProperties, computed } from 'vue';
+import { computed, type CSSProperties } from 'vue';
 
 import { getRandomInt } from '@/utils/string.ts';
 import { getColorHex, getDarkerColor } from '@/utils/color.ts';
 
 const defaultColors = [
-  '#eb5181', '#9031aa', '#613cb0', '#4350af',
-  '#4994ec', '#4ba6ee', '#54b9d1', '#429488',
-  '#67ad5b', '#97c15c', '#d0dc59', '#f6c344',
-  '#f19d38', '#ec6337', '#74574a', '#9e9e9e',
-  '#667c89', '#e15241', '#d3313c', '#4a7c8c',
-  '#57a6b2', '#f6a35a', '#edb46e', '#f5e67f',
-  '#62b7a7', '#bba0a6', '#e8b09b', '#5562e7',
-  '#b4cfbc', '#a45159', '#f9b658', '#faa40f',
-  '#dadc5b', '#d7bf37', '#d6ed64', '#4284b3',
-  '#0a9ac2', '#3cc37d', '#36ba60', '#65c87e',
-  '#59ab69', '#e28769', '#d87b41', '#e77665',
-  '#a4a62b', '#d2b165', '#8fb03b', '#759f7e',
-  '#a3ae75', '#a9d9a1', '#49c5a0', '#50b4b2',
-  '#30b57e', '#8abdef', '#9296a0', '#787486',
+  '#eb5181',
+  '#9031aa',
+  '#613cb0',
+  '#4350af',
+  '#4994ec',
+  '#4ba6ee',
+  '#54b9d1',
+  '#429488',
+  '#67ad5b',
+  '#97c15c',
+  '#d0dc59',
+  '#f6c344',
+  '#f19d38',
+  '#ec6337',
+  '#74574a',
+  '#9e9e9e',
+  '#667c89',
+  '#e15241',
+  '#d3313c',
+  '#4a7c8c',
+  '#57a6b2',
+  '#f6a35a',
+  '#edb46e',
+  '#f5e67f',
+  '#62b7a7',
+  '#bba0a6',
+  '#e8b09b',
+  '#5562e7',
+  '#b4cfbc',
+  '#a45159',
+  '#f9b658',
+  '#faa40f',
+  '#dadc5b',
+  '#d7bf37',
+  '#d6ed64',
+  '#4284b3',
+  '#0a9ac2',
+  '#3cc37d',
+  '#36ba60',
+  '#65c87e',
+  '#59ab69',
+  '#e28769',
+  '#d87b41',
+  '#e77665',
+  '#a4a62b',
+  '#d2b165',
+  '#8fb03b',
+  '#759f7e',
+  '#a3ae75',
+  '#a9d9a1',
+  '#49c5a0',
+  '#50b4b2',
+  '#30b57e',
+  '#8abdef',
+  '#9296a0',
+  '#787486',
 ];
 
 const props = withDefaults(
@@ -42,7 +84,9 @@ const background = computed(() => {
   let color = 'transparent';
   if (props.color) {
     color = getColorHex(props.color);
-  } else {
+  }
+  if (!color.startsWith('#')) {
+    // 随机颜色兜底
     color = defaultColors[getRandomInt(0, defaultColors.length - 1)];
   }
 
@@ -85,7 +129,7 @@ const background = computed(() => {
     transform: translate(-50%, -50%);
     font-weight: bold;
     font-size: calc(v-bind('props.size') / 2);
-    color: rgba(255, 255, 255, 0.6)
+    color: rgba(255, 255, 255, 0.6);
   }
 }
 </style>
