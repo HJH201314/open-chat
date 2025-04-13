@@ -145,6 +145,7 @@ const paginationItemStyle = computed(() => {
     </Panel>
 
     <nav class="problem-navigation">
+      <DiliButton type="secondary" :disabled="currentPage <= 1" @click="handleLastProblem"> 上一题</DiliButton>
       <CusPagination
         v-model:current-page="currentPage"
         class="problem-navigation-page"
@@ -152,10 +153,7 @@ const paginationItemStyle = computed(() => {
         :page-count="exam?.problems?.length"
         :page-item-style="paginationItemStyle"
       ></CusPagination>
-      <div class="problem-navigation-step">
-        <DiliButton type="secondary" :disabled="currentPage <= 1" @click="handleLastProblem"> 上一题</DiliButton>
-        <DiliButton type="secondary" :disabled="currentPage >= maxPage" @click="handleNextProblem"> 下一题</DiliButton>
-      </div>
+      <DiliButton type="secondary" :disabled="currentPage >= maxPage" @click="handleNextProblem"> 下一题</DiliButton>
     </nav>
   </div>
 </template>
@@ -211,13 +209,10 @@ const paginationItemStyle = computed(() => {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   width: 100%;
   max-width: 54rem;
-
-  .small & {
-    flex-direction: column-reverse;
-  }
 
   &-page {
     max-width: 100%;

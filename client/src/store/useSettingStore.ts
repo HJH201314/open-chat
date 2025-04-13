@@ -22,6 +22,7 @@ export type ChatSetting = {
   showModelAvatar?: boolean; // 是否显示模型头像
   theme?: 'light' | 'dark' | 'auto'; // 主题
   themeColor?: string; // 主题色
+  themeColorful?: boolean; // 炫彩
   // 添加索引签名，允许使用字符串索引
   [key: string]: any;
 };
@@ -41,6 +42,7 @@ const defaultSetting: ChatSetting = {
   showModelAvatar: false,
   theme: 'auto',
   themeColor: DEFAULT_COLOR,
+  themeColorful: false,
 };
 
 /* 设置相关 */

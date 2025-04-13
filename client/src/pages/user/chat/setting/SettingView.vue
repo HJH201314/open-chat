@@ -15,6 +15,7 @@ import { useDataStore } from '@/store/data/useDataStore.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import CusAvatar from '@/components/avatar/CusAvatar.vue';
+import LogoVIP from '@/components/logo/LogoVIP.vue';
 
 const { isModal = false } = defineProps<{
   isModal?: boolean;
@@ -223,6 +224,13 @@ defineExpose({
                 <CusAvatar size="1.5rem" :color="editingValue.themeColor" style="flex-shrink: 0" />
               </span>
             </div>
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">炫彩<LogoVIP /></span>
+              <span class="setting-list-item__subtitle">让主题色动起来</span>
+              <span class="setting-list-item__value">
+                <CusToggle v-model="editingValue.themeColorful" />
+              </span>
+            </div>
           </div>
           <div class="setting-list-section">
             <div class="setting-list-item">
@@ -371,6 +379,9 @@ defineExpose({
 
     &__title {
       grid-area: title;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
 
       .large & {
         font-weight: bold;

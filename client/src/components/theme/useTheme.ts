@@ -1,5 +1,5 @@
 import { computed, reactive, watch, watchEffect } from 'vue';
-import { tryOnMounted, useLocalStorage, useMediaQuery } from '@vueuse/core';
+import { tryOnMounted, useIntervalFn, useLocalStorage, useMediaQuery } from '@vueuse/core';
 import tinycolor from 'tinycolor2';
 import { nextFrame } from '@/utils/element.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
@@ -101,7 +101,6 @@ export const useTheme = defineStore('theme', () => {
 
   const saveThemeColor = (color: string) => {
     currentThemeColor.value = color;
-    registerThemeColor(color);
   };
 
   watch(
@@ -128,7 +127,6 @@ export const useTheme = defineStore('theme', () => {
       theme[key] = cssValue;
       theme[cssKey] = cssValue;
     });
-    console.debug('[syncCssVars]', theme);
   };
 
   // 监听变化
@@ -150,6 +148,7 @@ export const useTheme = defineStore('theme', () => {
       });
 
       watchEffect(() => {
+        // 监听设置中的主题，如果为 auto，则根据系统主题切换；如果为 light/dark，则直接切换
         if (settingStore.settings.theme == 'auto') {
           if (systemPreferDark.value) {
             currentTheme.value = 'dark';
@@ -160,6 +159,37 @@ export const useTheme = defineStore('theme', () => {
           currentTheme.value = settingStore.settings.theme;
         }
       });
+
+      // 炫彩主题
+      let currentColorful = tinycolor(currentThemeColor.value);
+      const { resume: startColorful, pause: stopColorful } = useIntervalFn(
+        () => {
+          if (currentColorful && settingStore.settings.themeColorful) {
+            currentColorful.spin(1);
+            registerThemeColor(currentColorful.toHexString());
+            syncCssVars();
+          } else {
+            stopColorful();
+          }
+        },
+        500,
+        { immediate: false, immediateCallback: true }
+      );
+      watch(
+        () => settingStore.settings.themeColorful,
+        (isThemeColorful) => {
+          if (isThemeColorful) {
+            currentColorful = tinycolor(currentThemeColor.value);
+            startColorful();
+          } else {
+            stopColorful();
+            currentColorful = tinycolor(currentThemeColor.value);
+            registerThemeColor();
+            syncCssVars();
+          }
+        },
+        { immediate: true }
+      );
 
       watch(
         () => currentThemeColor.value,
