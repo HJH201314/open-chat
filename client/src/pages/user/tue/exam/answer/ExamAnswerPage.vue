@@ -1,42 +1,31 @@
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import genApi from '@/api/gen-api.ts';
-import { type ApiSchemaExam } from '@/api/gen/data-contracts.ts';
+import { type ApiSchemaExam, type ApiSchemaExamUserRecord } from '@/api/gen/data-contracts.ts';
 import useGlobal from '@/commands/useGlobal.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { DialogManager } from '@/components/dialog';
-import { until, useElementBounding, useStepper } from '@vueuse/core';
 import { useRoute, useRouter } from 'vue-router';
-import IconButton from '@/components/IconButton.vue';
 import { Back } from '@icon-park/vue-next';
 import ExamAnswerView from '@/pages/user/tue/exam/answer/ExamAnswerView.vue';
+import DiliButton from '@/components/button/DiliButton.vue';
 
 const props = withDefaults(
   defineProps<{
     examId: string;
+    recordId?: number; // 用户回答 ID
   }>(),
-  {}
-);
-
-const exam = ref<ApiSchemaExam>();
-const {
-  current: currentStep,
-  goToNext: goToNextStep,
-  goTo: goToStep,
-} = useStepper(['welcome', 'answering', 'finished'], 'welcome');
-const fragmentAnsweringRef = useTemplateRef('fragment-answering');
-watch(
-  () => currentStep.value,
-  (newStep) => {
-    if (newStep == 'answering') {
-      until(fragmentAnsweringRef)
-        .not.toBeNull()
-        .then(() => {
-          fragmentAnsweringRef.value?.start();
-        });
-    }
+  {
+    recordId: 0,
   }
 );
+
+const emit = defineEmits<{
+  (e: 'back'): void;
+}>();
+
+const exam = ref<ApiSchemaExam>();
+const record = ref<ApiSchemaExamUserRecord>();
 
 const router = useRouter();
 
@@ -71,63 +60,69 @@ const handleLoadExam = async () => {
   }
 };
 
+// 加载用户作答记录
+const loadUserRecord = async () => {
+  if (!props.recordId) return;
+
+  const res = await genApi.Tue.examRecordsGet(props.recordId);
+  if (res.status == 200) {
+    record.value = res.data.data!;
+  }
+};
+// 处理用户作答记录加载
+const handleLoadUserRecord = async () => {
+  try {
+    await loadUserRecord();
+  } catch (e) {
+    console.error(e);
+  } finally {
+  }
+};
+
 const route = useRoute();
 onMounted(async () => {
-  await handleLoadExam();
-  // 带参数自动开始考试
-  if (route.query['autoStart'] || route.query['auto-start']) {
-    goToNextStep();
-  }
+  await Promise.all([await handleLoadExam(), await handleLoadUserRecord()]);
 });
 
 const handleBack = () => {
-  switch (currentStep.value) {
-    case 'welcome':
-    case 'finished':
-      router.back();
-      return;
-    case 'answering':
-      DialogManager.commonDialog({
-        title: '退出测验',
-        content: '退出后讲清空已作答内容，确定要退出测验吗？',
-        presetType: 'danger',
-        confirmButtonProps: {
-          text: '退出',
-        },
-        confirmHandler: () => {
-          router.back();
-          // TODO： 退出测验记录
-        },
-      });
-      return;
+  if (typeof route.name == 'string' && route.name.startsWith('ExamAnswerPage')) {
+    router.back();
+  } else {
+    emit('back');
   }
 };
 
 const { isSmallScreen } = useGlobal();
 
-const buttonBackRef = useTemplateRef('button-back');
-const { left: buttonbackLeft } = useElementBounding(buttonBackRef);
+defineSlots<{
+  back: () => any;
+}>();
+
+defineExpose({
+  back: handleBack,
+});
 </script>
 
 <template>
   <div class="exam-page" :class="{ small: isSmallScreen }">
     <LoadingModal :visible="loadingExam" />
-    <IconButton ref="button-back" class="exam-page-back" type="secondary" @click="handleBack">
-      <Back />
-    </IconButton>
+    <DiliButton ref="button-back" class="exam-page-back" type="secondary" @click="handleBack">
+      <slot v-if="$slots.back" name="back" />
+      <Back v-else />
+    </DiliButton>
     <ExamAnswerView
       ref="fragment-answering"
       class="exam-page-fragment-full"
       :exam="exam"
+      :record="record"
       :single-problem="true"
-      :button-back-left="buttonbackLeft"
     />
   </div>
 </template>
 
 <style scoped lang="scss">
 .exam-page {
-  --padding: 1rem;
+  --padding: var(--padding-normal);
 
   position: relative;
   height: 100%;

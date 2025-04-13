@@ -15,6 +15,7 @@ export type CommonDialogProps = {
   title?: string;
   subtitle?: string;
   content?: string;
+  renderContentHtml?: boolean; // 是否将 content 作为 html 来渲染
   showClose?: boolean;
   showCancel?: boolean;
   showConfirm?: boolean;

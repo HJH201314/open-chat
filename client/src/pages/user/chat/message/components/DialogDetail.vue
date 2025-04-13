@@ -15,6 +15,7 @@ import {
 import DialogExamProblem from '@/pages/user/chat/message/components/extension/DialogExamProblem.vue';
 import Birthday from '@/components/extra/Birthday.vue';
 import DiliButton from '@/components/button/DiliButton.vue';
+import DialogExamPage from '@/pages/user/chat/message/components/extension/DialogExamPage.vue';
 
 const props = withDefaults(defineProps<DialogDetailProps>(), {
   emptyTip: '随便问点啥？',
@@ -184,19 +185,19 @@ defineExpose({
           :key="item.id"
           :message="getMsgAnswer(item)"
           :thinking="getMsgThinking(item)"
+          :show-thinking="!(item.extra && Object.entries(item.extra).length > 0)"
           :html-message="getMsgAnswerRendered(item)"
           :streaming="getMsgStreaming(item)"
           :model="item.model"
           :role="item.sender"
           :time="new Date(item.time).toLocaleString()"
+          :extra="item.extra"
           @think-expand="handleMessageThinkExpand"
           @think-expanded="handleMessageThinkExpanded(index, $event)"
         >
           <template #extra>
-            <DialogExamProblem :item="item" />
-            <a v-if="item.extra?.['exam']" size="large" target="_self" :href="`/tue/exam/${item.extra['exam']['id']}`"
-              >立即前往
-            </a>
+            <DialogExamProblem v-if="item.extra?.['question']" :msg-info="item" />
+            <DialogExamPage v-if="item.extra?.['exam']" :exam-id="item.extra['exam']['id']" :msg-info="item" />
             <Birthday
               v-if="
                 item.extra?.['birthday-gift'] &&

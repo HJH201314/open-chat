@@ -105,9 +105,7 @@ function handleClick() {
     justify-content: center;
 
     &.disabled {
-      //background-color: $color-grey-200;
-      //color: $color-grey-500;
-      filter: grayscale(0.5) opacity(0.5);
+      filter: grayscale(0.1) opacity(0.75);
       cursor: not-allowed;
     }
 

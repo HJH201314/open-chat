@@ -31,6 +31,7 @@ export default defineConfig(({ mode }): UserConfig => {
       }),
       // ...
       AutoImport({
+        ignore: ['vue'],
         resolvers: [
           TDesignResolver({
             library: 'vue-next',
@@ -43,9 +44,7 @@ export default defineConfig(({ mode }): UserConfig => {
             library: 'vue-next',
           }),
         ],
-        globsExclude: [
-          'src/components/**/*.vue',
-        ],
+        globsExclude: ['src/components/**/*.vue'],
       }),
       sassDts({
         enabledMode: ['development', 'production'],

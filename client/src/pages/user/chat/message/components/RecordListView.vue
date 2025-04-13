@@ -379,11 +379,11 @@ const { isSmallScreen } = useGlobal();
 
       &-reset {
         cursor: pointer;
-        color: $color-grey-500;
+        color: var(--color-grey-500);
         transition: color 0.2s $ease-out-circ;
 
         &:hover {
-          color: color.adjust($color-grey-500, $lightness: -10%);
+          color: var(--color-grey-400);
         }
       }
 

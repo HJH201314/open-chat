@@ -6,6 +6,7 @@ import type { CommonModalFunc, CommonModalProps } from '@/components/modal/types
 import { useCommonModalStore } from '@/components/modal/store.ts';
 import { Close } from '@icon-park/vue-next';
 import { computed, nextTick, onBeforeUnmount, ref, toRef, useTemplateRef, watch, watchEffect } from 'vue';
+import { getRandomString } from '@/utils/string.ts';
 
 defineOptions({
   // CommonModal 通过 teleport 传递到 body 上，不继承父级的属性
@@ -25,15 +26,15 @@ const props = withDefaults(defineProps<CommonModalProps>(), {
 });
 
 const emit = defineEmits<{
-  (event: 'open'): void;
-  (event: 'close'): void;
+  (event: 'open', prevent: () => void): void;
+  (event: 'close', prevent: () => void): void;
   (event: 'after-close'): void;
   (event: 'update:visible', v: boolean): void;
 }>();
 
 const { modalMap, openModal, closeModal } = useCommonModalStore();
 
-const myId = ref('');
+const myId = ref(getRandomString(10)); // 模态框全局唯一 ID
 const myDepth = computed(() => modalMap[myId.value] || 0);
 const zIndex = computed(() => props.zIndex || myDepth.value * 2 + 1000);
 
@@ -54,16 +55,20 @@ watch(
 
 /* 展示模态框（暴露的方法，配合ref使用） */
 function open() {
-  if (showModal.value || myId.value) return;
+  if (showModal.value || !!modalMap[myId.value]) return;
+
+  // 触发事件，允许取消打开
+  let prevented = false;
+  emit('open', () => (prevented = true));
+  if (prevented) return;
 
   myId.value = openModal();
   showModal.value = true;
-  emit('open');
 }
 
 /* 关闭模态框（暴露的方法，配合ref使用） */
 function close() {
-  if (!showModal.value || !myId.value) return;
+  if (!showModal.value || !modalMap[myId.value]) return;
 
   showModal.value = false; // 先开始关闭动画
   closeModal(myId.value); // 再移除模态框数据，否则可能会导致层级变化
@@ -74,13 +79,16 @@ onBeforeUnmount(() => close());
 
 function afterClose() {
   emit('after-close');
+  // 关闭动画完成后再更新 visible 为 false，以便外部使用 visible 作为 v-if 条件时不会导致动画播放不完全
+  emit('update:visible', false);
 }
 
 watch(
   () => showModal.value,
   (newVal, oldVal) => {
-    if (newVal != oldVal) {
-      emit('update:visible', newVal);
+    if (newVal != oldVal && newVal == true) {
+      // showModal 变化时内外同步 visible
+      emit('update:visible', true);
     }
   }
 );
@@ -102,11 +110,17 @@ watchEffect(() => {
   });
 });
 
+// 关闭按钮点击
 function handleClose() {
+  // 触发事件，允许取消关闭
+  let prevented = false;
+  emit('close', () => (prevented = true));
+  if (prevented) return;
+
   close();
-  emit('close');
 }
 
+// 键盘按下 ESC 关闭
 function handleKeydown(e: KeyboardEvent) {
   if (!props.closeOnESC) return;
   if (e.key === 'Escape') {
@@ -114,13 +128,14 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+// 遮罩点击关闭
 function handleMaskClick() {
   if (!props.closeOnClickMask) return;
-  close();
+  handleClose();
 }
 
 defineSlots<{
-  default(props: { close: typeof close; isShown: boolean }): any;
+  default(props: { close: typeof close; isShown: boolean; modalId: string }): any;
 }>();
 
 /* 暴露接口 */
@@ -144,7 +159,7 @@ defineExpose<CommonModalFunc>({
         <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
       </div>
     </Transition>
-    <Transition :name="showBodyTransition && showModalBody ? 'x-expand' : 'x-expand'">
+    <Transition :name="modalTransitionName || (showBodyTransition && showModalBody ? 'x-expand' : 'x-expand')">
       <div
         v-show="showModalBody"
         ref="modal-body"
@@ -156,7 +171,7 @@ defineExpose<CommonModalFunc>({
         @click.stop
       >
         <!-- 对default slot暴露关闭方法，可以从v-slot中获取来关闭 -->
-        <slot :close="close" :is-shown="showModal"></slot>
+        <slot :close="close" :is-shown="showModal" :modal-id="myId"></slot>
       </div>
     </Transition>
   </Teleport>

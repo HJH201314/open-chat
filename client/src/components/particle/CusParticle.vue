@@ -4,7 +4,7 @@ import { getColorHex } from '@/utils/color.ts';
 
 const options = {
   fullScreen: {
-    zIndex: 1,
+    zIndex: 10000000,
   },
   emitters: {
     position: {
@@ -18,7 +18,7 @@ const options = {
     life: {
       count: 1,
       duration: 0.1,
-      delay: 0.4
+      delay: 0.4,
     },
   },
   particles: {
@@ -37,7 +37,7 @@ const options = {
       enable: true,
       gravity: {
         enable: true,
-        acceleration: 20
+        acceleration: 20,
       },
       outModes: {
         top: 'bounce',
@@ -158,7 +158,7 @@ const id = useId();
 </script>
 
 <template>
-  <div style="pointer-events: none;">
+  <div style="pointer-events: none">
     <vue-particles :id="`cus-particle-${id}`" :options="options" @particles-loaded="handleLoaded"></vue-particles>
   </div>
 </template>

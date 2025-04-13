@@ -186,6 +186,12 @@ defineExpose({
                 />
               </span>
             </div>
+            <div class="setting-list-item">
+              <span class="setting-list-item__title">展示模型头像</span>
+              <span class="setting-list-item__value">
+                <CusToggle v-model="editingValue.showModelAvatar" label="" />
+              </span>
+            </div>
           </div>
           <div class="setting-list-section">
             <div class="setting-list-item">

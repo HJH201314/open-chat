@@ -205,7 +205,7 @@ const { left: examPanelLeft } = useElementBounding(examPanelRef);
 const headerPaddingLeft = computed(() => {
   const deltaX = 40 - (examPanelLeft.value - props.buttonBackLeft);
   return deltaX > 0 ? deltaX : 0;
-})
+});
 
 defineExpose({
   start: startCountdown,
@@ -214,7 +214,7 @@ defineExpose({
 
 <template>
   <div class="exam-answering-fragment">
-    <header class="exam-header" :style="{'padding-left': `${headerPaddingLeft}px`}">
+    <header class="exam-header" :style="{ 'padding-left': `${headerPaddingLeft}px` }">
       <div v-if="exam?.limit_time" class="exam-countdown" :title="`倒计时${examCountdownRemaining}秒`">
         <StopwatchStart />
         {{ remainingTimeText }}
@@ -300,7 +300,7 @@ defineExpose({
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   overflow-y: auto;
 }
 

@@ -29,6 +29,12 @@
 
   --text-primary: var(--color-black);
   --text-secondary: var(--color-grey-500);
+
+  --padding-normal: 1rem;
+
+  @media screen and (max-width: $screen-sm) {
+    --padding-normal: 0.5rem;
+  }
 }
 
 :root.theme-dark {
@@ -75,7 +81,7 @@
   --td-shadow-1: #{$box-shadow-shallower};
   --td-shadow-2: #{$box-shadow};
   --td-shadow-3: #{$box-shadow-deeper};
-  --td-bg-color-specialcomponent: #{$color-bg-transparent-100}; // 输入框、outline 按钮等的背景色
+  --td-bg-color-specialcomponent: var(--color-trans-100); // 输入框、outline 按钮等的背景色
 }
 
 // 覆写 TDesign 样式
@@ -89,7 +95,7 @@
 }
 
 .t-transfer__list {
-  background-color: #{$color-bg-transparent-100};
+  background-color: var(--color-trans-100);
   padding-top: 1.5rem;
   flex: 1; // 两侧列表同宽
 
@@ -112,7 +118,7 @@
     }
 
     .t-checkbox__input {
-      border-color: #{$color-bg-transparent-300};
+      border-color: var(--color-trans-300);
     }
   }
 }

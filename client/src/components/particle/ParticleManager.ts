@@ -32,6 +32,10 @@ export class ParticleManager {
     }
     this.app?.mount('#cus-particle-container');
     this.isShowing = true;
+    // 临时设置 10s 后移除
+    setTimeout(() => {
+      this.hide();
+    }, 10000);
   }
 
   public static hide() {

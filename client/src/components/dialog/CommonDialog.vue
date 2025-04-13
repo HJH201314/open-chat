@@ -3,11 +3,12 @@
 import DiliButton from '@/components/button/DiliButton.vue';
 import type { CommonDialogEmits, CommonDialogExpose, CommonDialogProps } from '@/components/dialog/types.ts';
 import CommonModal from '@/components/modal/CommonModal.vue';
-import { computed, h, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, h, reactive, ref, shallowRef, useTemplateRef, watch, watchEffect } from 'vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import { Alarm, Caution, Close, Info, Success } from '@icon-park/vue-next';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import { storeToRefs } from 'pinia';
+import { createDraggable } from 'animejs';
 
 const props = withDefaults(defineProps<CommonDialogProps>(), {
   type: 'none',
@@ -22,6 +23,19 @@ const visible = defineModel<boolean>('visible', { default: false });
 const emits = defineEmits<CommonDialogEmits>();
 const modalVisible = ref(false);
 
+const dialogRef = useTemplateRef('dialog');
+const hrRef = useTemplateRef('hr');
+
+watchEffect(() => {
+  if (!dialogRef.value || !hrRef.value) return;
+
+  console.log('create draggable');
+  createDraggable(dialogRef.value, {
+    trigger: hrRef.value,
+    container: [0, 0, 0, 0],
+  });
+});
+
 watch(
   () => visible.value,
   (newVisible) => {
@@ -34,13 +48,17 @@ watch(
 // 展示模态框
 function show() {
   modalVisible.value = true;
-  if (!visible.value) visible.value = true;
+  if (visible.value) return;
+
+  visible.value = true;
 }
 
 // 关闭模态框
 function close() {
   modalVisible.value = false;
-  if (visible.value) visible.value = false;
+  if (!visible.value) return;
+
+  visible.value = false;
 }
 
 function afterClose() {
@@ -147,13 +165,14 @@ defineExpose<CommonDialogExpose>({
 
 <template>
   <CommonModal
+    v-slot="{ modalId }"
     :modal-style="{ ...modalStyle }"
     :show-close="false"
     :close-on-click-mask="closeOnClickMask || showCancel"
     :visible="modalVisible"
     @after-close="afterClose"
   >
-    <div class="dialog" :style="{ ...dialogStyle }">
+    <div :id="`dialog-${modalId}`" ref="dialog" class="dialog" :style="{ ...dialogStyle }">
       <header :style="{ marginRight: showClose ? '3rem' : '1rem' }">
         <Component :is="iconElement" v-if="!!iconElement" />
         <div v-if="title" class="dialog-title" :style="titleStyle">{{ title }}</div>
@@ -162,9 +181,10 @@ defineExpose<CommonDialogExpose>({
           <Close size="1rem" />
         </DiliButton>
       </header>
-      <hr v-if="showHr && (title || (subtitle && content))" />
+      <hr ref="hr" v-if="showHr && (title || (subtitle && content))" />
       <main>
-        <div class="dialog-content" v-html="content"></div>
+        <div v-if="renderContentHtml" class="dialog-content" v-html="content"></div>
+        <div v-else class="dialog-content" v-text="content"></div>
         <slot></slot>
         <div style="height: 0.5rem"></div>
         <!-- 高度占位 -->

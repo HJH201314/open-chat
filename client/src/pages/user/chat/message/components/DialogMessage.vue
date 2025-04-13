@@ -7,16 +7,20 @@ import CusSpin from '@/components/spinning/CusSpin.vue';
 import LogoDeepseek from '@/components/logo/LogoDeepSeek.vue';
 import LogoQwen from '@/components/logo/LogoQwen.vue';
 import LogoOpenAI from '@/components/logo/LogoOpenAI.vue';
+import type { MessageInfo } from '@/types/data.ts';
+import { useSettingStore } from '@/store/useSettingStore.ts';
 
 type DialogMessageProps = {
   streaming?: boolean; // 是否正在输出
   message?: string;
   htmlMessage?: string;
   thinking?: string;
+  showThinking?: boolean;
   role: 'user' | 'bot';
   model?: string;
   time?: string;
   markdownRender?: boolean;
+  extra?: MessageInfo['extra'];
 };
 
 const props = withDefaults(defineProps<DialogMessageProps>(), {
@@ -25,15 +29,19 @@ const props = withDefaults(defineProps<DialogMessageProps>(), {
   message: '',
   htmlMessage: '',
   thinking: '',
+  showThinking: true,
   model: '',
   time: new Date().toLocaleString(),
   markdownRender: true,
+  extra: () => ({}),
 });
 
 const emits = defineEmits<{
   (event: 'think-expand', expanded: boolean): void;
   (event: 'think-expanded', expanded: boolean): void;
 }>();
+
+const settingStore = useSettingStore();
 
 // 处理消息内容框内的点击
 async function handleClick(event: MouseEvent) {
@@ -106,7 +114,7 @@ watch(
 
 const statusText = computed(() => {
   // 思考中/思考中断/思考完成
-  if (props.thinking && !renderMessage.value) {
+  if (props.thinking && !renderMessage.value && !props.extra) {
     return props.streaming ? '奋力思考中(๑•̀ㅂ•́)و' : '思考中断(´;ω;`)';
   } else if (!props.streaming) {
     return props.thinking ? '思考完成ヽ(•̀ω•́ )ゝ' : '回答完成✧(•̀ω•́)✧';
@@ -125,7 +133,10 @@ defineSlots<{
 <template>
   <div :class="['dialog-message-container', `dialog-message-container__${props.role}`]" @click="handleClick">
     <div :class="['dialog-message-body', `dialog-message-body__${props.role}`]">
-      <div v-if="isLargeScreen && role === 'bot'" class="dialog-message-avatar">
+      <div
+        v-if="isLargeScreen && role === 'bot' && settingStore.settings.showModelAvatar"
+        class="dialog-message-avatar"
+      >
         <LogoDeepseek v-if="model?.includes('deepseek')" />
         <LogoQwen v-else-if="model?.includes('qwen')" />
         <LogoOpenAI v-else />
@@ -133,7 +144,7 @@ defineSlots<{
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
         <!-- 收起/展开思考内容 -->
         <div
-          v-if="thinking"
+          v-if="showThinking && thinking"
           class="dialog-message-content-think-toggle"
           :class="{ collapsed: thinkingCollapsed && !thinkingCollapsing }"
           @click="handleThinkExpand"
@@ -150,7 +161,7 @@ defineSlots<{
           @before-enter="thinkingExpanding = true"
           @after-enter="thinkingExpanding = false"
         >
-          <div v-if="thinking && !thinkingCollapsed" class="dialog-message-content-think">
+          <div v-if="showThinking && thinking && !thinkingCollapsed" class="dialog-message-content-think">
             <div class="content">{{ thinking }}</div>
           </div>
         </transition>
@@ -192,6 +203,7 @@ defineSlots<{
     max-width: 100%; // 限制消息盒子宽度
     display: flex;
     gap: 0.5rem;
+    padding-inline: 0.25em; // 设置一点边距使内容不会距离外边距太小
 
     &__user {
       flex-direction: row-reverse;
@@ -199,6 +211,11 @@ defineSlots<{
 
     &__bot {
       flex-direction: row;
+
+      // 展示 bot 头像时隐藏左边距
+      &:has(> :first-child.dialog-message-avatar) {
+        padding-left: 0;
+      }
     }
   }
 
@@ -228,8 +245,8 @@ defineSlots<{
     &__user {
       padding: 0.4em 0.8em;
       border-radius: 0.5rem;
-      background-color: var(--color-primary-100);
-      color: var(--color-primary-900);
+      background-color: var(--color-primary-400);
+      color: var(--color-white);
 
       & div::selection {
         background-color: var(--color-trans-500);

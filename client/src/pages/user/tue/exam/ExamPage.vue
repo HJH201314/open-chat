@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef, watch } from 'vue';
 import genApi from '@/api/gen-api.ts';
-import { type ApiSchemaExam } from '@/api/gen/data-contracts.ts';
+import { type ApiSchemaExam, type ApiSchemaExamUserRecord } from '@/api/gen/data-contracts.ts';
 import useGlobal from '@/commands/useGlobal.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { DialogManager } from '@/components/dialog';
@@ -20,6 +20,13 @@ const props = withDefaults(
   }>(),
   {}
 );
+
+const emit = defineEmits<{
+  (e: 'back'): void;
+  (e: 'go-to-detail'): void;
+  (e: 'submitted', recordId: number): void;
+  (e: 'rated', record: ApiSchemaExamUserRecord): void;
+}>();
 
 const exam = ref<ApiSchemaExam>();
 const {
@@ -41,6 +48,7 @@ watch(
   }
 );
 
+const route = useRoute();
 const router = useRouter();
 
 const loadingExam = ref(false);
@@ -81,7 +89,6 @@ const handleLoadExam = async () => {
   }
 };
 
-const route = useRoute();
 onMounted(async () => {
   await handleLoadExam();
   // 带参数自动开始考试
@@ -94,7 +101,11 @@ const handleBack = () => {
   switch (currentStep.value) {
     case 'welcome':
     case 'finished':
-      router.back();
+      if (typeof route.name == 'string' && route.name.startsWith('ExamPage')) {
+        router.back();
+      } else {
+        emit('back');
+      }
       return;
     case 'answering':
       DialogManager.commonDialog({
@@ -105,7 +116,11 @@ const handleBack = () => {
           text: '退出',
         },
         confirmHandler: () => {
-          router.back();
+          if (typeof route.name == 'string' && route.name.startsWith('ExamPage')) {
+            router.back();
+          } else {
+            emit('back');
+          }
           // TODO： 退出测验记录
         },
       });
@@ -134,6 +149,7 @@ const handleAnswerSubmit = async (payload: {
     });
     if (res.status == 200) {
       answerRecordId.value = res.data.data?.record_id;
+      answerRecordId.value && emit('submitted', answerRecordId.value);
       goToNextStep();
     }
   } catch (_) {
@@ -141,14 +157,37 @@ const handleAnswerSubmit = async (payload: {
   }
 };
 
+const handleGoToDetail = () => {
+  if (props.examId) {
+    if (typeof route.name == 'string' && route.name.startsWith('ExamPage')) {
+      router.push({
+        name: 'ExamAnswerPage',
+        params: {
+          examId: props.examId,
+        },
+      });
+    } else {
+      emit('go-to-detail');
+    }
+  }
+};
+
 const { isSmallScreen } = useGlobal();
 
 const buttonBackRef = useTemplateRef<HTMLDivElement>('button-back');
 const { left: buttonBackLeft } = useElementBounding(buttonBackRef);
+
+defineSlots<{
+  back: () => any;
+}>();
+
+defineExpose({
+  back: handleBack,
+});
 </script>
 
 <template>
-  <div class="exam-page" :class="{ small: isSmallScreen }">
+  <div ref="exam-page" class="exam-page" :class="{ small: isSmallScreen }">
     <LoadingModal :visible="loadingExam" />
     <DiliButton
       ref="button-back"
@@ -157,7 +196,8 @@ const { left: buttonBackLeft } = useElementBounding(buttonBackRef);
       :color="currentStep == 'answering' ? '--color-danger' : ''"
       @click="handleBack"
     >
-      <Back />
+      <slot v-if="$slots.back" name="back" />
+      <Back v-else />
     </DiliButton>
     <ExamWelcomeFragment
       v-if="currentStep == 'welcome'"
@@ -182,13 +222,15 @@ const { left: buttonBackLeft } = useElementBounding(buttonBackRef);
       :exam-total-score="exam?.total_score"
       :answer-record-id="answerRecordId"
       @back="goToStep('welcome')"
+      @go-to-detail="handleGoToDetail"
+      @rated="$emit('rated', $event)"
     />
   </div>
 </template>
 
 <style scoped lang="scss">
 .exam-page {
-  --padding: 1rem;
+  --padding: var(--padding-normal);
 
   position: relative;
   height: 100%;

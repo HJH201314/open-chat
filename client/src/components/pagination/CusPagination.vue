@@ -47,14 +47,6 @@ watch(
   }
 );
 
-watch(
-  () => props.pageItemStyle,
-  (newValue) => {
-    console.debug('newPageItemStyle', newValue);
-  },
-  { deep: true }
-);
-
 function handleChangePage(page: number) {
   currentPageVM.value = page;
   emit('change', page);

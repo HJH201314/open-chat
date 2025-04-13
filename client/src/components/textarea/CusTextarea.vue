@@ -68,6 +68,7 @@ defineExpose({
   position: relative;
   box-sizing: content-box;
   overflow-y: auto;
+  color: var(--color-black);
   //scrollbar-gutter: stable;
 
   > textarea {

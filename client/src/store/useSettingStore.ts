@@ -19,6 +19,7 @@ export type ChatSetting = {
   timeDisplayInDialogList?: string;
   timeDisplayInMessageList?: string;
   defaultModel?: string; // 默认模型，比如 gpt-4o
+  showModelAvatar?: boolean; // 是否显示模型头像
   theme?: 'light' | 'dark' | 'auto'; // 主题
   themeColor?: string; // 主题色
   // 添加索引签名，允许使用字符串索引
@@ -37,6 +38,7 @@ const defaultSetting: ChatSetting = {
   timeDisplayInDialogList: 'yyyy-MM-dd hh:mm:ss',
   timeDisplayInMessageList: 'yyyy-MM-dd hh:mm:ss',
   defaultModel: '',
+  showModelAvatar: false,
   theme: 'auto',
   themeColor: DEFAULT_COLOR,
 };

@@ -279,8 +279,6 @@ defineExpose({
     width: 3.5rem;
     padding: 0.5rem 0.5rem 1rem 0.5rem;
     text-align: center;
-    // box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
-    // border-right: 1px solid $color-grey-200;
     display: flex;
     flex-direction: column;
     align-items: center;

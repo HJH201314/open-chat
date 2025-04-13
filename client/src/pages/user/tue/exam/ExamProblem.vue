@@ -4,6 +4,7 @@ import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import {
   type ApiExamSubmitProblemResponse,
+  type ApiSchemaExamUserRecordAnswer,
   type ApiSchemaProblem,
   ApiSchemaProblemType,
 } from '@/api/gen/data-contracts.ts';
@@ -25,16 +26,18 @@ import type { CusRadioGroupProps } from '@/components/radio/types.ts';
 
 const props = withDefaults(
   defineProps<{
-    page?: number;
-    score?: number;
+    page?: number; // 题目序号
+    score?: number; // 本题分数
     sortOrder?: number;
-    problem?: ApiSchemaProblem;
-    disabled?: boolean;
-    choiceStyle?: CusRadioGroupProps['displayStyle'];
-    choiceType?: CusRadioGroupProps['type'];
-    showSubmit?: boolean;
-    showExplainAfterSubmit?: boolean;
-    showAnswer?: boolean;
+    problem?: ApiSchemaProblem; // 问题数据
+    disabled?: boolean; // 禁用状态
+    choiceStyle?: CusRadioGroupProps['displayStyle']; // 自定义选项展示样式
+    choiceType?: CusRadioGroupProps['type']; // 自定义选项展示类型
+
+    userAnswer?: ApiSchemaExamUserRecordAnswer; // 用户回答，传入后会特殊展示用户的选择
+    showSubmit?: boolean; // 展示单题提交按钮
+    showExplainAfterSubmit?: boolean; // 提交后是否展示答案？
+    showAnswer?: boolean; // 展示答案
   }>(),
   {
     choiceStyle: 'icon',
@@ -60,6 +63,33 @@ const typeName = computed(() => getProblemTypeName(props.problem?.type || ''));
 const innerTextAnswer = ref('');
 const innerBoolAnswer = ref<boolean>();
 const innerOptionAnswer = ref<number[]>([]);
+
+const formattedUserAnswer = computed(() => {
+  const ans = props.userAnswer?.answer;
+  switch (problemInfo.value.type) {
+    case ApiSchemaProblemType.EnumSingleChoice:
+    case ApiSchemaProblemType.EnumMultipleChoice: {
+      if (typeof ans === 'object' && ans.length) {
+        return ans.map((v) => indexToOption(v)).join(', ');
+      }
+      break;
+    }
+    case ApiSchemaProblemType.EnumTrueFalse: {
+      if (typeof ans == 'boolean') {
+        return ans ? '正确' : '错误';
+      }
+      break;
+    }
+    case ApiSchemaProblemType.EnumShortAnswer:
+    case ApiSchemaProblemType.EnumFillBlank: {
+      if (ans != undefined) {
+        return ans;
+      }
+      break;
+    }
+  }
+  return '';
+});
 
 // 问题变化时，清除保存的选项
 watch(
@@ -166,6 +196,7 @@ function handleResetInput() {
 }
 
 const submitLoading = ref(false);
+
 // 内部单题提交
 async function handleSubmit() {
   try {
@@ -201,16 +232,24 @@ defineSlots<{
     <header class="problem-header">
       <span class="problem-score">
         {{ page != undefined ? `${page}. ` : '' }}{{ typeName }}
-        <span v-if="score !== undefined">&nbsp;&nbsp;&nbsp;{{ (score || 0) / 100 }} 分</span>
+        <span v-if="score !== undefined"
+          >&nbsp;&nbsp;&nbsp;<span v-if="userAnswer?.score != undefined" style="color: var(--color-primary)"
+            >{{ userAnswer.score! / 100 }}&nbsp;/&nbsp;</span
+          >{{ (score || 0) / 100 }} 分
+        </span>
         <slot name="header-score" />
       </span>
       <section v-if="showSubmit" class="problem-submit">
-        <CusTooltip v-if="!showAnswer" text="重置输入" position="top"
-          ><DiliButton type="normal" @click="handleResetInput"><Redo /></DiliButton
-        ></CusTooltip>
+        <CusTooltip v-if="!showAnswer" text="重置输入" position="top">
+          <DiliButton type="normal" @click="handleResetInput">
+            <Redo />
+          </DiliButton>
+        </CusTooltip>
         <DiliButton
           v-if="!showAnswer"
-          :disabled="innerTextAnswer === '' && innerBoolAnswer == undefined && !innerOptionAnswer.length"
+          :disabled="
+            (innerTextAnswer === '' && innerBoolAnswer == undefined && !innerOptionAnswer.length) || submitLoading
+          "
           type="primary"
           text="提交"
           @click="handleSubmit"
@@ -221,7 +260,15 @@ defineSlots<{
       </section>
     </header>
 
+    <section v-if="showAnswer" class="problem-explanation">
+      <span v-if="userAnswer" class="problem-explanation-title">我的回答：</span>{{ formattedUserAnswer }}
+    </section>
+
     <section class="problem-content" v-html="description" />
+
+    <section v-if="showAnswer" class="problem-explanation">
+      <span class="problem-explanation-title">标准答案：</span>
+    </section>
 
     <section ref="answer-section" class="problem-answer-section">
       <template v-if="problemInfo.type === ApiSchemaProblemType.EnumShortAnswer">
@@ -270,8 +317,8 @@ defineSlots<{
         >
           <CusRadioButton class="problem-answer-section-select-item" value="true" label="A. 正确"> 正确</CusRadioButton>
           <CusRadioButton class="problem-answer-section-select-item" value="false" label="B. 错误">
-            错误</CusRadioButton
-          >
+            错误
+          </CusRadioButton>
         </CusRadioGroup>
       </template>
 
@@ -326,15 +373,10 @@ defineSlots<{
     align-items: center;
   }
 
-  &-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-  }
-
   &-score {
     color: var(--text-secondary);
     font-size: 0.875rem;
-    white-space: preserve;
+    white-space: nowrap;
   }
 
   &-submit {

@@ -1,27 +1,37 @@
 <script setup lang="ts">
 import ExamProblem from '@/pages/user/tue/exam/ExamProblem.vue';
-import CusProgress from '@/components/progress/CusProgress.vue';
 import CusPagination from '@/components/pagination/CusPagination.vue';
 import DiliButton from '@/components/button/DiliButton.vue';
 import { computed, type CSSProperties, ref, useTemplateRef, watch } from 'vue';
-import { DialogManager } from '@/components/dialog';
-import type { ApiSchemaExam } from '@/api/gen/data-contracts.ts';
+import type {
+  ApiSchemaExam,
+  ApiSchemaExamUserRecord,
+  ApiSchemaExamUserRecordAnswer,
+} from '@/api/gen/data-contracts.ts';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import { getProblemCategory } from '@/pages/user/tue/exam/utils.ts';
-import { StopwatchStart } from '@icon-park/vue-next';
 import Panel from '@/components/panel/Panel.vue';
-import { useCountdown, useElementBounding } from '@vueuse/core';
 
 const props = withDefaults(
   defineProps<{
-    buttonBackLeft?: number; // 返回按钮的 clientLeft, 用来避让返回按钮
-    exam?: ApiSchemaExam;
+    exam?: ApiSchemaExam; // 考题信息
+    record?: ApiSchemaExamUserRecord; // 用户作答
   }>(),
   {
-    buttonBackLeft: 0,
     exam: () => ({}),
+    record: () => ({}),
   }
 );
+
+const userAnswers = computed(() => {
+  const map = {} as Record<number, ApiSchemaExamUserRecordAnswer>;
+  props.record?.answers?.forEach((ans) => {
+    if (ans.problem_id) {
+      map[ans.problem_id] = ans;
+    }
+  });
+  return map;
+});
 
 watch(
   () => props.exam,
@@ -83,17 +93,6 @@ function handleNextProblem() {
 
 const answers = ref<Record<number, number[] | string | boolean>>({});
 
-const answerFinishProgress = computed(() => {
-  const totalProblemCount = maxPage.value;
-  let finishedProblemCount = 0;
-  Object.entries(answers.value).forEach(([problemId]) => {
-    if (isAnswerValid(Number(problemId))) {
-      finishedProblemCount += 1;
-    }
-  });
-  return (finishedProblemCount / totalProblemCount) * 100;
-});
-
 const highlightInvalidPage = ref(false);
 
 function getPaginationItemStyle(pageNum: number) {
@@ -123,49 +122,6 @@ const paginationItemStyle = computed(() => {
   }
   return res;
 });
-
-function handleExamSubmit() {
-  const incompleteProblemPages: number[] = [];
-  // 检查所有题目是否均已完成
-  for (let i = 0; i < maxPage.value; i++) {
-    if (!isPageAnswerValid(i + 1)) {
-      incompleteProblemPages.push(i + 1);
-    }
-  }
-  if (incompleteProblemPages.length) {
-    DialogManager.commonDialog({
-      type: 'danger',
-      title: '确认提交？',
-      content: `题目 ${incompleteProblemPages.join('、')} 未完成，请检查后提交！`,
-      cancelButtonProps: {
-        color: theme.colorDanger,
-        type: 'secondary',
-        text: '确认提交',
-      },
-      confirmButtonProps: {
-        text: '去检查',
-      },
-      cancelHandler: () => {
-        doSubmit();
-      },
-      confirmHandler: () => {
-        highlightInvalidPage.value = true;
-        currentPage.value = incompleteProblemPages[0];
-      },
-    });
-    return;
-  } else {
-    doSubmit();
-  }
-}
-
-// 专门用来避让返回按钮
-const examPanelRef = useTemplateRef('exam-panel');
-const { left: examPanelLeft } = useElementBounding(examPanelRef);
-const headerPaddingLeft = computed(() => {
-  const deltaX = 40 - (examPanelLeft.value - props.buttonBackLeft);
-  return deltaX > 0 ? deltaX : 0;
-})
 </script>
 
 <template>
@@ -177,6 +133,7 @@ const headerPaddingLeft = computed(() => {
             v-show="!singleProblem || currentPage == i + 1"
             :id="`problem-${i}`"
             v-model:answer="answers[problem.problem_id!]"
+            :user-answer="userAnswers[problem.problem_id!]"
             :page="i + 1"
             :problem="problem.problem"
             :score="problem.score"
@@ -246,7 +203,7 @@ const headerPaddingLeft = computed(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   overflow-y: auto;
 }
 
