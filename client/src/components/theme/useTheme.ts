@@ -37,26 +37,36 @@ export const registerThemeColor = (colorPrimary?: string, name: string = 'defaul
     const isDark = localStorage.getItem('theme') == 'dark';
     const levelList = isDark ? darkLevelListAsc : lightLevelList;
     const result: string[] = [];
+    const reversedResult: string[] = [];
     levelList.forEach((level, index) => {
-      let tintedColor: string = '';
+      let tintedColorHex: string = '';
+      let reversedColorHex: string = '';
       if (level <= baseLevel) {
-        tintedColor = tinycolor.mix('#fff', baseColor, (level / baseLevel) * 100).toHexString();
+        const tintedColor = tinycolor.mix('#fff', baseColor, (level / baseLevel) * 100);
+        tintedColorHex = tintedColor.toHexString();
+        reversedColorHex = tintedColor.spin(180).toHexString();
       } else {
         if (index < 1) throw new Error('Invalid color level');
         // 颜色加深时，以上一个色阶为基准进行加深
-        tintedColor = tinycolor
-          .mix(result[index - 1], '#252525', ((level - levelList[index - 1]) / levelList[index - 1]) * 100)
-          .toHexString();
+        const tintedColor = tinycolor.mix(
+          result[index - 1],
+          '#252525',
+          ((level - levelList[index - 1]) / levelList[index - 1]) * 100
+        );
+        tintedColorHex = tintedColor.toHexString();
+        reversedColorHex = tintedColor.spin(180).toHexString();
       }
-      result.push(tintedColor);
+      result.push(tintedColorHex);
+      reversedResult.push(reversedColorHex);
     });
 
     if (isDark) {
       result.reverse();
+      reversedResult.reverse();
     }
     result.forEach((color, index) => {
       root.style.setProperty(`--color-primary-${lightLevelList[index]}`, color);
-      name && root.style.setProperty(`--color-${name}-${lightLevelList[index]}`, color);
+      root.style.setProperty(`--color-secondary-${lightLevelList[index]}`, reversedResult[index]);
     });
   }
 };

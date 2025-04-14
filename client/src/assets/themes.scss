@@ -19,12 +19,14 @@
   --color-trans-300: rgba(0 0 0 / 15%);
   --color-trans-400: rgba(0 0 0 / 20%);
   --color-trans-500: rgba(0 0 0 / 25%);
+  --color-trans-1000: rgba(0 0 0 / 50%);
+  --color-trans-1500: rgba(0 0 0 / 75%);
   --color-primary: var(--color-primary-400);
   --color-primary-darker: var(--color-primary-500);
   --color-primary-lighter: var(--color-primary-200);
-  --color-secondary: #{$color-secondary};
-  --color-secondary-darker: #{$color-secondary-darker};
-  --color-secondary-lighter: #{$color-secondary-lighter};
+  --color-secondary: var(--color-secondary-400);
+  --color-secondary-darker: var(--color-secondary-500);
+  --color-secondary-lighter: var(--color-secondary-200);
   --body-background: linear-gradient(135deg, var(--color-primary-30), var(--color-primary-20));
 
   --text-primary: var(--color-black);
@@ -53,6 +55,8 @@
   --color-trans-300: rgba(255 255 255 / 15%);
   --color-trans-400: rgba(255 255 255 / 20%);
   --color-trans-500: rgba(255 255 255 / 25%);
+  --color-trans-1000: rgba(255 255 255 / 50%);
+  --color-trans-1500: rgba(255 255 255 / 75%);
   --color-primary-darker: var(--color-primary-300);
   --color-primary-lighter: var(--color-primary-500);
   --body-background: linear-gradient(135deg, var(--color-primary-30), var(--color-primary-20));

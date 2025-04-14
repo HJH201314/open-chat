@@ -16,20 +16,20 @@ code.hljs {
 }
 
 .cus-code-container {
-  background-color: rgb(29, 35, 47) ;
   border-radius: 8px;
   margin: 2px 0;
 
+  // 代码块头部
   section {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: rgba(255 255 255 / 50%);
     height: 2.2em;
     font-size: .8em;
     padding-inline: 0.8em;
-    background-color: rgb(29, 35, 47) !important;
-    border-radius: 8px;
+    color: var(--color-trans-1000);
+    background-color: var(--color-primary-70) !important;
+    border-radius: 8px 8px 0 0;
 
     .lang-name {
     }
@@ -42,9 +42,92 @@ code.hljs {
 
 // 行内代码块
 :not(pre) > code.hljs {
-  background-color: rgba(0 0 0 / 5%) !important;
   font-size: .8em;
   border-radius: .3em;
   margin-inline: .1em;
-  line-height: 1.5em;
+  line-height: 1.5;
+}
+
+/**
+ * The code style below is modified from highlightjs's Obsidian style
+ * ported by Alexander Marenin (http://github.com/ioncreature)
+ */
+
+.hljs {
+  color: var(--color-trans-1500);
+  background: var(--color-primary-30);
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-selector-id {
+  color: #93c763;
+}
+
+.hljs-number {
+  color: #ffcd22;
+}
+
+.hljs-attribute {
+  color: #668bb0;
+}
+
+.hljs-regexp,
+.hljs-link {
+  color: #d39745;
+}
+
+.hljs-meta {
+  color: #557182;
+}
+
+.hljs-tag,
+.hljs-name,
+.hljs-bullet,
+.hljs-subst,
+.hljs-emphasis,
+.hljs-type,
+.hljs-built_in,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #8cbbad;
+}
+
+.hljs-string,
+.hljs-symbol {
+  color: #ee7959;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion {
+  color: #818e96;
+}
+
+.hljs-selector-class {
+  color: #A082BD
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-doctag,
+.hljs-title,
+.hljs-section,
+.hljs-type,
+.hljs-name,
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-code,
+.hljs-title.class_,
+.hljs-class .hljs-title,
+.hljs-section {
+  color: var(--color-black);
 }
