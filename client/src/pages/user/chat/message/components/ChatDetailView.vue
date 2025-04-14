@@ -38,7 +38,8 @@ const { theme } = useTheme();
 
 const form = reactive({
   sessionId: props.dialogId,
-  withContext: false,
+  withContext: true, // 启用上下文，默认开启
+  withSearch: false, // 启用搜索，默认关闭
   modelName: '',
   botRoleId: 0, // 角色 ID
   inputValue: '',
@@ -48,6 +49,7 @@ const inputCtrl = reactive({
   modelSelector: true,
   botSelector: true,
   contextToggle: true,
+  searchToggle: true,
 });
 const hasPermission = computed(
   () => userStore.isLogin && (!sessionInfo.value.userId || sessionInfo.value.userId == userStore.userId)
@@ -110,6 +112,7 @@ watch(
   (newSession) => {
     if (newSession) {
       form.withContext = newSession.withContext ?? false;
+      form.withSearch = newSession.withSearch ?? false;
       form.modelName = newSession.model || '';
       form.botRoleId = newSession.botId || 0;
     }
@@ -122,6 +125,16 @@ watch(
   (newVal, oldVal) => {
     if (newVal !== oldVal) {
       dataStore.toggleDialogContext(form.sessionId, newVal);
+    }
+  }
+);
+
+// 保存搜索开关
+watch(
+  () => form.withSearch,
+  (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+      dataStore.toggleDialogSearch(form.sessionId, newVal);
     }
   }
 );
@@ -400,6 +413,7 @@ const { isSmallScreen } = useGlobal();
         ref="input-panel"
         v-model:input-user-input="form.inputValue"
         v-model:input-with-context="form.withContext"
+        v-model:input-with-search="form.withSearch"
         :input-model-name="form.modelName"
         :input-bot-id="form.botRoleId"
         :model-dropdown="modelDropdown"
@@ -410,6 +424,7 @@ const { isSmallScreen } = useGlobal();
         :show-model-selector="inputCtrl.modelSelector"
         :show-bot-selector="inputCtrl.botSelector"
         :show-context-toggle="inputCtrl.contextToggle"
+        :show-search-toggle="inputCtrl.searchToggle"
         @send="handleSendMessage"
         @model-select="
           (value) => {

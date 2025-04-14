@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<DialogInputProps>(), {
   showModelSelector: true,
   showBotSelector: true,
   showContextToggle: true,
+  showSearchToggle: true,
 });
 
 const showToolbar = computed(() => props.showModelSelector || props.showBotSelector || props.showContextToggle);
@@ -27,6 +28,7 @@ const showToolbar = computed(() => props.showModelSelector || props.showBotSelec
 const inputModelName = defineModel<string>('inputModelName', { default: '' });
 const inputBotId = defineModel<number>('inputBotId', { default: 0 });
 const inputWithContext = defineModel<boolean>('inputWithContext', { default: true });
+const inputWithSearch = defineModel<boolean>('inputWithSearch', { default: false });
 const inputUserInput = defineModel<string>('inputUserInput', { default: '' });
 
 const emit = defineEmits<DialogInputEmits>();
@@ -96,6 +98,13 @@ watchEffect(() => {
           v-model="inputWithContext"
           highlight
           label="上下文"
+          style="font-size: 0.75rem; opacity: 0.75"
+        ></CusToggle>
+        <CusToggle
+          v-if="showSearchToggle"
+          v-model="inputWithSearch"
+          highlight
+          label="联网搜索"
           style="font-size: 0.75rem; opacity: 0.75"
         ></CusToggle>
       </div>

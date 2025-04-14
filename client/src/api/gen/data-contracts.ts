@@ -20,6 +20,8 @@ export interface ApiChatChatMessageListResponse {
 export interface ApiChatCompletionStreamUserInput {
   bot_id?: number;
   enable_context?: boolean;
+  /** 是否启用搜索 */
+  enable_search?: boolean;
   /** 模型集合名称 */
   model_name: string;
   question: string;
@@ -190,6 +192,15 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole {
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaSchedule {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaSchedule;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser {
   /** 代码 */
   code?: number;
@@ -334,6 +345,15 @@ export interface ApiEntityCommonResponseSchemaRole {
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseSchemaSchedule {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiSchemaSchedule;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseSchemaSession {
   /** 代码 */
   code?: number;
@@ -434,6 +454,11 @@ export interface ApiEntityPaginatedTotalResponseSchemaRole {
   total?: number;
 }
 
+export interface ApiEntityPaginatedTotalResponseSchemaSchedule {
+  list?: ApiSchemaSchedule[];
+  total?: number;
+}
+
 export interface ApiEntityPaginatedTotalResponseSchemaUser {
   list?: ApiSchemaUser[];
   total?: number;
@@ -459,6 +484,12 @@ export interface ApiEntityReqUpdateBodySchemaProblem {
 
 export interface ApiEntityReqUpdateBodySchemaRole {
   data: ApiSchemaRole;
+  /** @minItems 1 */
+  updates: string[];
+}
+
+export interface ApiEntityReqUpdateBodySchemaSchedule {
+  data: ApiSchemaSchedule;
   /** @minItems 1 */
   updates: string[];
 }
@@ -829,6 +860,23 @@ export interface ApiSchemaRole {
   /** 多对多关联 */
   permissions?: ApiSchemaPermission[];
   updated_at?: string;
+}
+
+export interface ApiSchemaSchedule {
+  created_at?: string;
+  description?: string;
+  /** 执行间隔，单位：秒 */
+  duration?: number;
+  id?: number;
+  last_run_time?: number;
+  name?: string;
+  status?: ApiSchemaScheduleStatus;
+}
+
+export enum ApiSchemaScheduleStatus {
+  EnumScheduleStatusStopped = 0,
+  EnumScheduleStatusRunning = 1,
+  EnumScheduleStatusPending = 2,
 }
 
 export enum ApiSchemaScoreStatus {

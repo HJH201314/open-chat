@@ -95,9 +95,9 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
       if (queryMessage) {
         useSubscription(
           liveQuery(async () => {
-            // 先进行 time 排序，对于相同的 time 使用 id 排序
+            // 先进行 time 排序，对于相同的 time 使用 远程ID 排序
             return (await db.messages.where({ sessionId: newSessionId }).sortBy('time')).sort((a, b) => {
-              return a.time - b.time || Number(a.id || 0) - Number(b.id || 0);
+              return a.time - b.time || Number(a.messageId || 0) - Number(b.messageId || 0);
             });
           }).subscribe(toObserver(messages))
         );
@@ -286,6 +286,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
           session_id: sessionId,
           question: message,
           enable_context: session.value.withContext,
+          enable_search: session.value.withSearch,
         },
         ctrl.signal,
         async (event) => {

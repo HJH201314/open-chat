@@ -26,9 +26,9 @@ import type {
   ApiEntityReqUpdateBodySchemaSession,
   ApiSchemaMessage,
   ApiSchemaSessionFlagInfo,
-} from "./data-contracts";
-import type { HttpClient, RequestParams } from "./http-client";
-import { ContentType } from "./http-client";
+} from './data-contracts';
+import type { HttpClient, RequestParams } from './http-client';
+import { ContentType } from './http-client';
 
 export class Chat<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -147,7 +147,7 @@ export class Chat<SecurityDataType = unknown> {
       ...params,
     });
   /**
-   * @description 更新消息
+   * @description 更新消息（仅 extra 字段的增量合并更新）
    *
    * @tags Message
    * @name MessageUpdatePost
@@ -316,11 +316,14 @@ export class Chat<SecurityDataType = unknown> {
    */
   sessionSyncGet = (
     query: {
+      end_time?: number;
       /** 客户端上次同步时间戳 */
       last_sync_time: number;
       /** 分页参数 */
       page_num?: number;
       page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
     },
     params: RequestParams = {},
   ) =>

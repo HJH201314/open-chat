@@ -20,6 +20,7 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaSchedule,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser,
   ApiEntityCommonResponseInt,
   ApiEntityCommonResponseSchemaAPIKey,
@@ -29,10 +30,12 @@ import type {
   ApiEntityCommonResponseSchemaPermission,
   ApiEntityCommonResponseSchemaProvider,
   ApiEntityCommonResponseSchemaRole,
+  ApiEntityCommonResponseSchemaSchedule,
   ApiEntityCommonResponseSchemaUser,
   ApiEntityReqUpdateBodySchemaBucket,
   ApiEntityReqUpdateBodySchemaModelCollection,
   ApiEntityReqUpdateBodySchemaRole,
+  ApiEntityReqUpdateBodySchemaSchedule,
   ApiSchemaAPIKey,
   ApiSchemaBucket,
   ApiSchemaModel,
@@ -41,9 +44,9 @@ import type {
   ApiSchemaProvider,
   ApiSchemaRole,
   ApiSchemaUser,
-} from "./data-contracts";
-import type { HttpClient, RequestParams } from "./http-client";
-import { ContentType } from "./http-client";
+} from './data-contracts';
+import type { HttpClient, RequestParams } from './http-client';
+import { ContentType } from './http-client';
 
 export class Manage<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -177,7 +180,7 @@ export class Manage<SecurityDataType = unknown> {
    * @request POST:/manage/collection/{id}/delete
    * @response `200` `ApiEntityCommonResponseBool` 删除成功与否
    */
-  collectionDeletePost = (collectionId: number, id: string, params: RequestParams = {}) =>
+  collectionDeletePost = (id: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
       path: `/manage/collection/${id}/delete`,
       method: "POST",
@@ -194,7 +197,7 @@ export class Manage<SecurityDataType = unknown> {
    * @request GET:/manage/collection/{id}
    * @response `200` `ApiEntityCommonResponseSchemaModelCollection` 模型
    */
-  collectionGet = (collectionId: number, id: string, params: RequestParams = {}) =>
+  collectionGet = (id: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaModelCollection, any>({
       path: `/manage/collection/${id}`,
       method: "GET",
@@ -728,6 +731,86 @@ export class Manage<SecurityDataType = unknown> {
       path: `/manage/role/${id}/update`,
       method: "POST",
       body: role,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 获取 定时任务
+   *
+   * @tags Schedule
+   * @name ScheduleGet
+   * @summary 获取 定时任务
+   * @request GET:/manage/schedule/{name}
+   * @response `200` `ApiEntityCommonResponseSchemaSchedule` 定时任务
+   */
+  scheduleGet = (name: string, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseSchemaSchedule, any>({
+      path: `/manage/schedule/${name}`,
+      method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 批量获取 定时任务
+   *
+   * @tags Schedule
+   * @name ScheduleListGet
+   * @summary 批量获取 定时任务
+   * @request GET:/manage/schedule/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaSchedule` 定时任务列表
+   */
+  scheduleListGet = (
+    query?: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaSchedule, any>({
+      path: `/manage/schedule/list`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 立即运行 定时任务
+   *
+   * @tags Schedule
+   * @name ScheduleRunPost
+   * @summary 立即运行 定时任务
+   * @request POST:/manage/schedule/{name}/run
+   * @response `200` `ApiEntityCommonResponseBool` 成功与否
+   */
+  scheduleRunPost = (name: string, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/schedule/${name}/run`,
+      method: "POST",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 更新 定时任务
+   *
+   * @tags Schedule
+   * @name ScheduleUpdatePost
+   * @summary 更新 定时任务
+   * @request POST:/manage/schedule/{name}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  scheduleUpdatePost = (name: string, schedule: ApiEntityReqUpdateBodySchemaSchedule, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseBool, any>({
+      path: `/manage/schedule/${name}/update`,
+      method: "POST",
+      body: schedule,
       type: ContentType.Json,
       format: "json",
       ...params,

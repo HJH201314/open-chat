@@ -228,7 +228,7 @@ defineExpose<CommonModalFunc>({
 .show-enter-active,
 .show-leave-active {
   z-index: 999;
-  transition: opacity 0.15s $ease-out-circ;
+  transition: opacity 0.2s $ease-out-circ;
 }
 
 .show-enter-from,
@@ -238,15 +238,20 @@ defineExpose<CommonModalFunc>({
 
 .x-expand {
   &-enter-active {
-    transition: transform 0.15s $ease-out-circ;
+    transition:
+      transform 0.15s $ease-out-circ,
+      opacity 0.15s $ease-out-circ;
   }
 
   &-leave-active {
-    transition: transform 0.1s $ease-out-circ;
+    transition:
+      transform 0.1s $ease-out-circ,
+      opacity 0.1s $ease-out-circ;
   }
 
   &-enter-from,
   &-leave-to {
+    opacity: 0;
     transform: translate(-50%, -50%) rotate3d(1, 0, 0, 90deg);
   }
 }

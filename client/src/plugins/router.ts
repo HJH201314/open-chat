@@ -162,6 +162,12 @@ const router = createRouter({
               meta: { title: '储存桶' },
               component: () => import('@/pages/admin/system/bucket/ManageSystemBucket.vue'),
             },
+            {
+              path: 'schedule',
+              name: 'ManageSystemSchedule',
+              meta: { title: '定时任务' },
+              component: () => import('@/pages/admin/system/schedule/ManageSystemSchedule.vue'),
+            },
           ],
         },
       ],

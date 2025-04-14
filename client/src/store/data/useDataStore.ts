@@ -65,6 +65,7 @@ export const useDataStore = defineStore('data', () => {
           botId: botRoleId,
           createAt: Date.now(),
           withContext: true,
+          withSearch: false,
           model: settingStore.settings.defaultModel || chatConfigStore.defaultModel?.name,
           flags: {},
         });
@@ -111,6 +112,12 @@ export const useDataStore = defineStore('data', () => {
   function toggleSessionContext(sessionId: string, isOpen: boolean) {
     db.sessions.where({ id: sessionId }).modify((session) => {
       session.withContext = isOpen;
+    });
+  }
+
+  function toggleSessionSearch(sessionId: string, isOpen: boolean) {
+    db.sessions.where({ id: sessionId }).modify((session) => {
+      session.withSearch = isOpen;
     });
   }
 
@@ -250,7 +257,9 @@ export const useDataStore = defineStore('data', () => {
               flags: {
                 ...(localSession.flags || {}), // 保持本地数据
                 isStared: remoteUserSession.flag_info?.star,
-                isShared: remoteUserSession.share_info?.permanent || (remoteUserSession.share_info?.expired_at || 0) > Date.now(),
+                isShared:
+                  remoteUserSession.share_info?.permanent ||
+                  (remoteUserSession.share_info?.expired_at || 0) > Date.now(),
               },
             },
           });
@@ -311,6 +320,7 @@ export const useDataStore = defineStore('data', () => {
     editDialogTitle: editSessionTitle,
     editDialogSystemPrompt: editSessionSystemPrompt,
     toggleDialogContext: toggleSessionContext,
+    toggleDialogSearch: toggleSessionSearch,
     changeDialogModel: changeSessionModel,
     delDialog: delSession,
     clearAllData,

@@ -141,13 +141,13 @@ defineExpose({
             </div>
           </div>
           <div class="setting-list-section">
-            <div class="setting-list-item">
-              <span class="setting-list-item__title">对话缓存</span>
-              <span class="setting-list-item__subtitle"> 将对话数据缓存在本地，不进行联网查询 </span>
-              <span class="setting-list-item__value">
-                <CusToggle v-model="editingValue.localCache" />
-              </span>
-            </div>
+            <!--            <div class="setting-list-item">-->
+            <!--              <span class="setting-list-item__title">对话缓存</span>-->
+            <!--              <span class="setting-list-item__subtitle"> 将对话数据缓存在本地，不进行联网查询，无法关闭 </span>-->
+            <!--              <span class="setting-list-item__value">-->
+            <!--                <CusToggle v-model="editingValue.localCache" />-->
+            <!--              </span>-->
+            <!--            </div>-->
             <div class="setting-list-item">
               <span class="setting-list-item__title"> Markdown 缓存结果渲染 </span>
               <span class="setting-list-item__subtitle"> 使用缓存结果渲染对话，提升长对话加载效率 </span>
@@ -155,8 +155,6 @@ defineExpose({
                 <CusToggle v-model="editingValue.markdownCache" />
               </span>
             </div>
-          </div>
-          <div class="setting-list-section">
             <div class="setting-list-item">
               <span class="setting-list-item__title">默认发送方式</span>
               <span class="setting-list-item__value">

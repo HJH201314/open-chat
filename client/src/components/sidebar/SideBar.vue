@@ -190,7 +190,12 @@ defineExpose({
           <span :class="{ 'sidebar-entry-name-ext': expandBar }" class="sidebar-entry-name">{{ entry.name }}</span>
         </div>
       </div>
-      <CusTooltip :text="userStore.isLogin ? '退出登录' : '登录'" class="sidebar-entry-login" position="right">
+      <CusTooltip
+        v-if="!userStore.isLogin"
+        :text="userStore.isLogin ? '退出登录' : '登录'"
+        class="sidebar-entry-login"
+        position="right"
+      >
         <div class="sidebar-entry" @click="handleLogin">
           <Login v-if="userStore.isLogin" class="sidebar-entry-icon" size="24"></Login>
           <Logout v-else class="sidebar-entry-icon" size="24"></Logout>

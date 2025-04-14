@@ -45,6 +45,7 @@ export type DialogInputProps = {
   showModelSelector?: boolean;
   showBotSelector?: boolean;
   showContextToggle?: boolean;
+  showSearchToggle?: boolean;
 };
 
 export type DialogInputEmits = {
@@ -64,17 +65,16 @@ export type DialogDetailProps = {
   isSmallScreen?: boolean; // 是否小屏模式
   userInput?: string; // 当前用户输入的消息
   messageSyncing?: boolean;
-}
+};
 
 export type DialogDetailEmits = DialogInputEmits; // 透传输入模块事件
 
 // 在 DialogDetail 组件中，通过 provide/inject 传递插槽的 ref
 type InjectSlots = Pick<DialogDetailSlots, 'action' | 'input'>;
-export const DialogDetailSlotsInjectionKey: InjectionKey<{
-  [K in keyof InjectSlots]: Ref<Maybe<HTMLDivElement>>;
-} & {
-  [K in keyof InjectSlots as `set${Capitalize<K>}Ref`]: (
-    ref: Ref<Maybe<HTMLDivElement>>
-  ) => void;
-}> =
-  Symbol('DialogDetailSlotInjectionKey');
+export const DialogDetailSlotsInjectionKey: InjectionKey<
+  {
+    [K in keyof InjectSlots]: Ref<Maybe<HTMLDivElement>>;
+  } & {
+    [K in keyof InjectSlots as `set${Capitalize<K>}Ref`]: (ref: Ref<Maybe<HTMLDivElement>>) => void;
+  }
+> = Symbol('DialogDetailSlotInjectionKey');

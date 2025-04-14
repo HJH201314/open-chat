@@ -20,6 +20,7 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaPermission,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProvider,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaRole,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaSchedule,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser,
   ApiEntityCommonResponseInt,
   ApiEntityCommonResponseSchemaAPIKey,
@@ -29,10 +30,12 @@ import type {
   ApiEntityCommonResponseSchemaPermission,
   ApiEntityCommonResponseSchemaProvider,
   ApiEntityCommonResponseSchemaRole,
+  ApiEntityCommonResponseSchemaSchedule,
   ApiEntityCommonResponseSchemaUser,
   ApiEntityReqUpdateBodySchemaBucket,
   ApiEntityReqUpdateBodySchemaModelCollection,
   ApiEntityReqUpdateBodySchemaRole,
+  ApiEntityReqUpdateBodySchemaSchedule,
   ApiSchemaAPIKey,
   ApiSchemaBucket,
   ApiSchemaModel,
@@ -41,7 +44,7 @@ import type {
   ApiSchemaProvider,
   ApiSchemaRole,
   ApiSchemaUser,
-} from "./data-contracts";
+} from './data-contracts';
 
 export namespace Manage {
   /**
@@ -167,8 +170,7 @@ export namespace Manage {
   export namespace CollectionDeletePost {
     export type RequestParams = {
       /** ModelCollection ID */
-      collectionId: number;
-      id: string;
+      id: number;
     };
     export type RequestQuery = {};
     export type RequestBody = never;
@@ -187,8 +189,7 @@ export namespace Manage {
   export namespace CollectionGet {
     export type RequestParams = {
       /** ModelCollection ID */
-      collectionId: number;
-      id: string;
+      id: number;
     };
     export type RequestQuery = {};
     export type RequestBody = never;
@@ -699,6 +700,86 @@ export namespace Manage {
     };
     export type RequestQuery = {};
     export type RequestBody = ApiEntityReqUpdateBodySchemaRole;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
+   * @description 获取 定时任务
+   * @tags Schedule
+   * @name ScheduleGet
+   * @summary 获取 定时任务
+   * @request GET:/manage/schedule/{name}
+   * @response `200` `ApiEntityCommonResponseSchemaSchedule` 定时任务
+   */
+  export namespace ScheduleGet {
+    export type RequestParams = {
+      /** 定时任务 name */
+      name: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseSchemaSchedule;
+  }
+
+  /**
+   * @description 批量获取 定时任务
+   * @tags Schedule
+   * @name ScheduleListGet
+   * @summary 批量获取 定时任务
+   * @request GET:/manage/schedule/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaSchedule` 定时任务列表
+   */
+  export namespace ScheduleListGet {
+    export type RequestParams = {};
+    export type RequestQuery = {
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaSchedule;
+  }
+
+  /**
+   * @description 立即运行 定时任务
+   * @tags Schedule
+   * @name ScheduleRunPost
+   * @summary 立即运行 定时任务
+   * @request POST:/manage/schedule/{name}/run
+   * @response `200` `ApiEntityCommonResponseBool` 成功与否
+   */
+  export namespace ScheduleRunPost {
+    export type RequestParams = {
+      /** 定时任务 name */
+      name: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseBool;
+  }
+
+  /**
+   * @description 更新 定时任务
+   * @tags Schedule
+   * @name ScheduleUpdatePost
+   * @summary 更新 定时任务
+   * @request POST:/manage/schedule/{name}/update
+   * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
+   */
+  export namespace ScheduleUpdatePost {
+    export type RequestParams = {
+      /** 定时任务 name */
+      name: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiEntityReqUpdateBodySchemaSchedule;
     export type RequestHeaders = {};
     export type ResponseBody = ApiEntityCommonResponseBool;
   }

@@ -26,9 +26,9 @@ export const deleteSession = (sessionId: string) =>
 export const completionStream = (
   options: ApiChatCompletionStreamUserInput & { session_id: string },
   signal: AbortSignal,
-  onMessage: (e: EventSourceMessage) => void,
+  onMessage: (e: EventSourceMessage) => void
 ) => {
-  const { session_id, bot_id, enable_context, question, provider_name, model_name, system_prompt } = options;
+  const { session_id, bot_id, enable_context, question, enable_search, model_name, system_prompt } = options;
   return fetchEventSource(`${SERVER_NEXT_API_URL}/chat/completion/stream/${session_id}`, {
     method: 'POST',
     headers: {
@@ -39,8 +39,8 @@ export const completionStream = (
       question,
       bot_id,
       enable_context,
+      enable_search,
       system_prompt,
-      provider_name,
       model_name,
     }),
     signal: signal,

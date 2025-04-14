@@ -81,12 +81,12 @@ import type { PrimaryTableCol } from 'tdesign-vue-next/es/table/type';
 import { DialogManager } from '@/components/dialog';
 import TableTitleArea from '@/pages/admin/component/TableTitleArea.vue';
 import { AddIcon, DeleteIcon, EditIcon, RefreshIcon } from 'tdesign-icons-vue-next';
-import { getRouterInstance } from '@/plugins/router.ts';
 import { useRouteQuery } from '@vueuse/router';
 import DialogCreateModel from '@/pages/admin/system/provider/model/DialogCreateModel.vue';
 import TableWrapper from '@/pages/admin/component/TableWrapper.vue';
 import ActionSet from '@/pages/admin/component/ActionSet.vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
+import { useRouter } from 'vue-router';
 
 const data = ref<ApiSchemaModel[]>([]);
 const total = ref(0);
@@ -216,16 +216,19 @@ function handleDelete(row: ApiSchemaModel) {
   });
 }
 
+const router = useRouter();
+
 function handleUnselectProvider() {
-  getRouterInstance().replace({
+  router.replace({
     name: 'ManageSystemModel',
     query: {},
   });
 }
 
 function handleClickProvider(row: ApiSchemaModel) {
-  if (row.provider_id) {
-    getRouterInstance().replace({
+  if (row.provider_id && row.provider_id != providerId.value) {
+    const routerFunc = providerId.value ? router.replace : router.push;
+    routerFunc({
       name: 'ManageSystemModel',
       query: {
         provider_id: row.provider_id,

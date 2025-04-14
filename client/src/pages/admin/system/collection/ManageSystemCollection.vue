@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableTitleArea title="模型聚合" subtitle="聚合来自不同供应商的相同模型">
+    <TableTitleArea title="模型聚合" subtitle="聚合不同的模型，以供特定功能使用，具备负载均衡">
       <template #actions>
         <t-button variant="outline" shape="circle" @click="getModelCollections()">
           <template #icon>

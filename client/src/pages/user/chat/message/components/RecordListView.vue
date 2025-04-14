@@ -56,7 +56,7 @@ async function handleAddRecord(defaultBotId?: number) {
     settingStore.saveSetting('roleRemember', true);
     settingStore.saveSetting('roleDefaultId', defaultBotId?.toString());
   }
-  ToastManager.normal('开始对话吧~', { position: 'top-right' });
+  ToastManager.normal('开始对话吧~', { position: 'top' });
 }
 
 function handleListAddClick() {

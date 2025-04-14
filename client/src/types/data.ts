@@ -48,6 +48,7 @@ export type SessionInfo = {
   botRole?: string; // bot角色名称
   botId?: number; // bot角色 ID
   withContext?: boolean; // 是否启用上下文
+  withSearch?: boolean; // 是否启用联网搜索
   userId?: number; // 用户 ID
   model?: string; // 模型名称
   flags?: SessionFlags;
