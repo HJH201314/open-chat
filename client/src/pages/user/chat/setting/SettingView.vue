@@ -16,6 +16,9 @@ import ToastManager from '@/components/toast/ToastManager.ts';
 import { useTheme } from '@/components/theme/useTheme.ts';
 import CusAvatar from '@/components/avatar/CusAvatar.vue';
 import LogoVIP from '@/components/logo/LogoVIP.vue';
+import { ShuffleOne } from '@icon-park/vue-next';
+import tinycolor from 'tinycolor2';
+import { getRandomInt } from '@/utils/string.ts';
 
 const { isModal = false } = defineProps<{
   isModal?: boolean;
@@ -101,6 +104,10 @@ async function handleClearMessageCache() {
 function forceReloadPage() {
   // @ts-ignore lib 类型标注错误
   window.location.reload(true);
+}
+
+function genRandomThemeColor() {
+  editingValue.value.themeColor = tinycolor({ h: 0, s: 0.34, l: 0.56 }).spin(getRandomInt(0, 360)).toHexString();
 }
 
 // 颜色预览
@@ -220,6 +227,7 @@ defineExpose({
               <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
                 <CusInput v-model="editingValue.themeColor" style="width: 7.5rem" />
                 <CusAvatar size="1.5rem" :color="editingValue.themeColor" style="flex-shrink: 0" />
+                <DiliButton type="tertiary" @click="genRandomThemeColor"><ShuffleOne /></DiliButton>
               </span>
             </div>
             <div class="setting-list-item">

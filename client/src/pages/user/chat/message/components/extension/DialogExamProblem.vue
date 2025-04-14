@@ -6,8 +6,11 @@ import { ParticleManager } from '@/components/particle/ParticleManager.ts';
 import { db } from '@/store/data/database.ts';
 import genApi from '@/api/gen-api.ts';
 import type { MessageExtensionBaseProps } from '@/pages/user/chat/message/components/extension/types.ts';
+import { useUserStore } from '@/store/useUserStore.ts';
 
 const props = defineProps<MessageExtensionBaseProps>();
+
+const userStore = useUserStore();
 
 async function handleSubmitted(res: ApiExamSubmitProblemResponse) {
   const score = res.score || 0;
@@ -48,6 +51,7 @@ async function handleSubmitted(res: ApiExamSubmitProblemResponse) {
     :problem="msgInfo.extra?.['question']"
     :show-answer="msgInfo.extra?.['question-finished']"
     choice-style="background"
+    :disabled="userStore.userId != sessionInfo.userId"
     :choice-type="msgInfo.extra?.['question-finished'] ? 'normal' : 'highlight'"
     show-submit
     @submitted="handleSubmitted"

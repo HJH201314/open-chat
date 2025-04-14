@@ -192,12 +192,18 @@ defineExpose({
           :role="item.sender"
           :time="new Date(item.time).toLocaleString()"
           :extra="item.extra"
+          :tooltips="item.extra?.['tooltips']?.length ? item.extra?.['tooltips'] : []"
           @think-expand="handleMessageThinkExpand"
           @think-expanded="handleMessageThinkExpanded(index, $event)"
         >
           <template #extra>
-            <DialogExamProblem v-if="item.extra?.['question']" :msg-info="item" />
-            <DialogExamPage v-if="item.extra?.['exam']" :exam-id="item.extra['exam']['id']" :msg-info="item" />
+            <DialogExamProblem v-if="item.extra?.['question']" :msg-info="item" :session-info="session" />
+            <DialogExamPage
+              v-if="item.extra?.['exam']"
+              :exam-id="item.extra['exam']['id']"
+              :msg-info="item"
+              :session-info="session"
+            />
             <Birthday
               v-if="
                 item.extra?.['birthday-gift'] &&
@@ -206,7 +212,6 @@ defineExpose({
               "
               :info="item.extra?.['birthday-gift']"
             />
-            <div v-if="item.extra?.['tooltip']">{{ item.extra?.['tooltip'] }}</div>
           </template>
         </DialogMessage>
         <!--   消息列表   -->

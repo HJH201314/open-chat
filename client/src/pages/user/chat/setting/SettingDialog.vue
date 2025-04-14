@@ -17,6 +17,7 @@ const dialogRef = useTemplateRef('dialog');
   <CommonDialog
     ref="dialog"
     title="对话设置"
+    subtitle="所有设置保存后生效"
     :icon="h(SettingTwo)"
     :show-close="true"
     :show-confirm="false"

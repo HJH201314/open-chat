@@ -1,11 +1,10 @@
-import { tryOnMounted, until, useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
+import { useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 import genApi from '@/api/gen-api.ts';
 import type { ApiSchemaUser } from '@/api/gen/data-contracts.ts';
 import { encryptWithPublicKey } from '@/utils/encrypt.ts';
-import { ping } from '@/api/service/userService.ts';
 
 /* 用户相关 */
 export const useUserStore = defineStore('user', () => {
@@ -16,13 +15,17 @@ export const useUserStore = defineStore('user', () => {
   const loginStatus = ref<'login' | 'logout' | 'offline'>('logout');
   const isLogin = computed(() => {
     // 状态不为登出即视作已登录，offline 状态允许再次请求进行尝试
-    return loginStatus.value !== 'logout';
+    return loginStatus.value != 'logout';
   });
   const username = computed(() => currentUser.value.username ?? '未登录');
   const userId = computed(() => currentUser.value.id ?? -1);
   const roles = computed(() => currentUser.value.roles ?? []);
   const isAdmin = computed(() => {
-    return roles.value.map((role) => role.name).join('').toLowerCase().includes('admin');
+    return roles.value
+      .map((role) => role.name)
+      .join('')
+      .toLowerCase()
+      .includes('admin');
   });
 
   const ping = async () => {
@@ -70,7 +73,7 @@ export const useUserStore = defineStore('user', () => {
       if (res.data.code === 200) {
         loginStatus.value = 'login';
         currentUser.value = { ...res.data.data };
-        console.debug('[login]', res.data.data)
+        console.debug('[login]', res.data.data);
         resumePing();
         return true;
       } else {

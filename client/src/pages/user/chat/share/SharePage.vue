@@ -19,6 +19,7 @@ import { DialogManager } from '@/components/dialog';
 import { AxiosError } from 'axios';
 import CusInput from '@/components/input/CusInput.vue';
 import DiliButton from '@/components/button/DiliButton.vue';
+import LoadingModal from '@/components/modal/LoadingModal.vue';
 
 const props = defineProps<{
   sessionId: string;
@@ -51,6 +52,7 @@ const tip = computed(() => {
 const messageList = ref<MessageInfo[]>([]);
 const sessionInfo = ref<SessionInfo>({ id: props.sessionId });
 const modelMap = ref<Record<string, string>>({});
+const loading = ref(false);
 const currentPageNum = ref(1);
 const nextPageNum = ref(0);
 
@@ -143,7 +145,17 @@ onMounted(async () => {
     showLoginDialog();
     return;
   }
-  (await getSession()) && (await getMessageList(currentPageNum.value));
+});
+
+watchEffect(async () => {
+  if (userStore.isLogin) {
+    try {
+      loading.value = true;
+      (await getSession()) && (await getMessageList(currentPageNum.value));
+    } finally {
+      loading.value = false;
+    }
+  }
 });
 
 const onActionBack = () => {
@@ -165,6 +177,7 @@ const { isSmallScreen } = useGlobal();
 
 <template>
   <div class="share-page">
+    <LoadingModal :visible="loading" />
     <DialogDetail
       class="dialog-detail"
       :empty-tip="tip"
@@ -183,7 +196,7 @@ const { isSmallScreen } = useGlobal();
           </template>
         </DialogAction>
       </template>
-      <template #empty>
+      <template v-if="!loading" #empty>
         <div
           style="
             width: 100%;
@@ -220,6 +233,15 @@ const { isSmallScreen } = useGlobal();
         rgba(255, 255, 255, 0.9) calc(100% - 0.5rem),
         rgba(255, 255, 255, 0) 100%
       );
+
+      .theme-dark & {
+        background: linear-gradient(
+          to bottom,
+          rgba(37, 37, 37, 0.99) 0,
+          rgba(37, 37, 37, 0.9) calc(100% - 0.5rem),
+          rgba(37, 37, 37, 0) 100%
+        );
+      }
 
       &-title {
         @include line-clamp-1;

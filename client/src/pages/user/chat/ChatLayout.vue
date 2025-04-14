@@ -5,7 +5,7 @@ import { h, onMounted, ref, useTemplateRef } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { noPaddingKey } from '@/constants/eventBusKeys.ts';
 import useGlobal from '@/commands/useGlobal.ts';
-import { Message, SettingTwo } from '@icon-park/vue-next';
+import { Book, Message, SettingTwo } from '@icon-park/vue-next';
 import { DialogManager } from '@/components/dialog';
 import SettingDialog from '@/pages/user/chat/setting/SettingDialog.vue';
 import type { SidebarEntry } from '@/components/sidebar/types.ts';
@@ -26,6 +26,12 @@ onMounted(() => {
       name: '对话',
       icon: h(Message),
       href: '/chat/message',
+    },
+    {
+      key: 'learn',
+      name: '学习',
+      icon: h(Book),
+      href: '/chat/learning',
     },
     {
       key: 'setting',

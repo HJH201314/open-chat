@@ -33,6 +33,11 @@ const router = createRouter({
           component: () => import('@/pages/user/chat/share/SharePage.vue'),
         },
         {
+          path: 'learning',
+          name: 'LearningPage',
+          component: () => import('@/pages/user/tue/learning/LearningPage.vue'),
+        },
+        {
           path: 'setting',
           name: 'settingDialog',
           component: () => import('@/pages/user/chat/setting/SettingDialog.vue'),

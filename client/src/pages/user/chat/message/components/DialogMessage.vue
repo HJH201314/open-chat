@@ -20,6 +20,7 @@ type DialogMessageProps = {
   model?: string;
   time?: string;
   markdownRender?: boolean;
+  tooltips?: string[];
   extra?: MessageInfo['extra'];
 };
 
@@ -33,6 +34,7 @@ const props = withDefaults(defineProps<DialogMessageProps>(), {
   model: '',
   time: new Date().toLocaleString(),
   markdownRender: true,
+  tooltips: () => [],
   extra: () => ({}),
 });
 
@@ -142,6 +144,14 @@ defineSlots<{
         <LogoOpenAI v-else />
       </div>
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
+        <div class="dialog-message-content-tooltip">
+          <div v-for="(tip, index) in tooltips" :key="tip" class="dialog-message-content-tooltip-item">
+            <CusSpin v-if="index === tooltips.length - 1 && !thinking && !renderMessage" color="var(--color-primary)" />
+            <span>{{
+              index === tooltips.length - 1 && !thinking && !renderMessage ? tip : tip.replace('中...', '完成')
+            }}</span>
+          </div>
+        </div>
         <!-- 收起/展开思考内容 -->
         <div
           v-if="showThinking && thinking"
@@ -272,6 +282,31 @@ defineSlots<{
 
       &.think {
         margin-top: 0.5rem;
+      }
+    }
+
+    &-tooltip {
+      display: flex;
+      gap: 0.5em;
+      align-items: center;
+
+      &-item {
+        user-select: none;
+        width: fit-content;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.5em;
+        color: var(--color-black);
+        background: linear-gradient(135deg, var(--color-primary-20), var(--color-primary-50));
+        text-align: right;
+        font-size: 0.75rem;
+        line-height: 1;
+        padding: 0.5em 1em;
+        margin-bottom: 0.5em;
+        margin-right: 0.5em;
+        border-radius: $border-radius;
+        transition: all 0.2s $ease-out-circ;
       }
     }
 

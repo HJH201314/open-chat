@@ -350,6 +350,7 @@ function handleDeleteDialog() {
       color: theme.colorDanger,
     },
     content: `确认删除对话：<br /> - ${sessionInfo.value.title} <br />`,
+    renderContentHtml: true,
     confirmButtonProps: {
       backgroundColor: theme.colorDanger,
     },

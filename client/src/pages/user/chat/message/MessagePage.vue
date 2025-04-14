@@ -171,7 +171,7 @@ watch(
     &:not(&-full) {
       --deltaWidth: v-bind(deltaWidth);
       flex-grow: 0;
-      width: clamp(12rem, calc(25% + var(--deltaWidth)), max(calc(100% - 55rem), 20rem));
+      width: clamp(14rem, calc(25% + var(--deltaWidth)), min(calc(100% - 55rem), 50%));
     }
 
     // 在移动端使用absolute便于展示切换动画，否则会被挤压

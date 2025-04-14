@@ -10,12 +10,16 @@ import { updateSessionMessageExtra } from '@/store/data/useSession.ts';
 import ExamAnswerPage from '@/pages/user/tue/exam/answer/ExamAnswerPage.vue';
 import { useStepper } from '@vueuse/core';
 import genApi from '@/api/gen-api.ts';
+import { useUserStore } from '@/store/useUserStore.ts';
 
 const props = defineProps<
   {
     examId: string | number;
   } & MessageExtensionBaseProps
 >();
+
+const userStore = useUserStore();
+const isOwner = computed(() => props.sessionInfo.userId == userStore.userId);
 
 const examInfo = computed(() => (props.msgInfo.extra?.['exam'] || {}) as ApiSchemaExam);
 const examRecordId = computed(() => (props.msgInfo.extra?.['exam-record-id'] || 0) as number);
@@ -79,7 +83,7 @@ const onStartExam = () => {
 };
 
 const onExamSubmitted = async (recordId: number) => {
-  if (recordId) {
+  if (recordId && isOwner.value) {
     await updateSessionMessageExtra(props.msgInfo.sessionId, props.msgInfo.id, {
       'exam-record-id': recordId,
     });
@@ -87,7 +91,7 @@ const onExamSubmitted = async (recordId: number) => {
 };
 
 const onExamRated = async (record: ApiSchemaExamUserRecord) => {
-  if (record.id) {
+  if (record.id && isOwner.value) {
     await updateSessionMessageExtra(props.msgInfo.sessionId, props.msgInfo.id, {
       'exam-record-id': record.id,
       'exam-records': [record],

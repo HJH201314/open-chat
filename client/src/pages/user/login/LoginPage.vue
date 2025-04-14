@@ -32,10 +32,6 @@ const emit = defineEmits<{
 
 const router = useRouter();
 onMounted(() => {
-  if (userStore.isLogin) {
-    if (props.isModal) emit('close');
-    else router.replace('/');
-  }
   initPage();
 });
 
@@ -168,7 +164,8 @@ watch(
         closePage();
       }, 750);
     }
-  }
+  },
+  { immediate: true }
 );
 
 function showUserAgreement() {

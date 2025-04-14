@@ -124,6 +124,10 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
     return db.messages.add(msg);
   }
 
+  async function getMessage(msgIndex: number) {
+    return db.messages.get(msgIndex);
+  }
+
   async function deleteMessage(msgIndex: number) {
     return db.messages.delete(msgIndex);
   }
@@ -250,7 +254,10 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
         }
         const tooltipCmd = cp.getCommandByName('tooltip');
         if (tooltipCmd) {
-          await updateMessage(botMsgIndex, { extra: { tooltip: tooltipCmd.values.join('') } });
+          const msg = await getMessage(botMsgIndex);
+          await updateMessage(botMsgIndex, {
+            extra: { tooltips: [...(msg?.extra?.tooltips || []), tooltipCmd.values.join('')] },
+          });
         }
         const problemCmd = cp.getCommandByName('tool:question');
         if (problemCmd) {
