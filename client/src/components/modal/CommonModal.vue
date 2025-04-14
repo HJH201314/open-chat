@@ -228,7 +228,7 @@ defineExpose<CommonModalFunc>({
 .show-enter-active,
 .show-leave-active {
   z-index: 999;
-  transition: opacity 0.2s $ease-out-circ;
+  transition: opacity 0.1s $ease-out-circ;
 }
 
 .show-enter-from,

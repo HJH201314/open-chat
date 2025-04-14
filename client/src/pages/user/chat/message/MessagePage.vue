@@ -3,10 +3,12 @@ import useGlobal from '@/commands/useGlobal.ts';
 import RecordListView from '@/pages/user/chat/message/components/RecordListView.vue';
 import { noPaddingKey } from '@/constants/eventBusKeys.ts';
 import ChatDetailView from '@/pages/user/chat/message/components/ChatDetailView.vue';
-import { useEventBus } from '@vueuse/core';
-import { computed, ref, watch, watchEffect } from 'vue';
+import { useElementBounding, useEventBus, useLocalStorage } from '@vueuse/core';
+import { computed, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useRouter } from 'vue-router';
+import { createDraggable, Draggable } from 'animejs';
+import { nextFrame } from '@/utils/element.ts';
 
 const props = withDefaults(
   defineProps<{
@@ -55,18 +57,61 @@ watch(
     }
   }
 );
+
+// 拖拽控制，并且在页面宽度变化时重置 TODO：提升稳定性，降低延迟
+let splitStartX = 0;
+const deltaWidth = useLocalStorage('chat-page-split-delta-width', '0px');
+const splitRef = useTemplateRef('split');
+const pageRef = useTemplateRef('message-page');
+const { width: pageWidth } = useElementBounding(pageRef);
+let draggable: Draggable | undefined = undefined;
+const resetDraggable = () => {
+  draggable?.refresh();
+  draggable?.reset();
+  draggable?.revert();
+  deltaWidth.value = '0px';
+  nextFrame(() => {
+    splitStartX = splitRef.value?.getBoundingClientRect()?.x || 0;
+    draggable = createDraggable('.split', {
+      y: false,
+      snap: 5,
+      x: {
+        mapTo: 'none',
+        modifier: (x) => {
+          // 限制拖拽不能超过 record-list 的 clamp 限制的范围
+          const splitX = splitRef.value?.getBoundingClientRect()?.x || 0;
+          if (splitX - splitStartX + 1 < x) return splitX - splitStartX + 1;
+          else if (splitX - splitStartX - 1 > x) return splitX - splitStartX - 1;
+          else return x;
+        },
+      },
+      cursor: { onHover: 'ew-resize', onGrab: 'ew-resize' },
+      maxVelocity: 0, // 释放后无加速度
+      onSnap: (e) => {
+        deltaWidth.value = `${e.destX}px`;
+      },
+    });
+  });
+};
+watch(
+  () => pageWidth.value,
+  (newValue, oldValue) => {
+    Math.abs(newValue - (oldValue || 0)) > 5 && resetDraggable();
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <div class="message-page">
+  <div ref="message-page" class="message-page">
     <Transition :name="showListView ? 'slide-fade' : 'slide-fade-rev'">
       <RecordListView
         v-show="showListView"
         :class="{ 'message-page-record-list-full': !isLargeScreen }"
-        class="message-page-record-list transition-all-circ"
+        class="message-page-record-list"
       />
     </Transition>
-    <div v-if="showListView && showDialogView" class="split"></div>
+    <div v-if="showListView && showDialogView" ref="split" class="split"></div>
     <section
       v-show="showDialogView || isRightSessionShowing"
       class="session-right"
@@ -82,7 +127,7 @@ watch(
           v-if="showDialogView && props.sessionId"
           id="dialog-detail-view"
           :dialog-id="props.sessionId"
-          class="message-page-dialog-detail transition-all-circ"
+          class="message-page-dialog-detail"
           @back="() => $router.replace('/chat')"
         />
       </Transition>
@@ -124,8 +169,9 @@ watch(
     height: 100%;
 
     &:not(&-full) {
+      --deltaWidth: v-bind(deltaWidth);
       flex-grow: 0;
-      width: clamp(12rem, 25%, 20rem);
+      width: clamp(12rem, calc(25% + var(--deltaWidth)), max(calc(100% - 55rem), 20rem));
     }
 
     // 在移动端使用absolute便于展示切换动画，否则会被挤压

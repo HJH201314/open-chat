@@ -284,7 +284,7 @@ const { isSmallScreen } = useGlobal();
             </div>
             <div class="dialog-list-item__bottom">
               <div class="digest">
-                {{ item.model || '-' }}
+                {{ chatConfigStore.modelsNameDisplayMap[item.model ?? ''] || '-' }}
               </div>
               <div class="flags">
                 <Star v-if="item.flags?.isStared" :fill="theme.colorWarning" theme="filled" />

@@ -9,8 +9,16 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import LogoDeepSeek from '@/components/logo/LogoDeepSeek.vue';
 
 export const useChatConfigStore = defineStore('chat-config', () => {
-  // 供应商及模型数据
+  // 模型数据
   const chatModels = useLocalStorage<ApiEntityConfigChatModel[]>('chat-models', []);
+  // 模型名称映射表
+  const modelsNameDisplayMap = computed(() => {
+    const map = {} as Record<string, string>;
+    chatModels.value.forEach((value) => {
+      map[value.name!] = value.display_name!;
+    });
+    return map;
+  });
   // 转换为下拉菜单结果fix
   const modelDropdown = useArrayMap(chatModels, convertModelConfigDropdown);
   // 计算出一个默认的模型
@@ -111,6 +119,7 @@ export const useChatConfigStore = defineStore('chat-config', () => {
     chatModels,
     modelDropdown,
     defaultModel,
+    modelsNameDisplayMap,
 
     bots,
     botsNameIdMap,
