@@ -62,7 +62,6 @@ watchEffect(() => {
   cursor: pointer;
   padding: 8px 12px;
   border-radius: 8px;
-  //line-height: 1.2;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -138,6 +137,11 @@ watchEffect(() => {
         }
       }
     }
+  }
+
+  &.direction-row {
+    // 横向排列时，行高为 1，与其它元素保持一致
+    line-height: 1;
   }
 
   &:not(:last-child) {

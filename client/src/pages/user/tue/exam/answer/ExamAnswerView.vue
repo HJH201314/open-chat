@@ -125,7 +125,7 @@ const paginationItemStyle = computed(() => {
 </script>
 
 <template>
-  <div class="exam-answering-fragment">
+  <div class="exam-answer-view">
     <Panel ref="exam-panel" class="exam-panel">
       <main ref="exam-content" class="exam-content">
         <template v-for="(problem, i) in exam?.problems || []" :key="problem.problem_id">
@@ -159,7 +159,7 @@ const paginationItemStyle = computed(() => {
 </template>
 
 <style scoped lang="scss">
-.exam-answering-fragment {
+.exam-answer-view {
   position: relative;
   display: flex;
   flex-direction: column;

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import genApi from '@/api/gen-api.ts';
 import { type ApiSchemaExam, type ApiSchemaExamUserRecord } from '@/api/gen/data-contracts.ts';
 import useGlobal from '@/commands/useGlobal.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { DialogManager } from '@/components/dialog';
 import { useRoute, useRouter } from 'vue-router';
-import { Back } from '@icon-park/vue-next';
+import { Back, More } from '@icon-park/vue-next';
 import ExamAnswerView from '@/pages/user/tue/exam/answer/ExamAnswerView.vue';
 import DiliButton from '@/components/button/DiliButton.vue';
 
@@ -14,9 +14,11 @@ const props = withDefaults(
   defineProps<{
     examId: string;
     recordId?: number; // 用户回答 ID
+    noPadding?: boolean;
   }>(),
   {
     recordId: 0,
+    noPadding: false,
   }
 );
 
@@ -81,7 +83,13 @@ const handleLoadUserRecord = async () => {
 
 const route = useRoute();
 onMounted(async () => {
-  await Promise.all([await handleLoadExam(), await handleLoadUserRecord()]);
+  watch(
+    () => [props.examId, props.recordId],
+    async () => {
+      await Promise.all([await handleLoadExam(), await handleLoadUserRecord()]);
+    },
+    { immediate: true }
+  );
 });
 
 const handleBack = () => {
@@ -104,15 +112,28 @@ defineExpose({
 </script>
 
 <template>
-  <div class="exam-page" :class="{ small: isSmallScreen }">
+  <div
+    class="exam-page"
+    :class="{ small: isSmallScreen }"
+    :style="{ '--padding': noPadding ? '0' : 'var(--padding-normal)' }"
+  >
     <LoadingModal :visible="loadingExam" />
-    <DiliButton ref="button-back" class="exam-page-back" type="secondary" @click="handleBack">
-      <slot v-if="$slots.back" name="back" />
-      <Back v-else />
-    </DiliButton>
+    <div v-if="exam" class="exam-page-action">
+      <DiliButton ref="button-back" class="exam-page-back" type="tertiary" @click="handleBack">
+        <slot v-if="$slots.back" name="back" />
+        <Back v-else />
+      </DiliButton>
+      <div class="exam-page-title">
+        <div>{{ exam?.name || '' }}</div>
+        <div class="exam-page-title-sub">{{ exam?.description || '' }}</div>
+      </div>
+      <DiliButton ref="button-more" class="exam-page-more" type="tertiary">
+        <More />
+      </DiliButton>
+    </div>
     <ExamAnswerView
       ref="fragment-answering"
-      class="exam-page-fragment-full"
+      class="exam-page-answer-full"
       :exam="exam"
       :record="record"
       :single-problem="true"
@@ -121,6 +142,8 @@ defineExpose({
 </template>
 
 <style scoped lang="scss">
+@use '@/assets/extension' as *;
+
 .exam-page {
   --padding: var(--padding-normal);
 
@@ -132,15 +155,55 @@ defineExpose({
   flex-direction: column;
   gap: 0.5rem;
 
-  &-back {
+  &-action {
+    padding: 0.25rem;
     position: absolute;
-    left: var(--padding);
-    top: var(--padding);
     z-index: 1;
+    left: 0;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.99) 0,
+      rgba(255, 255, 255, 0.9) calc(100% - 0.5rem),
+      rgba(255, 255, 255, 0) 100%
+    );
+
+    .theme-dark & {
+      background: linear-gradient(
+        to bottom,
+        rgba(37, 37, 37, 0.99) 0,
+        rgba(37, 37, 37, 0.9) calc(100% - 0.5rem),
+        rgba(37, 37, 37, 0) 100%
+      );
+    }
   }
 
-  &-fragment-full {
+  &-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--color-primary);
+    line-height: 1;
+
+    &-sub {
+      @include line-clamp-1;
+      color: var(--color-trans-1000);
+      font-size: 0.9em;
+    }
+  }
+
+  &-record {
+    color: var(--color-trans-1500);
+  }
+
+  &-answer-full {
     width: 100%;
+    padding-top: 1.75rem;
     height: 100%;
   }
 }

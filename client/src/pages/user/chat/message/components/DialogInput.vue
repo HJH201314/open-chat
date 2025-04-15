@@ -34,7 +34,7 @@ const inputUserInput = defineModel<string>('inputUserInput', { default: '' });
 
 const emit = defineEmits<DialogInputEmits>();
 
-const smallInput = useLocalStorage('chat-dialog-input-small-input', true);
+const smallInput = useLocalStorage('chat-dialog-input-small-input', false);
 
 function handleInputKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.isComposing) {

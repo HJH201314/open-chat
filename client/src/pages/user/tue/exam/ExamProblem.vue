@@ -3,7 +3,7 @@ import { computed, ref, useTemplateRef, type VNode, watch } from 'vue';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import {
-  type ApiCourseSubmitExamResponse,
+  type ApiCourseSubmitProblemResponse,
   type ApiSchemaExamUserRecordAnswer,
   type ApiSchemaProblem,
   ApiSchemaProblemType,
@@ -52,7 +52,7 @@ const answerVM = defineModel<AnswerType>('answer');
 
 const emit = defineEmits<{
   (e: 'answer-change', answer: AnswerType): void;
-  (e: 'submitted', result: ApiCourseSubmitExamResponse): void;
+  (e: 'submitted', result: ApiCourseSubmitProblemResponse): void;
 }>();
 
 const problemInfo = computed(() => props.problem || ({} as ApiSchemaProblem));
@@ -260,11 +260,11 @@ defineSlots<{
       </section>
     </header>
 
+    <section class="problem-content" v-html="description" />
+
     <section v-if="showAnswer" class="problem-explanation">
       <span v-if="userAnswer" class="problem-explanation-title">我的回答：</span>{{ formattedUserAnswer }}
     </section>
-
-    <section class="problem-content" v-html="description" />
 
     <section v-if="showAnswer" class="problem-explanation">
       <span class="problem-explanation-title">标准答案：</span>

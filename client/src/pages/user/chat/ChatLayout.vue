@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Panel from '@/components/panel/Panel.vue';
 import SideBar from '@/components/sidebar/SideBar.vue';
-import { h, onMounted, ref, useTemplateRef } from 'vue';
+import { h, onMounted, ref, useTemplateRef, watchEffect } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { noPaddingKey } from '@/constants/eventBusKeys.ts';
 import useGlobal from '@/commands/useGlobal.ts';
@@ -15,6 +15,19 @@ const showPadding = ref(true);
 const noPaddingBus = useEventBus(noPaddingKey);
 noPaddingBus.on((v) => {
   showPadding.value = !v;
+});
+
+const { isLargeScreen, isSmallScreen } = useGlobal();
+
+watchEffect(() => {
+  // 大屏时展示边栏、关闭零内衬
+  if (isLargeScreen.value) {
+    noPaddingBus.emit(false);
+  }
+  // 进入对话时侧边栏收起，退出后展开
+  else {
+    noPaddingBus.emit(true);
+  }
 });
 
 // 在 onMounted 后再初始化 entries，否则会报错
@@ -46,8 +59,6 @@ onMounted(() => {
     },
   ];
 });
-
-const { isLargeScreen, isSmallScreen } = useGlobal();
 </script>
 
 <template>

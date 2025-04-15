@@ -11,6 +11,8 @@
  */
 
 import type {
+  ApiCourseGetExamResultsSearch,
+  ApiCourseGetProblemResultsSearch,
   ApiCourseMakeQuestionRequest,
   ApiCourseSubmitExamRequest,
   ApiEntityCommonResponseAny,
@@ -20,11 +22,11 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblemUserRecord,
   ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
   ApiEntityCommonResponseSchemaExamUserRecord,
   ApiEntityCommonResponseSchemaProblem,
-  ApiEntityParamPagingSort,
   ApiEntityReqUpdateBodySchemaProblem,
   ApiSchemaCourse,
   ApiSchemaExam,
@@ -174,6 +176,35 @@ export class Tue<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description 分页获取用户的考试评分结果（单个考试）
+   *
+   * @tags 考试
+   * @name ExamMyRecordsGet
+   * @summary 分页获取考试结果（单个考试）
+   * @request GET:/tue/exam/{id}/my-records
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord` OK
+   */
+  examMyRecordsGet = (
+    id: string,
+    query?: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord, any>({
+      path: `/tue/exam/${id}/my-records`,
+      method: "GET",
+      query: query,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
    * @description 随机测验
    *
    * @tags Exam
@@ -196,13 +227,43 @@ export class Tue<SecurityDataType = unknown> {
    * @tags 考试
    * @name ExamRecordGet
    * @summary 获取考试结果
-   * @request GET:/tue/exam/record/{id}
+   * @request GET:/tue/exam-record/{id}
    * @response `200` `ApiEntityCommonResponseSchemaExamUserRecord` OK
    */
   examRecordGet = (id: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaExamUserRecord, any>({
-      path: `/tue/exam/record/${id}`,
+      path: `/tue/exam-record/${id}`,
       method: "GET",
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 分页获取用户的考试评分结果
+   *
+   * @tags 考试
+   * @name ExamRecordListPost
+   * @summary 分页获取考试结果
+   * @request POST:/tue/exam-record/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord` OK
+   */
+  examRecordListPost = (
+    search: ApiCourseGetExamResultsSearch,
+    query?: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord, any>({
+      path: `/tue/exam-record/list`,
+      method: "POST",
+      query: query,
+      body: search,
       type: ContentType.Json,
       format: "json",
       ...params,
@@ -213,29 +274,41 @@ export class Tue<SecurityDataType = unknown> {
    * @tags 考试
    * @name ExamRecordRescorePost
    * @summary 重新评分考试
-   * @request POST:/tue/exam/record/{id}/rescore
+   * @request POST:/tue/exam-record/{id}/rescore
    */
   examRecordRescorePost = (id: number, params: RequestParams = {}) =>
     this.http.request<any, any>({
-      path: `/tue/exam/record/${id}/rescore`,
+      path: `/tue/exam-record/${id}/rescore`,
       method: "POST",
       type: ContentType.Json,
       ...params,
     });
   /**
-   * @description 分页获取用户的考试评分结果
+   * @description 获取单个问题结果列表
    *
-   * @tags 考试
-   * @name ExamRecordsGet
-   * @summary 分页获取考试结果
-   * @request GET:/tue/exam/{id}/records
-   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord` OK
+   * @tags Exam
+   * @name ExamSingleProblemRecordListPost
+   * @summary 获取单个问题结果列表
+   * @request POST:/tue/exam/single-problem-record/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblemUserRecord` OK
    */
-  examRecordsGet = (id: string, req: ApiEntityParamPagingSort, params: RequestParams = {}) =>
-    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord, any>({
-      path: `/tue/exam/${id}/records`,
-      method: "GET",
-      body: req,
+  examSingleProblemRecordListPost = (
+    search: ApiCourseGetProblemResultsSearch,
+    query?: {
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblemUserRecord, any>({
+      path: `/tue/exam/single-problem-record/list`,
+      method: "POST",
+      query: query,
+      body: search,
       type: ContentType.Json,
       format: "json",
       ...params,

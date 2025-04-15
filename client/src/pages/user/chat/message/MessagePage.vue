@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import useGlobal from '@/commands/useGlobal.ts';
 import RecordListView from '@/pages/user/chat/message/components/RecordListView.vue';
-import { noPaddingKey } from '@/constants/eventBusKeys.ts';
 import ChatDetailView from '@/pages/user/chat/message/components/ChatDetailView.vue';
-import { useElementBounding, useEventBus, useLocalStorage } from '@vueuse/core';
-import { computed, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { useElementBounding, useLocalStorage } from '@vueuse/core';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useRouter } from 'vue-router';
 import { createDraggable, Draggable } from 'animejs';
@@ -27,20 +26,6 @@ const showListView = computed(() => {
 });
 const showDialogView = computed(() => {
   return isLargeScreen.value || props.sessionId;
-});
-
-// 移动端 padding 隐藏和展示
-const noPaddingBus = useEventBus(noPaddingKey);
-watchEffect(() => {
-  // 大屏时展示边栏、关闭零内衬
-  if (isLargeScreen.value) {
-    noPaddingBus.emit(false);
-  }
-  // 进入对话时侧边栏收起，退出后展开
-  else {
-    noPaddingBus.emit(true);
-    // noPaddingBus.emit(!!props.sessionId);
-  }
 });
 
 // 通过Transition的事件控制 isRightSessionShowing，避免应用动画时刷新空空如也和消息列表挤压

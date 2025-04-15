@@ -65,7 +65,7 @@ async function getPermissions(page?: number, size?: number) {
     const res = await genApi.Manage.permissionListGet({
       page_num: finalPageNum,
       page_size: finalPageSize,
-      sort_expr: 'id ASC',
+      sort_expr: 'name ASC',
     });
     if (res.status == 200 && res.data.data) {
       total.value = res.data.data.total || 0;

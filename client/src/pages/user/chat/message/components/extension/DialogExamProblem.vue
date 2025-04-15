@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ExamProblem from '@/pages/user/tue/exam/ExamProblem.vue';
-import type { ApiExamSubmitProblemResponse } from '@/api/gen/data-contracts.ts';
+import type { ApiCourseSubmitProblemResponse } from '@/api/gen/data-contracts.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { ParticleManager } from '@/components/particle/ParticleManager.ts';
 import { db } from '@/store/data/database.ts';
@@ -12,7 +12,7 @@ const props = defineProps<MessageExtensionBaseProps>();
 
 const userStore = useUserStore();
 
-async function handleSubmitted(res: ApiExamSubmitProblemResponse) {
+async function handleSubmitted(res: ApiCourseSubmitProblemResponse) {
   const score = res.score || 0;
   if (score > 0) {
     if (score == 100) {

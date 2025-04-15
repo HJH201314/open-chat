@@ -30,8 +30,8 @@ const getPermissions = async () => {
     });
     if (res.status == 200 && res.data.data) {
       permissionList.value = (res.data.data.list || []).map((item) => ({
-        label: item.name || '',
-        value: item.path || 0,
+        label: `${item.name} (${item.path})`,
+        value: item.name || 0,
       }));
     }
   } finally {
@@ -41,7 +41,7 @@ const getPermissions = async () => {
 
 // 角色处理
 const permissionList = ref<TransferProps['data']>([]);
-const permissionPaths = ref<string[]>([]);
+const permissionNames = ref<string[]>([]);
 const checked = ref<TransferProps['checked']>([]);
 const handleCheckedChange: TransferProps['onCheckedChange'] = ({
   checked: checkedVal,
@@ -58,7 +58,7 @@ const handleCheckedChange: TransferProps['onCheckedChange'] = ({
   checked.value = checkedVal;
 };
 const handleChange: TransferProps['onChange'] = (newTargetValue) => {
-  permissionPaths.value = newTargetValue as string[];
+  permissionNames.value = newTargetValue as string[];
 };
 
 const formData: T & {
@@ -77,7 +77,7 @@ watch(
       formData.display_name = newData.display_name || '';
       formData.description = newData.description || '';
       formData.active = newData.active || true;
-      permissionPaths.value = (newData.permissions || []).map((item) => item.path || '');
+      permissionNames.value = (newData.permissions || []).map((item) => item.name || '');
     }
     getPermissions();
   },
@@ -91,11 +91,11 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
     prevent();
     return;
   }
-  console.debug(permissionPaths.value);
+  console.debug(permissionNames.value);
   if (props.mode == 'create') {
     await genApi.Manage.roleCreatePost({
       ...formData,
-      permissions: permissionPaths.value.map((item) => ({ path: item }) as ApiSchemaRole),
+      permissions: permissionNames.value.map((item) => ({ name: item }) as ApiSchemaRole),
     });
   } else {
     if (!props.data?.id) return;
@@ -106,10 +106,10 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
       }
     }
     if (
-      JSON.stringify(permissionPaths.value.sort()) !=
-      JSON.stringify(props.data?.permissions?.map((item) => item.path).sort())
+      JSON.stringify(permissionNames.value.sort()) !=
+      JSON.stringify(props.data?.permissions?.map((item) => item.name).sort())
     ) {
-      updateData.permissions = permissionPaths.value.map((item) => ({ path: item }) as ApiSchemaRole);
+      updateData.permissions = permissionNames.value.map((item) => ({ name: item }) as ApiSchemaRole);
     }
     // do update
     if (Object.keys(updateData).length != 0) {
@@ -137,7 +137,7 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
         </t-form-item>
         <t-form-item label="权限" name="permissions" label-align="top">
           <t-transfer
-            v-model="permissionPaths"
+            v-model="permissionNames"
             :data="permissionList"
             :search="true"
             :title="['可选权限', '已选权限']"

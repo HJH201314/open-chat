@@ -34,6 +34,16 @@
   overflow: hidden;
 }
 
+@mixin line-clamp-2 {
+  display: -webkit-box;
+  word-break: break-all;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
 @mixin button-like {
   border-radius: .5rem;
   padding: .5rem;

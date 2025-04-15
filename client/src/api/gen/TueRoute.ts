@@ -11,6 +11,8 @@
  */
 
 import type {
+  ApiCourseGetExamResultsSearch,
+  ApiCourseGetProblemResultsSearch,
   ApiCourseMakeQuestionRequest,
   ApiCourseSubmitExamRequest,
   ApiEntityCommonResponseAny,
@@ -20,11 +22,11 @@ import type {
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblemUserRecord,
   ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
   ApiEntityCommonResponseSchemaExamUserRecord,
   ApiEntityCommonResponseSchemaProblem,
-  ApiEntityParamPagingSort,
   ApiEntityReqUpdateBodySchemaProblem,
   ApiSchemaCourse,
   ApiSchemaExam,
@@ -161,6 +163,32 @@ export namespace Tue {
   }
 
   /**
+   * @description 分页获取用户的考试评分结果（单个考试）
+   * @tags 考试
+   * @name ExamMyRecordsGet
+   * @summary 分页获取考试结果（单个考试）
+   * @request GET:/tue/exam/{id}/my-records
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord` OK
+   */
+  export namespace ExamMyRecordsGet {
+    export type RequestParams = {
+      /** 考试 ID */
+      id: string;
+    };
+    export type RequestQuery = {
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    };
+    export type RequestBody = never;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord;
+  }
+
+  /**
    * @description 随机测验
    * @tags Exam
    * @name ExamRandomPost
@@ -181,7 +209,7 @@ export namespace Tue {
    * @tags 考试
    * @name ExamRecordGet
    * @summary 获取考试结果
-   * @request GET:/tue/exam/record/{id}
+   * @request GET:/tue/exam-record/{id}
    * @response `200` `ApiEntityCommonResponseSchemaExamUserRecord` OK
    */
   export namespace ExamRecordGet {
@@ -196,11 +224,34 @@ export namespace Tue {
   }
 
   /**
+   * @description 分页获取用户的考试评分结果
+   * @tags 考试
+   * @name ExamRecordListPost
+   * @summary 分页获取考试结果
+   * @request POST:/tue/exam-record/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord` OK
+   */
+  export namespace ExamRecordListPost {
+    export type RequestParams = {};
+    export type RequestQuery = {
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
+    };
+    export type RequestBody = ApiCourseGetExamResultsSearch;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord;
+  }
+
+  /**
    * @description 管理员重新评分考试
    * @tags 考试
    * @name ExamRecordRescorePost
    * @summary 重新评分考试
-   * @request POST:/tue/exam/record/{id}/rescore
+   * @request POST:/tue/exam-record/{id}/rescore
    */
   export namespace ExamRecordRescorePost {
     export type RequestParams = {
@@ -214,21 +265,26 @@ export namespace Tue {
   }
 
   /**
-   * @description 分页获取用户的考试评分结果
-   * @tags 考试
-   * @name ExamRecordsGet
-   * @summary 分页获取考试结果
-   * @request GET:/tue/exam/{id}/records
-   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord` OK
+   * @description 获取单个问题结果列表
+   * @tags Exam
+   * @name ExamSingleProblemRecordListPost
+   * @summary 获取单个问题结果列表
+   * @request POST:/tue/exam/single-problem-record/list
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblemUserRecord` OK
    */
-  export namespace ExamRecordsGet {
-    export type RequestParams = {
-      id: string;
+  export namespace ExamSingleProblemRecordListPost {
+    export type RequestParams = {};
+    export type RequestQuery = {
+      end_time?: number;
+      /** 分页参数 */
+      page_num?: number;
+      page_size?: number;
+      sort_expr?: string;
+      start_time?: number;
     };
-    export type RequestQuery = {};
-    export type RequestBody = ApiEntityParamPagingSort;
+    export type RequestBody = ApiCourseGetProblemResultsSearch;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord;
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblemUserRecord;
   }
 
   /**

@@ -34,9 +34,25 @@ export interface ApiChatShareSessionShareRequest {
   share_info?: ApiSchemaSessionShareInfo;
 }
 
+export interface ApiCourseExamRecordSearch {
+  everything?: string;
+}
+
+export interface ApiCourseGetExamResultsSearch {
+  search_data?: ApiCourseExamRecordSearch;
+}
+
+export interface ApiCourseGetProblemResultsSearch {
+  search_data?: ApiCourseProblemRecordSearch;
+}
+
 export interface ApiCourseMakeQuestionRequest {
   description: string;
   type: ApiSchemaProblemType;
+}
+
+export interface ApiCourseProblemRecordSearch {
+  everything?: string;
 }
 
 export interface ApiCourseSubmitExamRequest {
@@ -222,6 +238,15 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProble
   code?: number;
   /** 数据 */
   data?: ApiEntityPaginatedTotalResponseSchemaProblem;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblemUserRecord {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaProblemUserRecord;
   /** 消息 */
   msg?: string;
 }
@@ -483,6 +508,11 @@ export interface ApiEntityPaginatedTotalResponseSchemaProblem {
   total?: number;
 }
 
+export interface ApiEntityPaginatedTotalResponseSchemaProblemUserRecord {
+  list?: ApiSchemaProblemUserRecord[];
+  total?: number;
+}
+
 export interface ApiEntityPaginatedTotalResponseSchemaProvider {
   list?: ApiSchemaProvider[];
   total?: number;
@@ -501,15 +531,6 @@ export interface ApiEntityPaginatedTotalResponseSchemaSchedule {
 export interface ApiEntityPaginatedTotalResponseSchemaUser {
   list?: ApiSchemaUser[];
   total?: number;
-}
-
-export interface ApiEntityParamPagingSort {
-  end_time?: number;
-  /** 分页参数 */
-  page_num?: number;
-  page_size?: number;
-  sort_expr?: string;
-  start_time?: number;
 }
 
 export interface ApiEntityReqUpdateBodySchemaBucket {
@@ -832,6 +853,18 @@ export enum ApiSchemaProblemType {
   EnumFillBlank = "fill_blank",
   EnumShortAnswer = "short_answer",
   EnumTrueFalse = "true_false",
+}
+
+export interface ApiSchemaProblemUserRecord {
+  answer?: ApiSchemaProblemAnswer;
+  comment?: string;
+  created_at?: string;
+  id?: number;
+  /** 组装 */
+  problem?: ApiSchemaProblem;
+  problem_id?: number;
+  score?: number;
+  user_id?: number;
 }
 
 export interface ApiSchemaProvider {
