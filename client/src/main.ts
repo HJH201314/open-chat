@@ -32,4 +32,4 @@ registerThemeColor();
 
 app.mount('#app');
 
-console.info('TUE App is running... 🚀 Build time:', window.buildTime);
+console.info('TUE App is running... 🚀 Built at:', new Date(window.buildTime).toLocaleString());

@@ -63,7 +63,7 @@ export default defineConfig(({ mode }): UserConfig => {
         inject: {
           data: {
             // 模版中的 <%- injectScript %>
-            injectScript: `<script>window.buildTime = '${new Date().toLocaleString()}';</script>`,
+            injectScript: `<script>window.buildTime = ${Date.now()}; window.version = 'v0.0.1';</script>`,
           },
         },
       }),

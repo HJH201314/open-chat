@@ -6,7 +6,7 @@ import useGlobal from '@/commands/useGlobal.ts';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { DialogManager } from '@/components/dialog';
 import { useRoute, useRouter } from 'vue-router';
-import { Back, More } from '@icon-park/vue-next';
+import { Back } from '@icon-park/vue-next';
 import ExamAnswerView from '@/pages/user/tue/exam/answer/ExamAnswerView.vue';
 import DiliButton from '@/components/button/DiliButton.vue';
 
@@ -15,10 +15,12 @@ const props = withDefaults(
     examId: string;
     recordId?: number; // 用户回答 ID
     noPadding?: boolean;
+    showBack?: boolean;
   }>(),
   {
     recordId: 0,
     noPadding: false,
+    showBack: true,
   }
 );
 
@@ -118,26 +120,27 @@ defineExpose({
     :style="{ '--padding': noPadding ? '0' : 'var(--padding-normal)' }"
   >
     <LoadingModal :visible="loadingExam" />
-    <div v-if="exam" class="exam-page-action">
-      <DiliButton ref="button-back" class="exam-page-back" type="tertiary" @click="handleBack">
-        <slot v-if="$slots.back" name="back" />
-        <Back v-else />
-      </DiliButton>
-      <div class="exam-page-title">
-        <div>{{ exam?.name || '' }}</div>
-        <div class="exam-page-title-sub">{{ exam?.description || '' }}</div>
-      </div>
-      <DiliButton ref="button-more" class="exam-page-more" type="tertiary">
-        <More />
-      </DiliButton>
-    </div>
+    <DiliButton v-if="showBack" ref="button-back" class="exam-page-back" type="tertiary" @click="handleBack">
+      <slot v-if="$slots.back" name="back" />
+      <Back v-else />
+    </DiliButton>
     <ExamAnswerView
       ref="fragment-answering"
       class="exam-page-answer-full"
       :exam="exam"
       :record="record"
       :single-problem="true"
-    />
+    >
+      <template #header>
+        <div v-if="exam" class="exam-page-action">
+          <div class="exam-page-title">
+            <div>{{ exam?.name || '' }}</div>
+            <div class="exam-page-title-sub">{{ exam?.description || '' }}</div>
+          </div>
+          <div></div>
+        </div>
+      </template>
+    </ExamAnswerView>
   </div>
 </template>
 
@@ -155,32 +158,17 @@ defineExpose({
   flex-direction: column;
   gap: 0.5rem;
 
-  &-action {
-    padding: 0.25rem;
+  &-back {
     position: absolute;
+    left: var(--padding);
+    top: var(--padding);
     z-index: 1;
-    left: 0;
-    top: 0;
-    right: 0;
+  }
+
+  &-action {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-
-    background: linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.99) 0,
-      rgba(255, 255, 255, 0.9) calc(100% - 0.5rem),
-      rgba(255, 255, 255, 0) 100%
-    );
-
-    .theme-dark & {
-      background: linear-gradient(
-        to bottom,
-        rgba(37, 37, 37, 0.99) 0,
-        rgba(37, 37, 37, 0.9) calc(100% - 0.5rem),
-        rgba(37, 37, 37, 0) 100%
-      );
-    }
+    justify-content: center;
   }
 
   &-title {
@@ -188,12 +176,13 @@ defineExpose({
     flex-direction: column;
     align-items: center;
     color: var(--color-primary);
-    line-height: 1;
+    line-height: 1.2;
+    font-size: 1.1rem;
 
     &-sub {
       @include line-clamp-1;
       color: var(--color-trans-1000);
-      font-size: 0.9em;
+      font-size: 0.9rem;
     }
   }
 
@@ -203,7 +192,6 @@ defineExpose({
 
   &-answer-full {
     width: 100%;
-    padding-top: 1.75rem;
     height: 100%;
   }
 }

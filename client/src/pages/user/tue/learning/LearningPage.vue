@@ -18,6 +18,7 @@ import DiliButton from '@/components/button/DiliButton.vue';
 import { Close, MenuUnfold } from '@icon-park/vue-next';
 import IconButton from '@/components/IconButton.vue';
 import { toggleSidebarExpandKey } from '@/constants/eventBusKeys.ts';
+import { nextFrame } from '@/utils/element.ts';
 
 // 小屏展开侧边栏
 const toggleSideBarExpandBus = useEventBus(toggleSidebarExpandKey);
@@ -99,8 +100,12 @@ const onLoadMoreExam = async (state: InfiniteScrollState) => {
 };
 
 const onExamDetail = (item: ApiSchemaExamUserRecord) => {
+  const isViewing = viewingExam.value;
   examData.selectedRecordId = item.id || 0;
   examData.selectedExamId = item.exam_id || 0;
+  nextFrame(() => {
+    !isViewing && document.querySelector(`#exam-entry-${item.id}`)?.scrollIntoView();
+  });
 };
 
 const onExamBack = () => {
@@ -178,8 +183,12 @@ const onLoadMoreProblem = async (state: InfiniteScrollState) => {
 };
 
 const onProblemDetail = (item: ApiSchemaExamUserRecord) => {
+  const isViewing = viewingProblem.value;
   problemData.selectedRecordId = item.id || 0;
   problemData.selectedProblem = item;
+  nextFrame(() => {
+    !isViewing && document.querySelector(`#problem-entry-${item.id}`)?.scrollIntoView();
+  });
 };
 
 const onProblemBack = () => {
@@ -222,6 +231,7 @@ const { isSmallScreen } = useGlobal();
       <div v-if="currentType == 'exam'" class="exam-container" :class="{ viewing: viewingExam || isSmallScreen }">
         <ExamEntry
           v-for="item in examData.list"
+          :id="`exam-entry-${item.id}`"
           :key="item.id"
           class="exam-item"
           :class="{ active: examData.selectedRecordId == item.id }"
@@ -237,6 +247,7 @@ const { isSmallScreen } = useGlobal();
       >
         <ProblemEntry
           v-for="item in problemData.list"
+          :id="`problem-entry-${item.id}`"
           :key="item.id"
           class="problem-item"
           :class="{ active: problemData.selectedRecordId == item.id }"
@@ -251,9 +262,12 @@ const { isSmallScreen } = useGlobal();
       <ExamAnswerPage
         :exam-id="String(examData.selectedExamId)"
         :record-id="examData.selectedRecordId"
+        :show-back="false"
         no-padding
-        @back="onExamBack"
       />
+      <DiliButton style="position: absolute; left: 0.5rem; top: 0.5rem" type="tertiary" @click="onExamBack">
+        <Close />
+      </DiliButton>
     </div>
     <div v-else-if="viewingProblem" class="view-area-problem">
       <DiliButton style="position: absolute; left: 0.5rem; top: 0.5rem" type="tertiary" @click="onProblemBack">
@@ -300,15 +314,16 @@ const { isSmallScreen } = useGlobal();
     gap: 0.5rem;
     margin: 0.5rem;
 
-    &.viewing {
-      .toggle-exam-problem {
-        min-width: 10rem;
-        flex: auto;
+    .toggle-exam-problem {
+      min-width: 15rem;
 
-        .toggle-item {
-          flex: auto;
-          justify-content: center;
-        }
+      .mobile & {
+        flex: auto;
+      }
+
+      .toggle-item {
+        flex: auto;
+        justify-content: center;
       }
     }
 
@@ -402,6 +417,7 @@ const { isSmallScreen } = useGlobal();
 }
 
 .view-area-exam {
+  position: relative;
   min-width: calc(100% - 15rem);
   height: 100%;
   background-color: var(--color-white);

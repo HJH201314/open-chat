@@ -285,6 +285,9 @@ defineExpose({
           </div>
         </div>
       </div>
+      <div class="app-info">
+        <div>OpenChat</div>
+      </div>
     </div>
   </div>
 </template>
@@ -418,5 +421,14 @@ defineExpose({
       flex-direction: column;
     }
   }
+}
+
+.app-info {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-trans-1500);
+  font-size: 0.8rem;
 }
 </style>

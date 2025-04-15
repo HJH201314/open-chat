@@ -122,12 +122,18 @@ const paginationItemStyle = computed(() => {
   }
   return res;
 });
+
+defineSlots<{
+  default: () => any;
+  header: () => any;
+}>();
 </script>
 
 <template>
   <div class="exam-answer-view">
     <Panel ref="exam-panel" class="exam-panel">
       <main ref="exam-content" class="exam-content">
+        <slot name="header"></slot>
         <template v-for="(problem, i) in exam?.problems || []" :key="problem.problem_id">
           <ExamProblem
             v-show="!singleProblem || currentPage == i + 1"

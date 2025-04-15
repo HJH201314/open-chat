@@ -43,7 +43,7 @@ defineEmits<{
 .problem-entry {
   padding: 0.5rem;
   border-radius: $border-radius;
-  background: var(--color-primary-50);
+  background: var(--color-primary-40);
   cursor: pointer;
   transition: background-color 0.2s $ease-out-circ;
 

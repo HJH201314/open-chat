@@ -192,7 +192,7 @@ defineExpose({
     <DiliButton
       ref="button-back"
       class="exam-page-back"
-      type="secondary"
+      type="tertiary"
       :color="currentStep == 'answering' ? '--color-danger' : ''"
       @click="handleBack"
     >

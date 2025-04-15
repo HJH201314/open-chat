@@ -176,7 +176,7 @@ const onExamRated = async (record: ApiSchemaExamUserRecord) => {
         ref="expand-icon"
         class="dialog-exam-action"
         :class="{ full: fullscreen }"
-        type="secondary"
+        type="tertiary"
         @click="toggleFullscreen"
       >
         <FullScreenTwo v-if="!fullscreen" />
