@@ -117,11 +117,9 @@ function handleMouseLeave() {
 const route = useRoute();
 const router = useRouter();
 
+// 获取 entry 是否激活
 function getEntryActive(entry: SidebarEntry) {
-  if (entry.href) {
-    return route.path.startsWith(entry.href);
-  }
-  return false;
+  return [entry.href && route.path.startsWith(entry.href), entry.active && entry.active(route.path)].some((v) => !!v);
 }
 
 function handleEntryClick(_: Event, entry: SidebarEntry) {
@@ -152,15 +150,16 @@ defineExpose({
   <div class="sidebar" :class="{ place: props.defaultShow, hidden: !showSideBar && props.defaultShow }">
     <!-- 这里用 Modal 来实现：展开后的侧边栏和内容区域的隔离、点击外部收起 -->
     <CommonModal
+      :force-z-index="4096"
       :visible="expandBar"
       :show-close="false"
-      :z-index="1"
       :mask-style="{ background: 'rgba(0 0 0 / 10%)' }"
       close-on-click-mask
       @update:visible="(v) => !v && toggleSidebarExpandBus.emit(false)"
     />
     <div
       ref="sidebar-body"
+      :style="{ 'z-index': expandBar ? 4097 : undefined }"
       :class="{ 'sidebar-body-expand': expandBar, hidden: !showSideBar }"
       class="sidebar-body"
       @mouseleave="handleMouseLeave"

@@ -56,7 +56,7 @@ const loading = ref(false);
 const currentPageNum = ref(1);
 const nextPageNum = ref(0);
 
-useTitle(() => (sessionInfo.value.title ? `${sessionInfo.value.title} | 分享会话` : '分享会话 | OpenChat'));
+useTitle(() => (sessionInfo.value.title ? `${sessionInfo.value.title}` : '') + '分享 | OpenChat');
 
 const getSession = async (touch: boolean = true) => {
   try {
@@ -65,7 +65,8 @@ const getSession = async (touch: boolean = true) => {
       code: code.value,
     });
     if (res.data.code == 200) {
-      sessionInfo.value.title = res.data.data?.name || '';
+      sessionInfo.value.title = res.data.data?.session?.name || '';
+      sessionInfo.value.userId = res.data.data?.user_id ?? 0;
       return true;
     } else {
       switch (res.data.code) {

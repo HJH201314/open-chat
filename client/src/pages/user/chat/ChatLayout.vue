@@ -26,6 +26,7 @@ onMounted(() => {
       name: '对话',
       icon: h(Message),
       href: '/chat/message',
+      active: (path) => path.startsWith('/chat/share'),
     },
     {
       key: 'learn',

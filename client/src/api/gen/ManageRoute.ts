@@ -482,13 +482,13 @@ export namespace Manage {
    * @tags Permission
    * @name PermissionUpdatePost
    * @summary 更新权限
-   * @request POST:/manage/permission/{id}/update
+   * @request POST:/manage/permission/{name}/update
    * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
    */
   export namespace PermissionUpdatePost {
     export type RequestParams = {
-      /** 权限 ID */
-      id: number;
+      /** 权限 name */
+      name: string;
     };
     export type RequestQuery = {};
     export type RequestBody = ApiSchemaPermission;

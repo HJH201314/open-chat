@@ -510,12 +510,12 @@ export class Manage<SecurityDataType = unknown> {
    * @tags Permission
    * @name PermissionUpdatePost
    * @summary 更新权限
-   * @request POST:/manage/permission/{id}/update
+   * @request POST:/manage/permission/{name}/update
    * @response `200` `ApiEntityCommonResponseBool` 更新成功与否
    */
-  permissionUpdatePost = (id: number, permission: ApiSchemaPermission, params: RequestParams = {}) =>
+  permissionUpdatePost = (name: string, permission: ApiSchemaPermission, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseBool, any>({
-      path: `/manage/permission/${id}/update`,
+      path: `/manage/permission/${name}/update`,
       method: "POST",
       body: permission,
       type: ContentType.Json,

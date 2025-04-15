@@ -185,7 +185,7 @@ defineExpose({
           :key="item.id"
           :message="getMsgAnswer(item)"
           :thinking="getMsgThinking(item)"
-          :show-thinking="!(item.extra && Object.entries(item.extra).length > 0)"
+          :show-thinking="!(item.extra && Object.entries(item.extra).filter(([v]) => v != 'tooltips').length > 0)"
           :html-message="getMsgAnswerRendered(item)"
           :streaming="getMsgStreaming(item)"
           :model="item.model"

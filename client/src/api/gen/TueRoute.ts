@@ -12,22 +12,24 @@
 
 import type {
   ApiCourseMakeQuestionRequest,
+  ApiCourseSubmitExamRequest,
   ApiEntityCommonResponseAny,
   ApiEntityCommonResponseBool,
+  ApiEntityCommonResponseCourseSubmitExamResponse,
+  ApiEntityCommonResponseCourseSubmitProblemResponse,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem,
-  ApiEntityCommonResponseExamSubmitExamResponse,
-  ApiEntityCommonResponseExamSubmitProblemResponse,
   ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
   ApiEntityCommonResponseSchemaExamUserRecord,
   ApiEntityCommonResponseSchemaProblem,
+  ApiEntityParamPagingSort,
   ApiEntityReqUpdateBodySchemaProblem,
-  ApiExamSubmitExamRequest,
   ApiSchemaCourse,
   ApiSchemaExam,
   ApiSchemaProblem,
-} from "./data-contracts";
+} from './data-contracts';
 
 export namespace Tue {
   /**
@@ -177,12 +179,12 @@ export namespace Tue {
   /**
    * @description 获取用户的考试评分结果
    * @tags 考试
-   * @name ExamRecordsGet
+   * @name ExamRecordGet
    * @summary 获取考试结果
-   * @request GET:/tue/exam/{id}/records
+   * @request GET:/tue/exam/record/{id}
    * @response `200` `ApiEntityCommonResponseSchemaExamUserRecord` OK
    */
-  export namespace ExamRecordsGet {
+  export namespace ExamRecordGet {
     export type RequestParams = {
       /** 考试记录ID */
       id: number;
@@ -196,11 +198,11 @@ export namespace Tue {
   /**
    * @description 管理员重新评分考试
    * @tags 考试
-   * @name ExamRescorePost
+   * @name ExamRecordRescorePost
    * @summary 重新评分考试
-   * @request POST:/tue/exam/{id}/rescore
+   * @request POST:/tue/exam/record/{id}/rescore
    */
-  export namespace ExamRescorePost {
+  export namespace ExamRecordRescorePost {
     export type RequestParams = {
       /** 考试记录ID */
       id: number;
@@ -212,19 +214,37 @@ export namespace Tue {
   }
 
   /**
+   * @description 分页获取用户的考试评分结果
+   * @tags 考试
+   * @name ExamRecordsGet
+   * @summary 分页获取考试结果
+   * @request GET:/tue/exam/{id}/records
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord` OK
+   */
+  export namespace ExamRecordsGet {
+    export type RequestParams = {
+      id: string;
+    };
+    export type RequestQuery = {};
+    export type RequestBody = ApiEntityParamPagingSort;
+    export type RequestHeaders = {};
+    export type ResponseBody = ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord;
+  }
+
+  /**
    * @description 提交单个问题并验证答案
    * @tags Exam
    * @name ExamSingleProblemSubmitPost
    * @summary 提交单个问题并验证答案
    * @request POST:/tue/exam/single-problem/submit
-   * @response `200` `ApiEntityCommonResponseExamSubmitProblemResponse` OK
+   * @response `200` `ApiEntityCommonResponseCourseSubmitProblemResponse` OK
    */
   export namespace ExamSingleProblemSubmitPost {
     export type RequestParams = {};
     export type RequestQuery = {};
-    export type RequestBody = ApiExamSubmitExamRequest;
+    export type RequestBody = ApiCourseSubmitExamRequest;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseExamSubmitProblemResponse;
+    export type ResponseBody = ApiEntityCommonResponseCourseSubmitProblemResponse;
   }
 
   /**
@@ -233,7 +253,7 @@ export namespace Tue {
    * @name ExamSubmitPost
    * @summary 提交考试答案
    * @request POST:/tue/exam/{id}/submit
-   * @response `200` `ApiEntityCommonResponseExamSubmitExamResponse` OK
+   * @response `200` `ApiEntityCommonResponseCourseSubmitExamResponse` OK
    */
   export namespace ExamSubmitPost {
     export type RequestParams = {
@@ -241,9 +261,9 @@ export namespace Tue {
       id: number;
     };
     export type RequestQuery = {};
-    export type RequestBody = ApiExamSubmitExamRequest;
+    export type RequestBody = ApiCourseSubmitExamRequest;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseExamSubmitExamResponse;
+    export type ResponseBody = ApiEntityCommonResponseCourseSubmitExamResponse;
   }
 
   /**

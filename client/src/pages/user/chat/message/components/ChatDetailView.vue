@@ -3,7 +3,7 @@ import useGlobal from '@/commands/useGlobal.ts';
 import { DialogManager } from '@/components/dialog';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { useIntervalFn, watchArray } from '@vueuse/core';
+import { onStartTyping, useIntervalFn, watchArray } from '@vueuse/core';
 import { computed, h, reactive, ref, useTemplateRef, watch } from 'vue';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
 import { storeToRefs } from 'pinia';
@@ -219,6 +219,7 @@ async function handleSendMessage() {
   const savedInputValue = form.inputValue;
   // 发送消息
   try {
+    let successfullyFinished = false;
     await startReceivingMsg(form.inputValue, {
       onPreSaveMsg() {
         form.inputValue = '';
@@ -231,13 +232,20 @@ async function handleSendMessage() {
       onMessage() {
         form.fixDialogToBottom && dialogDetailRef.value?.scrollDialogListToBottom('smooth');
       },
+      onFinish() {
+        successfullyFinished = true;
+      },
       onError() {
         ToastManager.danger('出错了，换个姿势再试吧~', { position: 'top-right' });
       },
     });
     // 若未到达底部，则提示用户生成完成
     if (!dialogDetailRef.value?.isDialogListReachedBottom) {
-      ToastManager.normal('回答结束', { position: 'top', icon: h(Correct) });
+      ToastManager.normal(successfullyFinished ? '回答完成' : '回答中断', {
+        position: 'top',
+        icon: h(Correct),
+        type: successfullyFinished ? 'success' : 'danger',
+      });
     }
     // 若消息数量小于 3 且第一个消息为用户消息，则启动定时任务来获取会话标题
     if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {
@@ -362,7 +370,19 @@ function handleDeleteDialog() {
   });
 }
 
+const inputPanelRef = useTemplateRef('input-panel');
+onStartTyping(() => {
+  if (inputPanelRef.value && !inputPanelRef.value?.textareaFocused) {
+    inputPanelRef.value.focusTextarea();
+  }
+});
+
 const { isSmallScreen } = useGlobal();
+
+defineExpose({
+  isStreaming: isReceivingMsg,
+  stopStreaming: stopReceivingMsg,
+});
 </script>
 
 <template>

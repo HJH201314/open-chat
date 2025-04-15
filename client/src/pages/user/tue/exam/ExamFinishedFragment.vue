@@ -31,7 +31,7 @@ const { resume: resumeRequest, pause: pauseRequest } = useIntervalFn(
       pauseRequest();
     }
     try {
-      const res = await genApi.Tue.examRecordsGet(props.answerRecordId);
+      const res = await genApi.Tue.examRecordGet(props.answerRecordId);
       if (res.status == 200) {
         switch (res.data.data?.status) {
           case ApiSchemaScoreStatus.EnumStatusCompleted:

@@ -274,8 +274,11 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
       };
 
       let usage: Record<string, any> = {};
+      let saveOnce = false; // 只能保存一次，避免意外的多次更新消息数据
       const saveBotMessage = async (extra: Record<string, any> = {}) => {
+        if (saveOnce) return;
         console.debug('[saveBotMessage]', rawData.msg, renderedMsg.value);
+        saveOnce = true;
         botMsgIndex &&
           (await updateMessage(botMsgIndex, {
             content: rawData.msg,
@@ -284,6 +287,9 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
             extra: extra,
           }));
       };
+      ctrl.signal.addEventListener('abort', () => {
+        saveBotMessage(usage['extra'] || {});
+      });
 
       // 提交处理
       return await api.chat.completionStream(

@@ -8,7 +8,8 @@ import { computed, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useRouter } from 'vue-router';
 import { createDraggable, Draggable } from 'animejs';
-import { nextFrame } from '@/utils/element.ts';
+import { nextFrame, waitUntilNextFrame } from '@/utils/element.ts';
+import { DialogManager } from '@/components/dialog';
 
 const props = withDefaults(
   defineProps<{
@@ -57,6 +58,33 @@ watch(
     }
   }
 );
+
+const chatDetailViewRef = useTemplateRef('chat-detail-view');
+async function handleSessionChange(sessionId: string) {
+  if (chatDetailViewRef.value?.isStreaming) {
+    const res = await DialogManager.commonDialog({
+      presetType: 'danger',
+      title: '对话进行中',
+      content: '是否中断对话并进行切换？',
+      confirmButtonProps: {
+        text: '中断',
+      },
+      actionReversed: false,
+    });
+    if (!res) return;
+    else {
+      chatDetailViewRef.value?.stopStreaming();
+      await waitUntilNextFrame();
+    }
+  }
+  const routerHandler = router.currentRoute.value.name === 'MessageList' ? router.push : router.replace;
+  routerHandler({
+    name: 'MessageDetail',
+    params: {
+      sessionId: sessionId,
+    },
+  });
+}
 
 // 拖拽控制，并且在页面宽度变化时重置 TODO：提升稳定性，降低延迟
 let splitStartX = 0;
@@ -109,6 +137,7 @@ watch(
         v-show="showListView"
         :class="{ 'message-page-record-list-full': !isLargeScreen }"
         class="message-page-record-list"
+        @change="handleSessionChange"
       />
     </Transition>
     <div v-if="showListView && showDialogView" ref="split" class="split"></div>
@@ -126,6 +155,7 @@ watch(
         <ChatDetailView
           v-if="showDialogView && props.sessionId"
           id="dialog-detail-view"
+          ref="chat-detail-view"
           :dialog-id="props.sessionId"
           class="message-page-dialog-detail"
           @back="() => $router.replace('/chat')"

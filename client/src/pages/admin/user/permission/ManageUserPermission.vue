@@ -98,8 +98,8 @@ const columns: PrimaryTableCol<ApiSchemaPermission>[] = [
 
 async function handleActiveChange(row: ApiSchemaPermission, v: boolean) {
   try {
-    if (!row.id) return;
-    const res = await genApi.Manage.permissionUpdatePost(row.id, {
+    if (!row.name) return;
+    const res = await genApi.Manage.permissionUpdatePost(row.name, {
       active: v,
     });
     if (res.status == 200) {

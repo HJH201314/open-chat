@@ -25,10 +25,16 @@ const examInfo = computed(() => (props.msgInfo.extra?.['exam'] || {}) as ApiSche
 const examRecordId = computed(() => (props.msgInfo.extra?.['exam-record-id'] || 0) as number);
 const examRecords = computed(() => (props.msgInfo.extra?.['exam-records'] || []) as ApiSchemaExam[]);
 
+const startExamText = computed(() => {
+  console.log(userStore.userId, props.sessionInfo.userId);
+  if (isOwner.value) return examRecords.value.length ? '再次作答' : examRecordId.value ? '评分中' : '点我开测！';
+  else return '我也试试';
+});
+
 watchEffect(async () => {
   // 作答完成，但评分记录不是最新的时候，根据记录 ID 获取最新的记录
   if (examRecordId.value && (examRecords.value.length == 0 || examRecords.value[0].id != examRecordId.value)) {
-    const { data } = await genApi.Tue.examRecordsGet(examRecordId.value);
+    const { data } = await genApi.Tue.examRecordGet(examRecordId.value);
     if (data.data?.status == ApiSchemaScoreStatus.EnumStatusCompleted) {
       await updateSessionMessageExtra(props.msgInfo.sessionId, props.msgInfo.id, {
         'exam-record-id': examRecordId.value,
@@ -126,7 +132,7 @@ const onExamRated = async (record: ApiSchemaExamUserRecord) => {
         style="flex: 1 0 auto"
         :button-style="{ width: '100%' }"
         type="secondary"
-        :text="examRecords.length ? '再次作答' : examRecordId ? '评分中' : '点我开测！'"
+        :text="startExamText"
         @click="onStartExam"
       />
     </div>

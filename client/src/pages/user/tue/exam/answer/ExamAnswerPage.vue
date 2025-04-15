@@ -64,7 +64,7 @@ const handleLoadExam = async () => {
 const loadUserRecord = async () => {
   if (!props.recordId) return;
 
-  const res = await genApi.Tue.examRecordsGet(props.recordId);
+  const res = await genApi.Tue.examRecordGet(props.recordId);
   if (res.status == 200) {
     record.value = res.data.data!;
   }

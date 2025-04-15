@@ -17,7 +17,7 @@ type CommonDialogInstance = {
 type CommonDialogPropsExtended = CommonDialogProps & {
   // 自动对 icon 和 button 应用样式
   presetType?: 'danger' | 'warning' | 'info' | 'success';
-}
+};
 
 export class DialogManager {
   private static instances: Map<string, CommonDialogInstance> = new Map();
@@ -61,14 +61,14 @@ export class DialogManager {
   public static createDialog = (props: CommonDialogPropsExtended, slots?: CommonDialogSlots) => {
     if (props.presetType) {
       props.type = props.presetType;
+      if (props.presetType == 'danger') {
+        props.actionReversed = props.actionReversed ?? true;
+      }
       props.confirmButtonProps = {
         type: 'secondary',
         color: `var(--color-${props.presetType})`,
         ...props.confirmButtonProps,
-      }
-      if (props.presetType == 'danger') {
-        props.actionReversed = true;
-      }
+      };
     }
 
     // 控制 component 中 CommonDialog 的显隐
@@ -139,7 +139,7 @@ export class DialogManager {
    * @param props
    * @param defaultSlot
    */
-  public static commonDialog = async (props:  CommonDialogPropsExtended, defaultSlot?: VNode) =>
+  public static commonDialog = async (props: CommonDialogPropsExtended, defaultSlot?: VNode) =>
     new Promise<boolean>((resolve) => {
       const dialog = DialogManager.createDialog(
         {

@@ -39,6 +39,31 @@ export interface ApiCourseMakeQuestionRequest {
   type: ApiSchemaProblemType;
 }
 
+export interface ApiCourseSubmitExamRequest {
+  /**
+   * 答案列表
+   * @minItems 1
+   */
+  answers?: ApiCourseSubmitExamRequestAnswer[];
+  /** 答题用时（秒） */
+  time_spent?: number;
+}
+
+export interface ApiCourseSubmitExamRequestAnswer {
+  answer?: any;
+  problem_id?: number;
+}
+
+export interface ApiCourseSubmitExamResponse {
+  /** 记录ID */
+  record_id?: number;
+}
+
+export interface ApiCourseSubmitProblemResponse {
+  comment?: string;
+  score?: number;
+}
+
 export interface ApiEntityCommonResponseAny {
   /** 代码 */
   code?: number;
@@ -93,6 +118,24 @@ export interface ApiEntityCommonResponseChatChatMessageListResponse {
   msg?: string;
 }
 
+export interface ApiEntityCommonResponseCourseSubmitExamResponse {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiCourseSubmitExamResponse;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseCourseSubmitProblemResponse {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiCourseSubmitProblemResponse;
+  /** 消息 */
+  msg?: string;
+}
+
 export interface ApiEntityCommonResponseEntityPaginatedContinuationResponseSchemaUserSession {
   /** 代码 */
   code?: number;
@@ -134,6 +177,15 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse
   code?: number;
   /** 数据 */
   data?: ApiEntityPaginatedTotalResponseSchemaCourse;
+  /** 消息 */
+  msg?: string;
+}
+
+export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord {
+  /** 代码 */
+  code?: number;
+  /** 数据 */
+  data?: ApiEntityPaginatedTotalResponseSchemaExamUserRecord;
   /** 消息 */
   msg?: string;
 }
@@ -206,24 +258,6 @@ export interface ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaUser {
   code?: number;
   /** 数据 */
   data?: ApiEntityPaginatedTotalResponseSchemaUser;
-  /** 消息 */
-  msg?: string;
-}
-
-export interface ApiEntityCommonResponseExamSubmitExamResponse {
-  /** 代码 */
-  code?: number;
-  /** 数据 */
-  data?: ApiExamSubmitExamResponse;
-  /** 消息 */
-  msg?: string;
-}
-
-export interface ApiEntityCommonResponseExamSubmitProblemResponse {
-  /** 代码 */
-  code?: number;
-  /** 数据 */
-  data?: ApiExamSubmitProblemResponse;
   /** 消息 */
   msg?: string;
 }
@@ -424,6 +458,11 @@ export interface ApiEntityPaginatedTotalResponseSchemaCourse {
   total?: number;
 }
 
+export interface ApiEntityPaginatedTotalResponseSchemaExamUserRecord {
+  list?: ApiSchemaExamUserRecord[];
+  total?: number;
+}
+
 export interface ApiEntityPaginatedTotalResponseSchemaModel {
   list?: ApiSchemaModel[];
   total?: number;
@@ -464,6 +503,15 @@ export interface ApiEntityPaginatedTotalResponseSchemaUser {
   total?: number;
 }
 
+export interface ApiEntityParamPagingSort {
+  end_time?: number;
+  /** 分页参数 */
+  page_num?: number;
+  page_size?: number;
+  sort_expr?: string;
+  start_time?: number;
+}
+
 export interface ApiEntityReqUpdateBodySchemaBucket {
   data: ApiSchemaBucket;
   /** @minItems 1 */
@@ -498,31 +546,6 @@ export interface ApiEntityReqUpdateBodySchemaSession {
   data: ApiSchemaSession;
   /** @minItems 1 */
   updates: string[];
-}
-
-export interface ApiExamSubmitExamRequest {
-  /**
-   * 答案列表
-   * @minItems 1
-   */
-  answers?: ApiExamSubmitExamRequestAnswer[];
-  /** 答题用时（秒） */
-  time_spent?: number;
-}
-
-export interface ApiExamSubmitExamRequestAnswer {
-  answer?: any;
-  problem_id?: number;
-}
-
-export interface ApiExamSubmitExamResponse {
-  /** 记录ID */
-  record_id?: number;
-}
-
-export interface ApiExamSubmitProblemResponse {
-  comment?: string;
-  score?: number;
 }
 
 export interface ApiManageUpdateSystemConfigParams {
@@ -735,7 +758,6 @@ export interface ApiSchemaPermission {
   created_at?: string;
   /** 权限描述 */
   description?: string;
-  id?: number;
   /** 所属模块（handler名称） */
   module?: string;
   /** 权限名称 */

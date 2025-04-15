@@ -253,7 +253,7 @@ export namespace Chat {
    * @name SessionSharedGet
    * @summary 获取已分享的用户会话信息
    * @request GET:/chat/session/{session_id}/shared
-   * @response `200` `ApiEntityCommonResponseSchemaSession` 返回数据
+   * @response `200` `ApiEntityCommonResponseSchemaUserSession` 返回数据
    */
   export namespace SessionSharedGet {
     export type RequestParams = {
@@ -267,7 +267,7 @@ export namespace Chat {
     };
     export type RequestBody = never;
     export type RequestHeaders = {};
-    export type ResponseBody = ApiEntityCommonResponseSchemaSession;
+    export type ResponseBody = ApiEntityCommonResponseSchemaUserSession;
   }
 
   /**

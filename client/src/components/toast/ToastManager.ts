@@ -44,7 +44,7 @@ class ToastManager {
   }
 
   static normal(text: string, options?: ToastProps) {
-    this.show({ ...options, text, type: 'normal' });
+    this.show({ text, type: 'normal', ...options });
   }
 
   static warning(text: string, options?: ToastProps) {

@@ -12,10 +12,10 @@ export const useUserStore = defineStore('user', () => {
   const refreshToken = useLocalStorage(USER_REFRESH_TOKEN_KEY, '');
   const avatar = ref('/favicon.ico');
   const currentUser = useSessionStorage<ApiSchemaUser>('current-user', {});
-  const loginStatus = ref<'login' | 'logout' | 'offline'>('logout');
+  const loginStatus = ref<'login' | 'logout' | 'offline'>('offline');
   const isLogin = computed(() => {
     // 状态不为登出即视作已登录，offline 状态允许再次请求进行尝试
-    return loginStatus.value != 'logout';
+    return loginStatus.value == 'login' || (loginStatus.value == 'offline' && accessToken.value != '');
   });
   const username = computed(() => currentUser.value.username ?? '未登录');
   const userId = computed(() => currentUser.value.id ?? -1);

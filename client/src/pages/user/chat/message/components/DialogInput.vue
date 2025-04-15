@@ -4,12 +4,13 @@ import CusSelect from '@/components/dropdown/CusSelect.vue';
 import CusTextarea from '@/components/textarea/CusTextarea.vue';
 import CusToggle from '@/components/toggle/CusToggle.vue';
 import CusSpin from '@/components/spinning/CusSpin.vue';
-import { computed, inject, ref, watchEffect } from 'vue';
+import { computed, inject, ref, useTemplateRef, watchEffect } from 'vue';
 import {
   DialogDetailSlotsInjectionKey,
   type DialogInputEmits,
   type DialogInputProps,
 } from '@/pages/user/chat/message/components/types.ts';
+import { useLocalStorage } from '@vueuse/core';
 
 const props = withDefaults(defineProps<DialogInputProps>(), {
   modelDropdown: () => [],
@@ -33,7 +34,7 @@ const inputUserInput = defineModel<string>('inputUserInput', { default: '' });
 
 const emit = defineEmits<DialogInputEmits>();
 
-const smallInput = ref(true);
+const smallInput = useLocalStorage('chat-dialog-input-small-input', true);
 
 function handleInputKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.isComposing) {
@@ -57,6 +58,12 @@ const detailSlots = inject(DialogDetailSlotsInjectionKey);
 const inputRef = ref<HTMLDivElement>();
 watchEffect(() => {
   detailSlots?.setInputRef(inputRef);
+});
+
+const textareaRef = useTemplateRef('input-textarea');
+defineExpose({
+  textareaFocused: textareaRef?.value?.focused ?? false,
+  focusTextarea: () => textareaRef.value?.focus(),
 });
 </script>
 
@@ -118,6 +125,7 @@ watchEffect(() => {
       <ExpandTextInput v-else size="16" />
     </div>
     <CusTextarea
+      ref="input-textarea"
       v-model="inputUserInput"
       class="dialog-input-textarea"
       :textarea-attr="{ placeholder: '有问题，尽管问' }"

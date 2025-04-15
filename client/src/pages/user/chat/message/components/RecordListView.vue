@@ -8,7 +8,6 @@ import type { SessionInfo } from '@/types/data.ts';
 import { MenuUnfold, Plus, ShareOne, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
 import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
-import { useRouter } from 'vue-router';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
@@ -50,13 +49,13 @@ async function handleAddRecord(defaultBotId?: number) {
   const sessionId = await dataStore.addDialog(defaultBotId ?? 0);
   if (!sessionId) return;
 
-  handleListItemClick(sessionId);
   roleForm.modalVisible = false;
   if (roleForm.remember) {
     settingStore.saveSetting('roleRemember', true);
     settingStore.saveSetting('roleDefaultId', defaultBotId?.toString());
   }
-  ToastManager.normal('开始对话吧~', { position: 'top' });
+
+  handleListItemClick(sessionId);
 }
 
 function handleListAddClick() {
@@ -130,17 +129,9 @@ function handleSidebarUnfold() {
   toggleSideBarExpandBus.emit(true);
 }
 
-const router = useRouter();
-
 // 点击对话列表项
 function handleListItemClick(id: string) {
-  const routerHandler = router.currentRoute.value.name === 'MessageList' ? router.push : router.replace;
-  routerHandler({
-    name: 'MessageDetail',
-    params: {
-      sessionId: id,
-    },
-  });
+  emit('change', id);
 }
 
 const roleForm = reactive({

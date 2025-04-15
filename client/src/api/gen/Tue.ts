@@ -12,24 +12,26 @@
 
 import type {
   ApiCourseMakeQuestionRequest,
+  ApiCourseSubmitExamRequest,
   ApiEntityCommonResponseAny,
   ApiEntityCommonResponseBool,
+  ApiEntityCommonResponseCourseSubmitExamResponse,
+  ApiEntityCommonResponseCourseSubmitProblemResponse,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaCourse,
+  ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord,
   ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaProblem,
-  ApiEntityCommonResponseExamSubmitExamResponse,
-  ApiEntityCommonResponseExamSubmitProblemResponse,
   ApiEntityCommonResponseSchemaCourse,
   ApiEntityCommonResponseSchemaExam,
   ApiEntityCommonResponseSchemaExamUserRecord,
   ApiEntityCommonResponseSchemaProblem,
+  ApiEntityParamPagingSort,
   ApiEntityReqUpdateBodySchemaProblem,
-  ApiExamSubmitExamRequest,
   ApiSchemaCourse,
   ApiSchemaExam,
   ApiSchemaProblem,
-} from "./data-contracts";
-import type { HttpClient, RequestParams } from "./http-client";
-import { ContentType } from "./http-client";
+} from './data-contracts';
+import type { HttpClient, RequestParams } from './http-client';
+import { ContentType } from './http-client';
 
 export class Tue<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;
@@ -192,14 +194,14 @@ export class Tue<SecurityDataType = unknown> {
    * @description 获取用户的考试评分结果
    *
    * @tags 考试
-   * @name ExamRecordsGet
+   * @name ExamRecordGet
    * @summary 获取考试结果
-   * @request GET:/tue/exam/{id}/records
+   * @request GET:/tue/exam/record/{id}
    * @response `200` `ApiEntityCommonResponseSchemaExamUserRecord` OK
    */
-  examRecordsGet = (id: number, params: RequestParams = {}) =>
+  examRecordGet = (id: number, params: RequestParams = {}) =>
     this.http.request<ApiEntityCommonResponseSchemaExamUserRecord, any>({
-      path: `/tue/exam/${id}/records`,
+      path: `/tue/exam/record/${id}`,
       method: "GET",
       type: ContentType.Json,
       format: "json",
@@ -209,15 +211,33 @@ export class Tue<SecurityDataType = unknown> {
    * @description 管理员重新评分考试
    *
    * @tags 考试
-   * @name ExamRescorePost
+   * @name ExamRecordRescorePost
    * @summary 重新评分考试
-   * @request POST:/tue/exam/{id}/rescore
+   * @request POST:/tue/exam/record/{id}/rescore
    */
-  examRescorePost = (id: number, params: RequestParams = {}) =>
+  examRecordRescorePost = (id: number, params: RequestParams = {}) =>
     this.http.request<any, any>({
-      path: `/tue/exam/${id}/rescore`,
+      path: `/tue/exam/record/${id}/rescore`,
       method: "POST",
       type: ContentType.Json,
+      ...params,
+    });
+  /**
+   * @description 分页获取用户的考试评分结果
+   *
+   * @tags 考试
+   * @name ExamRecordsGet
+   * @summary 分页获取考试结果
+   * @request GET:/tue/exam/{id}/records
+   * @response `200` `ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord` OK
+   */
+  examRecordsGet = (id: string, req: ApiEntityParamPagingSort, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseEntityPaginatedTotalResponseSchemaExamUserRecord, any>({
+      path: `/tue/exam/${id}/records`,
+      method: "GET",
+      body: req,
+      type: ContentType.Json,
+      format: "json",
       ...params,
     });
   /**
@@ -227,10 +247,10 @@ export class Tue<SecurityDataType = unknown> {
    * @name ExamSingleProblemSubmitPost
    * @summary 提交单个问题并验证答案
    * @request POST:/tue/exam/single-problem/submit
-   * @response `200` `ApiEntityCommonResponseExamSubmitProblemResponse` OK
+   * @response `200` `ApiEntityCommonResponseCourseSubmitProblemResponse` OK
    */
-  examSingleProblemSubmitPost = (request: ApiExamSubmitExamRequest, params: RequestParams = {}) =>
-    this.http.request<ApiEntityCommonResponseExamSubmitProblemResponse, any>({
+  examSingleProblemSubmitPost = (request: ApiCourseSubmitExamRequest, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseCourseSubmitProblemResponse, any>({
       path: `/tue/exam/single-problem/submit`,
       method: "POST",
       body: request,
@@ -245,10 +265,10 @@ export class Tue<SecurityDataType = unknown> {
    * @name ExamSubmitPost
    * @summary 提交考试答案
    * @request POST:/tue/exam/{id}/submit
-   * @response `200` `ApiEntityCommonResponseExamSubmitExamResponse` OK
+   * @response `200` `ApiEntityCommonResponseCourseSubmitExamResponse` OK
    */
-  examSubmitPost = (id: number, request: ApiExamSubmitExamRequest, params: RequestParams = {}) =>
-    this.http.request<ApiEntityCommonResponseExamSubmitExamResponse, any>({
+  examSubmitPost = (id: number, request: ApiCourseSubmitExamRequest, params: RequestParams = {}) =>
+    this.http.request<ApiEntityCommonResponseCourseSubmitExamResponse, any>({
       path: `/tue/exam/${id}/submit`,
       method: "POST",
       body: request,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, type TextareaHTMLAttributes, watch } from 'vue';
-import { useTextareaAutosize } from '@vueuse/core';
+import { useFocus, useTextareaAutosize } from '@vueuse/core';
 
 const props = withDefaults(
   defineProps<{
@@ -39,11 +39,14 @@ useTextareaAutosize({
   input: modelValue,
 });
 
+const { focused } = useFocus(textareaRef);
+
 function handleWrapperClick() {
   textareaRef.value?.focus();
 }
 
 defineExpose({
+  focused,
   focus: () => {
     textareaRef.value?.focus();
   },

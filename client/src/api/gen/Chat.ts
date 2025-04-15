@@ -268,7 +268,7 @@ export class Chat<SecurityDataType = unknown> {
    * @name SessionSharedGet
    * @summary 获取已分享的用户会话信息
    * @request GET:/chat/session/{session_id}/shared
-   * @response `200` `ApiEntityCommonResponseSchemaSession` 返回数据
+   * @response `200` `ApiEntityCommonResponseSchemaUserSession` 返回数据
    */
   sessionSharedGet = (
     sessionId: string,
@@ -279,7 +279,7 @@ export class Chat<SecurityDataType = unknown> {
     },
     params: RequestParams = {},
   ) =>
-    this.http.request<ApiEntityCommonResponseSchemaSession, any>({
+    this.http.request<ApiEntityCommonResponseSchemaUserSession, any>({
       path: `/chat/session/${sessionId}/shared`,
       method: "GET",
       query: query,

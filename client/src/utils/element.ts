@@ -27,3 +27,7 @@ export const nextFrame = (cb: () => any) => {
     });
   });
 };
+
+export const waitUntilNextFrame = () => new Promise<void>((resolve) => {
+  nextFrame(() => resolve());
+});

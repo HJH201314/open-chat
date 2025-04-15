@@ -3,7 +3,7 @@ import { computed, ref, useTemplateRef, type VNode, watch } from 'vue';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import {
-  type ApiExamSubmitProblemResponse,
+  type ApiCourseSubmitExamResponse,
   type ApiSchemaExamUserRecordAnswer,
   type ApiSchemaProblem,
   ApiSchemaProblemType,
@@ -52,7 +52,7 @@ const answerVM = defineModel<AnswerType>('answer');
 
 const emit = defineEmits<{
   (e: 'answer-change', answer: AnswerType): void;
-  (e: 'submitted', result: ApiExamSubmitProblemResponse): void;
+  (e: 'submitted', result: ApiCourseSubmitExamResponse): void;
 }>();
 
 const problemInfo = computed(() => props.problem || ({} as ApiSchemaProblem));
@@ -70,7 +70,7 @@ const formattedUserAnswer = computed(() => {
     case ApiSchemaProblemType.EnumSingleChoice:
     case ApiSchemaProblemType.EnumMultipleChoice: {
       if (typeof ans === 'object' && ans.length) {
-        return ans.map((v) => indexToOption(v)).join(', ');
+        return ans.map((v) => indexToOption(Number(v) - 1)).join(', ');
       }
       break;
     }

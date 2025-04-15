@@ -36,7 +36,7 @@ const { modalMap, openModal, closeModal } = useCommonModalStore();
 
 const myId = ref(getRandomString(10)); // 模态框全局唯一 ID
 const myDepth = computed(() => modalMap[myId.value] || 0);
-const zIndex = computed(() => props.zIndex || myDepth.value * 2 + 1000);
+const zIndex = computed(() => props.forceZIndex || myDepth.value * 2 + 1000);
 
 const showModal = ref(false);
 
