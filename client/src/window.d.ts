@@ -1,3 +1,4 @@
 interface Window {
-  buildTime: string;
+  buildTime: number;
+  version: string;
 }
