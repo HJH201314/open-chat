@@ -3,16 +3,16 @@ import ExamProblem from '@/pages/user/tue/exam/ExamProblem.vue';
 import type { ApiCourseSubmitProblemResponse } from '@/api/gen/data-contracts.ts';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { ParticleManager } from '@/components/particle/ParticleManager.ts';
-import { db } from '@/store/data/database.ts';
-import genApi from '@/api/gen-api.ts';
 import type { MessageExtensionBaseProps } from '@/pages/user/chat/message/components/extension/types.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
+import type { AnswerType } from '@/pages/user/tue/exam/types.ts';
+import { updateSessionMessageExtra } from '@/store/data/useSession.ts';
 
 const props = defineProps<MessageExtensionBaseProps>();
 
 const userStore = useUserStore();
 
-async function handleSubmitted(res: ApiCourseSubmitProblemResponse) {
+async function handleSubmitted(res: ApiCourseSubmitProblemResponse, answer?: AnswerType) {
   const score = res.score || 0;
   if (score > 0) {
     if (score == 100) {
@@ -22,20 +22,12 @@ async function handleSubmitted(res: ApiCourseSubmitProblemResponse) {
     }
     ParticleManager.show();
     try {
-      await db.messages.where({ sessionId: props.msgInfo.sessionId, id: props.msgInfo.id }).modify((obj) => {
-        obj['extra'] = {
-          ...obj['extra'],
-          'question-finished': true,
-          score: score,
-        };
+      console.log('updateSessionMessageExtra', props.msgInfo.sessionId, props.msgInfo.id, answer);
+      await updateSessionMessageExtra(props.msgInfo.sessionId, props.msgInfo.id, {
+        'question-finished': true,
+        'my-answer': answer,
+        score: score,
       });
-      props.msgInfo.messageId &&
-        (await genApi.Chat.messageUpdatePost(props.msgInfo.messageId, {
-          extra: {
-            'question-finished': true,
-            score: score,
-          },
-        }));
     } finally {
       // do nothing
     }
@@ -48,6 +40,8 @@ async function handleSubmitted(res: ApiCourseSubmitProblemResponse) {
 <template>
   <ExamProblem
     v-if="msgInfo.extra?.['question']"
+    :answer="msgInfo.extra?.['my-answer']"
+    :user-answer="{ answer: msgInfo.extra?.['my-answer'] }"
     :problem="msgInfo.extra?.['question']"
     :show-answer="msgInfo.extra?.['question-finished']"
     choice-style="background"

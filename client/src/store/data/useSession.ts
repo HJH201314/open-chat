@@ -224,7 +224,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
       callback?.onPreSaveMsg?.(userMsgIndex, botMsgIndex);
 
       // 观测回答的变化
-      const stopWatchingContent = watchThrottled(
+      watchThrottled(
         () => renderedMsg.value,
         (v, ov) => {
           if (v == ov) return;
@@ -233,7 +233,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
         { throttle: 150 }
       );
       // 观测思考的变化
-      const stopWatchingReasoning = watchThrottled(
+      watchThrottled(
         () => rawData.think,
         (v, ov) => {
           if (v == ov) return;
@@ -288,6 +288,7 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
           }));
       };
       ctrl.signal.addEventListener('abort', () => {
+        console.debug('[abort]', rawData.msg, renderedMsg.value);
         saveBotMessage(usage['extra'] || {});
       });
 
@@ -305,9 +306,10 @@ const useSession = (sessionId: MaybeRefOrGetter<string>, queryMessage: boolean =
         async (event) => {
           if (event.event === 'done') {
             // 停止截流观测
-            stopWatchingContent();
-            stopWatchingReasoning();
+            // stopWatchingContent();
+            // stopWatchingReasoning();
             // 当接收到服务器端的结束标记时，数据库保存消息
+            console.debug('[done]', rawData.msg, renderedMsg.value);
             saveBotMessage(usage['extra'] || {}).finally(() => {
               callback?.onFinish?.(renderedMsg.value); // 消息接收完毕回调
             });

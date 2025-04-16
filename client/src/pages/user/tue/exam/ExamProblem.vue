@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, type VNode, watch } from 'vue';
+import { computed, ref, toRaw, useTemplateRef, type VNode, watch } from 'vue';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import {
@@ -34,7 +34,7 @@ const props = withDefaults(
     choiceStyle?: CusRadioGroupProps['displayStyle']; // 自定义选项展示样式
     choiceType?: CusRadioGroupProps['type']; // 自定义选项展示类型
 
-    userAnswer?: ApiSchemaExamUserRecordAnswer; // 用户回答，传入后会特殊展示用户的选择
+    userAnswer?: ApiSchemaExamUserRecordAnswer; // 用户回答，传入后会展示“我的回答”；如需改变输入/选项的内容，需要传入 answer
     showSubmit?: boolean; // 展示单题提交按钮
     showExplainAfterSubmit?: boolean; // 提交后是否展示答案？
     showAnswer?: boolean; // 展示答案
@@ -52,7 +52,7 @@ const answerVM = defineModel<AnswerType>('answer');
 
 const emit = defineEmits<{
   (e: 'answer-change', answer: AnswerType): void;
-  (e: 'submitted', result: ApiCourseSubmitProblemResponse): void;
+  (e: 'submitted', result: ApiCourseSubmitProblemResponse, answer?: AnswerType): void;
 }>();
 
 const problemInfo = computed(() => props.problem || ({} as ApiSchemaProblem));
@@ -215,7 +215,7 @@ async function handleSubmit() {
       time_spent: 0,
     });
     if (res.data.data) {
-      emit('submitted', res.data.data);
+      emit('submitted', res.data.data, toRaw(answerVM.value));
     }
   } finally {
     submitLoading.value = false;
