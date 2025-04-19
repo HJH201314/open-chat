@@ -227,6 +227,7 @@ function handleUnselectProvider() {
 
 function handleClickProvider(row: ApiSchemaModel) {
   if (row.provider_id && row.provider_id != providerId.value) {
+    pageNum.value = 1;
     const routerFunc = providerId.value ? router.replace : router.push;
     routerFunc({
       name: 'ManageSystemModel',

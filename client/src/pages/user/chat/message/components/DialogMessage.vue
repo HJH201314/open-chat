@@ -268,7 +268,7 @@ defineSlots<{
       flex: 1; // 模型的回复默认占满剩余空间
       padding: 0;
       background-color: transparent;
-      color: $color-black;
+      color: var(--color-black);
     }
 
     &-body {

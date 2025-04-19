@@ -448,7 +448,7 @@ const { isSmallScreen } = useGlobal();
 
     &:not(&-selected):hover {
       // border-radius: 0;
-      background-color: var(--color-grey-100);
+      background-color: var(--color-trans-100);
     }
 
     &-selected {

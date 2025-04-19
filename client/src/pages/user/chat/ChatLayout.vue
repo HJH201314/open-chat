@@ -69,6 +69,7 @@ onMounted(() => {
       class="chat-panel-wrapper"
     >
       <Panel class="panel">
+        <slot />
         <RouterView v-slot="{ Component }">
           <Transition name="slide-fade">
             <component :is="Component" class="child-view" />

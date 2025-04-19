@@ -85,8 +85,8 @@ function handleGoDetail() {
   <main class="exam-finished">
     <p class="exam-finished-description">恭喜！{{ timeSpent ? `耗时: ${timeSpent} 秒` : '' }}</p>
     <p v-if="score !== undefined">
-      <span class="exam-finished-score">{{ score }} </span>
-      <span v-if="examTotalScore" class="exam-finished-total-score"> / {{ examTotalScore }}</span>
+      <span class="exam-finished-score">{{ score / 100 }} </span>
+      <span v-if="examTotalScore" class="exam-finished-total-score"> / {{ examTotalScore / 100 }}</span>
     </p>
     <p v-else class="exam-finished-description">你已完成测验，请稍后查看分数~</p>
     <DiliButton

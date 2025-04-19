@@ -3,9 +3,11 @@
 const props = withDefaults(
   defineProps<{
     size?: string;
+    showBackground?: boolean;
   }>(),
   {
     size: '32px',
+    showBackground: true,
   }
 );
 </script>
@@ -62,6 +64,7 @@ const props = withDefaults(
     </defs>
     <g id="surface1">
       <path
+        v-if="showBackground"
         style="stroke: none; fill-rule: nonzero; fill: #e3f1f1; fill-opacity: 1"
         d="M 16 0 L 32 0 C 40.835938 0 48 7.164062 48 16 L 48 32 C 48 40.835938 40.835938 48 32 48 L 16 48 C 7.164062 48 0 40.835938 0 32 L 0 16 C 0 7.164062 7.164062 0 16 0 Z M 16 0 "
       />

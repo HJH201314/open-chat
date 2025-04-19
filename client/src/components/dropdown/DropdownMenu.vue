@@ -19,8 +19,8 @@
 <script lang="ts" setup>
 import DropdownMenuItem from '@/components/dropdown/DropdownMenuItem.vue';
 import { type DropdownMenuInnerProps, type DropdownOption } from '@/components/dropdown/types';
-import { useElementBounding } from '@vueuse/core';
-import { computed, defineProps, reactive, useTemplateRef } from 'vue';
+import { useElementBounding, useWindowSize } from '@vueuse/core';
+import { computed, defineProps, reactive, useTemplateRef, watchEffect } from 'vue';
 
 const props = withDefaults(
   defineProps<
@@ -40,6 +40,7 @@ const currentShowingPath = defineModel<string[]>('currentShowingPath', { default
 const selfRef = useTemplateRef('menu');
 
 const { height: selfHeight, width: selfWidth } = useElementBounding(selfRef);
+const { height: windowHeight, width: windowWidth } = useWindowSize();
 const {
   left: parentLeft,
   right: parentRight,
@@ -53,13 +54,46 @@ const pos = reactive({
   right: computed(() => `${parentRight.value}px`),
   bottom: computed(() => `${parentBottom.value}px`),
 });
-const topTop = computed(() => `${parentTop.value - selfHeight.value}px`);
-const leftLeft = computed(() => `${parentLeft.value - selfWidth.value}px`);
 // 菜单最小宽度
 const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `unset`));
 // 遮罩放大倍数
 // const scaleY = computed(() => `${window.outerHeight / selfHeight.value}`);
 // const scaleX = computed(() => `${window.outerWidth / selfWidth.value}`);
+const finalPos = reactive({
+  top: '0',
+  left: '0',
+});
+watchEffect(() => {
+  let topNum = 0;
+  let leftNum = 0;
+  // 根据方位和父元素位置计算出菜单的位置
+  switch (props.position) {
+    case 'top':
+      topNum = parentTop.value - selfHeight.value;
+      leftNum = parentLeft.value;
+      break;
+    case 'bottom':
+      topNum = parentBottom.value;
+      leftNum = parentLeft.value;
+      break;
+    case 'left':
+      topNum = parentTop.value;
+      leftNum = parentLeft.value - selfWidth.value;
+      break;
+    case 'right':
+      topNum = parentTop.value;
+      leftNum = parentRight.value;
+  }
+
+  // 菜单超出屏幕边界时，调整位置
+  if (topNum < 0) topNum = 0;
+  if (leftNum < 0) leftNum = 0;
+  if (topNum + selfHeight.value > windowHeight.value) topNum = windowHeight.value - selfHeight.value;
+  if (leftNum + selfWidth.value > windowWidth.value) leftNum = windowWidth.value - selfWidth.value;
+
+  finalPos.top = topNum + 'px';
+  finalPos.left = leftNum + 'px';
+});
 </script>
 
 <style lang="scss" scoped>
@@ -67,6 +101,8 @@ const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `uns
 
 .dropdown-menu {
   position: fixed;
+  top: v-bind('finalPos.top');
+  left: v-bind('finalPos.left');
   background-color: var(--color-white);
   list-style: none;
   padding: 0;
@@ -74,6 +110,10 @@ const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `uns
   border-radius: 8px;
   z-index: calc(2000 + 2 * v-bind(_depth));
   min-width: v-bind(minWidth);
+  // 限制最大高度和宽度
+  max-height: calc(100 * var(--vh));
+  max-width: 100vw;
+  overflow: auto; // 超过最大大小时可以滚动
 
   //@media screen and (max-width: $screen-sm) {
   //  left: 50% !important;
@@ -90,28 +130,6 @@ const minWidth = computed(() => (!props._depth ? `${parentWidth.value}px` : `uns
   //    background-color: rgba(0 0 0 / 50%);
   //  }
   //}
-
-  &--top {
-    top: v-bind(topTop);
-    left: v-bind('pos.left');
-  }
-
-  &--bottom {
-    top: v-bind('pos.bottom');
-    left: v-bind('pos.left');
-  }
-
-  &--left {
-    left: v-bind(leftLeft);
-    top: v-bind('pos.top');
-    //transform: translateY(-50%);
-  }
-
-  &--right {
-    left: v-bind('pos.right');
-    top: v-bind('pos.top');
-    //transform: translateY(-50%);
-  }
 }
 </style>
 <style lang="scss">

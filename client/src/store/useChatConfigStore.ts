@@ -1,12 +1,13 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useArrayMap, useLocalStorage } from '@vueuse/core';
-import { computed, h, watch } from 'vue';
+import { computed, h, type VNode, watch } from 'vue';
 import genApi from '@/api/gen-api.ts';
 import type { ApiEntityConfigChatModel, ApiSchemaPreset } from '@/api/gen/data-contracts.ts';
 import type { DropdownOption } from '@/components/dropdown/types.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import LogoDeepSeek from '@/components/logo/LogoDeepSeek.vue';
+import LogoOpenAI from '@/components/logo/LogoOpenAI.vue';
 
 export const useChatConfigStore = defineStore('chat-config', () => {
   // 模型数据
@@ -129,7 +130,11 @@ export const useChatConfigStore = defineStore('chat-config', () => {
 });
 
 const convertModelConfigDropdown = (model: ApiEntityConfigChatModel) => {
-  const modelLogo = model.icon == 'deepseek' ? h(LogoDeepSeek, { showBackground: false }) : model.icon;
+  const modelIconMap: Record<string, () => VNode> = {
+    deepseek: () => h(LogoDeepSeek, { showBackground: false }),
+    openai: () => h(LogoOpenAI, { showBackground: false }),
+  };
+  const modelLogo = model.icon ? (modelIconMap[model.icon] ? modelIconMap[model.icon]() : model.icon) : undefined;
   // 基础映射：display_name -> label，name -> value
   const dropdownOption: DropdownOption = {
     value: model.name || '',

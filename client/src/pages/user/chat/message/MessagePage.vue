@@ -176,7 +176,7 @@ watch(
     flex-shrink: 0;
     width: 2px;
     height: 100%;
-    background-color: var(--color-grey-100);
+    background-color: var(--color-trans-100);
     opacity: 0.233;
   }
 

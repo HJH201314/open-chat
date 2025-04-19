@@ -156,8 +156,8 @@ defineExpose({
             <!--              </span>-->
             <!--            </div>-->
             <div class="setting-list-item">
-              <span class="setting-list-item__title"> Markdown 缓存结果渲染 </span>
-              <span class="setting-list-item__subtitle"> 使用缓存结果渲染对话，提升长对话加载效率 </span>
+              <span class="setting-list-item__title"> Markdown 渲染结果缓存 </span>
+              <span class="setting-list-item__subtitle"> 缓存渲染结果，提升长对话加载效率 </span>
               <span class="setting-list-item__value">
                 <CusToggle v-model="editingValue.markdownCache" />
               </span>

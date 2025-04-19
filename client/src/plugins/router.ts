@@ -10,6 +10,11 @@ const router = createRouter({
       redirect: '/chat/message',
     },
     {
+      path: '/test',
+      name: 'TestPage',
+      component: () => import('@/pages/test/TestPage.vue'),
+    },
+    {
       path: '/chat',
       name: 'ChatModule',
       redirect: '/chat/message',

@@ -1,8 +1,8 @@
 <template>
-  <div ref="dropdown" :class="{ active: isOpen, disabled: disabled, [backgroundModeClassName]: true }" class="dropdown">
+  <div ref="dropdown" :class="{ active: isOpen, disabled: disabled }" class="dropdown">
     <div
       ref="dropdown-toggle"
-      :class="{ 'dropdown-toggle--active': isOpen }"
+      :class="{ 'dropdown-toggle--active': isOpen, [backgroundModeClassName]: true }"
       :style="toggleStyle"
       class="dropdown-toggle"
       @click="toggleDropdown"
@@ -47,7 +47,7 @@ import CommonModal from '@/components/modal/CommonModal.vue';
 // 双向绑定 modelValue: 当前选中项的 value
 const selectedValue = defineModel<string>('modelValue');
 const props = withDefaults(defineProps<CusSelectProps>(), {
-  backgroundMode: 'color',
+  backgroundMode: 'transparent',
   placeholder: '请选择',
   position: 'bottom',
   _depth: 0,

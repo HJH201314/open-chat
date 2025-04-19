@@ -154,13 +154,19 @@ $dialog-max-width: 54rem;
   transform: translate(-50%, 0);
   display: flex;
   flex-direction: column;
-  background-color: var(--color-grey-50);
   border: 1px solid var(--color-trans-50);
   border-radius: 0.5rem 0.5rem 0 0;
   transition: all 0.2s $ease-out-circ;
   animation: input-flow-out-bottom-anim 0.2s $ease-out-circ reverse;
   overflow: hidden;
   z-index: 2; // 配合 DialogDetail 中的布局
+
+  .theme-light & {
+    background-color: #f9f9f9;
+  }
+  .theme-dark & {
+    background-color: #2a2a2a;
+  }
 
   &.hide {
     animation: input-flow-out-bottom-anim 0.2s $ease-out-circ;
@@ -254,7 +260,7 @@ $dialog-max-width: 54rem;
       border-radius: 0.5rem;
 
       &:hover {
-        background-color: var(--color-grey-200);
+        background-color: var(--color-trans-200);
       }
     }
   }
