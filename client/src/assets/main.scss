@@ -176,6 +176,10 @@ textarea::-webkit-scrollbar {
   transition: all 0.2s variables.$ease-out-circ;
 }
 
+.no-transition * {
+  transition: none !important;
+}
+
 /* 闪烁光标，一般配合typer使用 */
 .typed-cursor {
   margin-left: 10px;

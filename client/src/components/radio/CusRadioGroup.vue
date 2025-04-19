@@ -6,7 +6,7 @@ import { computed, type CSSProperties, onMounted, onUnmounted, provide, ref, toR
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
   name: getRandomString(5),
   type: 'highlight',
-  backgroundMode: 'color',
+  backgroundMode: 'transparent',
   direction: 'row',
   barAnimation: true,
   displayStyle: 'background',

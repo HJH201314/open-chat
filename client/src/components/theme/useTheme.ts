@@ -72,6 +72,21 @@ export const registerThemeColor = (colorPrimary?: string, name: string = 'defaul
 };
 
 /**
+ * 临时关闭过渡效果，避免动画导致卡顿
+ * @param cb
+ */
+const scopeNoTransition = (cb: () => void) => {
+  try {
+    document.documentElement.classList.add('no-transition');
+    cb();
+  } finally {
+    nextFrame(() => {
+      document.documentElement.classList.remove('no-transition');
+    });
+  }
+};
+
+/**
  * 将主题色重置为已保存的主题色，默认值兜底
  */
 export const resetThemeColor = () => {
@@ -116,10 +131,14 @@ export const useTheme = defineStore('theme', () => {
   watch(
     () => currentTheme.value,
     () => {
-      document.documentElement.classList.remove('theme-light', 'theme-dark');
-      document.documentElement.classList.add(`theme-${currentTheme.value}`);
-      nextFrame(() => {
-        registerThemeColor();
+      // 切换主题时，需要移除所有过渡效果，避免动画导致卡顿
+      scopeNoTransition(() => {
+        // 切换主题：移除旧主题，添加新主题
+        document.documentElement.classList.remove('theme-light', 'theme-dark');
+        document.documentElement.classList.add(`theme-${currentTheme.value}`);
+        nextFrame(() => {
+          registerThemeColor();
+        });
       });
     },
     { immediate: true }
@@ -175,9 +194,11 @@ export const useTheme = defineStore('theme', () => {
       const { resume: startColorful, pause: stopColorful } = useIntervalFn(
         () => {
           if (currentColorful && settingStore.settings.themeColorful) {
-            currentColorful.spin(1);
-            registerThemeColor(currentColorful.toHexString());
-            syncCssVars();
+            currentColorful.spin(Math.random());
+            scopeNoTransition(() => {
+              registerThemeColor(currentColorful.toHexString());
+              syncCssVars();
+            });
           } else {
             stopColorful();
           }
@@ -194,8 +215,10 @@ export const useTheme = defineStore('theme', () => {
           } else {
             stopColorful();
             currentColorful = tinycolor(currentThemeColor.value);
-            registerThemeColor();
-            syncCssVars();
+            scopeNoTransition(() => {
+              registerThemeColor();
+              syncCssVars();
+            });
           }
         },
         { immediate: true }
@@ -205,8 +228,10 @@ export const useTheme = defineStore('theme', () => {
         () => currentThemeColor.value,
         (newColor) => {
           if (newColor) {
-            registerThemeColor();
-            syncCssVars();
+            scopeNoTransition(() => {
+              registerThemeColor();
+              syncCssVars();
+            });
           }
         }
       );

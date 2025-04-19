@@ -105,14 +105,14 @@ defineExpose({
           v-model="inputWithContext"
           highlight
           label="上下文"
-          style="font-size: 0.75rem; opacity: 0.75"
+          style="font-size: 0.8rem"
         ></CusToggle>
         <CusToggle
           v-if="showSearchToggle"
           v-model="inputWithSearch"
           highlight
           label="联网搜索"
-          style="font-size: 0.75rem; opacity: 0.75"
+          style="font-size: 0.8rem"
         ></CusToggle>
       </div>
     </Transition>

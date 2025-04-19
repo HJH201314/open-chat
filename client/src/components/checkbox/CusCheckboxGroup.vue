@@ -8,7 +8,7 @@ const props = withDefaults(defineProps<CusCheckboxGroupProps>(), {
   type: 'highlight',
   barAnimation: true,
   direction: 'column',
-  backgroundMode: 'color',
+  backgroundMode: 'transparent',
   displayStyle: 'icon',
 });
 

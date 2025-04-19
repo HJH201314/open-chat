@@ -190,7 +190,7 @@ defineSlots<{
         transform: translateY(-50%);
         width: 1px;
         height: 1rem;
-        background: var(--color-grey-100);
+        background: var(--color-trans-100);
       }
     }
 

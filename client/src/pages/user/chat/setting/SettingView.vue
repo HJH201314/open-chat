@@ -348,7 +348,7 @@ defineExpose({
 
     // 除了最后一个 section，都添加下边框
     &:not(:nth-last-child(2)) {
-      border-bottom: 1px solid var(--color-grey-100);
+      border-bottom: 1px solid var(--color-trans-100);
     }
 
     .large & {
@@ -382,7 +382,7 @@ defineExpose({
         transform: translate(-50%, -50%);
         width: 1px;
         height: 60%;
-        background: var(--color-grey-300);
+        background: var(--color-trans-300);
       }
     }
 

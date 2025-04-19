@@ -126,7 +126,7 @@ defineOptions({
   transition:
     background-color 0.2s $ease-out-circ,
     border 0.2s $ease-out-circ;
-  background-color: var(--color-grey-100);
+  background-color: var(--color-trans-100);
 
   &:hover:not(:disabled) {
     border: 2px solid var(--color-primary-lighter);
@@ -144,7 +144,7 @@ defineOptions({
   }
 
   &:disabled {
-    color: var(--color-grey-400);
+    color: var(--color-trans-400);
   }
 }
 </style>

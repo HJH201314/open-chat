@@ -37,7 +37,7 @@ const toggleClasses = computed(() => {
     cursor: pointer;
     width: 2.5em;
     height: 1.5em;
-    background-color: var(--color-grey-400);
+    background-color: var(--color-trans-100);
     transition: background-color 0.2s $ease-out-circ;
     display: flex;
     align-items: center;
@@ -56,7 +56,7 @@ const toggleClasses = computed(() => {
     height: 1em;
     width: 1em;
     border-radius: 0.25em;
-    background-color: var(--color-grey-200);
+    background-color: var(--color-trans-100);
     transition: all 0.2s $ease-out-circ;
 
     &.off {
