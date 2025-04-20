@@ -204,8 +204,12 @@ defineExpose({
         </div>
       </CusTooltip>
       <div class="sidebar-footer">
-        <CusTooltip position="right" :text="`切换${currentTheme == 'dark' ? '浅色' : '深色'}`">
-          <div class="sidebar-entry sidebar-footer-item">
+        <CusTooltip
+          style="flex: auto; display: flex; justify-content: center"
+          position="right"
+          :text="`切换${currentTheme == 'dark' ? '浅色' : '深色'}`"
+        >
+          <div class="sidebar-entry">
             <SunOne
               v-if="currentTheme == 'dark'"
               class="sidebar-entry-icon"
@@ -392,15 +396,15 @@ defineExpose({
     gap: 1rem;
 
     &:not(&--active):hover {
-      background: var(--color-primary-50);
+      background: var(--color-primary-60);
     }
 
     &:not(&--active):active {
-      background: var(--color-primary-100);
+      background: var(--color-primary-90);
     }
 
     &--active {
-      background: var(--color-primary-70);
+      background: var(--color-primary-80);
       color: var(--color-primary);
     }
 
@@ -442,10 +446,6 @@ defineExpose({
     gap: 0.25rem;
     flex-wrap: wrap;
     justify-content: center;
-
-    &-item {
-      width: max-content;
-    }
   }
 
   &-user-action {

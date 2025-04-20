@@ -247,7 +247,7 @@ defineExpose({
               <span class="setting-list-item__title">默认角色</span>
               <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
                 <CusToggle v-model="editingValue.roleRemember" />
-                <CusSelect v-model="editingValue.roleDefaultId" position="bottom-right" :options="botsDropdown" />
+                <CusSelect v-model="editingValue.roleDefaultId" position="top-right" :options="botsDropdown" />
               </span>
             </div>
           </div>

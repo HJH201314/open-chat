@@ -149,28 +149,26 @@ watchEffect(() => {
   }
 
   // 边界检测及调整
-  // if (topNum < 0 || bottomNum + selfHeight.value > windowHeight.value) {
-  //   if (topNum < 0) topNum = 0;
-  //   transformOrigin[0] = 'top';
-  // }
-  // if (leftNum < 0 || rightNum + selfWidth.value > windowWidth.value) {
-  //   if (leftNum < 0) leftNum = 0;
-  //   transformOrigin[1] = 'left';
-  // }
-  // if (bottomNum < 0 || bottomNum + selfHeight.value > windowHeight.value) {
-  //   if (bottomNum < 0) bottomNum = windowHeight.value;
-  //   transformOrigin[0] = 'bottom';
-  // }
-  // if (rightNum < 0 || leftNum + selfWidth.value > windowWidth.value) {
-  //   if (rightNum < 0) rightNum = windowWidth.value;
-  //   transformOrigin[1] = 'right';
-  // }
+  const margin = 4;
+  if (topNum != undefined) {
+    if (topNum + selfHeight.value > windowHeight.value - margin) bottomNum = margin;
+    if (topNum < margin) topNum = margin;
+  }
+  if (leftNum != undefined) {
+    if (leftNum + selfWidth.value > windowWidth.value - margin) leftNum = windowWidth.value - selfWidth.value - margin;
+    if (leftNum < margin) leftNum = margin;
+  }
+  if (bottomNum != undefined) {
+    if (bottomNum + selfHeight.value > windowHeight.value - margin) topNum = margin;
+    if (bottomNum < margin) bottomNum = margin;
+  }
+  if (rightNum != undefined) {
+    if (rightNum + selfWidth.value > windowWidth.value - margin)
+      rightNum = windowWidth.value - selfWidth.value - margin;
+    if (rightNum < margin) rightNum = margin;
+  }
 
   finalStyle.transformOrigin = transformOrigin.join(' ');
-
-  // if (topNum + selfHeight.value > windowHeight.value) topNum = windowHeight.value - selfHeight.value;
-  // if (leftNum + selfWidth.value > windowWidth.value) leftNum = windowWidth.value - selfWidth.value;
-
   finalStyle.top = topNum != undefined ? topNum + 'px' : 'unset';
   finalStyle.right = rightNum != undefined ? rightNum + 'px' : 'unset';
   finalStyle.bottom = bottomNum != undefined ? bottomNum + 'px' : 'unset';
@@ -178,75 +176,6 @@ watchEffect(() => {
 
   finalStyle.translate = translate || 'unset';
 });
-
-// watchEffect(async () => {
-//   let topNum = 0;
-//   let leftNum = 0;
-//   let bottomNum = 0;
-//   let rightNum = 0;
-//   let transformOrigin = ['center', 'center'];
-//   // 根据方位和父元素位置计算出菜单的位置
-//   switch (props.position) {
-//     case 'top':
-//       bottomNum = windowHeight.value - parentTop.value;
-//       leftNum = parentLeft.value;
-//       transformOrigin = ['bottom', 'left'];
-//       break;
-//     case 'bottom':
-//       topNum = parentBottom.value;
-//       leftNum = parentLeft.value;
-//       transformOrigin = ['top', 'left'];
-//       break;
-//     case 'left':
-//       topNum = parentTop.value;
-//       rightNum = windowWidth.value - parentLeft.value;
-//       transformOrigin = ['top', 'right'];
-//       break;
-//     case 'right':
-//       topNum = parentTop.value;
-//       leftNum = parentRight.value;
-//       transformOrigin = ['top', 'left'];
-//   }
-//
-//   // 菜单超出屏幕边界时，调整位置
-//   if (topNum < 0 || bottomNum + selfHeight.value > windowHeight.value) {
-//     if (topNum < 0) topNum = 0;
-//     transformOrigin[0] = 'top';
-//   }
-//   if (leftNum < 0 || rightNum + selfWidth.value > windowWidth.value) {
-//     if (leftNum < 0) leftNum = 0;
-//     transformOrigin[1] = 'left';
-//   }
-//   if (bottomNum < 0 || bottomNum + selfHeight.value > windowHeight.value) {
-//     if (bottomNum < 0) bottomNum = windowHeight.value;
-//     transformOrigin[0] = 'bottom';
-//   }
-//   if (rightNum < 0 || leftNum + selfWidth.value > windowWidth.value) {
-//     if (rightNum < 0) rightNum = windowWidth.value;
-//     transformOrigin[1] = 'right';
-//   }
-//   finalStyle.transformOrigin = transformOrigin.join(' ');
-//
-//   if (topNum + selfHeight.value > windowHeight.value) topNum = windowHeight.value - selfHeight.value;
-//   if (leftNum + selfWidth.value > windowWidth.value) leftNum = windowWidth.value - selfWidth.value;
-//
-//   finalStyle.top = topNum + 'px';
-//   finalStyle.right = rightNum + 'px';
-//   finalStyle.bottom = bottomNum + 'px';
-//   finalStyle.left = leftNum + 'px';
-//   if (!finalStyle.transformOrigin.includes('right')) {
-//     finalStyle.right = 'unset';
-//   }
-//   if (!finalStyle.transformOrigin.includes('bottom')) {
-//     finalStyle.bottom = 'unset';
-//   }
-//   if (!finalStyle.transformOrigin.includes('left')) {
-//     finalStyle.left = 'unset';
-//   }
-//   if (!finalStyle.transformOrigin.includes('top')) {
-//     finalStyle.top = 'unset';
-//   }
-// });
 </script>
 
 <style lang="scss" scoped>
