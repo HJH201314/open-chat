@@ -14,8 +14,11 @@ export type DropdownOption = {
   childrenMenuOption?: DropdownMenuProps;
 };
 
+export type Horizontal = 'left' | 'right';
+export type Vertical = 'top' | 'bottom';
+export type CombinedPosition = `${Vertical}-${Horizontal}` | `${Horizontal}-${Vertical}`;
 export type DropdownMenuProps = {
-  position?: 'top' | 'bottom' | 'left' | 'right'; // 弹出方位
+  position?: CombinedPosition | Horizontal | Vertical; // 弹出方位
   disabled?: boolean; // 是否禁用
 };
 
@@ -23,7 +26,6 @@ export type DropdownMenuInnerProps = {
   _valuePath: string[];
   _depth: number;
 } & DropdownMenuProps;
-
 
 export type CusSelectEmits = {
   /**

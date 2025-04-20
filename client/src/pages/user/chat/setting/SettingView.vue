@@ -167,6 +167,7 @@ defineExpose({
               <span class="setting-list-item__value">
                 <CusSelect
                   v-model="editingValue.fastSendKey"
+                  position="bottom-right"
                   :options="[
                     {
                       value: 'enter',
@@ -185,11 +186,7 @@ defineExpose({
             <div class="setting-list-item">
               <span class="setting-list-item__title">默认模型</span>
               <span class="setting-list-item__value">
-                <CusSelect
-                  v-model="editingValue.defaultModel"
-                  :options="modelDropdown"
-                  :position="isLargeScreen ? 'bottom' : 'left'"
-                />
+                <CusSelect v-model="editingValue.defaultModel" position="bottom-right" :options="modelDropdown" />
               </span>
             </div>
             <div class="setting-list-item">
@@ -205,6 +202,7 @@ defineExpose({
               <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
                 <CusSelect
                   v-model="editingValue.theme"
+                  position="bottom-right"
                   :options="[
                     {
                       value: 'auto',
@@ -249,7 +247,7 @@ defineExpose({
               <span class="setting-list-item__title">默认角色</span>
               <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
                 <CusToggle v-model="editingValue.roleRemember" />
-                <CusSelect v-model="editingValue.roleDefaultId" :options="botsDropdown" />
+                <CusSelect v-model="editingValue.roleDefaultId" position="bottom-right" :options="botsDropdown" />
               </span>
             </div>
           </div>

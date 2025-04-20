@@ -11,7 +11,6 @@ const groupInject = inject(RadioGroupInjectionKey);
 const radioName = computed(() => groupInject?.name?.value || props.name);
 const radioValue = computed(() => props.value);
 const radioChecked = computed(() => {
-  console.log('groupvalue', groupInject?.value?.value, 'radiovalue', radioValue.value);
   return groupInject ? groupInject?.value?.value === radioValue.value : innerChecked.value;
 });
 

@@ -40,7 +40,7 @@ import {
   type DropdownOption,
 } from '@/components/dropdown/types';
 import { useElementBounding } from '@vueuse/core';
-import { computed, h, provide, ref, useTemplateRef, watch } from 'vue';
+import { computed, h, provide, reactive, ref, useTemplateRef, watch } from 'vue';
 import { treeEach } from '@liuli-util/tree';
 import CommonModal from '@/components/modal/CommonModal.vue';
 
@@ -58,9 +58,8 @@ const backgroundModeClassName = computed(() => `bg-mode-${props.backgroundMode}`
 
 const emit = defineEmits<CusSelectEmits>();
 
-const selfRef = useTemplateRef('dropdown');
-const toggleRef = useTemplateRef('dropdown-toggle');
-const toggleBounding = useElementBounding(toggleRef);
+const toggleRef = useTemplateRef<HTMLDivElement>('dropdown-toggle');
+const toggleBounding = reactive(useElementBounding(toggleRef));
 
 watch(
   () => selectedValue.value,

@@ -86,7 +86,7 @@ defineExpose({
           :label-render-text="(_, path) => path?.map((o) => o.label)?.join('/')"
           :options="modelDropdown"
           background-mode="transparent"
-          position="top"
+          position="top-left"
           style="font-size: 0.75rem"
           @select="(v, o, path) => handleModelSelect(v)"
         />
@@ -96,7 +96,7 @@ defineExpose({
           :options="botDropdown"
           background-mode="transparent"
           placeholder="角色选择"
-          position="top"
+          position="top-left"
           style="font-size: 0.75rem"
           @select="(v) => handleBotRoleSelect(v)"
         />
@@ -128,7 +128,7 @@ defineExpose({
       ref="input-textarea"
       v-model="inputUserInput"
       class="dialog-input-textarea"
-      :textarea-attr="{ placeholder: '有问题，尽管问' }"
+      :textarea-attr="{ placeholder: smallInput ? `向&nbsp;${inputModelName}&nbsp;提问` : '有问题，尽管问' }"
       :preset="false"
       @keydown="handleInputKeydown"
     />

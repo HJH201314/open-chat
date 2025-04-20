@@ -1,5 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { useArrayMap, useLocalStorage } from '@vueuse/core';
+import { tryOnMounted, useArrayMap, useLocalStorage } from '@vueuse/core';
 import { computed, h, type VNode, watch } from 'vue';
 import genApi from '@/api/gen-api.ts';
 import type { ApiEntityConfigChatModel, ApiSchemaPreset } from '@/api/gen/data-contracts.ts';
@@ -33,7 +33,7 @@ export const useChatConfigStore = defineStore('chat-config', () => {
       // 获取模型数据
       const models = await genApi.Chat.configModelsGet();
       if (models.data.data) {
-        chatModels.value = models.data.data;
+        chatModels.value = [...models.data.data];
         // 检查设置中的默认模型是否存在，如果不存在则使用第一个模型作为默认模型
         if (
           !settingStore.settings.defaultModel ||
@@ -47,8 +47,8 @@ export const useChatConfigStore = defineStore('chat-config', () => {
           });
         }
       }
-    } catch (_) {
-      console.error('获取模型数据失败');
+    } catch (err) {
+      console.error('获取模型数据失败', err);
     }
   };
 
@@ -83,38 +83,40 @@ export const useChatConfigStore = defineStore('chat-config', () => {
     try {
       const res = await genApi.Chat.configBotsGet();
       if (res.data.data) {
-        bots.value = res.data.data;
+        bots.value = [...res.data.data];
       }
     } catch (_) {
       console.error('获取 bot 角色数据失败');
     }
   };
 
-  // 登录后获取模型数据
   const userStore = useUserStore();
-  watch(
-    () => userStore.isLogin,
-    (isLogin) => {
-      if (isLogin) {
-        getModelsOnServer();
-        getBotsOnServer();
-      }
-    },
-    { immediate: true }
-  );
-
-  // 监听默认模型的变化，若设置中的默认模型为空，则将设置中默认模型设置为本 store 中的默认模型
   const settingStore = useSettingStore();
-  watch(
-    () => defaultModel.value,
-    async (newDefaultModel) => {
-      if (!settingStore.settings.defaultModel && newDefaultModel) {
-        settingStore.saveSettings({
-          defaultModel: newDefaultModel.name,
-        });
+  tryOnMounted(() => {
+    // 登录后获取模型数据
+    watch(
+      () => userStore.isLogin,
+      (isLogin) => {
+        if (isLogin) {
+          getModelsOnServer();
+          getBotsOnServer();
+        }
+      },
+      { immediate: true }
+    );
+
+    // 监听默认模型的变化，若设置中的默认模型为空，则将设置中默认模型设置为本 store 中的默认模型
+    watch(
+      () => defaultModel.value,
+      async (newDefaultModel) => {
+        if (!settingStore.settings.defaultModel && newDefaultModel) {
+          settingStore.saveSettings({
+            defaultModel: newDefaultModel.name,
+          });
+        }
       }
-    }
-  );
+    );
+  });
 
   return {
     chatModels,

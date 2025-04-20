@@ -196,9 +196,14 @@ export class DialogManager {
     const instance = this.instances.get(_id);
     if (!instance) return;
 
-    instance.app.unmount();
-    instance.dom.remove();
-    this.instances.delete(_id);
-    console.debug('[dialog-destroyed] dialog instances', this.instances);
+    try {
+      instance.app.unmount();
+      instance.dom.remove();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.instances.delete(_id);
+      console.debug('[dialog-destroyed] dialog instances', this.instances);
+    }
   }
 }

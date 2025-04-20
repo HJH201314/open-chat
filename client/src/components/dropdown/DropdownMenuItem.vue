@@ -39,8 +39,9 @@ import {
 import { Right } from '@icon-park/vue-next';
 import { vElementHover } from '@vueuse/components';
 import { useArrayFilter, useArrayIncludes, useElementBounding } from '@vueuse/core';
-import { computed, defineProps, h, inject, useTemplateRef } from 'vue';
+import { computed, defineProps, h, inject, reactive, useTemplateRef } from 'vue';
 import useGlobal from '@/commands/useGlobal.ts';
+import { nextFrame } from '@/utils/element.ts';
 
 const props = withDefaults(
   defineProps<
@@ -82,14 +83,16 @@ const getChildrenPos = (option: DropdownOption) => {
 };
 
 const menuItemRef = useTemplateRef('menu-item');
-const bounding = useElementBounding(menuItemRef);
+const bounding = reactive(useElementBounding(menuItemRef));
 const isSubMenuOpen = useArrayIncludes(
   () => currentShowingPath.value ?? [],
   () => props.option.value
 );
 
 const showSubMenu = () => {
+  // 更新一下本菜单项位置，以便子菜单显示位置正确
   currentShowingPath.value = [...frontPath.value, props.option.value];
+  bounding.update();
 };
 const hideSubMenu = () => {
   currentShowingPath.value = [...frontPath.value];
@@ -98,7 +101,9 @@ const hideSubMenu = () => {
 // 处理鼠标悬停，切换子菜单显示状态
 function handleHover(state: boolean) {
   if (currentShowingPath.value && state) {
-    showSubMenu();
+    nextFrame(() => {
+      showSubMenu();
+    });
   }
 }
 

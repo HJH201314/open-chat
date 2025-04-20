@@ -29,7 +29,6 @@ const hrRef = useTemplateRef('hr');
 watchEffect(() => {
   if (!dialogRef.value || !hrRef.value) return;
 
-  console.log('create draggable');
   createDraggable(dialogRef.value, {
     trigger: hrRef.value,
     container: [0, 0, 0, 0],
