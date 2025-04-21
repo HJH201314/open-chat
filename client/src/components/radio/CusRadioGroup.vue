@@ -17,7 +17,7 @@ const modelValue = defineModel<any>({ default: '' });
 watchOnce(
   () => props.defaultValue,
   (newDefaultValue) => {
-    modelValue.value = newDefaultValue;
+    newDefaultValue && (modelValue.value = newDefaultValue);
   },
   { immediate: true }
 );
