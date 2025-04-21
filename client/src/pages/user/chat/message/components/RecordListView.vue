@@ -1,17 +1,16 @@
 <script lang="ts" setup>
 import DiliButton from '@/components/button/DiliButton.vue';
 import Toggle from '@/components/toggle/CusToggle.vue';
-import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { AllApplication, Delete, MenuUnfold, Plus, ShareOne, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
+import { computed, h, onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { onClickOutside, until, useElementSize, useEventBus, useScroll } from '@vueuse/core';
+import { until, useElementSize, useEventBus, useScroll } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { goToLogin } from '@/pages/user/login';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
@@ -90,59 +89,59 @@ function handleListAddClick() {
   else roleForm.modalVisible = true;
 }
 
-const handleSessionRefresh = async () => {
-  if (!userStore.isLogin) {
-    ToastManager.danger('请先登录');
-    return;
-  }
-  if (dataStore.isSessionsEmpty) {
-    console.debug('fetch user trigger immediately');
-    await dataStore.syncSessions();
-    return;
-  }
-  const softMode = ref(true);
-  const dialog = DialogManager.createDialog(
-    {
-      title: '同步对话列表',
-      subtitle: '此操作不可逆，确认继续吗？',
-      async confirmHandler(controller) {
-        if (!softMode.value) {
-          ToastManager.danger('暂未支持');
-          return;
-        }
-        console.debug('fetch use trigger confirmed');
-        const syncRes = await dataStore.syncSessions(controller);
-        if (!syncRes) {
-          ToastManager.danger('同步失败，请稍后再试~', { position: 'top-left' });
-        } else {
-          ToastManager.normal('同步成功', { position: 'top-left' });
-        }
-      },
-    },
-    {
-      action: () =>
-        h(CusToggle, {
-          modelValue: softMode.value,
-          label: '保留本地数据',
-          onChange(t) {
-            softMode.value = t;
-          },
-        }),
-    }
-  );
-  // 根据开关软拉取模式，改变模态框的内容
-  watchEffect(() => {
-    const content = softMode.value
-      ? '此操作将会从服务器拉取对话数据：<br/>  1. 拉取服务器对比本地的增量对话<br/>  2. 不会删除本地的冗余对话'
-      : '此操作将会从服务器拉取对话数据：<br/>  1. 拉取服务器对比本地的增量对话<br/>  2. <strong style="color: var(--color-danger);">删除</strong>本地的冗余对话';
-    dialog.update({
-      content,
-      confirmButtonProps: {
-        backgroundColor: softMode.value ? '' : 'var(--color-danger)',
-      },
-    });
-  });
-};
+// const handleSessionRefresh = async () => {
+//   if (!userStore.isLogin) {
+//     ToastManager.danger('请先登录');
+//     return;
+//   }
+//   if (dataStore.isSessionsEmpty) {
+//     console.debug('fetch user trigger immediately');
+//     await dataStore.syncSessions();
+//     return;
+//   }
+//   const softMode = ref(true);
+//   const dialog = DialogManager.createDialog(
+//     {
+//       title: '同步对话列表',
+//       subtitle: '此操作不可逆，确认继续吗？',
+//       async confirmHandler(controller) {
+//         if (!softMode.value) {
+//           ToastManager.danger('暂未支持');
+//           return;
+//         }
+//         console.debug('fetch use trigger confirmed');
+//         const syncRes = await dataStore.syncSessions(controller);
+//         if (!syncRes) {
+//           ToastManager.danger('同步失败，请稍后再试~', { position: 'top-left' });
+//         } else {
+//           ToastManager.normal('同步成功', { position: 'top-left' });
+//         }
+//       },
+//     },
+//     {
+//       action: () =>
+//         h(CusToggle, {
+//           modelValue: softMode.value,
+//           label: '保留本地数据',
+//           onChange(t) {
+//             softMode.value = t;
+//           },
+//         }),
+//     }
+//   );
+//   // 根据开关软拉取模式，改变模态框的内容
+//   watchEffect(() => {
+//     const content = softMode.value
+//       ? '此操作将会从服务器拉取对话数据：<br/>  1. 拉取服务器对比本地的增量对话<br/>  2. 不会删除本地的冗余对话'
+//       : '此操作将会从服务器拉取对话数据：<br/>  1. 拉取服务器对比本地的增量对话<br/>  2. <strong style="color: var(--color-danger);">删除</strong>本地的冗余对话';
+//     dialog.update({
+//       content,
+//       confirmButtonProps: {
+//         backgroundColor: softMode.value ? '' : 'var(--color-danger)',
+//       },
+//     });
+//   });
+// };
 
 const toggleSideBarExpandBus = useEventBus(toggleSidebarExpandKey);
 
@@ -165,17 +164,17 @@ const searchForm = reactive({
   searchVal: '',
 });
 
-const searchInputRef = useTemplateRef('search-input');
-
-async function handleSearchIconClick() {
-  searchForm.inputting = true;
-  await until(() => searchInputRef.value).not.toBeNull();
-  searchInputRef.value?.focus();
-}
-
-onClickOutside(useTemplateRef('search-bar'), () => {
-  searchForm.inputting = false;
-});
+// const searchInputRef = useTemplateRef('search-input');
+//
+// async function handleSearchIconClick() {
+//   searchForm.inputting = true;
+//   await until(() => searchInputRef.value).not.toBeNull();
+//   searchInputRef.value?.focus();
+// }
+//
+// onClickOutside(useTemplateRef('search-bar'), () => {
+//   searchForm.inputting = false;
+// });
 
 const searchList = ref<SessionInfo[]>([]);
 watch(
@@ -264,7 +263,7 @@ const { isSmallScreen } = useGlobal();
       <IconButton
         v-if="isSmallScreen"
         type="secondary"
-        color="var(--color-grey-500)"
+        color="var(--color-trans-500)"
         no-normal-background
         @click="handleSidebarUnfold"
       >

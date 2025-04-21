@@ -17,11 +17,6 @@ const props = withDefaults(defineProps<CusContextMenuProps>(), {
 });
 
 const isOpen = ref(false);
-const onModalVisibleChange = (v: boolean) => {
-  if (!v) {
-    isOpen.value = false;
-  }
-};
 const bounding: DropdownMenuProps['parentBounding'] = reactive({} as any);
 provide(DropdownCurrentInfoInjectionKey, {
   onSelect: (o, vp) => {
@@ -58,7 +53,6 @@ const { isLargeScreen } = useGlobal();
   <div @contextmenu.prevent="onRightClick">
     <slot></slot>
     <CommonModal
-      v-show="isOpen"
       :visible="isOpen"
       :show-close="false"
       close-on-click-mask
