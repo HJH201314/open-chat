@@ -164,7 +164,7 @@ defineExpose<CommonModalFunc>({
 </script>
 
 <template>
-  <Teleport :to="teleportTo" :disabled="!teleportTo" :defer="true">
+  <Teleport :to="teleportTo" :disabled="!teleportTo">
     <Transition name="show" @after-leave="afterClose">
       <div
         v-if="showModal"

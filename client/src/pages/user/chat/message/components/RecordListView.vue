@@ -6,7 +6,7 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { AllApplication, Delete, MenuUnfold, Plus, ShareOne, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, h, onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
+import { computed, h, nextTick, onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
@@ -24,7 +24,7 @@ import CusPullRefresh from '@/components/pull-refresh/CusPullRefresh.vue';
 import CusAvatar from '@/components/avatar/CusAvatar.vue';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
-import CusContextMenu from '@/components/dropdown/CusContextMenu.vue';
+import CusMenu from '@/components/dropdown/CusMenu.vue';
 import type { DropdownOption } from '@/components/dropdown/types.ts';
 import useSession from '@/store/data/useSession.ts';
 
@@ -249,8 +249,12 @@ const rightClickMenuOptions = computed(() => {
 });
 const currentRightClickSessionId = ref('');
 const { session: currentRightClickSession } = useSession(currentRightClickSessionId);
-const onRightClick = (sessionId: string) => {
+const dialogListMenuRef = useTemplateRef('dialog-list-menu');
+const onRightClick = (evt: MouseEvent, sessionId: string) => {
   currentRightClickSessionId.value = sessionId;
+  nextTick(() => {
+    dialogListMenuRef.value?.show(evt);
+  });
 };
 
 const { theme } = useTheme();
@@ -345,14 +349,14 @@ const { isSmallScreen } = useGlobal();
       tip-refreshing="同步中..."
       @refresh="dataStore.syncSessions"
     >
-      <CusContextMenu :options="rightClickMenuOptions">
+      <div>
         <div
           v-for="item in displayList"
           :key="item.id"
           :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
           class="dialog-list-item"
           @click="handleListItemClick(item.id)"
-          @contextmenu="onRightClick(item.id)"
+          @contextmenu.capture.prevent="onRightClick($event, item.id)"
         >
           <CusAvatar style="opacity: 0.6" :name="item.title?.trim() || ''" size="2.5em" shape="circle" />
           <div class="dialog-list-item__right">
@@ -375,7 +379,7 @@ const { isSmallScreen } = useGlobal();
             </div>
           </div>
         </div>
-      </CusContextMenu>
+      </div>
     </CusPullRefresh>
     <div v-if="!displayList.length" class="dialog-list-empty">
       <DiliButton
@@ -394,6 +398,8 @@ const { isSmallScreen } = useGlobal();
       color="var(--color-primary)"
       tip="努力加载中..."
     ></LoadingModal>
+    <!-- 需要用 v-if 控制组件是否渲染，否则可能导致测试环境可用而生产环境不可用的奇怪渲染问题 vue@3.5.13 -->
+    <CusMenu v-if="currentRightClickSessionId" ref="dialog-list-menu" :options="rightClickMenuOptions" />
   </div>
 </template>
 <style lang="scss" scoped>

@@ -25,7 +25,7 @@ provide(DropdownCurrentInfoInjectionKey, {
   },
 });
 
-const onRightClick = (e: any) => {
+const onShow = (e: any) => {
   console.log('[context-menu]', e);
   if (props.disabled) return;
 
@@ -47,30 +47,33 @@ const onModalClose = () => {
 };
 
 const { isLargeScreen } = useGlobal();
+
+defineExpose({
+  show: (e: PointerEvent | MouseEvent) => {
+    onShow(e);
+  },
+});
 </script>
 
 <template>
-  <div @contextmenu.prevent="onRightClick">
-    <slot></slot>
-    <CommonModal
-      :visible="isOpen"
-      :show-close="false"
-      close-on-click-mask
-      modal-transition-name=""
-      :enable-mask-click-pass="isLargeScreen"
-      :mask-style="{ backgroundColor: 'transparent' }"
-      @close="onModalClose"
-    >
-      <DropdownMenu
-        :position="position"
-        :options="options"
-        :parent-bounding="bounding"
-        :is-open="isOpen"
-        :_depth="1"
-        :_value-path="[]"
-      />
-    </CommonModal>
-  </div>
+  <CommonModal
+    :visible="isOpen"
+    :show-close="false"
+    close-on-click-mask
+    modal-transition-name=""
+    :enable-mask-click-pass="isLargeScreen"
+    :mask-style="{ backgroundColor: 'transparent' }"
+    @close="onModalClose"
+  >
+    <DropdownMenu
+      :position="position"
+      :options="options"
+      :parent-bounding="bounding"
+      :is-open="isOpen"
+      :_depth="1"
+      :_value-path="[]"
+    />
+  </CommonModal>
 </template>
 
 <style scoped lang="scss"></style>
