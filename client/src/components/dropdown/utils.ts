@@ -1,4 +1,4 @@
-import type { DropdownMenuProps, DropdownOption } from '@/components/dropdown/types.ts';
+import type { DropdownMenuCommonProps, DropdownOption } from '@/components/dropdown/types.ts';
 import { treeMap } from '@liuli-util/tree';
 
 /**
@@ -6,7 +6,7 @@ import { treeMap } from '@liuli-util/tree';
  * @param options 选项节点列表
  * @param fn 返回设置
  */
-export const addChildrenDropdownOptions = (options: DropdownOption[], fn: (option: DropdownOption, depth: number) => DropdownMenuProps): DropdownOption[] => {
+export const addChildrenDropdownOptions = (options: DropdownOption[], fn: (option: DropdownOption, depth: number) => DropdownMenuCommonProps): DropdownOption[] => {
   return treeMap(options, (t, path) => {
     return {
       ...t,

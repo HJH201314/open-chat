@@ -1,23 +1,26 @@
-import type { CSSProperties, InjectionKey, Ref, VNode } from 'vue';
+import type { CSSProperties, InjectionKey, Reactive, Ref, VNode } from 'vue';
+import { useElementBounding } from '@vueuse/core';
 
 export const DropdownCurrentInfoInjectionKey: InjectionKey<{
-  currentOptionPath: Ref<DropdownOption[]>;
-  currentValue: Ref<string | undefined>;
-  onSelect: (option: DropdownOption, valuePath: string[]) => void;
+  currentOptionPath?: Ref<DropdownOption[]>;
+  currentValue?: Ref<string | undefined>;
+  onSelect?: (option: DropdownOption, valuePath: string[]) => void;
 }> = Symbol('DropdownCurrentInfo');
 
 export type DropdownOption = {
   label: string;
   value: string;
   icon?: string | VNode | (() => VNode);
+  style?: CSSProperties;
+  onClick?: (option: DropdownOption, valuePath: string[]) => void;
   children?: DropdownOption[];
-  childrenMenuOption?: DropdownMenuProps;
+  childrenMenuOption?: DropdownMenuCommonProps;
 };
 
 export type Horizontal = 'left' | 'right';
 export type Vertical = 'top' | 'bottom';
 export type CombinedPosition = `${Vertical}-${Horizontal}` | `${Horizontal}-${Vertical}`;
-export type DropdownMenuProps = {
+export type DropdownMenuCommonProps = {
   position?: CombinedPosition | Horizontal | Vertical; // 弹出方位
   disabled?: boolean; // 是否禁用
 };
@@ -25,7 +28,13 @@ export type DropdownMenuProps = {
 export type DropdownMenuInnerProps = {
   _valuePath: string[];
   _depth: number;
-} & DropdownMenuProps;
+} & DropdownMenuCommonProps;
+
+export type DropdownMenuProps = {
+  options: DropdownOption[];
+  parentBounding: Omit<Reactive<ReturnType<typeof useElementBounding>>, 'update'>;
+  isOpen: boolean;
+} & DropdownMenuInnerProps;
 
 export type CusSelectEmits = {
   /**
@@ -45,4 +54,10 @@ export type CusSelectProps = {
   labelRenderText?: (selectedOption?: DropdownOption, selectedOptionPath?: DropdownOption[]) => string | undefined;
 
   toggleStyle?: CSSProperties;
-} & DropdownMenuProps;
+} & DropdownMenuCommonProps;
+
+export type CusContextMenuProps = {
+  options?: DropdownOption[];
+} & DropdownMenuCommonProps;
+
+export type CusContextMenuEmits = CusSelectEmits;

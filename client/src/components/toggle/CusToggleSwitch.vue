@@ -56,7 +56,7 @@ const toggleClasses = computed(() => {
     height: 1em;
     width: 1em;
     border-radius: 0.25em;
-    background-color: var(--color-trans-100);
+    background-color: var(--color-trans-200);
     transition: all 0.2s $ease-out-circ;
 
     &.off {

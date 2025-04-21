@@ -60,6 +60,8 @@ export type SessionFlags = {
   needSync?: boolean; // 是否需要从服务器同步消息数据
   isStared?: boolean; // 是否收藏
   isShared?: boolean; // 是否分享
+
+  [key: string]: boolean | undefined;
 };
 
 export type MessageInfo = {

@@ -1,11 +1,11 @@
 <template>
-  <li ref="menu-item" v-element-hover="(state) => handleHover(state)" class="menu-item">
+  <li ref="menu-item" v-element-hover="(state) => handleHover(state)" class="menu-item" :style="option.style">
     <div
       ref="menu-item-body"
       class="menu-item-body"
       :class="{
         selected:
-          option.value === dropdownCurrent?.currentValue.value ||
+          option.value === dropdownCurrent?.currentValue?.value ||
           dropdownCurrent?.currentOptionPath?.value?.includes(option),
       }"
       @click="handleClick"
@@ -58,7 +58,7 @@ const iconComponent = computed(() => {
   if (typeof props.option.icon == 'string') {
     return h('img', { style: 'width: 1em; height: 1em;', src: props.option.icon });
   } else {
-    return props.option.icon ? h(props.option.icon, { style: 'width: 1em; height: 1em; scale: 1.5;' }) : null;
+    return props.option.icon ? h(props.option.icon) : null;
   }
 });
 
@@ -114,7 +114,9 @@ function handleClick() {
   if (props.option.children?.length) {
     isLargeScreen.value && isSubMenuOpen.value ? hideSubMenu() : showSubMenu();
   } else {
-    dropdownCurrent?.onSelect(props.option, [...props._valuePath, props.option.value]);
+    const path = [...props._valuePath, props.option.value];
+    dropdownCurrent?.onSelect?.(props.option, path);
+    props.option.onClick?.(props.option, path);
   }
 }
 </script>

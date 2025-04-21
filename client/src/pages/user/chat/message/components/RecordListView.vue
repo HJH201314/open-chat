@@ -5,13 +5,13 @@ import CusToggle from '@/components/toggle/CusToggle.vue';
 import { useDataStore } from '@/store/data/useDataStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
-import { MenuUnfold, Plus, ShareOne, Star } from '@icon-park/vue-next';
+import { AllApplication, Delete, MenuUnfold, Plus, ShareOne, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
 import { computed, h, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { onClickOutside, until, useEventBus, useScroll } from '@vueuse/core';
+import { onClickOutside, until, useElementSize, useEventBus, useScroll } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { goToLogin } from '@/pages/user/login';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
@@ -23,6 +23,11 @@ import { toggleSidebarExpandKey } from '@/constants/eventBusKeys.ts';
 import { formatTime } from '@/utils/string.ts';
 import CusPullRefresh from '@/components/pull-refresh/CusPullRefresh.vue';
 import CusAvatar from '@/components/avatar/CusAvatar.vue';
+import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
+import CusRadioButton from '@/components/radio/CusRadioButton.vue';
+import CusContextMenu from '@/components/dropdown/CusContextMenu.vue';
+import type { DropdownOption } from '@/components/dropdown/types.ts';
+import useSession from '@/store/data/useSession.ts';
 
 const emit = defineEmits<{
   (e: 'change', value: string): void;
@@ -32,6 +37,8 @@ const chatConfigStore = useChatConfigStore();
 const userStore = useUserStore();
 const settingStore = useSettingStore();
 const currentSessionId = useRouteParams<string>('sessionId');
+const filterType = ref<'all' | 'isStared' | 'isShared'>('all');
+const { filteredSessions } = dataStore.useFilteredSessions(() => [filterType.value]);
 
 onMounted(() => {
   until(() => userStore.isLogin)
@@ -57,6 +64,20 @@ async function handleAddRecord(defaultBotId?: number) {
 
   handleListItemClick(sessionId);
 }
+
+const newDialogRef = useTemplateRef('new-dialog');
+const { width: newDialogWidth } = useElementSize(newDialogRef);
+const newDialogText = computed(() => {
+  if (newDialogWidth.value < 68) {
+    return '';
+  } else if (newDialogWidth.value < 88) {
+    return '对话';
+  } else if (newDialogWidth.value < 120) {
+    return '新对话';
+  } else {
+    return '开始新对话';
+  }
+});
 
 function handleListAddClick() {
   if (!userStore.isLogin) {
@@ -171,14 +192,67 @@ watch(
 const displayList = computed(() => {
   if (searchForm.searchVal) {
     return searchList.value;
-  } else {
+  } else if (filterType.value == 'all') {
     return dataStore.sessions;
+  } else {
+    return filteredSessions.value;
   }
 });
 
 const dialogListRef = useTemplateRef<HTMLDivElement>('dialog-list');
 const recordListViewRef = useTemplateRef('record-list-view');
 const { arrivedState } = useScroll(dialogListRef);
+
+// 列表右键/长按菜单
+const rightClickMenuOptions = computed(() => {
+  return [
+    {
+      value: 'star',
+      label: currentRightClickSession.value.flags?.isStared ? '消星' : '标星',
+      icon: h(Star, { size: '1rem', theme: currentRightClickSession.value.flags?.isStared ? 'filled' : 'outline' }),
+      style: { color: 'var(--color-warning)' },
+      onClick() {
+        if (currentRightClickSession.value) {
+          dataStore.updateSessionFlags(currentRightClickSessionId.value, {
+            isStared: !currentRightClickSession.value.flags?.isStared,
+          });
+        }
+      },
+    },
+    {
+      value: 'delete',
+      label: '删除',
+      icon: h(Delete, { size: '1rem' }),
+      style: { color: 'var(--color-danger)' },
+      onClick() {
+        if (currentRightClickSession.value) {
+          DialogManager.commonDialog({
+            type: 'danger',
+            title: '删除对话',
+            subtitle: '这是不可逆的！',
+            subtitleStyle: {
+              color: theme.colorDanger,
+            },
+            content: `确认删除对话：<br /> - ${currentRightClickSession.value.title} <br />`,
+            renderContentHtml: true,
+            confirmButtonProps: {
+              backgroundColor: theme.colorDanger,
+            },
+          }).then((res) => {
+            if (res) {
+              dataStore.delDialog(currentRightClickSessionId.value);
+            }
+          });
+        }
+      },
+    },
+  ] as DropdownOption[];
+});
+const currentRightClickSessionId = ref('');
+const { session: currentRightClickSession } = useSession(currentRightClickSessionId);
+const onRightClick = (sessionId: string) => {
+  currentRightClickSessionId.value = sessionId;
+};
 
 const { theme } = useTheme();
 const { isSmallScreen } = useGlobal();
@@ -216,8 +290,25 @@ const { isSmallScreen } = useGlobal();
       <!--          <CloseOne theme="filled" />-->
       <!--        </span>-->
       <!--      </div>-->
-      <div v-show="!searchForm.inputting" class="dialog-list-new-dialog" @click="handleListAddClick">
-        <span>开始新对话</span>
+      <CusRadioGroup
+        v-model="filterType"
+        class="dialog-list-filter"
+        name="record-list-view-filter"
+        type="normal"
+        default-value="all"
+      >
+        <CusRadioButton v-slot="{ selected }" value="all">
+          <AllApplication :fill="selected ? 'var(--color-primary)' : 'var(--color-black)'" />
+        </CusRadioButton>
+        <CusRadioButton v-slot="{ selected }" value="isStared">
+          <Star :fill="selected ? 'var(--color-warning)' : 'var(--color-black)'" />
+        </CusRadioButton>
+        <CusRadioButton v-slot="{ selected }" value="isShared">
+          <ShareOne :fill="selected ? 'var(--color-info)' : 'var(--color-black)'" />
+        </CusRadioButton>
+      </CusRadioGroup>
+      <div v-show="!searchForm.inputting" ref="new-dialog" class="dialog-list-new-dialog" @click="handleListAddClick">
+        <span v-if="newDialogText">{{ newDialogText }}</span>
         <Plus size="1.2rem" theme="outline" />
         <CommonDialog
           v-model:visible="roleForm.modalVisible"
@@ -255,13 +346,14 @@ const { isSmallScreen } = useGlobal();
       tip-refreshing="同步中..."
       @refresh="dataStore.syncSessions"
     >
-      <div>
+      <CusContextMenu :options="rightClickMenuOptions">
         <div
           v-for="item in displayList"
           :key="item.id"
           :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
           class="dialog-list-item"
           @click="handleListItemClick(item.id)"
+          @contextmenu="onRightClick(item.id)"
         >
           <CusAvatar style="opacity: 0.6" :name="item.title?.trim() || ''" size="2.5em" shape="circle" />
           <div class="dialog-list-item__right">
@@ -284,7 +376,7 @@ const { isSmallScreen } = useGlobal();
             </div>
           </div>
         </div>
-      </div>
+      </CusContextMenu>
     </CusPullRefresh>
     <div v-if="!displayList.length" class="dialog-list-empty">
       <DiliButton
@@ -386,30 +478,35 @@ const { isSmallScreen } = useGlobal();
     }
   }
 
+  &-filter {
+    background-color: transparent !important;
+  }
+
   &-new-dialog {
     box-sizing: border-box;
     cursor: pointer;
     flex: 1;
-    height: 2em;
+    height: calc(2rem - 4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
     color: var(--color-primary);
-    border: 2px solid var(--color-primary);
-    opacity: 0.85;
+    box-shadow: $next-box-shadow-small;
+    opacity: 0.95;
     border-radius: 0.5rem;
-    font-weight: bold;
     transition: all 0.2s $ease-out-circ;
+    line-height: 1;
+    font-weight: bold;
 
     &:hover {
-      color: var(--color-white);
-      background: var(--color-primary);
+      color: var(--color-primary-500);
+      background: var(--color-primary-100);
     }
 
     &:active {
-      border-color: var(--color-primary-darker);
-      background: var(--color-primary-darker);
+      color: var(--color-primary-600);
+      background: var(--color-primary-200);
     }
   }
 

@@ -18,27 +18,13 @@
 
 <script lang="ts" setup>
 import DropdownMenuItem from '@/components/dropdown/DropdownMenuItem.vue';
-import {
-  type DropdownMenuInnerProps,
-  type DropdownOption,
-  type Horizontal,
-  type Vertical,
-} from '@/components/dropdown/types';
+import { type DropdownMenuProps, type Horizontal, type Vertical } from '@/components/dropdown/types';
 import { useElementBounding, useWindowSize } from '@vueuse/core';
-import { computed, defineProps, type Reactive, reactive, useTemplateRef, watchEffect } from 'vue';
+import { computed, defineProps, reactive, useTemplateRef, watchEffect } from 'vue';
 
-const props = withDefaults(
-  defineProps<
-    {
-      options: DropdownOption[];
-      parentBounding: Reactive<ReturnType<typeof useElementBounding>>;
-      isOpen: boolean;
-    } & DropdownMenuInnerProps
-  >(),
-  {
-    position: 'bottom',
-  }
-);
+const props = withDefaults(defineProps<DropdownMenuProps>(), {
+  position: 'bottom',
+});
 
 const currentShowingPath = defineModel<string[]>('currentShowingPath', { default: () => [] });
 
@@ -221,11 +207,15 @@ watchEffect(() => {
 <style lang="scss">
 @use '@/assets/variables' as *;
 
-.dropdown-enter-active,
+.dropdown-enter-active {
+  transition:
+    scale 0.2s $ease-out-back,
+    opacity 0.2s linear;
+}
 .dropdown-leave-active {
   transition:
-    scale 0.25s $ease-out-back,
-    opacity 0.25s linear;
+    scale 0.1s $ease-out-back,
+    opacity 0.1s linear;
 }
 
 .dropdown-enter-from,

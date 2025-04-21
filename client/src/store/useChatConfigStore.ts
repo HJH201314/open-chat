@@ -133,8 +133,8 @@ export const useChatConfigStore = defineStore('chat-config', () => {
 
 const convertModelConfigDropdown = (model: ApiEntityConfigChatModel) => {
   const modelIconMap: Record<string, () => VNode> = {
-    deepseek: () => h(LogoDeepSeek, { showBackground: false }),
-    openai: () => h(LogoOpenAI, { showBackground: false }),
+    deepseek: () => h(LogoDeepSeek, { showBackground: false, size: '1em', style: { scale: 1.5 } }),
+    openai: () => h(LogoOpenAI, { showBackground: false, size: '1em', style: { scale: 1.5 } }),
   };
   const modelLogo = model.icon ? (modelIconMap[model.icon] ? modelIconMap[model.icon]() : model.icon) : undefined;
   // 基础映射：display_name -> label，name -> value

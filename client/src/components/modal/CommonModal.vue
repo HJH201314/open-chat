@@ -7,6 +7,7 @@ import { useCommonModalStore } from '@/components/modal/store.ts';
 import { Close } from '@icon-park/vue-next';
 import { computed, nextTick, onBeforeUnmount, ref, toRef, useTemplateRef, watch, watchEffect } from 'vue';
 import { getRandomString } from '@/utils/string.ts';
+import { nextFrame } from '@/utils/element.ts';
 
 defineOptions({
   // CommonModal 通过 teleport 传递到 body 上，不继承父级的属性
@@ -21,13 +22,15 @@ const props = withDefaults(defineProps<CommonModalProps>(), {
   closeOnClickMask: false,
   visible: false,
   presetBody: false,
+  enableMaskClickPass: false,
   maskStyle: () => ({}),
   modalStyle: () => ({}),
 });
 
+type CloseType = 'esc' | 'mask-click' | 'mask-rightclick' | 'button';
 const emit = defineEmits<{
   (event: 'open', prevent: () => void): void;
-  (event: 'close', prevent: () => void): void;
+  (event: 'close', prevent: () => void, type: CloseType): void;
   (event: 'after-close'): void;
   (event: 'update:visible', v: boolean): void;
 }>();
@@ -111,10 +114,10 @@ watchEffect(() => {
 });
 
 // 关闭按钮点击
-function handleClose() {
+function handleClose(type: CloseType) {
   // 触发事件，允许取消关闭
   let prevented = false;
-  emit('close', () => (prevented = true));
+  emit('close', () => (prevented = true), type);
   if (prevented) return;
 
   close();
@@ -124,14 +127,28 @@ function handleClose() {
 function handleKeydown(e: KeyboardEvent) {
   if (!props.closeOnESC) return;
   if (e.key === 'Escape') {
-    handleClose();
+    handleClose('esc');
   }
 }
 
 // 遮罩点击关闭
-function handleMaskClick() {
+function handleMaskClick(e: MouseEvent & { triggerByCusCommonModal?: boolean }) {
   if (!props.closeOnClickMask) return;
-  handleClose();
+
+  handleClose(e.type == 'click' ? 'mask-click' : 'mask-rightclick');
+  if (props.enableMaskClickPass && !e.triggerByCusCommonModal) {
+    console.log(e);
+    nextFrame(() => {
+      const elBelow = document
+        .elementsFromPoint(e.clientX, e.clientY)
+        .filter((value) => !value.classList.contains('modal-mask'));
+      if (elBelow.length) {
+        // 创建一个新的点击事件，派发到下层元素
+        const evt = new MouseEvent(e.type, Object.assign(e, { triggerByCusCommonModal: true }));
+        elBelow[0].dispatchEvent(evt);
+      }
+    });
+  }
 }
 
 defineSlots<{
@@ -151,12 +168,13 @@ defineExpose<CommonModalFunc>({
     <Transition name="show" @after-leave="afterClose">
       <div
         v-if="showModal"
-        ref="modal"
+        ref="modal-mask"
         :style="{ ...props.maskStyle, 'z-index': zIndex }"
         class="modal-mask"
-        @click="handleMaskClick"
+        @click="handleMaskClick($event)"
+        @contextmenu.prevent="handleMaskClick($event)"
       >
-        <Close v-if="showClose" class="modal-close" size="20" @click="handleClose" />
+        <Close v-if="showClose" class="modal-close" size="20" @click="handleClose('button')" />
       </div>
     </Transition>
     <Transition :name="modalTransitionName || (showBodyTransition && showModalBody ? 'x-expand' : 'x-expand')">

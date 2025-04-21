@@ -1,6 +1,7 @@
 import type { InjectionKey, Ref } from 'vue';
 
 export type CusRadioGroupProps = {
+  defaultValue?: any;
   name?: string;
   type?: 'normal' | 'highlight';
   direction?: 'row' | 'column';

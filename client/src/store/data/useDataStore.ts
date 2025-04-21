@@ -3,7 +3,7 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { useLocalStorage, useToggle } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { ref, watch } from 'vue';
+import { computed, type MaybeRefOrGetter, ref, toValue, watch } from 'vue';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { toObserver, useSubscription } from '@vueuse/rxjs';
 import { liveQuery } from 'dexie';
@@ -42,6 +42,18 @@ export const useDataStore = defineStore('data', () => {
     { immediate: true }
   );
 
+  const useFilteredSessions = (filterFlags: MaybeRefOrGetter<string[]>) => {
+    const filteredSessions = computed(() => {
+      console.log('useFilteredSessions', toValue(filterFlags));
+      return sessions.value.filter((session) => {
+        return toValue(filterFlags).some((flag) => {
+          return session.flags?.[flag] === true;
+        });
+      });
+    });
+    return { filteredSessions };
+  };
+
   const chatConfigStore = useChatConfigStore();
   const settingStore = useSettingStore();
 
@@ -54,7 +66,6 @@ export const useDataStore = defineStore('data', () => {
       // 获取session_id
       const { status, data } = await genApi.Chat.sessionNewPost();
       const sessionId = data.data;
-      console.debug(data);
       if (status === 200 && data.data) {
         await db.sessions.add({
           id: sessionId,
@@ -72,7 +83,7 @@ export const useDataStore = defineStore('data', () => {
       }
       return sessionId;
     } catch (_) {
-      showToast({ text: '请求失败，请稍候重试 TAT', type: 'danger', position: 'top-left' });
+      showToast({ text: '创建失败，请稍候重试 TAT', type: 'danger', position: 'top-left' });
     }
     return '';
   }
@@ -313,6 +324,7 @@ export const useDataStore = defineStore('data', () => {
     sessionsFirstLoaded,
     isSessionsEmpty,
     isFetchingSessions,
+    useFilteredSessions,
     syncSessions,
     updateSessionFlags,
     changeSessionBot,

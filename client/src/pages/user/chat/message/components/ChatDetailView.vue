@@ -283,7 +283,7 @@ function handleActionTipClick() {
 async function handleStarDialog() {
   const res = await dataStore.updateSessionFlags(form.sessionId, { isStared: !sessionInfo.value.flags?.isStared });
   if (res) {
-    ToastManager.normal(`${!sessionInfo.value.flags?.isStared ? '取消' : ''}收藏成功`);
+    // ToastManager.normal(`${!sessionInfo.value.flags?.isStared ? '取消' : ''}收藏成功`);
   } else {
     ToastManager.danger('收藏失败，请稍后重试~');
   }

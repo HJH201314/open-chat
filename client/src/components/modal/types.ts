@@ -7,6 +7,7 @@ export type CommonModalProps = {
   showBodyTransition?: boolean;
   closeOnESC?: boolean;
   closeOnClickMask?: boolean;
+  enableMaskClickPass?: boolean; // 开启后点击或右键遮罩层会向下面的组件传递点击事件
   draggable?: boolean;
 
   maskStyle?: CSSProperties;

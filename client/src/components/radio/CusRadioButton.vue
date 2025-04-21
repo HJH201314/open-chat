@@ -29,6 +29,10 @@ watchEffect(() => {
     groupInject?.setElement(radioButtonRef.value);
   }
 });
+
+defineSlots<{
+  default: (props: { selected: boolean }) => any;
+}>();
 </script>
 
 <template>
@@ -41,6 +45,7 @@ watchEffect(() => {
       [typeClassName]: !!typeClassName,
       [directionClassName]: !!directionClassName,
       [`display-${displayStyle}`]: true,
+      'slot-only': !label,
     }"
     @click="handleClick"
   >
@@ -48,7 +53,8 @@ watchEffect(() => {
     <div v-if="displayStyle === 'icon'" class="radio-icon">
       <div class="radio-icon-inner"></div>
     </div>
-    <span class="radio-label">{{ label }}</span>
+    <span v-if="label" class="radio-label">{{ label }}</span>
+    <slot name="default" :selected="radioChecked"></slot>
   </div>
 </template>
 
@@ -64,6 +70,10 @@ watchEffect(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+
+  &.slot-only {
+    padding: 8px;
+  }
 
   // 圆形 radio 图标样式
   .radio-icon {

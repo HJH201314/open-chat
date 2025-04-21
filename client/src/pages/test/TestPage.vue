@@ -3,6 +3,7 @@ import ChatLayout from '@/pages/user/chat/ChatLayout.vue';
 import { computed, reactive } from 'vue';
 import tinycolor from 'tinycolor2';
 import CusSelectTest from '@/components/dropdown/test/CusSelectTest.vue';
+import CusContextMenu from '@/components/dropdown/CusContextMenu.vue';
 
 const colorTest = reactive({
   colors: computed(() => {
@@ -24,10 +25,12 @@ const colorTest = reactive({
 
 <template>
   <ChatLayout>
-    <div class="color-test">
-      颜色测试
-      <div v-for="c in colorTest.colors" :key="c" class="color-block" :style="{ 'background-color': c }"></div>
-    </div>
+    <CusContextMenu>
+      <div class="color-test">
+        颜色测试
+        <div v-for="c in colorTest.colors" :key="c" class="color-block" :style="{ 'background-color': c }"></div>
+      </div>
+    </CusContextMenu>
     <div class="select-test">
       popup 菜单测试
       <CusSelectTest />

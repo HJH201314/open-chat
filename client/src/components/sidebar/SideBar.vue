@@ -208,15 +208,11 @@ defineExpose({
           style="flex: auto; display: flex; justify-content: center"
           position="right"
           :text="`切换${currentTheme == 'dark' ? '浅色' : '深色'}`"
+          @click="toggleTheme"
         >
           <div class="sidebar-entry">
-            <SunOne
-              v-if="currentTheme == 'dark'"
-              class="sidebar-entry-icon"
-              size="1.5rem"
-              @click="toggleTheme"
-            ></SunOne>
-            <Moon v-if="currentTheme == 'light'" class="sidebar-entry-icon" size="1.5rem" @click="toggleTheme"></Moon>
+            <SunOne v-if="currentTheme == 'dark'" class="sidebar-entry-icon" size="1.5rem"></SunOne>
+            <Moon v-if="currentTheme == 'light'" class="sidebar-entry-icon" size="1.5rem"></Moon>
           </div>
         </CusTooltip>
       </div>

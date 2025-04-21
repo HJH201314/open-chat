@@ -199,7 +199,7 @@ defineSlots<{
       padding: 0.25rem;
       background: var(--color-white);
       border-radius: 0.5rem;
-      box-shadow: $box-shadow-right-bottom;
+      box-shadow: $next-box-shadow-small;
       position: absolute;
       top: 0.25rem;
       right: 3rem;

@@ -2,6 +2,7 @@
 import { type CusRadioGroupProps, RadioGroupInjectionKey } from '@/components/radio/types.ts';
 import { getRandomString } from '@/utils/string.ts';
 import { computed, type CSSProperties, onMounted, onUnmounted, provide, ref, toRefs, useTemplateRef, watch } from 'vue';
+import { watchOnce } from '@vueuse/core';
 
 const props = withDefaults(defineProps<CusRadioGroupProps>(), {
   name: getRandomString(5),
@@ -13,6 +14,13 @@ const props = withDefaults(defineProps<CusRadioGroupProps>(), {
 });
 
 const modelValue = defineModel<any>({ default: '' });
+watchOnce(
+  () => props.defaultValue,
+  (newDefaultValue) => {
+    modelValue.value = newDefaultValue;
+  },
+  { immediate: true }
+);
 
 const emits = defineEmits<{
   (event: 'change', value: any): void;
@@ -86,10 +94,10 @@ function positionBar() {
     const { offsetHeight, offsetTop, offsetWidth, offsetLeft } = selectedElement.value;
 
     barStyle.value = {
-      left: `${offsetLeft + 3}px`,
-      top: `${offsetTop + 3}px`,
-      width: `${offsetWidth - 6}px`,
-      height: `${offsetHeight - 6}px`,
+      left: `${offsetLeft + 2}px`,
+      top: `${offsetTop + 2}px`,
+      width: `${offsetWidth - 4}px`,
+      height: `${offsetHeight - 4}px`,
     };
 
     // 使用 setTimeout 任务在首次 bar 渲染完成后再启用动画
