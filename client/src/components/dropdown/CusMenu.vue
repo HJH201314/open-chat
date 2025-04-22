@@ -26,7 +26,6 @@ provide(DropdownCurrentInfoInjectionKey, {
 });
 
 const onShow = (e: any) => {
-  console.log('[context-menu]', e);
   if (props.disabled) return;
 
   isOpen.value = true;
@@ -72,6 +71,7 @@ defineExpose({
       :is-open="isOpen"
       :_depth="1"
       :_value-path="[]"
+      @contextmenu.capture.prevent
     />
   </CommonModal>
 </template>

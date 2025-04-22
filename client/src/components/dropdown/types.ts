@@ -1,5 +1,5 @@
 import type { CSSProperties, InjectionKey, Reactive, Ref, VNode } from 'vue';
-import { useElementBounding } from '@vueuse/core';
+import type { useElementBounding } from '@vueuse/core';
 
 export const DropdownCurrentInfoInjectionKey: InjectionKey<{
   currentOptionPath?: Ref<DropdownOption[]>;

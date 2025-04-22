@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="dropdown">
-      <ul v-show="isOpen" ref="menu" :class="[`dropdown-menu--${position}`]" class="dropdown-menu">
+      <ul v-show="isOpen" v-bind="$attrs" ref="menu" :class="[`dropdown-menu--${position}`]" class="dropdown-menu">
         <dropdown-menu-item
           v-for="option in options"
           :key="option.value"
@@ -24,6 +24,9 @@ import { computed, defineProps, reactive, useTemplateRef, watchEffect } from 'vu
 
 const props = withDefaults(defineProps<DropdownMenuProps>(), {
   position: 'bottom',
+});
+defineOptions({
+  inheritAttrs: false,
 });
 
 const currentShowingPath = defineModel<string[]>('currentShowingPath', { default: () => [] });
@@ -212,6 +215,7 @@ watchEffect(() => {
     scale 0.2s $ease-out-back,
     opacity 0.2s linear;
 }
+
 .dropdown-leave-active {
   transition:
     scale 0.1s $ease-out-back,

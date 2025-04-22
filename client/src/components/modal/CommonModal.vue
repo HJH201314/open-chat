@@ -47,11 +47,8 @@ const showModal = ref(false);
 watch(
   () => props.visible,
   (v) => {
-    // nextTick才真正改变可视，能够让props.visible从一开始就为true时也展示动画
-    nextTick(() => {
-      if (v) open();
-      else close();
-    });
+    if (v) open();
+    else close();
   },
   { immediate: true }
 );
@@ -165,7 +162,7 @@ defineExpose<CommonModalFunc>({
 
 <template>
   <Teleport :to="teleportTo" :disabled="!teleportTo">
-    <Transition name="show" @after-leave="afterClose">
+    <Transition name="show" @after-leave="afterClose" appear>
       <div
         v-if="showModal"
         ref="modal-mask"
