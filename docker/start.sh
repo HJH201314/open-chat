@@ -41,5 +41,5 @@ set_env_var RD_DB "0"
 
 # Start services
 nginx -g "daemon off;" &  # Start nginx
-cd /app && .main          # Start the app backend
+cd /app && ./main          # Start the app backend
 tail -f /dev/null         # Keep the container running
