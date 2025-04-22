@@ -45,4 +45,4 @@ set_env_var RD_DB "0"
 
 # 3. 启动服务
 nginx -g "daemon off;" &  # Start nginx
-/app/main                 # Start the app backend
+app/main                 # Start the app backend
