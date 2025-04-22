@@ -17,7 +17,7 @@ RUN cd client && pnpm run build-only
 # Stage 2: Build backend
 FROM golang:1.24-alpine as backend-builder
 WORKDIR /app
-COPY server/go.mod ./server/go.sum ./
+COPY server/go.mod server/go.sum ./
 RUN go mod download
 COPY server .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /main
