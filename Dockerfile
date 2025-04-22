@@ -34,7 +34,7 @@ COPY --from=backend-builder /main /app/main
 # Use /etc/app/conf as configuration directory
 RUN mkdir -p /etc/app/conf
 # Copy ./server/conf/.env to /etc/app/conf
-COPY server/conf/.env /etc/app/conf/.env
+COPY server/conf/.env /etc/app/conf/default.env
 # Create /app/conf, then mount it to /etc/app/conf
 RUN mkdir -p /app/conf && ln -sf /etc/app/conf /app/conf
 
