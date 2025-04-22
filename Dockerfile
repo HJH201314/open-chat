@@ -43,5 +43,6 @@ COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/start.sh /start.sh
 RUN chmod +x /app/main /start.sh
 
+EXPOSE 9033
 EXPOSE 9035
 CMD ["/start.sh"]
