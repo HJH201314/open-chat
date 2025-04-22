@@ -355,7 +355,14 @@ const { isSmallScreen } = useGlobal();
           @click="handleListItemClick(item.id)"
           @contextmenu.capture.prevent="onRightClick($event, item.id)"
         >
-          <CusAvatar style="opacity: 0.6" :name="item.title?.trim() || ''" size="2.5em" shape="circle" />
+          <CusAvatar
+            style="opacity: 0.6"
+            color="var(--color-primary)"
+            spin
+            :name="item.title?.trim() || ''"
+            size="2.5em"
+            shape="circle"
+          />
           <div class="dialog-list-item__right">
             <div class="dialog-list-item__top">
               <div class="title">

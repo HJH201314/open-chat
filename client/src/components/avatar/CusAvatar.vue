@@ -3,6 +3,7 @@ import { computed, type CSSProperties } from 'vue';
 
 import { getRandomInt } from '@/utils/string.ts';
 import { getColorHex, getDarkerColor } from '@/utils/color.ts';
+import tinycolor from 'tinycolor2';
 
 const defaultColors = [
   '#eb5181',
@@ -68,6 +69,7 @@ const props = withDefaults(
     size?: CSSProperties['width'];
     name?: string;
     color?: CSSProperties['color'];
+    spin?: boolean;
     shape?: 'circle' | 'square';
     gradient?: boolean;
   }>(),
@@ -75,6 +77,7 @@ const props = withDefaults(
     size: '2rem',
     name: '',
     color: '',
+    spin: false,
     shape: 'circle',
     gradient: false,
   }
@@ -88,6 +91,9 @@ const background = computed(() => {
   if (!color.startsWith('#')) {
     // 随机颜色兜底
     color = defaultColors[getRandomInt(0, defaultColors.length - 1)];
+  }
+  if (props.spin) {
+    color = tinycolor(color).spin(getRandomInt(1, 360)).toHexString();
   }
 
   if (props.gradient) {

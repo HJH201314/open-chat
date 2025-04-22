@@ -35,6 +35,7 @@ export const showLoginDialog = () => {
           showClose: false,
           presetBody: true,
           closeOnESC: true,
+          closeOnClickMask: true,
           onAfterClose() {
             app.unmount();
             mountDiv.remove();

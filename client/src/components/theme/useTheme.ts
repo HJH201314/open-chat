@@ -28,7 +28,7 @@ export const registerThemeColor = (colorPrimary?: string, name: string = 'defaul
     const lightLevelList = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
     // 暗色模式下色阶等级，与亮色模式一一对应
     const darkLevelList = [
-      2700, 2500, 2300, 2100, 1900, 1700, 1500, 1300, 1100, 900, 700, 600, 500, 400, 300, 200, 100, 50, 20, 10,
+      2700, 2500, 2300, 2100, 1900, 1700, 1500, 1300, 1100, 850, 650, 550, 450, 350, 250, 150, 100, 50, 20, 10,
     ];
     // 升序，用于辅助计算
     const darkLevelListAsc = darkLevelList.slice().toReversed();
@@ -50,7 +50,7 @@ export const registerThemeColor = (colorPrimary?: string, name: string = 'defaul
         // 颜色加深时，以上一个色阶为基准进行加深
         const tintedColor = tinycolor.mix(
           result[index - 1],
-          '#252525',
+          '#191919',
           ((level - levelList[index - 1]) / levelList[index - 1]) * 100
         );
         tintedColorHex = tintedColor.toHexString();
@@ -107,7 +107,7 @@ export const useTheme = defineStore('theme', () => {
   });
   const theme: Record<string, string> = reactive({
     colorPrimary: '#487eb0',
-    colorBlack: '#252525',
+    colorBlack: '#191919',
     colorWhite: '#fff',
     colorSuccess: '#52c41a',
     colorInfo: '#1890ff',
@@ -194,7 +194,7 @@ export const useTheme = defineStore('theme', () => {
       const { resume: startColorful, pause: stopColorful } = useIntervalFn(
         () => {
           if (currentColorful && settingStore.settings.themeColorful) {
-            currentColorful.spin(Math.random());
+            currentColorful.spin(Math.random() * 2);
             scopeNoTransition(() => {
               registerThemeColor(currentColorful.toHexString());
               syncCssVars();

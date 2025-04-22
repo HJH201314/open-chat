@@ -165,7 +165,7 @@ $dialog-max-width: 54rem;
     background-color: #f9f9f9;
   }
   .theme-dark & {
-    background-color: #2a2a2a;
+    background-color: #1f1f1f;
   }
 
   &.hide {
@@ -242,7 +242,7 @@ $dialog-max-width: 54rem;
     align-items: center;
     gap: 0.25rem;
     background: rgba(var(--color-white) / 50%);
-    opacity: 0.9;
+    //opacity: 0.9;
     padding: 0.25rem 2rem 0.25rem 0.25rem;
     overflow-x: auto;
     scrollbar-width: none;

@@ -1,6 +1,6 @@
 import { useIntervalFn, useLocalStorage, useSessionStorage } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { USER_ACCESS_TOKEN_KEY, USER_REFRESH_TOKEN_KEY } from '@/constants';
 import genApi from '@/api/gen-api.ts';
 import type { ApiSchemaUser } from '@/api/gen/data-contracts.ts';
@@ -106,6 +106,12 @@ export const useUserStore = defineStore('user', () => {
     refreshToken.value = '';
     pausePing();
   }
+
+  onMounted(() => {
+    if (!accessToken.value) {
+      logout();
+    }
+  });
 
   return {
     avatar,

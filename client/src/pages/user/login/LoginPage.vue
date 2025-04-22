@@ -3,7 +3,7 @@ import useGlobal from '@/commands/useGlobal.ts';
 import { DialogManager } from '@/components/dialog';
 import showToast from '@/components/toast/toast.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { Close, Github, Right } from '@icon-park/vue-next';
+import { Close, Right } from '@icon-park/vue-next';
 import EasyTyper from 'easy-typer-js';
 import { onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -16,6 +16,7 @@ import { encryptWithPublicKey } from '@/utils/encrypt.ts';
 import CusInput from '@/components/input/CusInput.vue';
 import { onStartTyping } from '@vueuse/core';
 import DiliButton from '@/components/button/DiliButton.vue';
+import { LogoGithubIcon, LogoQqIcon, LogoWechatStrokeIcon } from 'tdesign-icons-vue-next';
 
 const props = withDefaults(
   defineProps<{
@@ -154,12 +155,21 @@ async function handleLoginSubmit() {
 }
 
 async function handleThirdPartyLogin(providerName: string) {
-  const res = await genApi.Auth.getAuth(providerName);
-  if (res.status == 200 && res.data.data) {
-    // 记录当前页面
-    localStorage.setItem('login-redirect', route.fullPath);
-    // 在本标签页打开
-    location.href = res.data.data;
+  if (providerName == 'github') {
+    try {
+      submitDisabled.value = true;
+      const res = await genApi.Auth.getAuth(providerName);
+      if (res.status == 200 && res.data.data) {
+        // 记录当前页面
+        localStorage.setItem('login-redirect', route.fullPath);
+        // 在本标签页打开
+        location.href = res.data.data;
+      }
+    } finally {
+      submitDisabled.value = false;
+    }
+  } else {
+    ToastManager.warning('暂未开放');
   }
 }
 
@@ -260,7 +270,13 @@ function showUserAgreement() {
     <div class="login-footer">注册前请阅读并同意<a @click="showUserAgreement">《OpenChat用户协议》</a></div>
     <div class="login-third-party">
       <DiliButton @click="handleThirdPartyLogin('github')">
-        <Github size="1.5rem" />
+        <LogoGithubIcon size="1.25rem" />
+      </DiliButton>
+      <DiliButton @click="handleThirdPartyLogin('qq')">
+        <LogoQqIcon size="1.25rem" />
+      </DiliButton>
+      <DiliButton @click="handleThirdPartyLogin('wechat')">
+        <LogoWechatStrokeIcon size="1.25rem" />
       </DiliButton>
     </div>
   </div>

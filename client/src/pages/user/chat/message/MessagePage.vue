@@ -9,6 +9,7 @@ import { useRouter } from 'vue-router';
 import { createDraggable, Draggable } from 'animejs';
 import { nextFrame, waitUntilNextFrame } from '@/utils/element.ts';
 import { DialogManager } from '@/components/dialog';
+import EmptyTip from '@/components/EmptyTip.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -45,6 +46,7 @@ watch(
 );
 
 const chatDetailViewRef = useTemplateRef('chat-detail-view');
+
 async function handleSessionChange(sessionId: string) {
   if (chatDetailViewRef.value?.isStreaming) {
     const res = await DialogManager.commonDialog({
@@ -147,13 +149,11 @@ watch(
         />
       </Transition>
       <Transition name="ease-in">
-        <div
+        <EmptyTip
           v-if="showDialogView && !props.sessionId && !isRightSessionShowing"
           id="dialog-detail-empty-tip"
           class="message-page-empty-tip"
-        >
-          ╮(￣▽￣)╭<br />这里空空如也<br />
-        </div>
+        />
       </Transition>
     </section>
   </div>
@@ -202,16 +202,6 @@ watch(
     position: absolute;
     inset: 0;
     background: var(--color-white);
-  }
-
-  &-empty-tip {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: var(--color-primary);
-    font-size: 2rem;
   }
 }
 

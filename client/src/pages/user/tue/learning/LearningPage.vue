@@ -19,6 +19,7 @@ import { Close, MenuUnfold } from '@icon-park/vue-next';
 import IconButton from '@/components/IconButton.vue';
 import { toggleSidebarExpandKey } from '@/constants/eventBusKeys.ts';
 import { nextFrame } from '@/utils/element.ts';
+import EmptyTip from '@/components/EmptyTip.vue';
 
 // 小屏展开侧边栏
 const toggleSideBarExpandBus = useEventBus(toggleSidebarExpandKey);
@@ -210,7 +211,7 @@ const { isSmallScreen } = useGlobal();
   <div class="learning-page" :class="{ mobile: isSmallScreen }">
     <LoadingModal :visible="examData.loading" />
     <div class="list-area">
-      <div v-if="showEmptyTip" class="empty-tip">╮(￣▽￣)╭<br />这里空空如也<br /></div>
+      <EmptyTip v-if="showEmptyTip"></EmptyTip>
       <div class="header-container" :class="{ viewing: viewingExam || viewingProblem || isSmallScreen }">
         <IconButton
           v-if="isSmallScreen"
@@ -263,7 +264,6 @@ const { isSmallScreen } = useGlobal();
           @detail="onProblemDetail(item)"
         />
         <CusInfiniteScroll ref="problem-infinite-scroll" @load="onLoadMoreProblem" />
-        <div v-if="problemData.list.length == 0" class="empty-tip">╮(￣▽￣)╭<br />这里空空如也<br /></div>
       </div>
     </div>
     <hr v-if="examData.selectedRecordId" class="split" />
@@ -307,16 +307,6 @@ const { isSmallScreen } = useGlobal();
     height: 100%;
     background-color: var(--color-grey-100);
     opacity: 0.233;
-  }
-
-  .empty-tip {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: var(--color-primary);
-    font-size: 2rem;
   }
 }
 

@@ -72,7 +72,7 @@ useEventListener(document, 'mousemove', (e) => {
     clearInterval(closeInterval.value);
     closeInterval.value = window.setInterval(() => hide(e), 75);
   }
-})
+});
 
 const closeInterval = ref<number>();
 
@@ -125,9 +125,10 @@ defineSlots<{
   &-slot {
     position: fixed;
     border-radius: 0.5rem;
-    background-color: white;
+    color: var(--color-black);
+    background-color: var(--color-white);
     box-shadow: $box-shadow-deeper;
-    z-index: 999;
+    z-index: 99999;
     box-sizing: border-box;
   }
 }

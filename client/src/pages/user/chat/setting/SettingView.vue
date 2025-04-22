@@ -19,6 +19,7 @@ import LogoVIP from '@/components/logo/LogoVIP.vue';
 import { ShuffleOne } from '@icon-park/vue-next';
 import tinycolor from 'tinycolor2';
 import { getRandomInt } from '@/utils/string.ts';
+import CusPopover from '@/components/tooltip/CusPopover.vue';
 
 const { isModal = false } = defineProps<{
   isModal?: boolean;
@@ -106,8 +107,10 @@ function forceReloadPage() {
   window.location.reload(true);
 }
 
+let lastColorHex = tinycolor({ h: 0, s: 0.451, l: 0.451 }).toHexString();
 function genRandomThemeColor() {
-  editingValue.value.themeColor = tinycolor({ h: 0, s: 0.34, l: 0.56 }).spin(getRandomInt(0, 360)).toHexString();
+  editingValue.value.themeColor = tinycolor(lastColorHex).spin(getRandomInt(1, 360)).toHexString();
+  lastColorHex = editingValue.value.themeColor;
 }
 
 // 颜色预览
@@ -143,7 +146,7 @@ defineExpose({
             <div class="setting-list-item">
               <span class="setting-list-item__title">API地址</span>
               <span class="setting-list-item__value">
-                <CusInput v-model="editingValue.baseUrl" placeholder="后端服务地址" />
+                <CusInput v-model="editingValue.baseUrl" placeholder="API服务地址" disabled />
               </span>
             </div>
           </div>
@@ -224,7 +227,15 @@ defineExpose({
               <span class="setting-list-item__title">主题色</span>
               <span class="setting-list-item__value" style="flex-direction: row; align-items: center">
                 <CusInput v-model="editingValue.themeColor" style="width: 7.5rem" />
-                <CusAvatar size="1.5rem" :color="editingValue.themeColor" style="flex-shrink: 0" />
+                <CusPopover position="top">
+                  <CusAvatar size="1.5rem" :color="editingValue.themeColor" style="flex-shrink: 0" />
+                  <template #popover>
+                    <div style="padding: 0.5rem; user-select: text">
+                      {{ tinycolor(editingValue.themeColor).toRgbString() }}<br />
+                      {{ tinycolor(editingValue.themeColor).toHslString() }}
+                    </div>
+                  </template>
+                </CusPopover>
                 <DiliButton type="tertiary" @click="genRandomThemeColor"><ShuffleOne /></DiliButton>
               </span>
             </div>

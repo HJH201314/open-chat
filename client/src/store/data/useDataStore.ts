@@ -44,7 +44,6 @@ export const useDataStore = defineStore('data', () => {
 
   const useFilteredSessions = (filterFlags: MaybeRefOrGetter<string[]>) => {
     const filteredSessions = computed(() => {
-      console.log('useFilteredSessions', toValue(filterFlags));
       return sessions.value.filter((session) => {
         return toValue(filterFlags).some((flag) => {
           return session.flags?.[flag] === true;
@@ -189,13 +188,18 @@ export const useDataStore = defineStore('data', () => {
     }
   }
 
-  const lastSyncTime = useLocalStorage('last-sync-time', 0);
+  const lastSyncTime = useLocalStorage(
+    computed(() => `last-sync-time:${userStore.userId}`),
+    0
+  );
   const [isFetchingSessions, changeFetchingStatus] = useToggle(false);
 
   /**
    * 从服务器拉取会话
    */
   async function syncSessions(abortController?: AbortController) {
+    if (isFetchingSessions.value) return;
+
     const controller = abortController || new AbortController();
     const updatedSessions: ApiSchemaUserSession[] = [];
     const deletedSessions: ApiSchemaUserSession[] = [];
