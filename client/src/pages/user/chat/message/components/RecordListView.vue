@@ -6,11 +6,11 @@ import { useSettingStore } from '@/store/useSettingStore.ts';
 import type { SessionInfo } from '@/types/data.ts';
 import { AllApplication, Delete, MenuUnfold, Plus, ShareOne, Star } from '@icon-park/vue-next';
 import { useRouteParams } from '@vueuse/router';
-import { computed, h, nextTick, onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
+import { computed, h, nextTick, reactive, ref, useTemplateRef, watch } from 'vue';
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { until, useElementSize, useEventBus, useScroll } from '@vueuse/core';
+import { useElementSize, useEventBus, useScroll } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { goToLogin } from '@/pages/user/login';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
@@ -39,17 +39,14 @@ const currentSessionId = useRouteParams<string>('sessionId');
 const filterType = ref<'all' | 'isStared' | 'isShared'>('all');
 const { filteredSessions } = dataStore.useFilteredSessions(() => [filterType.value]);
 
-onMounted(() => {
-  until(() => userStore.isLogin)
-    .toBe(true)
-    .then(() => {
-      until(() => dataStore.sessionsFirstLoaded)
-        .toBe(true)
-        .then(() => {
-          dataStore.syncSessions();
-        });
-    });
-});
+watch(
+  () => userStore.isLogin && dataStore.sessionsFirstLoaded,
+  (newValue) => {
+    if (newValue) {
+      dataStore.syncSessions();
+    }
+  }
+);
 
 async function handleAddRecord(defaultBotId?: number) {
   const sessionId = await dataStore.addDialog(defaultBotId ?? 0);
@@ -541,6 +538,7 @@ const { isSmallScreen } = useGlobal();
   }
 
   &-item {
+    user-select: none;
     padding: 0.5em;
     cursor: pointer;
     transition: background-color 0.2s $ease-out-cubic;

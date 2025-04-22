@@ -4,6 +4,7 @@ import { User } from '@/api/gen/User.ts';
 import { Preset } from '@/api/gen/Preset.ts';
 import { Tue } from '@/api/gen/Tue.ts';
 import { Base } from '@/api/gen/Base.ts';
+import { Auth } from '@/api/gen/Auth.ts';
 import { USER_ACCESS_TOKEN_KEY } from '@/constants';
 import { getActivePinia } from 'pinia';
 import { useSettingStore } from '@/store/useSettingStore.ts';
@@ -42,6 +43,7 @@ export default {
   Chat: new Chat(genApiClient),
   Manage: new Manage(genApiClient),
   User: new User(genApiClient),
+  Auth: new Auth(genApiClient),
   Preset: new Preset(genApiClient),
   Tue: new Tue(genApiClient),
   Base: new Base(genApiClient),

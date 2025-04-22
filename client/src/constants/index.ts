@@ -1,4 +1,4 @@
-export const DEFAULT_COLOR: string = '#757cbd';
+export const DEFAULT_COLOR: string = '#487eb0';
 
 export const SERVER_ORIGIN_API_URL = '/api/origin';
 export const SERVER_CLOUD_API_URL = '/api/cloud';

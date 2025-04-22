@@ -459,7 +459,7 @@ defineExpose({
       color: var(--color-black);
 
       &:hover {
-        background-color: var(--color-grey-100);
+        background-color: var(--color-trans-100);
       }
     }
   }

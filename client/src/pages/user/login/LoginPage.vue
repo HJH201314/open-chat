@@ -3,10 +3,10 @@ import useGlobal from '@/commands/useGlobal.ts';
 import { DialogManager } from '@/components/dialog';
 import showToast from '@/components/toast/toast.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { Close, Right } from '@icon-park/vue-next';
+import { Close, Github, Right } from '@icon-park/vue-next';
 import EasyTyper from 'easy-typer-js';
 import { onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import CusRadioGroup from '@/components/radio/CusRadioGroup.vue';
 import CusRadioButton from '@/components/radio/CusRadioButton.vue';
 import genApi from '@/api/gen-api.ts';
@@ -31,6 +31,7 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const route = useRoute();
 onMounted(() => {
   initPage();
 });
@@ -152,6 +153,16 @@ async function handleLoginSubmit() {
   }
 }
 
+async function handleThirdPartyLogin(providerName: string) {
+  const res = await genApi.Auth.getAuth(providerName);
+  if (res.status == 200 && res.data.data) {
+    // 记录当前页面
+    localStorage.setItem('login-redirect', route.fullPath);
+    // 在本标签页打开
+    location.href = res.data.data;
+  }
+}
+
 watch(
   () => userStore.isLogin,
   (v) => {
@@ -246,7 +257,12 @@ function showUserAgreement() {
         </button>
       </form>
     </div>
-    <div class="login-footer">我已阅读并同意<a @click="showUserAgreement">《OpenChat用户协议》</a></div>
+    <div class="login-footer">注册前请阅读并同意<a @click="showUserAgreement">《OpenChat用户协议》</a></div>
+    <div class="login-third-party">
+      <DiliButton @click="handleThirdPartyLogin('github')">
+        <Github size="1.5rem" />
+      </DiliButton>
+    </div>
   </div>
 </template>
 
@@ -309,6 +325,14 @@ function showUserAgreement() {
     display: flex;
     flex-direction: row;
     gap: 0.5rem;
+  }
+
+  &-third-party {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
   }
 
   &-footer {

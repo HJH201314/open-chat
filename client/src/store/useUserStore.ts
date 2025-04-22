@@ -87,11 +87,19 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  const internalLogin = (userInfo: ApiSchemaUser) => {
+    loginStatus.value = 'login';
+    currentUser.value = { ...userInfo };
+    resumePing();
+  };
+
   /**
    * 登出，清除本地登录信息
    */
   function logout() {
-    genApi.User.logoutPost();
+    if (accessToken.value) {
+      genApi.User.logoutPost();
+    }
     loginStatus.value = 'logout';
     currentUser.value = {};
     accessToken.value = '';
@@ -109,6 +117,7 @@ export const useUserStore = defineStore('user', () => {
     currentUser,
     isAdmin,
     login,
+    internalLogin,
     logout,
     refreshToken,
     token: accessToken,

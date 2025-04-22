@@ -50,6 +50,19 @@ const router = createRouter({
       ],
     },
     {
+      path: '/auth',
+      name: 'AuthPage',
+      component: () => import('@/pages/user/chat/ChatLayout.vue'),
+      children: [
+        {
+          path: 'redirect/:name',
+          name: 'AuthRedirectPage',
+          props: true,
+          component: () => import('@/pages/user/chat/auth/AuthRedirectPage.vue'),
+        },
+      ],
+    },
+    {
       path: '/tue',
       name: 'tueModule',
       component: () => import('@/pages/user/tue/TueLayout.vue'),

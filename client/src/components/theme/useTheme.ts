@@ -106,7 +106,7 @@ export const useTheme = defineStore('theme', () => {
     listenToStorageChanges: true,
   });
   const theme: Record<string, string> = reactive({
-    colorPrimary: '#26a69a',
+    colorPrimary: '#487eb0',
     colorBlack: '#252525',
     colorWhite: '#fff',
     colorSuccess: '#52c41a',

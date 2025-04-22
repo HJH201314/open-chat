@@ -22,6 +22,7 @@ import { nextFrame } from '@/utils/element.ts';
 
 // 小屏展开侧边栏
 const toggleSideBarExpandBus = useEventBus(toggleSidebarExpandKey);
+
 function handleSidebarUnfold() {
   toggleSideBarExpandBus.emit(true);
 }
@@ -196,6 +197,12 @@ const onProblemBack = () => {
   problemData.selectedProblem = {};
 };
 
+const showEmptyTip = computed(() => {
+  return (
+    (currentType.value == 'exam' && examData.list.length == 0) ||
+    (currentType.value == 'problem' && problemData.list.length == 0)
+  );
+});
 const { isSmallScreen } = useGlobal();
 </script>
 
@@ -203,6 +210,7 @@ const { isSmallScreen } = useGlobal();
   <div class="learning-page" :class="{ mobile: isSmallScreen }">
     <LoadingModal :visible="examData.loading" />
     <div class="list-area">
+      <div v-if="showEmptyTip" class="empty-tip">╮(￣▽￣)╭<br />这里空空如也<br /></div>
       <div class="header-container" :class="{ viewing: viewingExam || viewingProblem || isSmallScreen }">
         <IconButton
           v-if="isSmallScreen"
@@ -255,6 +263,7 @@ const { isSmallScreen } = useGlobal();
           @detail="onProblemDetail(item)"
         />
         <CusInfiniteScroll ref="problem-infinite-scroll" @load="onLoadMoreProblem" />
+        <div v-if="problemData.list.length == 0" class="empty-tip">╮(￣▽￣)╭<br />这里空空如也<br /></div>
       </div>
     </div>
     <hr v-if="examData.selectedRecordId" class="split" />
@@ -299,9 +308,20 @@ const { isSmallScreen } = useGlobal();
     background-color: var(--color-grey-100);
     opacity: 0.233;
   }
+
+  .empty-tip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--color-primary);
+    font-size: 2rem;
+  }
 }
 
 .list-area {
+  position: relative;
   height: 100%;
   flex: auto;
   display: flex;

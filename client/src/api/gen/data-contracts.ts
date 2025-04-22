@@ -985,6 +985,7 @@ export interface ApiSchemaSessionShareInfo {
 export interface ApiSchemaUser {
   created_at?: string;
   id?: number;
+  nickname?: string;
   password?: string;
   /** 用户与角色之间的多对多关系 */
   roles?: ApiSchemaRole[];
@@ -1009,6 +1010,11 @@ export interface ApiSchemaUserSession {
 export enum ApiSchemaUserSessionType {
   EnumUserSessionTypeOwner = 1,
   EnumUserSessionTypeInvitee = 2,
+}
+
+export interface ApiUserLoginByOAuthReq {
+  code: string;
+  state: string;
 }
 
 export interface ApiUserLoginLoginRequest {
