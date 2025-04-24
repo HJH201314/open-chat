@@ -299,9 +299,7 @@ defineSlots<{
             class="problem-answer-section-select-item"
             :value="option.id"
             :label="`${indexToOption(i)}. ${option.content}`"
-          >
-            {{ option.content }}
-          </CusRadioButton>
+          ></CusRadioButton>
         </CusRadioGroup>
       </template>
 
@@ -315,10 +313,8 @@ defineSlots<{
           background-mode="transparent"
           @change="(val) => (innerBoolAnswer = val === 'true')"
         >
-          <CusRadioButton class="problem-answer-section-select-item" value="true" label="A. 正确"> 正确</CusRadioButton>
-          <CusRadioButton class="problem-answer-section-select-item" value="false" label="B. 错误">
-            错误
-          </CusRadioButton>
+          <CusRadioButton class="problem-answer-section-select-item" value="true" label="A. 正确"></CusRadioButton>
+          <CusRadioButton class="problem-answer-section-select-item" value="false" label="B. 错误"></CusRadioButton>
         </CusRadioGroup>
       </template>
 
@@ -337,9 +333,7 @@ defineSlots<{
             class="problem-answer-section-select-item"
             :value="Number(option.id)"
             :label="`${indexToOption(i)}. ${option.content}`"
-          >
-            {{ option.content }}
-          </CusCheckboxButton>
+          ></CusCheckboxButton>
         </CusCheckboxGroup>
       </template>
 
@@ -349,7 +343,8 @@ defineSlots<{
     </section>
 
     <section v-if="showAnswer" class="problem-explanation">
-      <span class="problem-explanation-title">解析：</span>{{ problemInfo.explanation }}
+      <span class="problem-explanation-title">解析：</span>
+      <div v-html="problemInfo.explanation"></div>
     </section>
   </div>
 </template>

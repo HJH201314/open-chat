@@ -120,7 +120,7 @@ async function getSchedules(page?: number, size?: number) {
     const res = await genApi.Manage.scheduleListGet({
       page_num: finalPageNum,
       page_size: finalPageSize,
-      sort_expr: 'created_at DESC',
+      sort_expr: 'created_at ASC',
     });
     if (res.status == 200 && res.data.data) {
       total.value = res.data.data.total || 0;

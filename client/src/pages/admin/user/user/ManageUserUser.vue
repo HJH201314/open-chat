@@ -110,7 +110,7 @@ async function getUsers(page?: number, size?: number) {
     const res = await genApi.Manage.userListGet({
       page_num: finalPageNum,
       page_size: finalPageSize,
-      sort_expr: 'id DESC',
+      sort_expr: 'id ASC',
     });
     if (res.status == 200 && res.data.data) {
       total.value = res.data.data.total || 0;

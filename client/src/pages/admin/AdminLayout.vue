@@ -14,8 +14,16 @@ const route = useRoute();
 const currentRoute = ref(route.name);
 watch(
   () => currentRoute.value,
+  (newRouteName, oldRouteName) => {
+    if (newRouteName != oldRouteName && route.name != newRouteName) {
+      router.push({ name: newRouteName });
+    }
+  }
+);
+watch(
+  () => route.name,
   (newRouteName) => {
-    router.replace({ name: newRouteName });
+    currentRoute.value = newRouteName;
   }
 );
 
@@ -109,10 +117,10 @@ const { currentTheme } = useTheme();
           </t-breadcrumb-item>
         </t-breadcrumb>
       </t-header>
-      <t-content ref="content" style="padding: 0 1rem; flex: auto; min-height: 0;">
-        <RouterView style="height: 100%; display: flex; flex-direction: column; gap: 0.5rem;" />
+      <t-content ref="content" style="padding: 0 1rem; flex: auto; min-height: 0">
+        <RouterView style="height: 100%; display: flex; flex-direction: column; gap: 0.5rem" />
       </t-content>
-<!--      <t-footer>Copyright @ 2017-{{ new Date().getFullYear() }} FCraft. All Rights Reserved</t-footer>-->
+      <!--      <t-footer>Copyright @ 2017-{{ new Date().getFullYear() }} FCraft. All Rights Reserved</t-footer>-->
     </t-layout>
   </t-layout>
 </template>
@@ -121,6 +129,7 @@ const { currentTheme } = useTheme();
 :global(body) {
   user-select: text;
 }
+
 .admin-layout {
   &-right {
     height: calc(100 * var(--vh));

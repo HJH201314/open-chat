@@ -4,12 +4,12 @@
       <template #actions>
         <t-button variant="outline" shape="circle" @click="getProviders()">
           <template #icon>
-            <refresh-icon/>
+            <refresh-icon />
           </template>
         </t-button>
         <t-button theme="primary" @click="handleEdit({})">
           <template #icon>
-            <add-icon/>
+            <add-icon />
           </template>
           创建
         </t-button>
@@ -38,22 +38,22 @@
           <ActionSet>
             <t-tooltip :delay="10" content="编辑">
               <t-link theme="primary" hover="color" @click="handleEdit(row)">
-                <edit-icon/>
+                <edit-icon />
               </t-link>
             </t-tooltip>
             <t-tooltip :delay="10" content="模型">
               <t-link theme="primary" hover="color" @click="handleModel(row)">
-                <RobotOne size="16"/>
+                <RobotOne size="16" />
               </t-link>
             </t-tooltip>
             <t-tooltip :delay="10" content="API">
               <t-link theme="primary" hover="color" @click="handleConfigKey(row)">
-                <Api size="16"/>
+                <Api size="16" />
               </t-link>
             </t-tooltip>
             <t-tooltip :delay="10" content="删除">
               <t-link theme="danger" hover="color" @click="handleDelete(row)">
-                <delete-icon/>
+                <delete-icon />
               </t-link>
             </t-tooltip>
           </ActionSet>
@@ -77,7 +77,6 @@ import { useRouter } from 'vue-router';
 import { Api, RobotOne } from '@icon-park/vue-next';
 import TableWrapper from '@/pages/admin/component/TableWrapper.vue';
 import ActionSet from '@/pages/admin/component/ActionSet.vue';
-
 
 const data = ref<ApiSchemaProvider[]>([]);
 const total = ref(0);
@@ -110,7 +109,7 @@ async function getProviders(page?: number, size?: number) {
     const res = await genApi.Manage.providerListGet({
       page_num: finalPageNum,
       page_size: finalPageSize,
-      sort_expr: 'created_at DESC',
+      sort_expr: 'id ASC',
     });
     if (res.status == 200 && res.data.data) {
       total.value = res.data.data.total || 0;
@@ -145,7 +144,7 @@ function handleEdit(row: ApiSchemaProvider) {
       onConfirm() {
         getProviders();
       },
-    }),
+    })
   );
 }
 
@@ -167,7 +166,7 @@ function handleConfigKey(row: ApiSchemaProvider) {
   DialogManager.renderDialog(
     h(DialogApiKey, {
       data: row,
-    }),
+    })
   );
 }
 

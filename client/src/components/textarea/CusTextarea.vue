@@ -97,12 +97,12 @@ defineExpose({
 
   &.preset {
     padding-inline: 0.25rem;
-    border: 2px solid var(--color-grey-100);
+    border: 2px solid transparent;
     border-radius: 0.5rem;
     transition:
       background-color 0.2s $ease-out-circ,
       border 0.2s $ease-out-circ;
-    background-color: var(--color-grey-100);
+    background-color: var(--color-trans-100);
 
     &:focus-within {
       background-color: var(--color-white);
@@ -110,7 +110,7 @@ defineExpose({
     }
 
     &:disabled {
-      color: var(--color-grey-400);
+      color: var(--color-trans-400);
     }
   }
 }

@@ -2,13 +2,14 @@
 import useGlobal from '@/commands/useGlobal.ts';
 import useMarkdownIt from '@/commands/useMarkdownIt';
 import { computed, ref, type VNode, watch } from 'vue';
-import { Down } from '@icon-park/vue-next';
+import { CheckSmall, Down } from '@icon-park/vue-next';
 import CusSpin from '@/components/spinning/CusSpin.vue';
 import LogoDeepseek from '@/components/logo/LogoDeepSeek.vue';
 import LogoQwen from '@/components/logo/LogoQwen.vue';
 import LogoOpenAI from '@/components/logo/LogoOpenAI.vue';
 import type { MessageInfo } from '@/types/data.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
+import LoadingOne from '@/components/loading/LoadingOne.vue';
 
 type DialogMessageProps = {
   streaming?: boolean; // 是否正在输出
@@ -125,6 +126,14 @@ const statusText = computed(() => {
   }
 });
 
+const showLoading = computed(() => {
+  return !renderMessage.value && !Object.keys(props.extra).length && !props.thinking;
+});
+
+const isToolRunning = (index: number) => {
+  return index === props.tooltips.length - 1 && !props.thinking && !renderMessage.value;
+};
+
 const { isLargeScreen } = useGlobal();
 
 defineSlots<{
@@ -144,11 +153,18 @@ defineSlots<{
         <LogoOpenAI v-else />
       </div>
       <div :class="['dialog-message-content', `dialog-message-content__${props.role}`]">
+        <LoadingOne v-if="showLoading" color="var(--color-trans-1000)" />
         <div class="dialog-message-content-tooltip">
-          <div v-for="(tip, index) in tooltips" :key="tip" class="dialog-message-content-tooltip-item">
-            <CusSpin v-if="index === tooltips.length - 1 && !thinking && !renderMessage" color="var(--color-primary)" />
-            <span>{{
-              index === tooltips.length - 1 && !thinking && !renderMessage ? tip : tip.replace('中...', '完成')
+          <div
+            v-for="(tip, index) in tooltips"
+            :key="tip"
+            class="dialog-message-content-tooltip-item"
+            :class="{ running: isToolRunning(index) }"
+          >
+            <LoadingOne v-if="isToolRunning(index)" color="var(--color-trans-1000)" />
+            <CheckSmall v-else fill="var(--color-primary-lighter)" />
+            <span class="name" :class="{ done: !isToolRunning(index) }">{{
+              isToolRunning(index) ? tip : tip.replace('中...', '完成')
             }}</span>
           </div>
         </div>
@@ -287,26 +303,48 @@ defineSlots<{
 
     &-tooltip {
       display: flex;
-      gap: 0.5em;
+      gap: 0.75em;
       align-items: center;
 
       &-item {
+        --angle: 135deg;
         user-select: none;
         width: fit-content;
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        gap: 0.5em;
-        color: var(--color-black);
-        background: linear-gradient(135deg, var(--color-primary-20), var(--color-primary-50));
+        gap: 0.25em;
+        color: var(--color-grey-500);
         text-align: right;
-        font-size: 0.75rem;
+        font-size: 0.9rem;
         line-height: 1;
-        padding: 0.5em 1em;
+        //padding: 0.5em 1em;
         margin-bottom: 0.5em;
-        margin-right: 0.5em;
-        border-radius: $border-radius;
-        transition: all 0.2s $ease-out-circ;
+        //margin-right: 0.5em;
+        //border-radius: $border-radius;
+
+        &.running .name {
+          background: var(--color-trans-1000)
+            linear-gradient(to left, transparent, var(--color-trans-1000), transparent) no-repeat 0 0;
+          background-size: 30% 100%;
+          background-clip: text;
+          color: transparent;
+          animation: shine 5s infinite linear;
+
+          @keyframes shine {
+            from {
+              background-position: -80% -80%;
+            }
+
+            to {
+              background-position: 180% 180%;
+            }
+          }
+        }
+
+        .name.done {
+          color: var(--color-primary-lighter);
+        }
       }
     }
 

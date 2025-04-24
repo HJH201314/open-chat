@@ -4,6 +4,7 @@ import genApi from '@/api/gen-api.ts';
 import { useRouteQuery } from '@vueuse/router';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useRouter } from 'vue-router';
+import EmptyTip from '@/components/EmptyTip.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -49,7 +50,7 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <div class="auth-redirect">登录中...{{ resData }}</div>
+  <div class="auth-redirect"><EmptyTip line1="(・_・)" line2="登录中..." /></div>
 </template>
 
 <style scoped lang="scss">

@@ -12,7 +12,7 @@ import ToastManager from '@/components/toast/ToastManager.ts';
 import ShareDialog from '@/pages/user/chat/message/components/ShareDialog.vue';
 import DialogDetail from './DialogDetail.vue';
 import { useTheme } from '@/components/theme/useTheme.ts';
-import { Correct, Refresh } from '@icon-park/vue-next';
+import { Refresh } from '@icon-park/vue-next';
 import EditDialog from '@/pages/user/chat/message/components/EditDialog.vue';
 import DialogAction from '@/pages/user/chat/message/components/DialogAction.vue';
 import DialogInput from '@/pages/user/chat/message/components/DialogInput.vue';
@@ -241,11 +241,11 @@ async function handleSendMessage() {
     });
     // 若未到达底部，则提示用户生成完成
     if (!dialogDetailRef.value?.isDialogListReachedBottom) {
-      ToastManager.normal(successfullyFinished ? '回答完成' : '回答中断', {
-        position: 'top',
-        icon: h(Correct),
-        type: successfullyFinished ? 'success' : 'danger',
-      });
+      // ToastManager.normal(successfullyFinished ? '回答完成' : '回答中断', {
+      //   position: 'top',
+      //   icon: h(Correct),
+      //   type: successfullyFinished ? 'success' : 'danger',
+      // });
     }
     // 若消息数量小于 3 且第一个消息为用户消息，则启动定时任务来获取会话标题
     if (messageList.value.length < 3 && messageList.value[0] && !sessionInfo.value.title) {

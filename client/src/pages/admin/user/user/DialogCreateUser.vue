@@ -99,13 +99,17 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
     }
     if (JSON.stringify(roleIds.value.sort()) != JSON.stringify(props.data?.roles?.map((item) => item.id).sort())) {
       if (userStore.userId == props.data?.id) {
-        const res = await DialogManager.commonDialog({ title: '修改？', content: '你正在修改自己的权限，请再三确认！', presetType: 'danger' });
+        const res = await DialogManager.commonDialog({
+          title: '修改？',
+          content: '你正在修改自己的权限，请再三确认！',
+          presetType: 'danger',
+        });
         if (!res) return;
       }
       updateData.roles = roleIds.value.map((item) => ({ id: item }) as ApiSchemaRole);
     }
     // do update
-    if (Object.keys(updateData).length != 0)  {
+    if (Object.keys(updateData).length != 0) {
       await genApi.Manage.userUpdatePost(props.data?.id, updateData);
     }
   }
@@ -113,14 +117,19 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
 </script>
 
 <template>
-  <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm" :dialog-style="{ 'width': '789px' }">
+  <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm" :dialog-style="{ width: '789px' }">
     <template #default>
       <t-form ref="form" :data="formData" label-align="top" style="margin-bottom: 1rem">
         <t-form-item label="用户名" name="username" :rules="[{ required: true }]">
-          <t-input v-model="formData.username" placeholder="用户名"></t-input>
+          <t-input v-model="formData.username" placeholder="用户名" autocomplete="new-password"></t-input>
         </t-form-item>
         <t-form-item label="密码" name="password" :rules="[{ required: mode == 'create' }]">
-          <t-input v-model="formData.password" type="password" placeholder="密码，不修改则留空"></t-input>
+          <t-input
+            v-model="formData.password"
+            type="password"
+            placeholder="密码，不修改则留空"
+            autocomplete="new-password"
+          ></t-input>
         </t-form-item>
         <t-form-item label="角色" name="roles">
           <t-transfer
@@ -128,7 +137,7 @@ const handleConfirm: CommonDialogProps['confirmHandler'] = async (_, prevent) =>
             :data="roleList"
             :title="['可选角色', '已选角色']"
             :operation="['移除', '添加']"
-            style="width: 100%;"
+            style="width: 100%"
             @change="handleChange"
             @checked-change="handleCheckedChange"
           ></t-transfer>

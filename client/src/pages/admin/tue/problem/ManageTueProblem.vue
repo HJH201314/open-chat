@@ -119,10 +119,10 @@ async function getProblems(page?: number, size?: number) {
 }
 
 const columns = ref<PrimaryTableCol<T>[]>([
-  { colKey: 'serial-number', title: 'NO', width: '3rem', align: 'center' },
+  { colKey: 'id', title: 'NO', width: '3rem', align: 'center' },
   { colKey: 'type', title: '类型', width: '10rem' },
   { colKey: 'description', title: '题目描述', ellipsis: true },
-  { colKey: 'subject', title: '主题', width: '5rem' },
+  // { colKey: 'subject', title: '主题', width: '5rem' },
   { colKey: 'difficulty', title: '难度', width: '7rem' },
   { colKey: 'operation', title: '操作', width: '4rem', fixed: 'right' },
 ]);

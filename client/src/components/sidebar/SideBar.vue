@@ -241,7 +241,11 @@ defineExpose({
         <span v-if="expandBar" class="sidebar-avatar-name">{{ userStore.username }}</span>
         <template v-if="userStore.isLogin" #popover>
           <div class="sidebar-user-action">
-            <div v-if="userStore.isAdmin" class="sidebar-user-action-item" @click="router.push('/admin')">
+            <div
+              v-if="userStore.isAdmin"
+              class="sidebar-user-action-item"
+              @click="router.push('/admin/manage/system/provider')"
+            >
               <DashboardOne />
               <span class="sidebar-user-action-item-name">管理面板</span>
             </div>
@@ -445,18 +449,21 @@ defineExpose({
   }
 
   &-user-action {
+    line-height: 1;
     padding: 0.25rem;
     border-radius: 0.4rem;
     background-color: var(--color-white);
+    box-shadow: $box-shadow-deeper;
 
     &-item {
       cursor: pointer;
-      padding: 0.25rem 0.5rem;
+      padding: 0.5rem 0.5rem;
       border-radius: 0.4rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
       color: var(--color-black);
+      transition: background-color 0.2s $ease-out-circ;
 
       &:hover {
         background-color: var(--color-trans-100);

@@ -285,7 +285,13 @@ const handleGenerate = async () => {
 <template>
   <CommonDialog :title="title" :subtitle="subtitle" :confirm-handler="handleConfirm" :dialog-style="{ width: '789px' }">
     <template #action>
-      <DiliButton v-if="mode == 'create'" type="secondary" text="AI 生成" @click="handleGenerate"></DiliButton>
+      <DiliButton
+        v-if="mode == 'create'"
+        type="secondary"
+        :text="generateLoading ? '生成中...' : 'AI 辅助'"
+        :disabled="generateLoading"
+        @click="handleGenerate"
+      ></DiliButton>
       <DiliButton v-if="mode == 'edit'" type="secondary" text="重置" @click="handleReset"></DiliButton>
       <LoadingModal v-if="formRef" :visible="generateLoading" tip="奋力生成中" />
     </template>
@@ -306,7 +312,7 @@ const handleGenerate = async () => {
           name="display_name"
           required-mark
         >
-          <div style="overflow-x: auto;">
+          <div style="overflow-x: auto">
             <t-table
               row-key="id"
               :columns="optionTableColumns"
@@ -396,9 +402,9 @@ const handleGenerate = async () => {
         <t-form-item label="难度等级" name="difficulty" :rules="[{ required: false }]">
           <t-rate v-model="formData.difficulty" placeholder="展示名"></t-rate>
         </t-form-item>
-        <t-form-item label="主题" name="subject" :rules="[{ required: false }]">
-          <t-input v-model="formData.subject" placeholder="主题"></t-input>
-        </t-form-item>
+        <!--        <t-form-item label="主题" name="subject" :rules="[{ required: false }]">-->
+        <!--          <t-input v-model="formData.subject" placeholder="主题"></t-input>-->
+        <!--        </t-form-item>-->
       </t-form>
     </template>
   </CommonDialog>
