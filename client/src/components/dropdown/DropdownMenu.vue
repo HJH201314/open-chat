@@ -182,6 +182,7 @@ watchEffect(() => {
   list-style: none;
   padding: 0;
   box-shadow: $box-shadow-deeper;
+  border: 1px solid var(--color-trans-200);
   border-radius: 8px;
   z-index: calc(2000 + 2 * v-bind(_depth));
   min-width: v-bind(minWidth);

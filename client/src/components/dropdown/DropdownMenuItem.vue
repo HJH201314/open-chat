@@ -151,6 +151,10 @@ function handleClick() {
       background-color: var(--color-trans-200);
     }
 
+    &:active {
+      background-color: var(--color-trans-300);
+    }
+
     &.selected {
       color: var(--color-primary);
     }

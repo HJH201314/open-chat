@@ -1,11 +1,10 @@
 import shake from '@/commands/shake.ts';
 import pinia from '@/plugins/pinia.ts';
-import initRouter from '@/plugins/router.ts';
+import router from '@/plugins/router.ts';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import type { App } from 'vue';
 /* TDesign */
 import 'tdesign-vue-next/es/style/index.css';
-import router from '@/plugins/router.ts';
 
 /**
  * 在 vue app 中注册应用所需的插件

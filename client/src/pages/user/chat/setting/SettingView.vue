@@ -355,6 +355,12 @@ defineExpose({
     box-sizing: border-box;
     padding-bottom: 0.25rem;
 
+    &__title {
+      font-size: 0.75rem;
+      line-height: 1;
+      color: var(--color-grey-1000);
+    }
+
     // 除了最后一个 section，都添加下边框
     &:not(:nth-last-child(2)) {
       border-bottom: 1px solid var(--color-trans-100);

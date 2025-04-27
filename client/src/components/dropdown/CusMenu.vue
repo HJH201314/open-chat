@@ -71,6 +71,7 @@ defineExpose({
       :is-open="isOpen"
       :_depth="1"
       :_value-path="[]"
+      style="min-width: 10rem"
       @contextmenu.capture.prevent
     />
   </CommonModal>

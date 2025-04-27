@@ -10,7 +10,7 @@ import { computed, h, nextTick, reactive, ref, useTemplateRef, watch } from 'vue
 import { DialogManager } from '@/components/dialog';
 import ToastManager from '@/components/toast/ToastManager.ts';
 import { useUserStore } from '@/store/useUserStore.ts';
-import { useElementSize, useEventBus, useScroll } from '@vueuse/core';
+import { useElementSize, useEventBus, useScroll, useVirtualList } from '@vueuse/core';
 import LoadingModal from '@/components/modal/LoadingModal.vue';
 import { goToLogin } from '@/pages/user/login';
 import { useChatConfigStore } from '@/store/useChatConfigStore.ts';
@@ -195,16 +195,23 @@ const displayList = computed(() => {
   }
 });
 
-const dialogListRef = useTemplateRef<HTMLDivElement>('dialog-list');
 const recordListViewRef = useTemplateRef('record-list-view');
-const { arrivedState } = useScroll(dialogListRef);
 
 // 列表右键/长按菜单
 const rightClickMenuOptions = computed(() => {
   return [
     {
+      value: 'new-dialog',
+      label: '新对话',
+      icon: h(Plus, { size: '1rem' }),
+      style: { color: 'var(--color-primary)' },
+      onClick() {
+        handleListAddClick();
+      },
+    },
+    {
       value: 'star',
-      label: currentRightClickSession.value.flags?.isStared ? '消星' : '标星',
+      label: currentRightClickSession.value.flags?.isStared ? '取消收藏' : '收藏',
       icon: h(Star, { size: '1rem', theme: currentRightClickSession.value.flags?.isStared ? 'filled' : 'outline' }),
       style: { color: 'var(--color-warning)' },
       onClick() {
@@ -254,13 +261,25 @@ const onRightClick = (evt: MouseEvent, sessionId: string) => {
   });
 };
 
+// 虚拟滚动
+const {
+  list: virtualDisplayList,
+  containerProps: virtualContainerProps,
+  wrapperProps: virtualWrapperProps,
+} = useVirtualList(displayList, {
+  itemHeight: 58,
+  overscan: 10,
+});
+const { arrivedState: listArrivedState } = useScroll(virtualContainerProps.ref);
+const listReachedTop = computed(() => listArrivedState.top);
+
 const { theme } = useTheme();
 const { isSmallScreen } = useGlobal();
 </script>
 <template>
   <!-- 角色列表 -->
   <div ref="record-list-view" class="dialog-list">
-    <div class="dialog-list-bar" :class="{ shadow: !arrivedState.top }">
+    <div class="dialog-list-bar" :class="{ shadow: !listArrivedState.top }">
       <IconButton
         v-if="isSmallScreen"
         type="secondary"
@@ -344,57 +363,60 @@ const { isSmallScreen } = useGlobal();
       tip-pulling="继续下拉同步"
       tip-release="释放立即同步"
       tip-refreshing="同步中..."
+      :disabled="!listReachedTop"
       @refresh="dataStore.syncSessions"
     >
-      <div>
-        <div
-          v-for="item in displayList"
-          :key="item.id"
-          :class="{ 'dialog-list-item-selected': item.id === currentSessionId }"
-          class="dialog-list-item"
-          @click="handleListItemClick(item.id)"
-          @contextmenu.capture.prevent="onRightClick($event, item.id)"
-        >
-          <CusAvatar
-            style="opacity: 0.6"
-            color="var(--color-primary)"
-            spin
-            :name="item.title?.trim() || ''"
-            size="2.5em"
-            shape="circle"
-          />
-          <div class="dialog-list-item__right">
-            <div class="dialog-list-item__top">
-              <div class="title">
-                {{ item.title || '未命名对话' }}
+      <div v-bind="virtualContainerProps" style="height: 100%">
+        <div v-bind="virtualWrapperProps">
+          <div
+            v-for="item in virtualDisplayList"
+            :key="item.index"
+            :class="{ 'dialog-list-item-selected': item.data.id === currentSessionId }"
+            class="dialog-list-item"
+            @click="handleListItemClick(item.data.id)"
+            @contextmenu.capture.prevent="onRightClick($event, item.data.id)"
+          >
+            <CusAvatar
+              style="opacity: 0.6"
+              color="var(--color-primary)"
+              spin
+              :name="item.data.title?.trim() || ''"
+              size="2.5em"
+              shape="circle"
+            />
+            <div class="dialog-list-item__right">
+              <div class="dialog-list-item__top">
+                <div class="title">
+                  {{ item.data.title || '未命名对话' }}
+                </div>
+                <div class="datetime">
+                  {{ formatTime(new Date(item.data.createAt ?? '')) }}
+                </div>
               </div>
-              <div class="datetime">
-                {{ formatTime(new Date(item.createAt ?? '')) }}
-              </div>
-            </div>
-            <div class="dialog-list-item__bottom">
-              <div class="digest">
-                {{ chatConfigStore.modelsNameDisplayMap[item.model ?? ''] || '-' }}
-              </div>
-              <div class="flags">
-                <Star v-if="item.flags?.isStared" :fill="theme.colorWarning" theme="filled" />
-                <ShareOne v-if="item.flags?.isShared" :fill="theme.colorInfo" theme="filled" />
+              <div class="dialog-list-item__bottom">
+                <div class="digest">
+                  {{ chatConfigStore.modelsNameDisplayMap[item.data.model ?? ''] || '-' }}
+                </div>
+                <div class="flags">
+                  <Star v-if="item.data.flags?.isStared" :fill="theme.colorWarning" theme="filled" />
+                  <ShareOne v-if="item.data.flags?.isShared" :fill="theme.colorInfo" theme="filled" />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <div v-if="!displayList.length" class="dialog-list-empty">
+        <DiliButton
+          v-if="!userStore.isLogin"
+          type="secondary"
+          text="登录"
+          :button-style="{ width: '3em' }"
+          @click="() => goToLogin()"
+        />
+        {{ userStore.isLogin ? '快来新建对话吧' : '后即刻开始' }}
+      </div>
     </CusPullRefresh>
-    <div v-if="!displayList.length" class="dialog-list-empty">
-      <DiliButton
-        v-if="!userStore.isLogin"
-        type="secondary"
-        text="登录"
-        :button-style="{ width: '3em' }"
-        @click="() => goToLogin()"
-      />
-      {{ userStore.isLogin ? '快来新建对话吧' : '后即刻开始' }}
-    </div>
     <LoadingModal
       v-if="recordListViewRef"
       :teleport-to="recordListViewRef"
@@ -624,13 +646,13 @@ const { isSmallScreen } = useGlobal();
   }
 
   &-empty {
-    text-wrap: nowrap;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: var(--color-primary);
     font-size: 1.5rem;
+    text-wrap: nowrap;
     display: flex;
     flex-direction: row;
     align-items: center;

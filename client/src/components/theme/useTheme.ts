@@ -50,7 +50,7 @@ export const registerThemeColor = (colorPrimary?: string, name: string = 'defaul
         // 颜色加深时，以上一个色阶为基准进行加深
         const tintedColor = tinycolor.mix(
           result[index - 1],
-          '#191919',
+          '#13181D',
           ((level - levelList[index - 1]) / levelList[index - 1]) * 100
         );
         tintedColorHex = tintedColor.toHexString();
@@ -107,7 +107,7 @@ export const useTheme = defineStore('theme', () => {
   });
   const theme: Record<string, string> = reactive({
     colorPrimary: '#487eb0',
-    colorBlack: '#191919',
+    colorBlack: '#13181D',
     colorWhite: '#fff',
     colorSuccess: '#52c41a',
     colorInfo: '#1890ff',

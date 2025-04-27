@@ -1,7 +1,7 @@
 @use 'sass:color';
 
 $color-white: #fefefe;
-$color-grey: #e5e7eb;
+$color-grey: #13181D;
 $color-grey-50: #fafafa;
 $color-grey-100: #f5f5f5;
 $color-grey-200: #eeeeee;
@@ -10,7 +10,7 @@ $color-grey-400: #bdbdbd;
 $color-grey-500: #9e9e9e;
 
 $color-black-lighter: #3d3d3d;
-$color-black: #191919 ;
+$color-black: #13181D ;
 $color-black-lighter: #424242;
 
 $color-pink-100: #fff0f6;
@@ -53,11 +53,21 @@ $screen-sm: 768px;
 
 $border-radius: 8px;
 
-$box-shadow-shallower: 0px 0px 5px 0 rgba(0, 0, 0, .025);
+// from qq-mail
+$shadow-1: 0 2px 3px 0 rgba(19, 24, 29, 0.12);
+$shadow-2: 0 4px 6px 0 rgba(19, 24, 29, 0.12);
+$shadow-3: 0 6px 9px 0 rgba(19, 24, 29, 0.14);
+$shadow-4: 0 8px 12px 0 rgba(19, 24, 29, 0.14);
+$shadow-5: 0 10px 15px 0 rgba(19, 24, 29, 0.16);
+$shadow-6: 0 12px 18px 0 rgba(19, 24, 29, 0.16);
+$shadow-7: 0 14px 21px 0 rgba(19, 24, 29, 0.18);
+$shadow-8: 0 16px 24px 0 rgba(19, 24, 29, 0.18);
+
+$box-shadow-shallower: $shadow-1;
 $box-shadow-shallower-right-bottom: 2px 2px 5px 0 rgba(0, 0, 0, .025);
-$box-shadow: 0px 0px 5px 0 rgba(0, 0, 0, .05);
+$box-shadow: $shadow-2;
 $box-shadow-right-bottom: 1px 1px 5px 0 rgba(0, 0, 0, .05);
-$box-shadow-deeper: 0px 0px 10px 0 rgba(0, 0, 0, .1);
+$box-shadow-deeper: $shadow-3;
 $box-shadow-deeper-right-bottom: 2px 2px 10px 0 rgba(0, 0, 0, .1);
 $next-box-shadow-small: 0px 0px 5px 0px rgba(0, 0, 0, .02), 0px 2px 10px 0px rgba(0, 0, 0, .06), 0px 0px 1px 0px rgba(0, 0, 0, .3);
 $next-box-shadow-medium: 0px 0px 15px 0px rgba(0, 0, 0, .03), 0px 2px 30px 0px rgba(0, 0, 0, .08), 0px 0px 1px 0px rgba(0, 0, 0, .3);

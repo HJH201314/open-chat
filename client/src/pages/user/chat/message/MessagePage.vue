@@ -85,6 +85,10 @@ const resetDraggable = () => {
   draggable?.reset();
   draggable?.revert();
   deltaWidth.value = '0px';
+
+  // 若拖拽元素不存在，则不再进行注册
+  if (!splitRef.value) return;
+
   nextFrame(() => {
     splitStartX = splitRef.value?.getBoundingClientRect()?.x || 0;
     draggable = createDraggable('.split', {

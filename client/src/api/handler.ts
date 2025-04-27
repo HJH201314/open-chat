@@ -30,7 +30,7 @@ export const errorHandler = (error: any) => {
       const userStore = useUserStore();
       if (userStore.isLogin) {
         // 之前是登录状态，现在鉴权失败，则提示登录态过期
-        ToastManager.danger('登录态已过期，请登录后重试~', {
+        ToastManager.danger('登录态已过期，请重新登录~', {
           onClick() {
             getRouterInstance().push('/login');
           },

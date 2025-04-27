@@ -10,8 +10,17 @@
       @mouseup="onTouchEnd"
       @mouseleave="onTouchEnd"
     >
-      <div ref="refresh-tip" :style="{ transform: `translateY(${pullDistance}px)`, transitionDuration: transitionDuration }" class="refresh-tip">{{ statusText }}</div>
-      <div :style="{ transform: `translateY(${pullDistance}px)`, transitionDuration: transitionDuration }" class="content">
+      <div
+        ref="refresh-tip"
+        :style="{ transform: `translateY(${pullDistance}px)`, transitionDuration: transitionDuration }"
+        class="refresh-tip"
+      >
+        {{ statusText }}
+      </div>
+      <div
+        :style="{ transform: `translateY(${pullDistance}px)`, transitionDuration: transitionDuration }"
+        class="content"
+      >
         <slot></slot>
       </div>
     </div>
@@ -28,6 +37,7 @@ const props = withDefaults(
     tipPulling?: string;
     tipRefreshing?: string;
     tipRelease?: string;
+    disabled?: boolean; // 是否启用（当不使用默认滚动容器时，可以通过这个属性来控制此时是否能触发下拉刷新）
   }>(),
   {
     threshold: 48,
@@ -35,6 +45,8 @@ const props = withDefaults(
     tipPulling: '继续下拉刷新',
     tipRefreshing: '加载中...',
     tipRelease: '释放立即刷新',
+    disabled: false,
+    contentProps: () => ({}),
   }
 );
 
@@ -47,7 +59,7 @@ const refreshContainerRef = useTemplateRef('refresh-container');
 const startY = ref<number>(0);
 const currentY = ref<number>(0);
 const isLoading = ref<boolean>(false);
-const transitionDuration = computed(() => startY.value ? '0.2s' : '0.4s')
+const transitionDuration = computed(() => (startY.value ? '0.2s' : '0.4s'));
 
 // 当前下拉距离
 const pullDistance = computed(() => {
@@ -79,7 +91,7 @@ const statusText = computed(() => {
 });
 
 const onTouchStart = (e: TouchEvent | MouseEvent) => {
-  if (isLoading.value || (refreshContainerRef.value?.scrollTop ?? 1) != 0) {
+  if (isLoading.value || props.disabled || (refreshContainerRef.value?.scrollTop ?? 1) != 0) {
     startY.value = 0;
     currentY.value = 0;
     return;
@@ -93,7 +105,7 @@ const onTouchStart = (e: TouchEvent | MouseEvent) => {
 };
 
 const onTouchMove = (e: TouchEvent | MouseEvent) => {
-  if (isLoading.value || (refreshContainerRef.value?.scrollTop ?? 1) != 0) {
+  if (isLoading.value || props.disabled || (refreshContainerRef.value?.scrollTop ?? 1) != 0) {
     startY.value = 0;
     currentY.value = 0;
     return;
@@ -132,6 +144,7 @@ const onTouchEnd = async () => {
 @use '@/assets/variables' as *;
 
 .pull-refresh {
+  height: 100%;
   position: relative;
 }
 
@@ -150,6 +163,7 @@ const onTouchEnd = async () => {
 }
 
 .content {
+  height: 100%;
   transition: transform 0.2s $ease-out-circ;
 }
 </style>
