@@ -339,7 +339,7 @@ $dialog-max-width: 54rem;
 
   :global(.cus-code-container > section) {
     position: sticky;
-    top: 2.75rem;
+    top: 2.4rem;
     z-index: 1;
   }
 }

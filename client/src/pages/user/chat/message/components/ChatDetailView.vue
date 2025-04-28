@@ -420,6 +420,7 @@ defineExpose({
         :menu-in-more="isSmallScreen"
         :shadowed="!detailArrivedState.top"
         :can-expand-menu="!isSmallScreen"
+        style="margin-inline: 0.25rem"
         @back="$emit('back')"
         @star="handleStarDialog"
         @share="handleShareDialog"

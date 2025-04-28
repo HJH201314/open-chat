@@ -48,7 +48,7 @@ defineSlots<{
 </script>
 
 <template>
-  <div ref="actionRef" class="dialog-action" :class="{ shadow: shadowed }">
+  <div ref="actionRef" class="dialog-action" :class="{ 'dialog-action--shadow': shadowed }">
     <div class="dialog-action-area-left">
       <DiliButton
         v-if="!$slots.back"
@@ -93,26 +93,26 @@ defineSlots<{
             style="flex-shrink: 0"
             @click="$emit('star')"
           >
-            <Star size="16" :theme="isStared ? 'filled' : 'outline'" />
+            <Star size="1em" :theme="isStared ? 'filled' : 'outline'" />
           </DiliButton>
         </CusTooltip>
         <CusTooltip text="分享对话" position="bottom">
           <DiliButton :type="isShared ? 'secondary' : 'tertiary'" style="flex-shrink: 0" @click="$emit('share')">
-            <ShareOne size="16" :theme="isShared ? 'filled' : 'outline'" />
+            <ShareOne size="1em" :theme="isShared ? 'filled' : 'outline'" />
           </DiliButton>
         </CusTooltip>
         <CusTooltip text="刷新对话" position="bottom">
           <DiliButton type="tertiary" style="flex-shrink: 0" @click="$emit('sync')">
             <cus-spin :show="messageSyncing">
-              <Refresh size="16" />
+              <Refresh size="1em" />
             </cus-spin>
           </DiliButton>
         </CusTooltip>
         <DiliButton type="tertiary" style="flex-shrink: 0" @click="$emit('edit')">
-          <Edit size="16" />
+          <Edit size="1em" />
         </DiliButton>
         <DiliButton type="tertiary" color="var(--color-danger)" style="flex-shrink: 0" @click="$emit('delete')">
-          <Delete size="16" />
+          <Delete size="1em" />
         </DiliButton>
       </section>
     </Transition>
@@ -129,12 +129,17 @@ defineSlots<{
   flex-direction: row;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.3em;
   color: var(--color-black);
   background: var(--color-white);
+  font-size: 0.95rem;
+  transition:
+    box-shadow 0.2s $ease-out-circ,
+    border-radius 0.2s $ease-out-circ;
 
-  &.shadow {
-    box-shadow: $box-shadow-shallower;
+  &--shadow {
+    border-radius: 0 0 0.75rem 0.75rem;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
   }
 
   &-area-left {
@@ -147,7 +152,7 @@ defineSlots<{
 
   &-title {
     font-weight: bold;
-    font-size: 20px;
+    font-size: 1.25em;
 
     display: -webkit-box;
     word-break: break-all;
@@ -159,14 +164,14 @@ defineSlots<{
   }
 
   &-subtitle {
-    font-size: 0.75rem;
+    font-size: 0.75em;
     flex-shrink: 0;
   }
 
   &-tip {
     flex-shrink: 0;
     border-radius: 0.25rem;
-    font-size: 0.75rem;
+    font-size: 0.75em;
     line-height: 1;
     padding: 0.25rem;
     color: $color-danger;
@@ -185,11 +190,11 @@ defineSlots<{
       &:before {
         content: '';
         position: absolute;
-        left: -0.25rem;
+        left: -0.25em;
         top: 50%;
         transform: translateY(-50%);
         width: 1px;
-        height: 1rem;
+        height: 1em;
         background: var(--color-trans-100);
       }
     }
