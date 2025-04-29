@@ -353,7 +353,7 @@ defineSlots<{
       border-radius: 0 0.5rem 0.5rem 0.5rem;
       padding: 0.5rem 0.75rem;
       color: var(--color-black);
-      background-color: var(--color-grey-100);
+      background-color: var(--color-trans-100);
 
       .content {
         overflow: hidden;
@@ -367,7 +367,7 @@ defineSlots<{
         justify-content: flex-start;
         align-items: center;
         color: var(--color-black);
-        background-color: var(--color-grey-100);
+        background-color: var(--color-trans-100);
         font-size: 0.75em;
         cursor: pointer;
         text-align: right;

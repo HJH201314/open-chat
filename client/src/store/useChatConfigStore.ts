@@ -8,6 +8,7 @@ import { useUserStore } from '@/store/useUserStore.ts';
 import { useSettingStore } from '@/store/useSettingStore.ts';
 import LogoDeepSeek from '@/components/logo/LogoDeepSeek.vue';
 import LogoOpenAI from '@/components/logo/LogoOpenAI.vue';
+import LogoQwen from '@/components/logo/LogoQwen.vue';
 
 export const useChatConfigStore = defineStore('chat-config', () => {
   // 模型数据
@@ -135,6 +136,7 @@ const convertModelConfigDropdown = (model: ApiEntityConfigChatModel) => {
   const modelIconMap: Record<string, () => VNode> = {
     deepseek: () => h(LogoDeepSeek, { showBackground: false, size: '1em', style: { scale: 1.5 } }),
     openai: () => h(LogoOpenAI, { showBackground: false, size: '1em', style: { scale: 1.5 } }),
+    qwen: () => h(LogoQwen, { showBackground: false, size: '1em', style: { scale: 1.5 } }),
   };
   const modelLogo = model.icon ? (modelIconMap[model.icon] ? modelIconMap[model.icon]() : model.icon) : undefined;
   // 基础映射：display_name -> label，name -> value
