@@ -213,14 +213,14 @@ watchEffect(() => {
 
 .dropdown-enter-active {
   transition:
-    scale 0.2s $ease-out-back,
+    scale 0.2s $ease-out-cubic,
     opacity 0.2s linear;
 }
 
 .dropdown-leave-active {
   transition:
-    scale 0.1s $ease-out-back,
-    opacity 0.1s linear;
+    scale 0.15s $ease-out-cubic,
+    opacity 0.15s linear;
 }
 
 .dropdown-enter-from,
