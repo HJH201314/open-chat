@@ -70,7 +70,7 @@ export const useUserStore = defineStore('user', () => {
         username: _username,
         password: await encryptWithPublicKey(publicKey, _password),
       });
-      if (res.data.code === 200) {
+      if (res.status === 200) {
         loginStatus.value = 'login';
         currentUser.value = { ...res.data.data };
         console.debug('[login]', res.data.data);

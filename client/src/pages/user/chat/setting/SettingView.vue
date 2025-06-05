@@ -295,7 +295,7 @@ defineExpose({
         </div>
       </div>
       <div class="app-info">
-        <div>OpenChat</div>
+        <div>F-Chat</div>
       </div>
     </div>
   </div>

@@ -13,10 +13,10 @@ const props = withDefaults(
 
 <template>
   <div class="logo">
-    <img v-if="showFavicon" style="width: 24px; height: 24px;" src="/favicon.ico" alt="OpenChat" />
+    <img v-if="showFavicon" style="width: 24px; height: 24px;" src="/favicon.ico" alt="F-Chat" />
     <template v-if="showTitle">
       <slot v-if="$slots.default" />
-      <span v-else>OpenChat</span>
+      <span v-else>F-Chat</span>
     </template>
   </div>
 </template>

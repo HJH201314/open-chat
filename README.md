@@ -1,9 +1,9 @@
 <!--lint disable awesome-heading awesome-github awesome-toc double-link -->
 
-<h2 align='center'>OpenChat</h2>
+<h2 align='center'>F-Chat</h2>
 
 <p align='center'>
-A chatbot platform with flexibility
+A Chat Platform with flexibility
 </p>
 
 <!--lint ignore-->
@@ -16,9 +16,9 @@ A chatbot platform with flexibility
 </p>
 
 <p align="center">
-<img src="https://img.shields.io/github/actions/workflow/status/hjh201314/open-chat/docker-image.yml?style=flat-square&color=ffeab4" alt="Build">
-<img src="https://img.shields.io/github/stars/HJH201314/openai-front?logo=github&style=flat-square&color=f59688" alt="Github Repo Stars">
-<img src="https://img.shields.io/github/license/HJH201314/openai-front?style=flat-square&color=ea3a59" alt="Github License">
+<img src="https://img.shields.io/github/actions/workflow/status/fcraft/f-chat/docker-image.yml?style=flat-square&color=ffeab4" alt="Build">
+<img src="https://img.shields.io/github/stars/fcraft/f-chat?logo=github&style=flat-square&color=f59688" alt="Github Repo Stars">
+<img src="https://img.shields.io/github/license/fcraft/f-chat?style=flat-square&color=ea3a59" alt="Github License">
 </p>
 
 ## Features
@@ -42,7 +42,7 @@ A chatbot platform with flexibility
 Run the project with Docker:
 
 ```shell
-docker run -d --name open-chat -p 9035:9035 fcraft/open-chat
+docker run -d --name f-chat -p 9035:9035 fcraft/f-chat
 ```
 
 ## Developing
@@ -98,7 +98,7 @@ go build        # Build for production
   - [GORM](https://github.com/go-gorm/gorm) - ORM Library
 
 ## Contributors
-![Contributors](https://contrib.rocks/image?repo=HJH201314/openai-front)
+![Contributors](https://contrib.rocks/image?repo=fcraft/f-chat)
 
 ## License
 [GPL-3.0](LICENSE) © 2017-2025 FCraft

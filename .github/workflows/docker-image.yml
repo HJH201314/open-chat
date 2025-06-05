@@ -10,7 +10,7 @@ on:
 env:
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-  REPOSITORY: fcraft/open-chat
+  REPOSITORY: fcraft/f-chat
 
 jobs:
   build:

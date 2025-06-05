@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { siteLoadingKey } from '@/constants/eventBusKeys';
-import { useEventBus, useWindowSize } from '@vueuse/core';
-import { useTemplateRef, watchEffect } from 'vue';
+import { useEventBus, useTitle, useWindowFocus, useWindowSize } from '@vueuse/core';
+import { computed, useTemplateRef, watchEffect } from 'vue';
 import CusFullSiteProgress from '@/components/progress/CusFullSiteProgress.vue';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { useTheme } from '@/components/theme/useTheme.ts';
@@ -18,6 +18,9 @@ siteProgressBus.on((evt) => {
     siteProgressRef.value?.finish();
   }
 });
+
+const isWindowFocused = useWindowFocus();
+useTitle(computed(() => 'F' + (isWindowFocused.value ? '-_-' : '>_<') + 'Chat - AI 对话'));
 
 // 解决某些移动端浏览器下 vh 并非视口高度的问题
 const { height: windowHeight } = useWindowSize();

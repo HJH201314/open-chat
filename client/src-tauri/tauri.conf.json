@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "open-chat-client",
+  "productName": "f-chat-app",
   "version": "0.1.0",
-  "identifier": "cn.fcraft.tue",
+  "identifier": "cn.fcraft.chat",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "https://localhost:9035",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "OpenChat - AI知识学习平台",
+        "title": "FChat",
         "width": 800,
         "height": 600,
         "resizable": true,

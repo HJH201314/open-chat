@@ -23,7 +23,7 @@ const props = withDefaults(
     entries?: SidebarEntry[];
   }>(),
   {
-    title: 'OpenChat',
+    title: 'F-_-Chat',
     defaultShow: true,
     entries: () => [],
   }

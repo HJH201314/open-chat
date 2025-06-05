@@ -194,7 +194,7 @@ watch(
 
 function showUserAgreement() {
   DialogManager.commonDialog({
-    title: 'OpenChat用户协议',
+    title: 'F-Chat 用户协议',
     content: '没有协议拜了个拜',
   });
 }
@@ -270,7 +270,7 @@ function showUserAgreement() {
         </button>
       </form>
     </div>
-    <div class="login-footer">注册前请阅读并同意<a @click="showUserAgreement">《OpenChat用户协议》</a></div>
+    <div class="login-footer">注册前请阅读并同意<a @click="showUserAgreement">《F-Chat用户协议》</a></div>
     <div class="login-third-party">
       <DiliButton @click="handleThirdPartyLogin('github')">
         <LogoGithubIcon size="1.25rem" />

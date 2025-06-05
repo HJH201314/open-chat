@@ -1,7 +1,7 @@
 {
-  "name": "open-chat",
+  "name": "f-chat",
   "version": "1.0.0",
-  "description": "OpenChat - Next Generation AI Chatbot Interface",
+  "description": "FChat - Next Generation AI Chatbot Interface",
   "packageManager": "pnpm@10.4.1",
   "scripts": {
     "dev": "concurrently \"pnpm run dev:client\" \"pnpm run dev:server\"",
@@ -22,7 +22,7 @@
     "node",
     "go"
   ],
-  "author": "HJH201314",
+  "author": "BGY",
   "license": "GPL-3.0",
   "devDependencies": {
     "@types/node": "^22.13.11",
